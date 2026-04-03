@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "kelly-sys-dev",
+      "runtimeExecutable": "venv/Scripts/python",
+      "runtimeArgs": ["manage.py", "runserver", "--settings=config.settings.local_sqlite"],
+      "port": 8000,
+      "autoPort": true
+    }
+  ]
+}

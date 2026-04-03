@@ -58,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
     'axes.middleware.AxesMiddleware',
+    'csp.middleware.CSPMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -327,3 +328,23 @@ AXES_META_PRECEDENCE_ORDER = [
     'HTTP_X_FORWARDED_FOR',
     'REMOTE_ADDR',
 ]
+
+# ── Content Security Policy (django-csp) — defense-in-depth ────────────────
+# Espelha a política CSP do nginx.conf para proteção mesmo sem reverse proxy.
+# Alpine.js e HTMX requerem unsafe-inline/unsafe-eval.
+from csp.constants import NONE, SELF, UNSAFE_EVAL, UNSAFE_INLINE  # noqa: E402
+
+CONTENT_SECURITY_POLICY = {
+    'DIRECTIVES': {
+        'default-src': [SELF],
+        'script-src': [SELF, UNSAFE_INLINE, UNSAFE_EVAL],
+        'style-src': [SELF, UNSAFE_INLINE],
+        'img-src': [SELF, 'data:', 'https:'],
+        'font-src': [SELF],
+        'frame-src': [SELF, 'https://www.youtube.com', 'https://www.youtube-nocookie.com'],
+        'connect-src': [SELF],
+        'base-uri': [SELF],
+        'form-action': [SELF],
+        'object-src': [NONE],
+    },
+}

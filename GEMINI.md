@@ -1,4 +1,4 @@
-# GEMINI.md — Instruções Kelly Sys
+# GEMINI.md — Instruções news_portal
 
 > Leia **"Tarefa Atual"** antes de começar. Máximo 3KB — limpar após cada fase concluída.
 

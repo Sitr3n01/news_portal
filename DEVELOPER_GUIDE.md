@@ -1,4 +1,4 @@
-# Developer Guide — Kelly Sys
+# Developer Guide — news_portal
 
 > Guia de onboarding para novos desenvolvedores. Assume familiaridade com Django e Python.
 
@@ -6,7 +6,7 @@
 
 ## O Que É Este Projeto
 
-Kelly Sys é um sistema multi-portal construído em Django 5.1+. Ele serve dois portais a partir do mesmo codebase:
+news_portal é um sistema multi-portal construído em Django 5.1+. Ele serve dois portais a partir do mesmo codebase:
 
 | Portal | URL Base | Propósito |
 |--------|----------|-----------|
@@ -69,7 +69,7 @@ python manage.py runserver
 ## Estrutura de Diretórios
 
 ```
-kelly_sys/
+news_portal/
 ├── apps/                   # Apps Django custom
 │   ├── accounts/           # Autenticação e usuários
 │   ├── common/             # Utilitários compartilhados (models abstratos, sanitização)

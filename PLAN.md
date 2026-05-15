@@ -1,4 +1,4 @@
-# Kelly Sys - Plano Global do Projeto
+# news_portal - Plano Global do Projeto
 
 ## Visão Geral
 

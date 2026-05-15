@@ -1,4 +1,4 @@
-# Guia de Deploy - Kelly Sys
+# Guia de Deploy - news_portal
 
 Este guia detalha os passos necessários para colocar o sistema em produção usando Docker Compose e Nginx.
 
@@ -7,14 +7,14 @@ Este guia detalha os passos necessários para colocar o sistema em produção us
 - Mínimo de 1GB de RAM (2GB recomendado)
 - Docker Engine e Docker Compose instalados
 - Git instalado
-- Domínios apontados para o IP da máquina (ex: `escola.kelly.com` e `news.kelly.com`)
+- Domínios apontados para o IP da máquina (ex: `escola.seudominio.com.br` e `news.seudominio.com.br`)
 
 ## 1. Preparando o Ambiente
 
 Clone o repositório na máquina de produção:
 ```bash
-git clone https://github.com/kelly/kelly_sys.git /opt/kelly_sys
-cd /opt/kelly_sys
+git clone https://github.com/Sitr3n01/news_portal.git /opt/news_portal
+cd /opt/news_portal
 ```
 
 ## 2. Configurando Variáveis de Produção
@@ -29,10 +29,10 @@ Edite as seguintes variáveis críticas:
 ```env
 DEBUG=False
 SECRET_KEY=sua_chave_cripografica_gigante_e_segura
-ALLOWED_HOSTS=escola.kelly.com,news.kelly.com,localhost
+ALLOWED_HOSTS=escola.seudominio.com.br,news.seudominio.com.br,localhost
 
-DB_NAME=kelly_prod_db
-DB_USER=kelly_prod_user
+DB_NAME=news_portal_prod_db
+DB_USER=news_portal_prod_user
 DB_PASSWORD=senha_segura_do_banco
 DB_HOST=db
 ```
@@ -63,7 +63,7 @@ docker run -it --rm \
   -v $(pwd)/docker/certbot_www:/var/www/certbot \
   certbot/certbot certonly \
   --webroot --webroot-path=/var/www/certbot \
-  -d escola.kelly.com -d news.kelly.com
+  -d escola.seudominio.com.br -d news.seudominio.com.br
 ```
 
 Após isto, basta descomentar as diretivas relativas ao SSL no seu arquivo `docker/nginx/nginx.conf` e dar reload no Nginx:
@@ -76,5 +76,5 @@ docker compose -f docker/docker-compose.prod.yml restart nginx
 O CI/CD via **GitHub Actions** já está testando a aplicação automaticamente a cada Push na branch `main`.
 Para automatizar o dump do banco de Postgres localmente, insira na Crontab do Host:
 ```bash
-@daily docker exec kelly_sys-db-1 pg_dump -U kelly_user kelly_sys > /backups/kelly_sys_$(date +%Y%m%d).sql
+@daily docker exec news_portal-db-1 pg_dump -U news_portal_prod_user news_portal_prod_db > /backups/news_portal_$(date +%Y%m%d).sql
 ```

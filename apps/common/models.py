@@ -33,7 +33,7 @@ class SiteExtension(models.Model):
     )
     newsletter_from_name = models.CharField(
         'Nome remetente da Newsletter', max_length=100, blank=True,
-        help_text='Nome exibido como remetente. Ex: Equipe Kelly News',
+        help_text='Nome exibido como remetente. Ex: Equipe News Portal',
     )
     google_analytics_id = models.CharField(max_length=30, blank=True)
     facebook_url = models.URLField(blank=True)

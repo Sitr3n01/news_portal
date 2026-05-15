@@ -9,22 +9,22 @@ def create_default_site(apps, schema_editor):
 
     site, created = Site.objects.get_or_create(
         id=1,
-        defaults={'domain': 'example.com', 'name': 'Kelly School e Portal de Notícias'}
+        defaults={'domain': 'example.com', 'name': 'Escola e Portal de Notícias'}
     )
     if not created:
-        site.name = 'Kelly School e Portal de Notícias'
+        site.name = 'Escola e Portal de Notícias'
         site.save()
 
     SiteExtension.objects.get_or_create(
         site=site,
         defaults={
             'tagline': 'Moldando o futuro, inspirando mentes.',
-            'primary_email': 'contato@kellyschool.edu.br',
+            'primary_email': 'contato@exemplo.edu.br',
             'phone_number': '(11) 99999-9999',
             'address': 'Rua da Educação, 123, São Paulo - SP',
-            'facebook_url': 'https://facebook.com/kellyschool',
-            'instagram_url': 'https://instagram.com/kellyschool',
-            'youtube_url': 'https://youtube.com/kellyschool',
+            'facebook_url': 'https://facebook.com/exemplo',
+            'instagram_url': 'https://instagram.com/exemplo',
+            'youtube_url': 'https://youtube.com/exemplo',
         }
     )
 

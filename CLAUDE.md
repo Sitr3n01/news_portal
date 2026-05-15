@@ -1,4 +1,4 @@
-# CLAUDE.md — Kelly Sys
+# CLAUDE.md — news_portal
 
 > Referência normativa do projeto. Claude é arquiteto e revisor — coordena, não escreve código bruto.
 

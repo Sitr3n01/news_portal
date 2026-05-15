@@ -1,4 +1,4 @@
-# Technical Reference — Kelly Sys
+# Technical Reference — news_portal
 
 > Documentação exaustiva para debugging sensível e mudanças estruturais. Assume conhecimento profundo de Django.
 
@@ -1073,7 +1073,7 @@ services:
     
   db:
     image: postgres:16-alpine
-    healthcheck: pg_isready -U kelly_user
+    healthcheck: pg_isready -U news_portal_user
     
   mailpit:
     image: axllent/mailpit

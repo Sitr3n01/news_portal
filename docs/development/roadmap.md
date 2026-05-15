@@ -96,7 +96,7 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 | 5J | Context processor: categorias na navegação | ✅ Concluído |
 | 5K | Sistema de comentários e likes (add_comment, delete_comment, toggle_like) | ✅ Concluído |
 | 5L | Autenticação e dashboard de usuário (login, register, bookmarks) | ✅ Concluído |
-| 5M | Bug fixes revisão Claude: unique_per_site newsletter, sidebar filtro site, CategoryFeed 404 | ✅ Concluído |
+| 5M | Bug fixes de revisão técnica: unique_per_site newsletter, sidebar filtro site, CategoryFeed 404 | ✅ Concluído |
 
 ### Fase 6: Admin Enhancement — Painel Unificado Bilíngue ⚠️ (parcial)
 | # | Tarefa | Status |
@@ -121,11 +121,11 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 | 7E | Corrigir template dashboard: remover wrapper `<main>`, shadow inválido, `max-w-7xl` | ✅ Concluído |
 | 7F | Adicionar `help_text` PT-BR nos models para usuários não-técnicos | ✅ Concluído |
 | 7G | Traduzir fieldsets, actions, verbose_names e TextChoices para PT-BR em todos os models e admin.py | ✅ Concluído |
-| 7H | Atualizar arquivos .md (PLAN, CLAUDE, GEMINI) | ✅ Concluído |
+| 7H | Atualizar documentação técnica e plano de execução | ✅ Concluído |
 | 7I | Verificação final: `manage.py check` sem erros, migrations aplicadas | ✅ Concluído |
 
 ### Fase 8: Consistência + Dashboard Funcional ✅
-> Dashboard completamente reescrita por Claude. Portal de notícias com bilinguismo consistente.
+> Dashboard completamente reescrita. Portal de notícias com bilinguismo consistente.
 
 | # | Tarefa | Status |
 |---|--------|--------|
@@ -134,9 +134,9 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 | 8.3 | `manage.py check` → 0 erros | ✅ Concluído |
 | 8.4 | **Debug e Correções do Portal de Notícias** (9 bugs corrigidos pelo Gemini) | ✅ Concluído |
 | 8.5 | Polir responsividade mobile (testar 375px, 768px) | ⬜ Pendente |
-| 8.6 | **Auditoria de Segurança Final** (2ª rodada — Claude) | ✅ Concluído |
+| 8.6 | **Auditoria de Segurança Final** (2ª rodada) | ✅ Concluído |
 
-#### Sub-tarefas da Fase 8.6 — Segurança Final (detalhes no SECURITY_REPORT.md + plano Claude):
+#### Sub-tarefas da Fase 8.6 — Segurança Final (detalhes no SECURITY_REPORT.md + plano técnico):
 | # | Tarefa | Severidade | Status |
 |---|--------|-----------|--------|
 | 8.6.A1 | Sitemap escola: Page.on_site (vazava páginas de todos os sites) | 🔴 CRÍTICO | ✅ |
@@ -188,11 +188,11 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 10. **`get_sidebar_context()` como utility** — evita queries desnecessárias em páginas que não precisam da sidebar
 11. **Dashboard via `DASHBOARD_CALLBACK`** — função callback que o Unfold chama para injetar dados no template `admin/index.html` (não usar View class)
 12. **Design CSS puro** — sem depender de ferramentas externas (Stitch/Jules). Tailwind via Unfold, sem CDN extra
-13. **`gemini-task.md` max 3KB** — instruções concisas, sem código inline, limpar após cada fase
+13. **Notas temporárias de tarefa** — manter concisas, sem código inline, e limpar após cada fase
 
 ---
 
-## Bugs Resolvidos (Revisão Claude — Fase 5M)
+## Bugs Resolvidos (Revisão Técnica — Fase 5M)
 
 | Bug | Fix Aplicado |
 |-----|-------------|
@@ -213,13 +213,13 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 | Data | Lição | Impacto |
 |------|-------|---------|
 | 2026-02-24 | Workflow Stitch → Jules falhou: IA externas não entregam código confiável para integração direta | Fase 7 antiga cancelada, design será CSS puro |
-| 2026-02-24 | `INDEX_DASHBOARD` nunca existiu no Unfold — Gemini alucionou a chave, Claude não verificou | Dashboard ficou órfã por dias. Sempre conferir docs oficiais |
-| 2026-02-24 | GEMINI.md cresceu para 106KB com instruções acumuladas → Gemini alucinou | Regra: max 3KB, limpar após cada fase, sem blocos de código |
+| 2026-02-24 | `INDEX_DASHBOARD` nunca existiu no Unfold — ferramenta externa sugeriu a chave sem validação | Dashboard ficou órfã por dias. Sempre conferir docs oficiais |
+| 2026-02-24 | Notas de tarefa cresceram demais com instruções acumuladas | Regra: manter notas curtas, limpar após cada fase, sem blocos de código |
 | 2026-02-24 | Dashboard usava Tailwind CDN sobre Tailwind compilado do Unfold → conflitos CSS | Nunca carregar CDN externo sobre framework que já compila Tailwind |
 
 ---
 
-## Bugs Encontrados (Revisão Claude — Fase 7)
+## Bugs Encontrados (Revisão Técnica — Fase 7)
 
 | # | Bug | Severidade | Arquivo |
 |---|-----|-----------|---------|
@@ -233,7 +233,7 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 
 ---
 
-## Bugs Encontrados (Auditoria Claude — Fase 8.4)
+## Bugs Encontrados (Auditoria Técnica — Fase 8.4)
 
 | # | Bug | Severidade | Arquivo |
 |---|-----|-----------|---------|
@@ -260,7 +260,7 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 ### Resumo do estado por área:
 | Área | Estado | Nota |
 |------|--------|------|
-| **Portal de Notícias** | 🟢 Funcional + Seguro | Bugs corrigidos (8.4), segurança auditada 2x (Gemini + Claude) |
+| **Portal de Notícias** | 🟢 Funcional + Seguro | Bugs corrigidos (8.4), segurança auditada em duas rodadas |
 | **Dashboard Admin** | 🟢 Funcional + Seguro | Export emails restrito, axes ativo, CSRF/session hardened |
 | **Site da Escola** | 🔴 Inacabado | Models/views básicas existem, templates e design incompletos (Fase 9) |
 | **Infraestrutura** | 🟢 Hardened | nginx com CSP/headers/rate-limit, Docker non-root, expose vs ports |

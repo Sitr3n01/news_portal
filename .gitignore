@@ -55,8 +55,19 @@ node_modules/
 npm-debug.log*
 yarn-error.log
 
-# Claude Code local settings (session-specific, not shared)
-.claude/settings.local.json
+# Local AI assistant files (session-specific, not shared)
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.agent/
+.agents/
+.claude/
+.codex/
+.cursor/
+.continue/
+.aider*
+docs/development/ai-workflow.md
+docs/development/gemini-task.md
 
 # Temporary debug/utility scripts created during development
 debug_*.py

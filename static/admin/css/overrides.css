@@ -1,4 +1,4 @@
-/* Kelly Sys — Admin CSS Overrides */
+/* news_portal — Admin CSS Overrides */
 
 /* Force dark theme: hide theme selector */
 [x-on\:click="adminTheme = 'light'"],

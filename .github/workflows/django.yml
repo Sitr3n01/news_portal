@@ -13,9 +13,9 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_DB: kelly_sys_test
-          POSTGRES_USER: kelly_user
-          POSTGRES_PASSWORD: kelly_pass
+          POSTGRES_DB: news_portal_test
+          POSTGRES_USER: news_portal_user
+          POSTGRES_PASSWORD: news_portal_pass
         ports:
           - 5432:5432
         options: >-
@@ -46,8 +46,8 @@ jobs:
         DJANGO_SETTINGS_MODULE: config.settings.test
         DB_HOST: localhost
         DB_PORT: 5432
-        DB_NAME: kelly_sys_test
-        DB_USER: kelly_user
-        DB_PASSWORD: kelly_pass
+        DB_NAME: news_portal_test
+        DB_USER: news_portal_user
+        DB_PASSWORD: news_portal_pass
       run: |
         pytest

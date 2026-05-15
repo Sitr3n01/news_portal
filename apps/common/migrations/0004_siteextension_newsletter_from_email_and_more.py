@@ -18,6 +18,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='siteextension',
             name='newsletter_from_name',
-            field=models.CharField(blank=True, help_text='Nome exibido como remetente. Ex: Equipe Kelly News', max_length=100, verbose_name='Nome remetente da Newsletter'),
+            field=models.CharField(blank=True, help_text='Nome exibido como remetente. Ex: Equipe News Portal', max_length=100, verbose_name='Nome remetente da Newsletter'),
         ),
     ]

@@ -1,11 +1,11 @@
 ---
 allowed-tools: Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr comment:*), Bash(gh pr list:*), Bash(gh issue view:*), Bash(gh api:*), Bash(gh repo view:*), Bash(git log:*), Bash(git diff:*), Bash(git show:*), Bash(git blame:*), Bash(git rev-parse:*), Bash(git merge-base:*)
 argument-hint: "[<PR#> | local]"
-description: Quality review do Kelly Sys com base no checklist do CLAUDE.md
+description: Quality review do news_portal com base no checklist do CLAUDE.md
 disable-model-invocation: false
 ---
 
-Você é o revisor de qualidade do projeto **Kelly Sys**. Realize uma revisão especializada das regras do `CLAUDE.md` deste repositório (PT-BR, Unfold, multi-site, sanitização, FBV).
+Você é o revisor de qualidade do projeto **news_portal**. Realize uma revisão especializada das regras do `CLAUDE.md` deste repositório (PT-BR, Unfold, multi-site, sanitização, FBV).
 
 ## Modo de operação
 
@@ -18,7 +18,7 @@ Anote o SHA do head para usar nos links de citação mais tarde — você precis
 
 ## Passos
 
-1. **Gate de elegibilidade (somente modo PR)**: lance um Haiku agent para conferir se o PR (a) está fechado, (b) é draft, (c) é trivialmente OK (PR automatizado, mudança óbvia e mínima), ou (d) já tem um comentário de quality review meu anterior (cabeçalho `### Quality review (Kelly Sys)`). Se qualquer condição for verdadeira, **não prossiga** — informe ao usuário e encerre.
+1. **Gate de elegibilidade (somente modo PR)**: lance um Haiku agent para conferir se o PR (a) está fechado, (b) é draft, (c) é trivialmente OK (PR automatizado, mudança óbvia e mínima), ou (d) já tem um comentário de quality review meu anterior (cabeçalho `### Quality review (news_portal)`). Se qualquer condição for verdadeira, **não prossiga** — informe ao usuário e encerre.
 
 2. **Coleta de CLAUDE.md**: lance um Haiku agent para retornar os caminhos (não o conteúdo) dos `CLAUDE.md` relevantes: o `CLAUDE.md` da raiz e qualquer `CLAUDE.md` em diretórios cujos arquivos foram modificados.
 
@@ -66,7 +66,7 @@ Anote o SHA do head para usar nos links de citação mais tarde — você precis
 
    **Agent #5 — Histórico & comentários de PR**:
    - Para cada arquivo modificado, rode `git blame` nas linhas tocadas e identifique se o autor original adicionou guidance que está sendo violada agora.
-   - Liste os 3 PRs mais recentes que tocaram esses arquivos (via `gh pr list --state merged --search "<filepath>"` ou `gh api repos/Sitr3n01/kelly_sys/commits?path=<filepath>&per_page=5`), e veja se há review comments antigos relevantes (`gh api repos/Sitr3n01/kelly_sys/pulls/<n>/comments`).
+   - Liste os 3 PRs mais recentes que tocaram esses arquivos (via `gh pr list --state merged --search "<filepath>"` ou `gh api repos/Sitr3n01/news_portal/commits?path=<filepath>&per_page=5`), e veja se há review comments antigos relevantes (`gh api repos/Sitr3n01/news_portal/pulls/<n>/comments`).
    - Verifique comentários de código (`# `, `<!-- -->`, docstrings) nos arquivos modificados — alguma guidance ali contraria a mudança?
 
 5. **Confidence scoring**: para cada issue agregada dos 5 agents, lance em paralelo um Haiku agent que recebe (PR/diff context, descrição da issue, lista de CLAUDE.md do passo 2) e atribui uma nota 0-100. Para issues motivadas por CLAUDE.md, o agent deve **verificar literalmente** que a regra invocada está escrita lá. Rubrica (passar **verbatim** ao agent):
@@ -85,13 +85,13 @@ Anote o SHA do head para usar nos links de citação mais tarde — você precis
    **Modo PR**: use `gh pr comment <n> --body "$(cat <<'EOF' ... EOF)"` para postar. Formato:
 
    ```markdown
-   ### Quality review (Kelly Sys)
+   ### Quality review (news_portal)
 
    Encontrei N problema(s):
 
    1. <descrição curta em PT-BR> (CLAUDE.md: "<citação literal da regra>")
 
-   <link https://github.com/Sitr3n01/kelly_sys/blob/<SHA-COMPLETO>/<arquivo>#L<a>-L<b>>
+   <link https://github.com/Sitr3n01/news_portal/blob/<SHA-COMPLETO>/<arquivo>#L<a>-L<b>>
 
    2. ...
 
@@ -103,7 +103,7 @@ Anote o SHA do head para usar nos links de citação mais tarde — você precis
    Ou, se zero problemas:
 
    ```markdown
-   ### Quality review (Kelly Sys)
+   ### Quality review (news_portal)
 
    Nenhum problema encontrado. Revisei contra o checklist do CLAUDE.md.
 
@@ -115,7 +115,7 @@ Anote o SHA do head para usar nos links de citação mais tarde — você precis
 ## Regras de link (críticas)
 
 - Use **sempre o SHA completo** (não use `$(git rev-parse HEAD)` literal dentro de Markdown — substitua pelo SHA).
-- Formato: `https://github.com/Sitr3n01/kelly_sys/blob/<SHA>/<path>#L<start>-L<end>`
+- Formato: `https://github.com/Sitr3n01/news_portal/blob/<SHA>/<path>#L<start>-L<end>`
 - Inclua pelo menos 1 linha de contexto antes e depois da linha problemática.
 
 ## Falsos positivos a ignorar

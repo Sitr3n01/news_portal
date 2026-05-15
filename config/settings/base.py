@@ -133,7 +133,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ── Django Unfold Admin Configuration ──────────────────────────────────────
 UNFOLD = {
-    'SITE_TITLE': 'Kelly Sys',
+    'SITE_TITLE': 'News Portal',
     'SITE_HEADER': 'Painel de Administração',
     'SITE_URL': None,  # Removido — links de portal estão na sidebar (Visualizar Portais)
     'SITE_ICON': None,  # Deixar None ou apontar para um favicon estático
@@ -304,7 +304,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760   # 10 MB
 #   EMAIL_HOST_USER=seu@email.com
 #   EMAIL_HOST_PASSWORD=sua_senha
 #   EMAIL_USE_TLS=True
-#   DEFAULT_FROM_EMAIL=Portal Kelly <noticias@seusite.com>
+#   DEFAULT_FROM_EMAIL=News Portal <noticias@seusite.com>
 EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='noreply@localhost')
 EMAIL_HOST = env('EMAIL_HOST', default='localhost')

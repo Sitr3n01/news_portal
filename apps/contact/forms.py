@@ -1,5 +1,7 @@
 from django import forms
+
 from .models import ContactInquiry
+
 
 class ContactInquiryForm(forms.ModelForm):
     class Meta:

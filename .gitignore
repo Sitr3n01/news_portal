@@ -10,14 +10,26 @@ build/
 # Django
 *.log
 db.sqlite3
+db.sqlite3-journal
+*.sqlite3
 staticfiles/
 media/*
 !media/.gitkeep
+*.pot
+*.mo
 
 # Environment
 .env
 *.env
 !.env.example
+
+# Test / coverage artifacts
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+.cache/
 
 # IDE
 .vscode/
@@ -28,6 +40,7 @@ media/*
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # Docker
 docker/postgres_data/
@@ -37,9 +50,18 @@ venv/
 .venv/
 env/
 
+# Node (in case any frontend tooling is added later)
+node_modules/
+npm-debug.log*
+yarn-error.log
+
 # Claude Code local settings (session-specific, not shared)
 .claude/settings.local.json
 
 # Temporary debug/utility scripts created during development
 debug_*.py
 replace_*.py
+scratch_*.py
+
+# Local screenshots before they are curated into docs/assets/screenshots/
+*.png.tmp

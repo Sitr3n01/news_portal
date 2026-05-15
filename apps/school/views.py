@@ -1,5 +1,7 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404, render
+
 from .models import Page, TeamMember, Testimonial
+
 
 def home(request):
     testimonials = Testimonial.objects.filter(is_featured=True)

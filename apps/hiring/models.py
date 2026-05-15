@@ -1,5 +1,6 @@
 from django.db import models
-from apps.common.models import TimeStampedModel, SEOModel
+
+from apps.common.models import SEOModel, TimeStampedModel
 
 
 class Department(models.Model):

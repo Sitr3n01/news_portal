@@ -1,11 +1,11 @@
 ---
 allowed-tools: Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr comment:*), Bash(gh pr list:*), Bash(gh issue view:*), Bash(gh api:*), Bash(gh repo view:*), Bash(git log:*), Bash(git diff:*), Bash(git show:*), Bash(git blame:*), Bash(git rev-parse:*), Bash(git merge-base:*)
 argument-hint: "[<PR#> | local]"
-description: Quality review do news_portal com base no checklist do CLAUDE.md
+description: Quality review do news_portal com base no checklist do ai-workflow.md
 disable-model-invocation: false
 ---
 
-Você é o revisor de qualidade do projeto **news_portal**. Realize uma revisão especializada das regras do `CLAUDE.md` deste repositório (PT-BR, Unfold, multi-site, sanitização, FBV).
+Você é o revisor de qualidade do projeto **news_portal**. Realize uma revisão especializada das regras de `docs/development/ai-workflow.md` deste repositório (PT-BR, Unfold, multi-site, sanitização, FBV).
 
 ## Modo de operação
 
@@ -20,11 +20,11 @@ Anote o SHA do head para usar nos links de citação mais tarde — você precis
 
 1. **Gate de elegibilidade (somente modo PR)**: lance um Haiku agent para conferir se o PR (a) está fechado, (b) é draft, (c) é trivialmente OK (PR automatizado, mudança óbvia e mínima), ou (d) já tem um comentário de quality review meu anterior (cabeçalho `### Quality review (news_portal)`). Se qualquer condição for verdadeira, **não prossiga** — informe ao usuário e encerre.
 
-2. **Coleta de CLAUDE.md**: lance um Haiku agent para retornar os caminhos (não o conteúdo) dos `CLAUDE.md` relevantes: o `CLAUDE.md` da raiz e qualquer `CLAUDE.md` em diretórios cujos arquivos foram modificados.
+2. **Coleta de regras**: lance um Haiku agent para retornar os caminhos (não o conteúdo) dos arquivos normativos relevantes: `docs/development/ai-workflow.md` (regras do projeto) e qualquer `CLAUDE.md` em diretórios cujos arquivos foram modificados.
 
 3. **Sumário da mudança**: lance um Haiku agent para ler o PR/diff e retornar um sumário curto em PT-BR (1-3 frases) do que está sendo alterado.
 
-4. **Cinco Sonnet agents em paralelo** — cada um retorna uma lista de issues com (a) descrição curta, (b) arquivo + range de linhas, (c) motivo (qual regra do CLAUDE.md ou bug). Lance todos no mesmo turno, em um único bloco de tool calls:
+4. **Cinco Sonnet agents em paralelo** — cada um retorna uma lista de issues com (a) descrição curta, (b) arquivo + range de linhas, (c) motivo (qual regra do ai-workflow.md ou bug). Lance todos no mesmo turno, em um único bloco de tool calls:
 
    **Agent #1 — Models & Schema** (`apps/**/models.py`):
    - Models herdam de `apps.common.models.TimeStampedModel`? Models de conteúdo público herdam também de `SEOModel`?
@@ -69,11 +69,11 @@ Anote o SHA do head para usar nos links de citação mais tarde — você precis
    - Liste os 3 PRs mais recentes que tocaram esses arquivos (via `gh pr list --state merged --search "<filepath>"` ou `gh api repos/Sitr3n01/news_portal/commits?path=<filepath>&per_page=5`), e veja se há review comments antigos relevantes (`gh api repos/Sitr3n01/news_portal/pulls/<n>/comments`).
    - Verifique comentários de código (`# `, `<!-- -->`, docstrings) nos arquivos modificados — alguma guidance ali contraria a mudança?
 
-5. **Confidence scoring**: para cada issue agregada dos 5 agents, lance em paralelo um Haiku agent que recebe (PR/diff context, descrição da issue, lista de CLAUDE.md do passo 2) e atribui uma nota 0-100. Para issues motivadas por CLAUDE.md, o agent deve **verificar literalmente** que a regra invocada está escrita lá. Rubrica (passar **verbatim** ao agent):
+5. **Confidence scoring**: para cada issue agregada dos 5 agents, lance em paralelo um Haiku agent que recebe (PR/diff context, descrição da issue, lista de regras do passo 2) e atribui uma nota 0-100. Para issues motivadas por ai-workflow.md, o agent deve **verificar literalmente** que a regra invocada está escrita lá. Rubrica (passar **verbatim** ao agent):
    - **0**: Falso positivo óbvio, ou issue pré-existente fora do diff.
-   - **25**: Talvez seja real, talvez não. Estilo não explicitamente normado pelo CLAUDE.md.
+   - **25**: Talvez seja real, talvez não. Estilo não explicitamente normado pelo ai-workflow.md.
    - **50**: É real, mas é nitpick ou raro na prática.
-   - **75**: Alta confiança. Issue real que vai impactar funcionamento, OU regra mencionada literalmente no CLAUDE.md.
+   - **75**: Alta confiança. Issue real que vai impactar funcionamento, OU regra mencionada literalmente no ai-workflow.md.
    - **100**: Certeza absoluta. Evidência direta no diff confirma.
 
 6. **Filtro**: descarte issues com score `< 80`. Se sobrar zero, vá direto para o passo 8 com a saída "nenhum problema".
@@ -89,7 +89,7 @@ Anote o SHA do head para usar nos links de citação mais tarde — você precis
 
    Encontrei N problema(s):
 
-   1. <descrição curta em PT-BR> (CLAUDE.md: "<citação literal da regra>")
+   1. <descrição curta em PT-BR> (ai-workflow.md: "<citação literal da regra>")
 
    <link https://github.com/Sitr3n01/news_portal/blob/<SHA-COMPLETO>/<arquivo>#L<a>-L<b>>
 
@@ -105,7 +105,7 @@ Anote o SHA do head para usar nos links de citação mais tarde — você precis
    ```markdown
    ### Quality review (news_portal)
 
-   Nenhum problema encontrado. Revisei contra o checklist do CLAUDE.md.
+   Nenhum problema encontrado. Revisei contra o checklist do ai-workflow.md.
 
    🤖 Gerado com [Claude Code](https://claude.ai/code)
    ```
@@ -122,14 +122,14 @@ Anote o SHA do head para usar nos links de citação mais tarde — você precis
 
 - Issues pré-existentes (linhas fora do diff).
 - Erros que linter/typechecker/CI pegariam (imports, tipos, formatação).
-- Nitpicks não citados no `CLAUDE.md`.
+- Nitpicks não citados no `ai-workflow.md`.
 - Mudanças intencionais relacionadas ao escopo do PR.
 - Problemas em arquivos do diff mas em linhas **não** modificadas pelo usuário.
-- Cobertura de testes ausente (a menos que `CLAUDE.md` exija explicitamente).
+- Cobertura de testes ausente (a menos que `ai-workflow.md` exija explicitamente).
 
 ## Observações finais
 
 - Faça um todo list antes de começar.
 - **Não** rode `manage.py check` ou tente buildar o app — CI cuida disso.
 - Use `gh` para qualquer interação com GitHub (nunca WebFetch).
-- Toda citação do CLAUDE.md deve ser **literal** — não parafraseie a regra.
+- Toda citação do ai-workflow.md deve ser **literal** — não parafraseie a regra.

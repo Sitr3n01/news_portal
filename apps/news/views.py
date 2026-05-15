@@ -5,8 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.paginator import Paginator
 from django.db.models import F, Q
-from django.http import HttpResponse
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -15,6 +14,7 @@ from django.views.decorators.http import require_POST
 from .forms import NewsletterSubscriptionForm
 from .models import Article, ArticleBookmark, ArticleLike, Category, Comment, NewsletterSubscription, Tag
 from .utils import get_sidebar_context
+
 
 def safe_referer_redirect(request, default_url):
     referer = request.META.get('HTTP_REFERER')
@@ -65,7 +65,7 @@ def article_detail(request, slug):
     if not request.session.get(session_key, False):
         Article.on_site.filter(pk=article.pk).update(view_count=F('view_count') + 1)
         request.session[session_key] = True
-    
+
     article.refresh_from_db(fields=['view_count'])
 
     # Artigos relacionados (mesma categoria, excluindo atual)
@@ -238,7 +238,7 @@ def article_list_page(request):
     )
     if exclude_pk:
         articles = articles.exclude(pk=exclude_pk)
-    
+
     paginator = Paginator(articles, 12)
     page_obj = paginator.get_page(request.GET.get('page', 1))
     return render(request, 'news/partials/article_grid.html', {'page_obj': page_obj})

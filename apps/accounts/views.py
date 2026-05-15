@@ -5,7 +5,7 @@ from django.contrib.auth.views import LoginView, PasswordResetView
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import cache
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 

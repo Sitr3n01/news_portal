@@ -17,7 +17,7 @@ urlpatterns = [
     path('archive/<int:year>/', views.article_archive, name='archive_year'),
     path('archive/<int:year>/<int:month>/', views.article_archive, name='archive_month'),
     path('htmx/articles/', views.article_list_page, name='article_list_page'),
-    
+
     # User Account & Actions
     path('account/', views.user_dashboard, name='user_dashboard'),
     path('toggle-bookmark/<int:article_id>/', views.toggle_bookmark, name='toggle_bookmark'),

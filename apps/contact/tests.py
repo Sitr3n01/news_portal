@@ -1,6 +1,8 @@
 import pytest
 from django.urls import reverse
+
 from .models import ContactInquiry
+
 
 @pytest.mark.django_db
 def test_contact_page_get(client):

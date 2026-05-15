@@ -1,7 +1,9 @@
-from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from .models import JobPosting, Application
+from django.shortcuts import get_object_or_404, redirect, render
+
 from .forms import ApplicationForm
+from .models import Application, JobPosting
+
 
 def job_list(request):
     jobs = JobPosting.objects.filter(status=JobPosting.Status.OPEN)
@@ -9,7 +11,7 @@ def job_list(request):
 
 def job_detail(request, slug):
     job = get_object_or_404(JobPosting, slug=slug, status=JobPosting.Status.OPEN)
-    
+
     if request.method == 'POST':
         form = ApplicationForm(request.POST, request.FILES)
         if form.is_valid():
@@ -22,5 +24,5 @@ def job_detail(request, slug):
             return redirect('hiring:job_detail', slug=job.slug)
     else:
         form = ApplicationForm()
-        
+
     return render(request, 'hiring/job_detail.html', {'job': job, 'form': form})

@@ -9,6 +9,12 @@
 
 ---
 
+## Status
+
+Sistema de produção desenvolvido para um cliente real (portal escolar + portal de notícias). Em desenvolvimento ativo — funcionalidades core operacionais, escopo restante em construção.
+
+---
+
 ## Visão Geral
 
 Sistema web unificado que serve dois portais independentes a partir do mesmo codebase:
@@ -119,7 +125,7 @@ Configuração em `.env` (use `.env.example` como base).
 
 ## Padrões do Projeto
 
-Resumo das convenções críticas (detalhe em [CLAUDE.md](CLAUDE.md) e [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)):
+Resumo das convenções críticas (detalhe em [docs/development/ai-workflow.md](docs/development/ai-workflow.md) e [docs/development/DEVELOPER_GUIDE.md](docs/development/DEVELOPER_GUIDE.md)):
 
 - **Views:** Function-Based Views (FBV) — decisão arquitetural permanente.
 - **Models:** herdam de `TimeStampedModel` (e `SEOModel` para conteúdo público). Models com `ForeignKey(Site)` declaram `on_site = CurrentSiteManager()`.
@@ -144,7 +150,7 @@ Configurações de teste em `config/settings/test.py` (banco em memória, hasher
 
 ## Deploy
 
-Deploy de produção usa Docker Compose + Nginx + Let's Encrypt. Roteiro completo em [DEPLOY.md](DEPLOY.md), incluindo:
+Deploy de produção usa Docker Compose + Nginx + Let's Encrypt. Roteiro completo em [docs/development/DEPLOY.md](docs/development/DEPLOY.md), incluindo:
 
 - Configuração de `.env.prod`
 - Build e subida dos containers de produção
@@ -157,11 +163,10 @@ Deploy de produção usa Docker Compose + Nginx + Let's Encrypt. Roteiro complet
 
 | Documento | Conteúdo |
 |-----------|----------|
-| [CLAUDE.md](CLAUDE.md) | Referência normativa do projeto (stack, padrões, checklist de review) |
-| [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) | Onboarding para novos devs |
-| [TECHNICAL_REFERENCE.md](TECHNICAL_REFERENCE.md) | Referência técnica exaustiva (middleware, settings, apps, segurança) |
-| [DEPLOY.md](DEPLOY.md) | Guia de deploy em produção |
-| [PLAN.md](PLAN.md) | Plano global e estado atual das fases |
+| [docs/development/DEVELOPER_GUIDE.md](docs/development/DEVELOPER_GUIDE.md) | Onboarding para novos devs |
+| [docs/development/TECHNICAL_REFERENCE.md](docs/development/TECHNICAL_REFERENCE.md) | Referência técnica exaustiva (middleware, settings, apps, segurança) |
+| [docs/development/DEPLOY.md](docs/development/DEPLOY.md) | Guia de deploy em produção |
+| [docs/development/roadmap.md](docs/development/roadmap.md) | Plano global e estado atual das fases |
 
 ---
 

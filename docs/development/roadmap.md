@@ -1,4 +1,4 @@
-# news_portal - Plano Global do Projeto
+# news_portal — Plano Global do Projeto
 
 ## Visão Geral
 
@@ -188,7 +188,7 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 10. **`get_sidebar_context()` como utility** — evita queries desnecessárias em páginas que não precisam da sidebar
 11. **Dashboard via `DASHBOARD_CALLBACK`** — função callback que o Unfold chama para injetar dados no template `admin/index.html` (não usar View class)
 12. **Design CSS puro** — sem depender de ferramentas externas (Stitch/Jules). Tailwind via Unfold, sem CDN extra
-13. **GEMINI.md max 3KB** — instruções concisas, sem código inline, limpar após cada fase
+13. **`gemini-task.md` max 3KB** — instruções concisas, sem código inline, limpar após cada fase
 
 ---
 

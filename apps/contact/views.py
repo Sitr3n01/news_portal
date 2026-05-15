@@ -1,7 +1,9 @@
-from django.shortcuts import render, redirect
 from django.contrib import messages
-from .forms import ContactInquiryForm
 from django.contrib.sites.shortcuts import get_current_site
+from django.shortcuts import redirect, render
+
+from .forms import ContactInquiryForm
+
 
 def contact_page(request):
     if request.method == 'POST':
@@ -14,5 +16,5 @@ def contact_page(request):
             return redirect('contact:page')
     else:
         form = ContactInquiryForm()
-        
+
     return render(request, 'contact/contact_page.html', {'form': form})

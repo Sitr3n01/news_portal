@@ -44,6 +44,7 @@ jobs:
     - name: Run Tests
       env:
         DJANGO_SETTINGS_MODULE: config.settings.test
+        SECRET_KEY: ci-test-secret-key-not-for-production
         DB_HOST: localhost
         DB_PORT: 5432
         DB_NAME: news_portal_test

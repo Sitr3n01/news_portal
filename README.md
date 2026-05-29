@@ -125,7 +125,7 @@ Configuração em `.env` (use `.env.example` como base).
 
 ## Padrões do Projeto
 
-Resumo das convenções críticas (detalhe em [docs/development/ai-workflow.md](docs/development/ai-workflow.md) e [docs/development/DEVELOPER_GUIDE.md](docs/development/DEVELOPER_GUIDE.md)):
+Resumo das convenções críticas (detalhe em [docs/development/DEVELOPER_GUIDE.md](docs/development/DEVELOPER_GUIDE.md)):
 
 - **Views:** Function-Based Views (FBV) — decisão arquitetural permanente.
 - **Models:** herdam de `TimeStampedModel` (e `SEOModel` para conteúdo público). Models com `ForeignKey(Site)` declaram `on_site = CurrentSiteManager()`.

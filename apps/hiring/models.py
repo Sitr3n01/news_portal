@@ -1,6 +1,18 @@
+import uuid
+from pathlib import Path
+
 from django.db import models
 
 from apps.common.models import SEOModel, TimeStampedModel
+
+
+def resume_upload_path(instance, filename):
+    """Gera nome de arquivo UUID para currículos.
+
+    Evita URLs adivinháveis (nomes derivados do candidato) que permitiriam
+    baixar currículos diretamente de /media/ sem autenticação.
+    """
+    return f'hiring/resumes/{uuid.uuid4().hex}{Path(filename).suffix.lower()}'
 
 
 class Department(models.Model):
@@ -64,7 +76,7 @@ class Application(TimeStampedModel):
     email = models.EmailField()
     phone = models.CharField(max_length=30)
     cover_letter = models.TextField(blank=True)
-    resume = models.FileField(upload_to='hiring/resumes/')
+    resume = models.FileField(upload_to=resume_upload_path)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.RECEIVED, help_text='Acompanhe o progresso desta candidatura.')
     notes = models.TextField(blank=True, help_text='Notas internas sobre o candidato. Não visíveis ao candidato.')
 

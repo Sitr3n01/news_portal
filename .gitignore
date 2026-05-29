@@ -21,6 +21,7 @@ media/*
 # Environment
 .env
 *.env
+.env.*
 !.env.example
 
 # Test / coverage artifacts

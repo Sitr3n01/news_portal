@@ -143,6 +143,7 @@ Antes de usar qualquer chave de configuração, conferir na documentação ofici
 | Mensagens genéricas em autenticação/candidaturas | Previne user enumeration |
 | CSP com `unsafe-inline`/`unsafe-eval` | Bloqueia scripts externos sem quebrar HTMX/Alpine |
 | `server_name _` no nginx | Catch-all até domínio real ser configurado |
+| Currículos privados via X-Accel-Redirect | Arquivos sensíveis nunca em `/media/` público — view autenticada (`hiring.view_application`) + `location internal` no nginx; nomes UUID em `upload_to` |
 
 ---
 
@@ -182,11 +183,11 @@ Antes de usar qualquer chave de configuração, conferir na documentação ofici
 
 | Área | Estado |
 |------|--------|
-| Portal de Notícias | Funcional, seguro, auditado 2x |
+| Portal de Notícias | Funcional, seguro, auditado 3x |
 | Dashboard Admin | Funcional, bilíngue PT/EN |
 | Site da Escola | Inacabado — Fase 9 |
 | Infraestrutura | Hardened (nginx CSP, Docker non-root) |
-| Segurança | Auditada 2x — 20+ proteções ativas |
+| Segurança | Auditada 3x — 20+ proteções + currículos via X-Accel-Redirect, uploads com magic-bytes |
 | Mobile | Fase 8.5 pendente |
 
 **Próximas fases:** 8.5 (mobile) → Fase 9 (escola completa) → Fase 10 (hardening prod)

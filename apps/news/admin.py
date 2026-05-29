@@ -7,6 +7,15 @@ from unfold.admin import ModelAdmin
 from .models import Article, ArticleBookmark, ArticleLike, Category, Comment, NewsletterSubscription, Tag
 
 
+def _csv_safe(value):
+    """Previne CSV/formula injection: prefixa com aspa simples valores que
+    aplicativos de planilha interpretariam como fórmula."""
+    text = '' if value is None else str(value)
+    if text and text[0] in ('=', '+', '-', '@', '\t', '\r'):
+        return "'" + text
+    return text
+
+
 @admin.register(Category)
 class CategoryAdmin(ModelAdmin):
     list_display = ['name', 'parent', 'order']
@@ -190,7 +199,7 @@ class NewsletterSubscriptionAdmin(ModelAdmin):
         writer = csv.writer(response)
         writer.writerow(['E-mail', 'Site', 'Data de Inscrição', 'Ativo'])
         for sub in queryset:
-            writer.writerow([sub.email, sub.site.name, sub.created_at, 'Sim' if sub.is_active else 'Não'])
+            writer.writerow([_csv_safe(sub.email), _csv_safe(sub.site.name), sub.created_at, 'Sim' if sub.is_active else 'Não'])
         return response
 
 

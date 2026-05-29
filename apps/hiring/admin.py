@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.urls import reverse
+from django.utils.html import format_html
 from unfold.admin import ModelAdmin
 
 from .models import Application, Department, JobPosting
@@ -57,13 +59,13 @@ class ApplicationAdmin(ModelAdmin):
     list_display = ['first_name', 'last_name', 'job', 'status', 'created_at']
     list_filter = ['status', 'job', 'created_at']
     search_fields = ['first_name', 'last_name', 'email']
-    readonly_fields = ['first_name', 'last_name', 'email', 'phone', 'cover_letter', 'resume', 'created_at', 'updated_at']
+    readonly_fields = ['first_name', 'last_name', 'email', 'phone', 'cover_letter', 'resume_link', 'created_at', 'updated_at']
     fieldsets = [
         ('Candidato', {
             'fields': ('first_name', 'last_name', 'email', 'phone'),
         }),
         ('Candidatura', {
-            'fields': ('job', 'cover_letter', 'resume'),
+            'fields': ('job', 'cover_letter', 'resume_link'),
         }),
         ('Avaliação', {
             'fields': ('status', 'notes'),
@@ -74,6 +76,13 @@ class ApplicationAdmin(ModelAdmin):
         }),
     ]
     actions = ['mark_reviewing', 'mark_accepted', 'mark_rejected']
+
+    @admin.display(description='Currículo')
+    def resume_link(self, obj):
+        if obj is None or not obj.resume:
+            return '—'
+        url = reverse('hiring:download_resume', args=[obj.pk])
+        return format_html('<a href="{}" target="_blank" rel="noopener">Baixar currículo</a>', url)
 
     @admin.action(description='Marcar como Em Análise')
     def mark_reviewing(self, request, queryset):

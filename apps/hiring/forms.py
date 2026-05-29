@@ -33,4 +33,17 @@ class ApplicationForm(forms.ModelForm):
                 raise ValidationError(
                     'Apenas extensões .pdf, .doc e .docx são permitidas.'
                 )
+
+            # Valida o conteúdo real (magic bytes) — content_type é falsificável.
+            header = resume.read(8)
+            resume.seek(0)
+            valid_signature = (
+                header.startswith(b'%PDF-')               # PDF
+                or header.startswith(b'PK\x03\x04')        # .docx (zip)
+                or header.startswith(b'\xd0\xcf\x11\xe0')  # .doc (OLE2)
+            )
+            if not valid_signature:
+                raise ValidationError(
+                    'O conteúdo do arquivo não corresponde a um PDF ou Word válido.'
+                )
         return resume

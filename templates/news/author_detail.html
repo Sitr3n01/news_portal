@@ -3,9 +3,9 @@
 {% block title %}{{ author.get_full_name|default:author.username }} - Portal de Notícias{% endblock %}
 
 {% block content %}
-<div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
+<div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
   <!-- Author Header -->
-  <div class="bg-white rounded-3xl p-8 md:p-12 mb-12 border border-gray-100 shadow-sm">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 mb-10 sm:mb-12 border border-gray-100 dark:border-slate-800 shadow-sm">
     <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
       {% if author.avatar %}
       <img src="{{ author.avatar.url }}" alt="{{ author.get_full_name }}"
@@ -16,27 +16,27 @@
         {{ author.get_full_name|default:author.username|first|upper }}
       </div>
       {% endif %}
-      <div class="text-center md:text-left">
-        <h1 class="text-4xl font-display font-bold text-gray-900 mb-2">{{ author.get_full_name|default:author.username }}</h1>
+      <div class="text-center md:text-left min-w-0">
+        <h1 class="text-3xl sm:text-4xl font-display font-bold text-gray-900 dark:text-white mb-2 break-words">{{ author.get_full_name|default:author.username }}</h1>
         <p class="text-primary-600 font-medium mb-4">{{ author.get_role_display|default:"Redator" }}</p>
         {% if author.bio %}
-        <p class="text-gray-600 max-w-2xl">{{ author.bio }}</p>
+        <p class="text-gray-600 dark:text-slate-300 max-w-2xl">{{ author.bio }}</p>
         {% endif %}
-        <p class="text-sm text-gray-400 mt-4">{{ page_obj.paginator.count }} artigo{{ page_obj.paginator.count|pluralize:"s" }} publicado{{ page_obj.paginator.count|pluralize:"s" }}</p>
+        <p class="text-sm text-gray-400 dark:text-slate-500 mt-4">{{ page_obj.paginator.count }} artigo{{ page_obj.paginator.count|pluralize:"s" }} publicado{{ page_obj.paginator.count|pluralize:"s" }}</p>
       </div>
     </div>
   </div>
 
-  <div class="flex flex-col lg:flex-row gap-12">
+  <div class="flex flex-col lg:flex-row gap-10 lg:gap-12">
     <!-- Articles Grid -->
     <div class="flex-grow lg:w-2/3">
-      <h2 class="text-2xl font-display font-bold text-gray-900 mb-8"
+      <h2 class="text-2xl font-display font-bold text-gray-900 dark:text-white mb-8"
         x-text="t('Artigos publicados', 'Published articles')">Artigos publicados</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         {% for article in page_obj %}
         {% include 'news/partials/article_card.html' %}
         {% empty %}
-        <div class="col-span-full text-center py-16 text-gray-500">
+        <div class="col-span-full text-center py-16 text-gray-500 dark:text-slate-400">
           Este autor ainda não tem artigos publicados.
         </div>
         {% endfor %}

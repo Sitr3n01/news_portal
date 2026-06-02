@@ -36,11 +36,17 @@ def download_resume(request, application_id):
 
 
 def job_list(request):
-    jobs = JobPosting.objects.filter(status=JobPosting.Status.OPEN)
+    jobs = JobPosting.on_site.select_related('department').filter(site=request.site, status=JobPosting.Status.OPEN)
     return render(request, 'hiring/job_list.html', {'jobs': jobs})
 
+
 def job_detail(request, slug):
-    job = get_object_or_404(JobPosting, slug=slug, status=JobPosting.Status.OPEN)
+    job = get_object_or_404(
+        JobPosting.on_site.select_related('department'),
+        site=request.site,
+        slug=slug,
+        status=JobPosting.Status.OPEN,
+    )
 
     if request.method == 'POST':
         form = ApplicationForm(request.POST, request.FILES)

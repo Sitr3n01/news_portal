@@ -10,6 +10,7 @@ urlpatterns = [
     path('search/', views.article_search, name='search'),
     path('feed/', LatestArticlesFeed(), name='feed'),
     path('newsletter/subscribe/', views.newsletter_subscribe, name='newsletter_subscribe'),
+    path('newsletter/unsubscribe/<path:token>/', views.newsletter_unsubscribe, name='newsletter_unsubscribe'),
     path('category/<slug:slug>/', views.category_detail, name='category_detail'),
     path('category/<slug:slug>/feed/', CategoryFeed(), name='category_feed'),
     path('tag/<slug:slug>/', views.tag_detail, name='tag_detail'),

@@ -3,7 +3,7 @@
 {% block title %}Minha Conta - The Chronicle{% endblock %}
 
 {% block content %}
-<div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-0 py-16 md:py-20 font-display">
+<div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-0 py-10 sm:py-16 md:py-20 font-display">
 
     <!-- Flash Messages -->
     {% if messages %}
@@ -26,8 +26,8 @@
     </div>
     {% endif %}
 
-    <div class="flex items-center gap-4 mb-12">
-        <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-white"
+    <div class="flex flex-wrap items-center gap-4 mb-10 sm:mb-12">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white"
             x-text="t('Minha Conta', 'My Account')">Minha Conta</h1>
         <div class="h-8 w-px bg-slate-200 dark:bg-slate-700 mx-2 hidden sm:block"></div>
         <p class="text-slate-500 dark:text-slate-400 font-ui text-lg mt-2 sm:mt-0 hidden sm:block">
@@ -35,7 +35,7 @@
         </p>
     </div>
 
-    <div class="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+    <div class="grid lg:grid-cols-[280px_1fr] gap-10 lg:gap-20">
         <!-- Sidebar Navigation -->
         <aside class="space-y-1">
             <a href="?tab=saved"
@@ -86,8 +86,8 @@
                 <div class="grid gap-6">
                     {% for article in saved_articles %}
                     <div
-                        class="flex gap-6 items-start group p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/30 border border-transparent hover:border-slate-100 dark:hover:border-slate-800 transition-all">
-                        <div class="w-24 h-24 rounded-lg bg-slate-200 dark:bg-slate-800 flex-shrink-0 overflow-hidden">
+                        class="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start group p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/30 border border-transparent hover:border-slate-100 dark:hover:border-slate-800 transition-all">
+                        <div class="w-full h-40 sm:w-24 sm:h-24 rounded-lg bg-slate-200 dark:bg-slate-800 flex-shrink-0 overflow-hidden">
                             {% if article.featured_image %}
                             <img src="{{ article.featured_image.url }}" alt="{{ article.title }}"
                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
@@ -99,7 +99,7 @@
                         </div>
                         <div class="flex-grow">
                             <div class="flex justify-between items-start gap-4">
-                                <a href="{% url 'news:article_detail' article.slug %}" class="block">
+                                <a href="{% url 'news:article_detail' article.slug %}" class="block min-w-0">
                                     <h3
                                         class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors leading-tight mb-2">
                                         {{ article.title }}</h3>

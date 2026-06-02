@@ -37,6 +37,23 @@ DB_PASSWORD=senha_segura_do_banco
 DB_HOST=db
 ```
 
+Configure também o SMTP transacional usado pela newsletter automática:
+```env
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.seuprovedor.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=usuario_smtp
+EMAIL_HOST_PASSWORD=senha_smtp
+EMAIL_USE_TLS=True
+DEFAULT_FROM_EMAIL=News Portal <noticias@seudominio.com.br>
+```
+
+O painel administrativo não grava segredos de produção como `SECRET_KEY`,
+credenciais do banco ou `EMAIL_HOST_PASSWORD`. Ele mostra a saúde dessas
+variáveis na dashboard e permite ao cliente gerenciar as configurações públicas
+por site em **Sistema > Configurações do Site**, como logo, contatos, analytics
+e o remetente visível da newsletter.
+
 ## 3. Subindo os Containers
 
 Rode o compose de produção e aguarde o build do projeto:
@@ -77,4 +94,9 @@ O CI/CD via **GitHub Actions** já está testando a aplicação automaticamente 
 Para automatizar o dump do banco de Postgres localmente, insira na Crontab do Host:
 ```bash
 @daily docker exec news_portal-db-1 pg_dump -U news_portal_prod_user news_portal_prod_db > /backups/news_portal_$(date +%Y%m%d).sql
+```
+
+Para automatizar o envio de newsletters pendentes do portal de notícias:
+```bash
+*/5 * * * * docker compose -f /opt/news_portal/docker/docker-compose.prod.yml exec -T web python manage.py send_pending_newsletters --batch-size 100
 ```

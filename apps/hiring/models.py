@@ -1,6 +1,9 @@
 import uuid
 from pathlib import Path
 
+from django.contrib.sites.managers import CurrentSiteManager
+from django.contrib.sites.models import Site
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from apps.common.models import SEOModel, TimeStampedModel
@@ -16,13 +19,20 @@ def resume_upload_path(instance, filename):
 
 
 class Department(models.Model):
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='departments')
     name = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200, unique=True)
+    slug = models.SlugField(max_length=200)
+
+    objects = models.Manager()
+    on_site = CurrentSiteManager()
 
     class Meta:
         ordering = ['name']
         verbose_name = 'Departamento'
         verbose_name_plural = 'Departamentos'
+        constraints = [
+            models.UniqueConstraint(fields=['site', 'slug'], name='unique_department_slug_per_site'),
+        ]
 
     def __str__(self):
         return self.name
@@ -40,9 +50,10 @@ class JobPosting(TimeStampedModel, SEOModel):
         OPEN = 'open', 'Aberta'
         CLOSED = 'closed', 'Fechada'
 
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='job_postings')
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='jobs')
     title = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200, unique=True)
+    slug = models.SlugField(max_length=200)
     description = models.TextField()
     requirements = models.TextField()
     employment_type = models.CharField(max_length=20, choices=EmploymentType.choices, default=EmploymentType.FULL_TIME)
@@ -52,13 +63,24 @@ class JobPosting(TimeStampedModel, SEOModel):
     published_at = models.DateTimeField(null=True, blank=True)
     deadline = models.DateTimeField(null=True, blank=True, help_text='Data limite para receber candidaturas.')
 
+    objects = models.Manager()
+    on_site = CurrentSiteManager()
+
     class Meta:
         ordering = ['-published_at']
         verbose_name = 'Vaga'
         verbose_name_plural = 'Vagas'
+        constraints = [
+            models.UniqueConstraint(fields=['site', 'slug'], name='unique_job_posting_slug_per_site'),
+        ]
 
     def __str__(self):
         return self.title
+
+    def clean(self):
+        super().clean()
+        if self.department_id and self.site_id and self.department.site_id != self.site_id:
+            raise ValidationError({'department': 'O departamento deve pertencer ao mesmo site da vaga.'})
 
 
 class Application(TimeStampedModel):

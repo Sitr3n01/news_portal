@@ -1,24 +1,24 @@
 {% if page_obj.has_other_pages %}
-<nav class="flex justify-center items-center gap-2 mt-12" aria-label="Paginação">
+<nav class="flex flex-wrap justify-center items-center gap-2 mt-10 sm:mt-12" aria-label="Paginação">
   {% if page_obj.has_previous %}
   <a href="?{% if query %}q={{ query }}&{% endif %}page={{ page_obj.previous_page_number }}"
-     class="px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-primary-50 hover:border-primary-300 transition-colors font-medium text-sm"
+     class="px-3 sm:px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-slate-300 hover:bg-primary-50 hover:border-primary-300 transition-colors font-medium text-sm"
      x-text="t('Anterior', 'Previous')">Anterior
   </a>
   {% endif %}
 
   {% for num in page_obj.paginator.page_range %}
     {% if page_obj.number == num %}
-    <span class="px-4 py-2 rounded-xl bg-primary-600 text-white font-bold text-sm">{{ num }}</span>
+    <span class="px-3 sm:px-4 py-2 rounded-xl bg-primary-600 text-white font-bold text-sm">{{ num }}</span>
     {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
     <a href="?{% if query %}q={{ query }}&{% endif %}page={{ num }}"
-       class="px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-primary-50 transition-colors font-medium text-sm">{{ num }}</a>
+       class="px-3 sm:px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-slate-300 hover:bg-primary-50 transition-colors font-medium text-sm">{{ num }}</a>
     {% endif %}
   {% endfor %}
 
   {% if page_obj.has_next %}
   <a href="?{% if query %}q={{ query }}&{% endif %}page={{ page_obj.next_page_number }}"
-     class="px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-primary-50 hover:border-primary-300 transition-colors font-medium text-sm"
+     class="px-3 sm:px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-slate-300 hover:bg-primary-50 hover:border-primary-300 transition-colors font-medium text-sm"
      x-text="t('Próxima', 'Next')">Próxima
   </a>
   {% endif %}

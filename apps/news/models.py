@@ -142,6 +142,43 @@ class NewsletterSubscription(TimeStampedModel):
         return self.email
 
 
+class NewsletterDelivery(TimeStampedModel):
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Pendente'
+        SENT = 'sent', 'Enviado'
+        FAILED = 'failed', 'Falhou'
+        SKIPPED = 'skipped', 'Ignorado'
+
+    article = models.ForeignKey(
+        Article, on_delete=models.CASCADE,
+        related_name='newsletter_deliveries', verbose_name='Artigo',
+    )
+    subscription = models.ForeignKey(
+        NewsletterSubscription, on_delete=models.CASCADE,
+        related_name='deliveries', verbose_name='Assinatura',
+    )
+    email = models.EmailField('E-mail')
+    status = models.CharField(
+        'Status', max_length=20, choices=Status.choices, default=Status.PENDING,
+    )
+    attempts = models.PositiveSmallIntegerField('Tentativas', default=0)
+    last_error = models.TextField('Último erro', blank=True)
+    sent_at = models.DateTimeField('Enviado em', null=True, blank=True)
+
+    class Meta:
+        ordering = ['created_at']
+        verbose_name = 'Entrega de Newsletter'
+        verbose_name_plural = 'Entregas de Newsletter'
+        unique_together = [['article', 'subscription']]
+        indexes = [
+            models.Index(fields=['status', 'created_at']),
+            models.Index(fields=['article', 'status']),
+        ]
+
+    def __str__(self):
+        return f'{self.email} — {self.article.title}'
+
+
 class ArticleLike(TimeStampedModel):
     article = models.ForeignKey(
         Article, on_delete=models.CASCADE,

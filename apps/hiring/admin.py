@@ -8,22 +8,28 @@ from .models import Application, Department, JobPosting
 
 @admin.register(Department)
 class DepartmentAdmin(ModelAdmin):
-    list_display = ['name', 'slug']
-    search_fields = ['name']
+    list_display = ['name', 'site', 'slug']
+    list_filter = ['site']
+    search_fields = ['name', 'slug']
     prepopulated_fields = {'slug': ('name',)}
+    fieldsets = [
+        ('Departamento', {
+            'fields': ('site', 'name', 'slug'),
+        }),
+    ]
 
 
 @admin.register(JobPosting)
 class JobPostingAdmin(ModelAdmin):
-    list_display = ['title', 'department', 'employment_type', 'status', 'published_at', 'deadline']
-    list_filter = ['status', 'employment_type', 'department']
-    search_fields = ['title', 'description', 'requirements']
+    list_display = ['title', 'site', 'department', 'employment_type', 'status', 'published_at', 'deadline']
+    list_filter = ['site', 'status', 'employment_type', 'department']
+    search_fields = ['title', 'description', 'requirements', 'location']
     prepopulated_fields = {'slug': ('title',)}
     readonly_fields = ['created_at', 'updated_at']
     date_hierarchy = 'published_at'
     fieldsets = [
-        ('Detalhes da Vaga', {
-            'fields': ('title', 'slug', 'department', 'employment_type', 'location', 'salary_range'),
+        ('Site e detalhes da vaga', {
+            'fields': ('site', 'title', 'slug', 'department', 'employment_type', 'location', 'salary_range'),
         }),
         ('Descrição', {
             'fields': ('description', 'requirements'),
@@ -45,20 +51,20 @@ class JobPostingAdmin(ModelAdmin):
     @admin.action(description='Abrir vagas selecionadas')
     def open_postings(self, request, queryset):
         from django.utils import timezone
-        updated = queryset.update(status='open', published_at=timezone.now())
+        updated = queryset.update(status=JobPosting.Status.OPEN, published_at=timezone.now())
         self.message_user(request, f'{updated} vaga(s) aberta(s).')
 
     @admin.action(description='Fechar vagas selecionadas')
     def close_postings(self, request, queryset):
-        updated = queryset.update(status='closed')
+        updated = queryset.update(status=JobPosting.Status.CLOSED)
         self.message_user(request, f'{updated} vaga(s) fechada(s).')
 
 
 @admin.register(Application)
 class ApplicationAdmin(ModelAdmin):
-    list_display = ['first_name', 'last_name', 'job', 'status', 'created_at']
-    list_filter = ['status', 'job', 'created_at']
-    search_fields = ['first_name', 'last_name', 'email']
+    list_display = ['first_name', 'last_name', 'job', 'job_site', 'status', 'created_at']
+    list_filter = ['status', 'job__site', 'job', 'created_at']
+    search_fields = ['first_name', 'last_name', 'email', 'job__title']
     readonly_fields = ['first_name', 'last_name', 'email', 'phone', 'cover_letter', 'resume_link', 'created_at', 'updated_at']
     fieldsets = [
         ('Candidato', {
@@ -77,6 +83,10 @@ class ApplicationAdmin(ModelAdmin):
     ]
     actions = ['mark_reviewing', 'mark_accepted', 'mark_rejected']
 
+    @admin.display(description='Site')
+    def job_site(self, obj):
+        return obj.job.site
+
     @admin.display(description='Currículo')
     def resume_link(self, obj):
         if obj is None or not obj.resume:
@@ -86,15 +96,15 @@ class ApplicationAdmin(ModelAdmin):
 
     @admin.action(description='Marcar como Em Análise')
     def mark_reviewing(self, request, queryset):
-        updated = queryset.update(status='reviewing')
+        updated = queryset.update(status=Application.Status.REVIEWING)
         self.message_user(request, f'{updated} candidatura(s) marcada(s) como em análise.')
 
     @admin.action(description='Marcar como Aceito')
     def mark_accepted(self, request, queryset):
-        updated = queryset.update(status='accepted')
+        updated = queryset.update(status=Application.Status.ACCEPTED)
         self.message_user(request, f'{updated} candidatura(s) aceita(s).')
 
     @admin.action(description='Marcar como Rejeitado')
     def mark_rejected(self, request, queryset):
-        updated = queryset.update(status='rejected')
+        updated = queryset.update(status=Application.Status.REJECTED)
         self.message_user(request, f'{updated} candidatura(s) rejeitada(s).')

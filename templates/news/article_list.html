@@ -3,14 +3,14 @@
 {% block title %}{{ current_site.name }} - Editorial Edition{% endblock %}
 
 {% block content %}
-<main class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full grid grid-cols-1 lg:grid-cols-12 gap-12">
+<main class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
     <!-- Left Column: Editorial Content (8 cols) -->
     <div class="lg:col-span-8 flex flex-col gap-16">
         <!-- Hero Story -->
         {% if featured %}
         <article class="flex flex-col gap-6 group cursor-pointer">
             <a href="{% url 'news:article_detail' featured.slug %}" class="block">
-                <div class="w-full aspect-[2/1] overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 relative">
+                <div class="w-full aspect-[4/3] overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 relative sm:aspect-[2/1]">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10"></div>
                     {% if featured.featured_image %}
                     <div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
@@ -23,7 +23,7 @@
                     {% endif %}
                 </div>
                 <div class="flex flex-col gap-3 mt-4">
-                    <div class="flex items-center gap-3 mb-1">
+                    <div class="flex flex-wrap items-center gap-3 mb-1">
                         {% if featured.category %}
                         <span class="font-ui text-xs font-bold text-primary tracking-widest uppercase">{{ featured.category.name }}</span>
                         {% endif %}
@@ -32,10 +32,10 @@
                                 read</span></span>
                     </div>
                     <h2
-                        class="text-4xl md:text-5xl font-bold leading-[1.1] text-slate-900 dark:text-white group-hover:text-primary transition-colors">
+                        class="text-3xl sm:text-4xl md:text-5xl font-bold leading-[1.1] text-slate-900 dark:text-white group-hover:text-primary transition-colors">
                         {{ featured.title }}
                     </h2>
-                    <p class="text-xl leading-relaxed text-slate-600 dark:text-slate-300 max-w-2xl font-normal mt-2">
+                    <p class="text-lg sm:text-xl leading-relaxed text-slate-600 dark:text-slate-300 max-w-2xl font-normal mt-2">
                         {{ featured.excerpt|default:featured.content|striptags|truncatewords:30 }}
                     </p>
                     {% if featured.author %}
@@ -62,7 +62,7 @@
         {% if page_obj.paginator.count > 0 %}
         <div id="articles-grid-view">
             <div id="articles-grid"
-                class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12 border-t border-gray-100 dark:border-gray-800 pt-12">
+                class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 sm:gap-y-12 border-t border-gray-100 dark:border-gray-800 pt-10 sm:pt-12">
                 {% for article in page_obj|slice:":2" %}
                 <article class="flex flex-col gap-4 group cursor-pointer">
                     <a href="{% url 'news:article_detail' article.slug %}" class="block">
@@ -98,7 +98,7 @@
             <div class="border-t border-gray-100 dark:border-gray-800 pt-12">
                 <div class="flex flex-col gap-8">
                     {% for article in page_obj|slice:"2:" %}
-                    <article class="flex flex-col md:flex-row gap-6 items-start group cursor-pointer">
+                    <article class="flex flex-col md:flex-row gap-5 md:gap-6 items-start group cursor-pointer">
                         <div class="flex-1">
                             <a href="{% url 'news:article_detail' article.slug %}">
                                 <h3
@@ -108,7 +108,7 @@
                                 <p class="text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
                                     {{ article.excerpt|default:article.content|striptags|truncatewords:30 }}
                                 </p>
-                                <div class="mt-3 flex items-center gap-2">
+                                <div class="mt-3 flex flex-wrap items-center gap-2">
                                     {% if article.author %}
                                     <span class="font-ui text-xs font-medium text-slate-500"><span x-text="t('Por', 'By')">By</span> {{ article.author.get_full_name|default:article.author.username }}</span>
                                     <span class="text-slate-300">•</span>

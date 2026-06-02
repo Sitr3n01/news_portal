@@ -3,9 +3,9 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-12">
             <!-- Brand & Social Column -->
             <div class="lg:col-span-4">
-                <div class="flex items-center gap-2 mb-4 text-slate-900 dark:text-white">
-                    <span class="material-symbols-outlined text-[24px] text-primary">newspaper</span>
-                    <span class="font-bold text-lg font-display">{{ current_site.name|default:"The Chronicle" }}</span>
+                <div class="flex min-w-0 items-center gap-2 mb-4 text-slate-900 dark:text-white">
+                    <span class="material-symbols-outlined shrink-0 text-[24px] text-primary">newspaper</span>
+                    <span class="min-w-0 break-words font-bold text-lg font-display">{{ current_site.name|default:"The Chronicle" }}</span>
                 </div>
                 <p class="text-sm text-slate-500 leading-relaxed font-ui mb-6"
                     x-text="t('Jornalismo independente para o intelectual moderno. Dedicado à verdade, clareza e profundidade.', 'Independent journalism for the modern intellectual. Dedicated to truth, clarity, and depth.')">
@@ -73,13 +73,13 @@
                     <li class="flex items-start gap-3">
                         <span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">mail</span>
                         <a href="mailto:{{ site_settings.contact_email }}"
-                            class="hover:text-primary transition-colors">{{ site_settings.contact_email }}</a>
+                            class="break-all hover:text-primary transition-colors">{{ site_settings.contact_email }}</a>
                     </li>
                     {% else %}
                     <li class="flex items-start gap-3">
                         <span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">mail</span>
                         <a href="mailto:contato@exemplo.com"
-                            class="hover:text-primary transition-colors">contato@exemplo.com</a>
+                            class="break-all hover:text-primary transition-colors">contato@exemplo.com</a>
                     </li>
                     {% endif %}
                     {% if site_settings.phone_number %}
@@ -101,7 +101,7 @@
             class="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-gray-100 dark:border-gray-800">
             <p class="font-ui text-xs text-slate-400 mb-4 md:mb-0">© {% now "Y" %} {{ current_site.name }}. <span
                     x-text="t('Todos os direitos reservados.', 'All rights reserved.')">All rights reserved.</span></p>
-            <div class="flex gap-6 font-ui text-xs text-slate-400">
+            <div class="flex flex-wrap justify-center gap-x-6 gap-y-2 font-ui text-xs text-slate-400 md:justify-end">
                 <a class="hover:text-primary transition-colors" href="{% url 'school:privacy' %}"><span
                         x-text="t('Política de Privacidade e Termos', 'Privacy Policy & Terms')">Privacy Policy &
                         Terms</span></a>

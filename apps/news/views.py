@@ -272,6 +272,23 @@ def newsletter_subscribe(request):
     return safe_referer_redirect(request, 'news:list')
 
 
+def newsletter_unsubscribe(request, token):
+    """Cancela inscrição da newsletter por token assinado, sem exigir login."""
+    from .newsletter import get_subscription_from_unsubscribe_token
+
+    subscription = get_subscription_from_unsubscribe_token(token)
+    if subscription is None:
+        messages.error(request, 'Link de cancelamento inválido ou expirado.')
+        return redirect('news:list')
+
+    if subscription.is_active:
+        subscription.is_active = False
+        subscription.save(update_fields=['is_active'])
+
+    messages.success(request, 'Inscrição na newsletter cancelada com sucesso.')
+    return redirect('news:list')
+
+
 @login_required
 def user_dashboard(request):
     """Dashboard do usuario com artigos salvos, curtidos e comentarios."""

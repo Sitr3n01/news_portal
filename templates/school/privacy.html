@@ -1,82 +1,56 @@
-{% extends 'base_news.html' %}
+{% extends 'base_school.html' %}
 
-{% block title %}Política de Privacidade e Termos de Uso - {{ current_site.name }}{% endblock %}
+{% block title %}Política de privacidade - {{ current_site.name }}{% endblock %}
+{% block meta_description %}Informações sobre privacidade, uso de dados e canais de contato de {{ current_site.name }}.{% endblock %}
 
 {% block content %}
-<main class="pt-20 lg:pt-28 pb-16 lg:pb-24">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <header class="text-center mb-16">
-            <h1 class="text-4xl md:text-5xl font-display font-bold text-gray-900 dark:text-white mb-6">
-                Política de Privacidade e Termos de Uso
-            </h1>
-            <p class="text-lg text-gray-600 dark:text-gray-400 font-ui max-w-2xl mx-auto">
-                Nosso compromisso com a sua privacidade e a transparência no tratamento dos seus dados.
-            </p>
-        </header>
+<section class="bg-[#f8faf7] py-16 md:py-24">
+    <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+        <p class="text-sm font-bold uppercase tracking-[0.2em] text-primary-700">Privacidade</p>
+        <h1 class="mt-4 font-display text-4xl font-bold tracking-tight text-slate-950 md:text-6xl">Política de privacidade e termos de uso</h1>
+        <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
+            Transparência sobre como tratamos informações enviadas por formulários, candidaturas e interações essenciais do site.
+        </p>
+    </div>
+</section>
 
-        <article class="prose prose-lg prose-slate dark:prose-invert mx-auto font-ui">
-            <h2>Termos de Serviço</h2>
+<section class="bg-white py-12 md:py-16">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <article class="school-prose text-lg">
+            <h2>Uso do site</h2>
             <p>
-                Bem-vindo ao <strong>{{ current_site.name }}</strong>. Ao utilizar nosso sistema, você concorda com
-                nossos termos.
-                Nossos serviços são oferecidos para promover o acesso à informação, educação e jornalismo através do
-                nosso portal de notícias.
-                Os usuários concordam em interagir com o conteúdo de maneira respeitosa, não promovendo discursos de
-                ódio, conteúdo malicioso ou qualquer atividade que comprometa a segurança da plataforma.
+                Ao navegar no site institucional de <strong>{{ current_site.name }}</strong>, você concorda em utilizar os canais disponíveis de maneira respeitosa e compatível com sua finalidade educacional e institucional.
             </p>
 
-            <h2>Política de Privacidade</h2>
+            <h2>Dados enviados por formulários</h2>
             <p>
-                Levamos a privacidade de nossos leitores e usuários a sério. Diferente de grande parte da web moderna,
-                <strong>não utilizamos seus dados para rastreamento publicitário avançado, nem os comercializamos com
-                    terceiros</strong>.
+                Os formulários de contato e candidatura coletam apenas as informações necessárias para responder mensagens, registrar solicitações e conduzir processos relacionados à escola.
+            </p>
+            <p>
+                Essas informações são usadas internamente pela equipe responsável e não devem ser comercializadas ou utilizadas para finalidades incompatíveis com o contato solicitado.
             </p>
 
-            <h3>Coleta de Dados Pessoais</h3>
+            <h2>Cookies e sessão</h2>
             <p>
-                O sistema é desenhado para operar com o mínimo de informações possíveis. Os únicos dados pessoais que
-                tratamos ativamente são o seu <strong>nome de usuário</strong> e o seu <strong>endereço de
-                    e-mail</strong>, estritamente para os fins de:
-            </p>
-            <ul>
-                <li>Identificação de Conta: Para permitir que você salve publicações (Bookmarks) e comente matérias
-                    publicamente.</li>
-                <li>Comunicação: Para assinar ou receber notificações ativas da nossa Newsletter (apenas quando
-                    solicitado por você).</li>
-            </ul>
-            <p>
-                Nenhuma outra forma de coleta invasiva de dados demográficos, financeiros ou informações pessoais
-                diretas são exigidas ou armazenadas por nós.
+                O sistema pode utilizar cookies técnicos para segurança, autenticação, proteção contra CSRF e funcionamento básico da plataforma. Esses recursos ajudam a manter a experiência estável e segura.
             </p>
 
-            <h3>Cookies</h3>
+            <h2>Candidaturas</h2>
             <p>
-                Utilizamos cookies apenas para funções operacionais essenciais do sistema:
-            </p>
-            <ul>
-                <li><strong>Autenticação:</strong> Para manter a sua sessão de usuário aberta de forma segura enquanto
-                    você navega pelos artigos.</li>
-                <li><strong>Preferências:</strong> Para memorizar localmente seu Tema (Escuro/Claro) e Idioma,
-                    armazenados inteiramente em seu próprio navegador.</li>
-            </ul>
-
-            <h3>Exclusão de Dados</h3>
-            <p>
-                Conforme as diretrizes de proteção de dados, você possui o direito e a autonomia de gerenciar seus
-                dados.
-                Se desejar revogar seu consentimento, sair da nossa newsletter ou solicitar o apagamento permanente da
-                sua conta, comentários ou likes associados ao seu e-mail, entre em contato através dos meios listados no
-                final da nossa página.
+                Dados enviados em vagas abertas, incluindo currículo, são tratados como informações sensíveis de processo seletivo e devem ser acessados apenas por pessoas autorizadas.
             </p>
 
-            <div
-                class="mt-12 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800 text-center">
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-0">
-                    Última atualização: {% now "d \d\e F \d\e Y" %}. Quaisquer alterações futuras em nossa política
-                    serão limitadas à melhoria da experiência do usuário e devidamente notificadas nesta página.
+            <h2>Solicitações e contato</h2>
+            <p>
+                Para solicitar informações, revisar dados enviados ou pedir remoção de registros quando aplicável, utilize os canais oficiais da escola.
+            </p>
+
+            <div class="mt-10 rounded-3xl border border-slate-200/70 bg-[#f8faf7] p-6 text-base">
+                <p class="mb-0 text-slate-600">
+                    Última atualização: {% now "d/m/Y" %}. Mudanças futuras nesta página buscarão melhorar clareza, segurança e transparência.
                 </p>
             </div>
         </article>
     </div>
-</main>
+</section>
 {% endblock %}

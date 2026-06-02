@@ -44,6 +44,14 @@
 .kb-stat-card:hover .kb-amber-icon{background:#f59e0b;color:#fff}
 .kb-stat-icon.kb-rose-icon{background:rgba(251,113,133,.12);color:#fb7185}
 .kb-stat-card:hover .kb-rose-icon{background:#f43f5e;color:#fff}
+.kb-ops-grid{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+@media(max-width:900px){.kb-ops-grid{grid-template-columns:1fr}}
+.kb-config-body{padding:1rem 1.25rem}
+.kb-config-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.75rem}
+.kb-config-row strong{font-size:.875rem;color:#f9fafb}
+.kb-config-meta{display:grid;grid-template-columns:1fr 1fr;gap:.625rem;margin-top:.875rem;padding-top:.875rem;border-top:1px solid rgba(55,65,81,.5)}
+.kb-config-meta span{display:block;font-size:.6875rem;color:var(--font-muted-color,#9ca3af)}
+.kb-config-meta strong{display:block;font-size:.75rem;color:#d1d5db;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .kb-tables{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
 @media(max-width:900px){.kb-tables{grid-template-columns:1fr}}
 .kb-table-card{background:var(--bg-color,#1f2937);border:1px solid var(--border-color,#374151);border-radius:.5rem;overflow:hidden}
@@ -140,6 +148,57 @@
 <p class="kb-stat-number {% if pending_comments %}kb-hint-attention{% else %}kb-zero{% endif %}">{{ pending_comments }}</p>
 {% if pending_comments %}<p class="kb-stat-hint kb-hint-attention">Requer moderação</p>{% endif %}</div>
 <div class="kb-stat-icon kb-rose-icon"><span class="material-symbols-outlined">rate_review</span></div></a>
+</div>
+</div>
+</div>
+<div class="kb-ops-grid">
+<div>
+<div class="kb-portal-header kb-news"><span class="material-symbols-outlined">mark_email_unread</span><h2>Operação de Newsletter</h2></div>
+<div class="kb-stats-grid">
+<a href="{% url 'admin:news_newsletterdelivery_changelist' %}?status__exact=pending" class="kb-stat-card">
+<div><p class="kb-stat-label">Entregas Pendentes</p>
+<p class="kb-stat-number {% if not newsletter_pending_deliveries %}kb-zero{% endif %}">{{ newsletter_pending_deliveries }}</p>
+<p class="kb-stat-hint kb-hint-neutral">{{ newsletter_articles_pending }} artigo(s) aguardando automação</p></div>
+<div class="kb-stat-icon kb-amber-icon"><span class="material-symbols-outlined">outbox</span></div></a>
+<a href="{% url 'admin:news_newsletterdelivery_changelist' %}?status__exact=failed" class="kb-stat-card">
+<div><p class="kb-stat-label">Falhas de Envio</p>
+<p class="kb-stat-number {% if newsletter_failed_deliveries %}kb-hint-attention{% else %}kb-zero{% endif %}">{{ newsletter_failed_deliveries }}</p>
+{% if newsletter_failed_deliveries %}<p class="kb-stat-hint kb-hint-attention">Revisar SMTP ou destinatário</p>
+{% else %}<p class="kb-stat-hint kb-hint-neutral">Sem falhas abertas</p>{% endif %}</div>
+<div class="kb-stat-icon kb-rose-icon"><span class="material-symbols-outlined">error</span></div></a>
+<a href="{% url 'admin:news_newsletterdelivery_changelist' %}?status__exact=sent" class="kb-stat-card">
+<div><p class="kb-stat-label">Enviadas Hoje</p>
+<p class="kb-stat-number {% if not newsletter_sent_today %}kb-zero{% endif %}">{{ newsletter_sent_today }}</p>
+<p class="kb-stat-hint kb-hint-positive">Processadas pelo comando agendado</p></div>
+<div class="kb-stat-icon kb-news-icon"><span class="material-symbols-outlined">mark_email_read</span></div></a>
+<a href="{% url 'admin:common_siteextension_changelist' %}" class="kb-stat-card">
+<div><p class="kb-stat-label">Remetentes por Site</p>
+<p class="kb-stat-number {% if not newsletter_sender_sites %}kb-zero{% endif %}">{{ newsletter_sender_sites }}</p>
+<p class="kb-stat-hint kb-hint-neutral">Nome e e-mail editáveis no painel</p></div>
+<div class="kb-stat-icon kb-news-icon"><span class="material-symbols-outlined">settings_account_box</span></div></a>
+</div>
+</div>
+<div class="kb-table-card">
+<div class="kb-table-header">
+<h3>Configuração de E-mail</h3>
+<a href="{% url 'admin:common_siteextension_changelist' %}">Ajustar remetente</a></div>
+<div class="kb-config-body">
+<div class="kb-config-row">
+<strong>SMTP transacional</strong>
+{% if smtp_configured %}
+<span class="kb-badge kb-badge-green"><span class="kb-badge-dot"></span> Pronto</span>
+{% else %}
+<span class="kb-badge kb-badge-amber"><span class="kb-badge-dot"></span> Atenção</span>
+{% endif %}
+</div>
+<p class="kb-stat-hint {% if newsletter_config_ready %}kb-hint-positive{% else %}kb-hint-attention{% endif %}">{{ newsletter_config_hint }}</p>
+{% if email_missing_settings %}
+<p class="kb-stat-hint kb-hint-attention">Falta configurar: {{ email_missing_settings }}</p>
+{% endif %}
+<div class="kb-config-meta">
+<div><span>Backend</span><strong>{{ email_backend }}</strong></div>
+<div><span>Servidor</span><strong>{{ email_host }}:{{ email_port }}</strong></div>
+</div>
 </div>
 </div>
 </div>

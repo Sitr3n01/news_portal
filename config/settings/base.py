@@ -190,6 +190,18 @@ UNFOLD = {
                         'permission': lambda request: request.user.has_perm('school.view_page'),
                     },
                     {
+                        'title': 'Home Escolar',
+                        'icon': 'home',
+                        'link': reverse_lazy('admin:school_schoolhomeconfig_changelist'),
+                        'permission': lambda request: request.user.has_perm('school.view_schoolhomeconfig'),
+                    },
+                    {
+                        'title': 'Diferenciais',
+                        'icon': 'auto_awesome',
+                        'link': reverse_lazy('admin:school_schoolfeature_changelist'),
+                        'permission': lambda request: request.user.has_perm('school.view_schoolfeature'),
+                    },
+                    {
                         'title': 'Equipe',
                         'icon': 'group',
                         'link': reverse_lazy('admin:school_teammember_changelist'),
@@ -261,6 +273,12 @@ UNFOLD = {
                         'link': reverse_lazy('admin:news_newslettersubscription_changelist'),
                         'permission': lambda request: request.user.has_perm('news.view_newslettersubscription'),
                     },
+                    {
+                        'title': 'Entregas de Newsletter',
+                        'icon': 'mark_email_read',
+                        'link': reverse_lazy('admin:news_newsletterdelivery_changelist'),
+                        'permission': lambda request: request.user.has_perm('news.view_newsletterdelivery'),
+                    },
                 ],
             },
             {
@@ -331,16 +349,28 @@ AXES_META_PRECEDENCE_ORDER = [
 
 # ── Content Security Policy (django-csp) — defense-in-depth ────────────────
 # Espelha a política CSP do nginx.conf para proteção mesmo sem reverse proxy.
-# Alpine.js e HTMX requerem unsafe-inline/unsafe-eval.
+# Alpine.js, HTMX e Tailwind CDN requerem unsafe-inline/unsafe-eval e hosts CDN
+# explicitamente permitidos para que o frontend publico renderize sob CSP.
 from csp.constants import NONE, SELF, UNSAFE_EVAL, UNSAFE_INLINE  # noqa: E402
 
 CONTENT_SECURITY_POLICY = {
     'DIRECTIVES': {
         'default-src': [SELF],
-        'script-src': [SELF, UNSAFE_INLINE, UNSAFE_EVAL],
-        'style-src': [SELF, UNSAFE_INLINE],
+        'script-src': [
+            SELF,
+            UNSAFE_INLINE,
+            UNSAFE_EVAL,
+            'https://cdn.tailwindcss.com',
+            'https://unpkg.com',
+            'https://cdn.jsdelivr.net',
+        ],
+        'style-src': [
+            SELF,
+            UNSAFE_INLINE,
+            'https://fonts.googleapis.com',
+        ],
         'img-src': [SELF, 'data:', 'https:'],
-        'font-src': [SELF],
+        'font-src': [SELF, 'https://fonts.gstatic.com'],
         'frame-src': [SELF, 'https://www.youtube.com', 'https://www.youtube-nocookie.com'],
         'connect-src': [SELF],
         'base-uri': [SELF],

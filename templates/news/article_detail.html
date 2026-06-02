@@ -135,16 +135,35 @@
     .dark .article-body li {
         color: #cbd5e1;
     }
+
+    @media (max-width: 640px) {
+        .article-body p {
+            font-size: 1rem;
+            line-height: 1.75;
+        }
+
+        .article-body h2 {
+            font-size: 1.5rem;
+        }
+
+        .article-body h3 {
+            font-size: 1.25rem;
+        }
+
+        .article-body>p:first-of-type::first-letter {
+            font-size: 3.75rem;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <main>
-    <article class="relative mx-auto max-w-[960px] px-6 py-12 lg:px-0">
+    <article class="relative mx-auto max-w-[960px] px-4 py-10 sm:px-6 sm:py-12 lg:px-0">
         <!-- Article Header Group -->
         <div class="mx-auto max-w-[720px] mb-12">
             <!-- Breadcrumbs -->
-            <div class="mb-6 flex items-center gap-2 text-sm font-medium tracking-wide">
+            <div class="mb-6 flex flex-wrap items-center gap-2 text-sm font-medium tracking-wide">
                 <a class="text-primary hover:text-primary/80 transition-colors uppercase"
                     href="{% url 'news:list' %}"><span x-text="t('Notícias', 'News')">News</span></a>
                 <span class="text-slate-300 dark:text-slate-700">/</span>
@@ -161,23 +180,23 @@
 
             <!-- Headline -->
             <h1
-                class="mb-6 text-4xl font-bold leading-[1.1] tracking-[-0.02em] text-slate-900 dark:text-slate-50 sm:text-5xl md:text-6xl font-display">
+                class="mb-6 text-3xl font-bold leading-[1.1] text-slate-900 dark:text-slate-50 sm:text-5xl md:text-6xl font-display">
                 {{ article.title }}
             </h1>
 
             <!-- Subtitle (Excerpt) -->
             {% if article.excerpt %}
-            <p class="mb-8 text-xl leading-relaxed text-slate-600 dark:text-slate-400 font-normal font-display">
+            <p class="mb-8 text-lg sm:text-xl leading-relaxed text-slate-600 dark:text-slate-400 font-normal font-display">
                 {{ article.excerpt }}
             </p>
             {% endif %}
 
             <!-- Author Meta -->
             <div
-                class="flex items-center justify-between border-t border-b border-slate-200 dark:border-slate-800 py-4">
-                <div class="flex items-center gap-3">
+                class="flex items-start justify-between gap-4 border-t border-b border-slate-200 dark:border-slate-800 py-4">
+                <div class="flex min-w-0 items-center gap-3">
                     {% if article.author %}
-                    <div class="h-10 w-10 overflow-hidden rounded-full bg-slate-200">
+                    <div class="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-200">
                         {% if article.author.avatar %}
                         <img src="{{ article.author.avatar.url }}" alt="{{ article.author.get_full_name }}"
                             class="h-full w-full object-cover">
@@ -188,8 +207,8 @@
                         </div>
                         {% endif %}
                     </div>
-                    <div class="flex flex-col">
-                        <span class="text-sm font-bold text-slate-900 dark:text-slate-100 font-ui">{{ article.author.get_full_name|default:article.author.username }}</span>
+                    <div class="flex min-w-0 flex-col">
+                        <span class="truncate text-sm font-bold text-slate-900 dark:text-slate-100 font-ui">{{ article.author.get_full_name|default:article.author.username }}</span>
                         <span class="text-xs text-slate-500 dark:text-slate-400 font-ui">{{ article.published_at|date:"M d, Y" }} • {{ article.reading_time }} <span x-text="t('min de leitura', 'min read')">min
                                 read</span></span>
                     </div>
@@ -197,7 +216,7 @@
                 </div>
 
                 <!-- Header Actions -->
-                <div class="flex items-center gap-2">
+                <div class="shrink-0 flex items-center gap-2">
                     <!-- Save Bookmark Button (HTMX) -->
                     {% include 'news/partials/bookmark_button.html' with article=article is_bookmarked=is_bookmarked %}
                     <button :aria-label="t('Compartilhar Artigo', 'Share Article')"
@@ -212,9 +231,9 @@
 
         <!-- Featured Image -->
         {% if article.featured_image %}
-        <div class="mb-16 w-full overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-900 shadow-sm">
+        <div class="mb-12 sm:mb-16 w-full overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-900 shadow-sm">
             <img src="{{ article.featured_image.url }}" alt="{{ article.title }}"
-                class="aspect-[21/9] w-full object-cover">
+                class="aspect-[4/3] sm:aspect-[21/9] w-full object-cover">
             {% if article.featured_image_caption %}
             <div class="mt-3 px-4 text-center">
                 <p class="text-xs text-slate-500 dark:text-slate-400 font-ui">
@@ -312,7 +331,7 @@
                             x-text="t('Você precisa ter uma conta para publicar comentários.', 'You need an account to post comments.')">
                             You need an account to post comments.
                         </p>
-                        <div class="flex gap-3">
+                        <div class="flex flex-col gap-3 min-[380px]:flex-row">
                             <a href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}"
                                 class="font-ui text-sm font-bold bg-primary text-white px-6 py-2 rounded shadow-sm hover:bg-primary/90 transition-colors"
                                 x-text="t('Fazer Login', 'Log In')">Log In</a>
@@ -354,8 +373,8 @@
 
     <!-- Read Next Section -->
     {% if related_articles %}
-    <section class="border-t border-slate-200 bg-white py-16 dark:border-slate-800 dark:bg-background-dark">
-        <div class="mx-auto max-w-[960px] px-6 lg:px-0">
+    <section class="border-t border-slate-200 bg-white py-12 sm:py-16 dark:border-slate-800 dark:bg-background-dark">
+        <div class="mx-auto max-w-[960px] px-4 sm:px-6 lg:px-0">
             <h3 class="mb-8 text-sm font-bold uppercase tracking-widest text-slate-400 font-ui"
                 x-text="t('Leia a Seguir', 'Read Next')">Read Next</h3>
             <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">

@@ -1,4 +1,4 @@
-<div class="sticky top-24 space-y-12">
+<div class="space-y-10 sm:space-y-12 lg:sticky lg:top-24">
     <!-- Trending / Latest Updates Timeline -->
     <div>
         <div class="flex items-center justify-between mb-8">
@@ -20,7 +20,7 @@
                 <a class="block group-hover:translate-x-1 transition-transform"
                     href="{% url 'news:article_detail' article.slug %}">
                     <h5
-                        class="text-lg font-bold leading-snug text-slate-900 dark:text-white mb-1 group-hover:text-primary transition-colors">
+                        class="text-base sm:text-lg font-bold leading-snug text-slate-900 dark:text-white mb-1 group-hover:text-primary transition-colors">
                         {{ article.title }}
                     </h5>
                     <p class="text-sm text-slate-500 leading-normal line-clamp-2">
@@ -33,7 +33,7 @@
     </div>
 
     <!-- Newsletter Box -->
-    <div class="p-6 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800"
+    <div class="p-5 sm:p-6 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800"
         id="sidebar-newsletter">
         <div class="text-primary mb-3">
             <span class="material-symbols-outlined text-[32px]">mail</span>

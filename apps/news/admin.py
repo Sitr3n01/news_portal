@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin
 
-from .models import Article, ArticleBookmark, ArticleLike, Category, Comment, NewsletterSubscription, Tag
+from .models import Article, ArticleBookmark, ArticleLike, Category, Comment, NewsletterDelivery, NewsletterSubscription, Tag
 
 
 def _csv_safe(value):
@@ -118,7 +118,7 @@ class ArticleAdmin(ModelAdmin):
 
     @admin.action(description='Enviar Newsletter para inscritos')
     def send_newsletter(self, request, queryset):
-        from .newsletter import send_article_newsletter
+        from .newsletter import process_article_newsletter
 
         published = queryset.filter(status=Article.Status.PUBLISHED)
 
@@ -131,13 +131,28 @@ class ArticleAdmin(ModelAdmin):
             return
 
         total_sent = 0
+        total_failed = 0
+        total_skipped = 0
         articles_sent = 0
 
         for article in published:
-            sent = send_article_newsletter(article)
-            if sent > 0:
-                total_sent += sent
+            result = process_article_newsletter(
+                article,
+                retry_failed=True,
+                include_marked_sent=True,
+            )
+            total_sent += result['sent']
+            total_failed += result['failed']
+            total_skipped += result['skipped']
+            if result['sent'] > 0:
                 articles_sent += 1
+
+        if total_failed or total_skipped:
+            self.message_user(
+                request,
+                f'Entregas com atenção: {total_failed} falha(s), {total_skipped} ignorada(s).',
+                messages.WARNING,
+            )
 
         if total_sent > 0:
             self.message_user(
@@ -201,6 +216,32 @@ class NewsletterSubscriptionAdmin(ModelAdmin):
         for sub in queryset:
             writer.writerow([_csv_safe(sub.email), _csv_safe(sub.site.name), sub.created_at, 'Sim' if sub.is_active else 'Não'])
         return response
+
+
+@admin.register(NewsletterDelivery)
+class NewsletterDeliveryAdmin(ModelAdmin):
+    list_display = ['article', 'email', 'status', 'attempts', 'sent_at', 'updated_at']
+    list_filter = ['status', 'article__site', 'sent_at', 'created_at']
+    search_fields = ['email', 'article__title', 'last_error']
+    readonly_fields = ['article', 'subscription', 'email', 'status', 'attempts', 'last_error', 'sent_at', 'created_at', 'updated_at']
+    list_per_page = 50
+
+    fieldsets = [
+        ('Entrega', {
+            'fields': ('article', 'subscription', 'email', 'status', 'attempts', 'sent_at'),
+        }),
+        ('Erro', {
+            'fields': ('last_error',),
+            'classes': ('collapse',),
+        }),
+        ('Auditoria', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',),
+        }),
+    ]
+
+    def has_add_permission(self, request):
+        return False
 
 
 @admin.register(Comment)

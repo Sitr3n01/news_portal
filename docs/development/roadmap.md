@@ -4,7 +4,7 @@
 
 Sistema web unificado que gerencia dois sites independentes de um grupo educacional:
 - **Portal de Notícias** ("The Chronicle") — portal público de notícias. **Quase pronto** — funcional com design aplicado, faltam refinamentos
-- **Site da Escola** — institucional com contratação e contato. **Inacabado** — models e views básicas existem, falta completar templates e design
+- **Site da Escola** — institucional com contratação e contato. **Funcional + CMS** — design completo, backend administrável e dados isolados por site
 - **Dashboard Admin** (Django Unfold) — painel unificado para gerenciar ambos. **Em correção** — dashboard customizado nunca funcionou, sendo reconstruído na Fase 7
 
 Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Único link cruzado: botão na navbar do news → escola.
@@ -133,7 +133,7 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 | 8.2 | Corrigir 7 strings PT-only em `article_card`, `pagination`, `category_detail`, `tag_detail`, `author_detail` | ✅ Concluído |
 | 8.3 | `manage.py check` → 0 erros | ✅ Concluído |
 | 8.4 | **Debug e Correções do Portal de Notícias** (9 bugs corrigidos pelo Gemini) | ✅ Concluído |
-| 8.5 | Polir responsividade mobile (testar 375px, 768px) | ⬜ Pendente |
+| 8.5 | Polir responsividade mobile (testar 375px, 768px) | ✅ Concluído |
 | 8.6 | **Auditoria de Segurança Final** (2ª rodada) | ✅ Concluído |
 
 #### Sub-tarefas da Fase 8.6 — Segurança Final (detalhes no SECURITY_REPORT.md + plano técnico):
@@ -153,16 +153,29 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 | 8.6.D1 | Deletar arquivo `nul` (artefato Windows) | 🔵 LIMPEZA | ✅ |
 | 8.6.D2 | nginx server_name: `example.com` → `_` (catch-all) | 🔵 LIMPEZA | ✅ |
 
-### Fase 9: Site da Escola — Construção Completa ⬜
-> O site da escola está **completamente inacabado**. Tem models e views básicas mas precisa de funcionalidades, templates e design completos.
+### Fase 9: Site da Escola — Construção Completa ✅
+> Site institucional da escola construído com home completa, identidade visual própria, páginas institucionais polidas e integração visual com vagas/contato.
 
 | # | Tarefa | Status |
 |---|--------|--------|
-| 9.1 | Auditar estado atual: listar o que funciona e o que falta | ⬜ Pendente |
-| 9.2 | Completar templates da escola (home, páginas, equipe, depoimentos) | ⬜ Pendente |
-| 9.3 | Integrar hiring (vagas) e contact (formulário) nos templates | ⬜ Pendente |
-| 9.4 | Aplicar design visual distinto (paleta diferente do news) | ⬜ Pendente |
-| 9.5 | Responsividade mobile | ⬜ Pendente |
+| 9.1 | Auditar estado atual: listar o que funciona e o que falta | ✅ Concluído |
+| 9.2 | Completar templates da escola (home, páginas, equipe, depoimentos) | ✅ Concluído |
+| 9.3 | Integrar hiring (vagas) e contact (formulário) nos templates | ✅ Concluído |
+| 9.4 | Aplicar design visual distinto (paleta diferente do news) | ✅ Concluído |
+| 9.5 | Responsividade mobile | ✅ Concluído |
+
+### Fase 9.1: Backend CMS Escola + Isolamento Multi-site ✅
+> Backend do site escolar alinhado ao frontend da Fase 9, com conteúdo editável no Django Unfold, fallbacks seguros e isolamento por `Site`.
+
+| # | Tarefa | Status |
+|---|--------|--------|
+| 9.1A | Criar configuração editável da home escolar (`SchoolHomeConfig`) | ✅ Concluído |
+| 9.1B | Criar cards administráveis por seção (`SchoolFeature`) | ✅ Concluído |
+| 9.1C | Isolar páginas, equipe, depoimentos, departamentos e vagas por site | ✅ Concluído |
+| 9.1D | Atualizar admin PT-BR com filtros, fieldsets e navegação Unfold | ✅ Concluído |
+| 9.1E | Atualizar views/templates para consumir backend com fallbacks seguros | ✅ Concluído |
+| 9.1F | Cobrir isolamento multi-site e conteúdo CMS com testes | ✅ Concluído |
+| 9.1G | Validar quality gate local completo | ✅ Concluído |
 
 ### Fase 10: Hardening para Produção ⬜ (parcial — segurança já coberta)
 | # | Tarefa | Status |
@@ -189,6 +202,7 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 11. **Dashboard via `DASHBOARD_CALLBACK`** — função callback que o Unfold chama para injetar dados no template `admin/index.html` (não usar View class)
 12. **Design CSS puro** — sem depender de ferramentas externas (Stitch/Jules). Tailwind via Unfold, sem CDN extra
 13. **Notas temporárias de tarefa** — manter concisas, sem código inline, e limpar após cada fase
+14. **Conteúdo escolar por site** — modelos públicos com `ForeignKey(Site)` usam `objects` + `on_site`, constraints por site e queries públicas filtradas por `request.site`
 
 ---
 
@@ -251,17 +265,17 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 
 ## Estado Atual
 
-- **Fase:** 8.6 concluída — Auditoria de Segurança Final
-- **Tarefa ativa:** Nenhuma — tudo implementado
-- **Próximo:** 8.5 (responsividade mobile) ou Fase 9 (site da escola)
-- **Bloqueios:** Nenhum. Pendente apenas `makemigrations` + `migrate` para email unique e Page manager
-- **Última atualização:** 2026-02-25
+- **Fase:** 9.1 concluída — Backend CMS Escola + isolamento multi-site
+- **Tarefa ativa:** Nenhuma — Fase 9.1 implementada e verificada
+- **Próximo:** Fase 10 (hardening produção)
+- **Bloqueios:** Nenhum para Fase 9.1. Warnings conhecidos do `django-axes` permanecem como dívida técnica separada.
+- **Última atualização:** 2026-06-02
 
 ### Resumo do estado por área:
 | Área | Estado | Nota |
 |------|--------|------|
-| **Portal de Notícias** | 🟢 Funcional + Seguro | Bugs corrigidos (8.4), segurança auditada em duas rodadas |
+| **Portal de Notícias** | 🟢 Funcional + Seguro + Mobile validado | Bugs corrigidos (8.4), responsividade mobile concluída (8.5), segurança auditada em duas rodadas |
 | **Dashboard Admin** | 🟢 Funcional + Seguro | Export emails restrito, axes ativo, CSRF/session hardened |
-| **Site da Escola** | 🔴 Inacabado | Models/views básicas existem, templates e design incompletos (Fase 9) |
+| **Site da Escola** | 🟢 Funcional + CMS administrável | Home, cards, páginas, equipe, depoimentos, departamentos e vagas integrados ao admin e isolados por site |
 | **Infraestrutura** | 🟢 Hardened | nginx com CSP/headers/rate-limit, Docker non-root, expose vs ports |
 | **Segurança** | 🟢 Auditada 2x | 20+ proteções ativas. Nenhum `\|safe` em templates. Bleach centralizado |

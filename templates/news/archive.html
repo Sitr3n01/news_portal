@@ -3,11 +3,11 @@
 {% block title %}Arquivo {% if month %}{{ month }}/{% endif %}{{ year }} - Portal de Notícias{% endblock %}
 
 {% block content %}
-<div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
-  <div class="flex flex-col lg:flex-row gap-12">
+<div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+  <div class="flex flex-col lg:flex-row gap-10 lg:gap-12">
     <!-- Main Content -->
     <div class="flex-grow lg:w-2/3">
-      <div class="mb-12">
+      <div class="mb-10 sm:mb-12">
         <a href="{% url 'news:list' %}"
           class="inline-flex items-center text-sm font-bold text-primary-600 uppercase tracking-widest hover:text-primary-800 mb-6 transition-colors">
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -15,17 +15,17 @@
           </svg>
           Voltar para Notícias
         </a>
-        <h1 class="text-5xl font-display font-bold text-gray-900 mb-4">
+        <h1 class="text-3xl sm:text-5xl font-display font-bold text-gray-900 dark:text-white mb-4">
           Arquivo: {% if month %}{{ month }}/{% endif %}{{ year }}
         </h1>
-        <p class="text-xl text-gray-600">{{ page_obj.paginator.count }} artigo{{ page_obj.paginator.count|pluralize:"s" }} encontrado{{ page_obj.paginator.count|pluralize:"s" }}.</p>
+        <p class="text-base sm:text-xl text-gray-600 dark:text-slate-300">{{ page_obj.paginator.count }} artigo{{ page_obj.paginator.count|pluralize:"s" }} encontrado{{ page_obj.paginator.count|pluralize:"s" }}.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         {% for article in page_obj %}
         {% include 'news/partials/article_card.html' %}
         {% empty %}
-        <div class="col-span-full text-center py-16 text-gray-500">
+        <div class="col-span-full text-center py-16 text-gray-500 dark:text-slate-400">
           Nenhum artigo encontrado neste período.
         </div>
         {% endfor %}

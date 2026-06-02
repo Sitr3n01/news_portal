@@ -3,8 +3,8 @@
 {% block title %}{{ category.name }} - Portal de Notícias - {{ current_site.name }}{% endblock %}
 
 {% block content %}
-<div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <div class="mb-12 border-b border-gray-200 pb-12">
+<div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+    <div class="mb-10 border-b border-gray-200 pb-10 dark:border-gray-800 sm:mb-12 sm:pb-12">
         <a href="{% url 'news:list' %}"
             class="inline-flex items-center text-sm font-bold text-primary-600 uppercase tracking-widest hover:text-primary-800 mb-6 transition-colors">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -12,14 +12,14 @@
             </svg>
             <span x-text="t('Voltar para Notícias', 'Back to News')">Voltar para Notícias</span>
         </a>
-        <h1 class="text-5xl font-display font-bold text-gray-900 mb-4">{{ category.name }}</h1>
+        <h1 class="text-3xl sm:text-5xl font-display font-bold text-gray-900 dark:text-white mb-4">{{ category.name }}</h1>
         {% if category.description %}
-        <p class="text-xl text-gray-600 max-w-3xl">{{ category.description }}</p>
+        <p class="text-base sm:text-xl text-gray-600 dark:text-slate-300 max-w-3xl">{{ category.description }}</p>
         {% endif %}
-        <p class="text-sm text-gray-400 mt-3">{{ page_obj.paginator.count }} artigo{{ page_obj.paginator.count|pluralize:"s" }} nesta categoria.</p>
+        <p class="text-sm text-gray-400 dark:text-slate-500 mt-3">{{ page_obj.paginator.count }} artigo{{ page_obj.paginator.count|pluralize:"s" }} nesta categoria.</p>
     </div>
 
-    <div class="flex flex-col lg:flex-row gap-12">
+    <div class="flex flex-col lg:flex-row gap-10 lg:gap-12">
         <!-- Articles Grid -->
         <div class="flex-grow lg:w-2/3">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -33,7 +33,7 @@
                                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                     </div>
-                    <h3 class="text-2xl font-display font-bold text-gray-900 mb-2">Categoria Vazia</h3>
+                    <h3 class="text-2xl font-display font-bold text-gray-900 dark:text-white mb-2">Categoria Vazia</h3>
                     <p class="text-gray-500">Ainda não há artigos publicados nesta categoria.</p>
                 </div>
                 {% endfor %}

@@ -1,0 +1,51 @@
+# Segredos e ambiente local — NUNCA na imagem
+.env
+.env.*
+!.env.example
+
+# Virtualenvs (binários de host; quebram/incham a imagem Linux)
+.venv/
+venv/
+env/
+
+# Histórico e metadados de repositório
+.git/
+.github/
+.gitignore
+.gitattributes
+
+# Artefatos de agente/IA e config local de ferramenta
+.claude/
+*.local.md
+
+# Banco de dev e mídia de runtime (vêm de volumes, não da imagem)
+*.sqlite3
+db.sqlite3*
+media/
+
+# Estáticos compilados (regenerados via collectstatic no build)
+staticfiles/
+
+# Caches e bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+.coverage.*
+
+# Documentação (não necessária em runtime)
+docs/
+
+# Binário/config do Tailwind standalone (usado só para gerar o CSS, não em runtime)
+tailwind/bin/
+tools/tailwind/bin/
+
+# Sistema operacional / editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

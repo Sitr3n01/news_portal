@@ -157,6 +157,8 @@ Deploy de produção usa Docker Compose + Nginx + Let's Encrypt. Roteiro complet
 - Emissão de certificado SSL via Certbot
 - Backup diário do PostgreSQL via cron
 
+Antes de publicar, siga o [checklist de go-live](docs/development/go-live-checklist.md).
+
 ---
 
 ## Documentação
@@ -166,6 +168,7 @@ Deploy de produção usa Docker Compose + Nginx + Let's Encrypt. Roteiro complet
 | [docs/development/DEVELOPER_GUIDE.md](docs/development/DEVELOPER_GUIDE.md) | Onboarding para novos devs |
 | [docs/development/TECHNICAL_REFERENCE.md](docs/development/TECHNICAL_REFERENCE.md) | Referência técnica exaustiva (middleware, settings, apps, segurança) |
 | [docs/development/DEPLOY.md](docs/development/DEPLOY.md) | Guia de deploy em produção |
+| [docs/development/go-live-checklist.md](docs/development/go-live-checklist.md) | Checklist de go-live (segredos, e-mail, TLS, verificação final) |
 | [docs/development/roadmap.md](docs/development/roadmap.md) | Plano global e estado atual das fases |
 
 ---

@@ -1,0 +1,25 @@
+<section class="kb-guide-panel" aria-labelledby="kb-guide-resources-title">
+    <div class="kb-guide-panel-header">
+        <div>
+            <p class="kb-eyebrow">Atalhos</p>
+            <h2 id="kb-guide-resources-title">Telas relacionadas</h2>
+        </div>
+    </div>
+
+    <div class="kb-resource-list">
+        {% for group in guide.resources %}
+            <article class="kb-resource-group">
+                <h3>{{ group.title }}</h3>
+                <p>{{ group.description }}</p>
+                <div class="kb-resource-links">
+                    {% for link in group.links %}
+                        <a href="{{ link.url }}" class="kb-action-link">
+                            <span class="material-symbols-outlined" aria-hidden="true">{{ link.icon }}</span>
+                            <span>{{ link.title }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+</section>

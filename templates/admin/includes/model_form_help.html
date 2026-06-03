@@ -1,0 +1,24 @@
+{% with model_admin=adminform.model_admin %}
+    {% if model_admin.ux_form_title %}
+        <section class="kb-model-guide kb-model-guide-form">
+            <div class="kb-model-guide-main">
+                <span class="kb-model-guide-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">{{ model_admin.ux_form_icon }}</span>
+                </span>
+                <div>
+                    <p class="kb-eyebrow">Edição orientada</p>
+                    <h2>{{ model_admin.ux_form_title }}</h2>
+                    <p>{{ model_admin.ux_form_description }}</p>
+                </div>
+            </div>
+
+            {% if model_admin.ux_form_steps %}
+                <ol class="kb-form-step-list">
+                    {% for step in model_admin.ux_form_steps %}
+                        <li>{{ step }}</li>
+                    {% endfor %}
+                </ol>
+            {% endif %}
+        </section>
+    {% endif %}
+{% endwith %}

@@ -1,0 +1,35 @@
+<section class="kb-guide-section" aria-labelledby="kb-guide-workflows-title">
+    <div class="kb-section-header">
+        <div>
+            <p class="kb-eyebrow">Fluxos</p>
+            <h2 id="kb-guide-workflows-title">Trabalho por etapas</h2>
+        </div>
+        <p>Cada card representa uma rotina comum da equipe, com as telas certas na ordem de uso.</p>
+    </div>
+
+    <div class="kb-workflow-grid">
+        {% for workflow in guide.workflows %}
+            <article class="kb-workflow-card kb-tone-{{ workflow.tone }}">
+                <div class="kb-workflow-card-header">
+                    <span class="kb-icon" aria-hidden="true">
+                        <span class="material-symbols-outlined">{{ workflow.icon }}</span>
+                    </span>
+                    <span class="kb-status-pill kb-tone-{{ workflow.tone }}">{{ workflow.status }}</span>
+                </div>
+                <h3>{{ workflow.title }}</h3>
+                <p>{{ workflow.description }}</p>
+
+                {% if workflow.actions %}
+                    <div class="kb-workflow-actions">
+                        {% for action in workflow.actions %}
+                            <a href="{{ action.url }}" class="kb-action-link {% if action.kind == 'primary' %}kb-action-link-primary{% endif %}">
+                                <span class="material-symbols-outlined" aria-hidden="true">{{ action.icon }}</span>
+                                <span>{{ action.title }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </article>
+        {% endfor %}
+    </div>
+</section>

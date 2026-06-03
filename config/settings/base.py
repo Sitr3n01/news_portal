@@ -132,15 +132,25 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ── Django Unfold Admin Configuration ──────────────────────────────────────
+def _admin_has_any(request, *permissions):
+    return request.user.is_superuser or any(request.user.has_perm(permission) for permission in permissions)
+
+
 UNFOLD = {
     'SITE_TITLE': 'News Portal',
     'SITE_HEADER': 'Painel de Administração',
     'SITE_URL': None,  # Removido — links de portal estão na sidebar (Visualizar Portais)
     'SITE_ICON': None,  # Deixar None ou apontar para um favicon estático
+    # Força o tema escuro de fato (antes só o seletor era escondido via CSS, mas o
+    # tema caía em 'auto' e seguia o SO). Com THEME='dark', o Unfold aplica
+    # class="dark" sempre e esconde o seletor — mantém o design system kb- consistente.
+    'THEME': 'dark',
     'SHOW_HISTORY': True,
     'SHOW_VIEW_ON_SITE': True,
     'STYLES': [
         lambda request: '/static/admin/css/overrides.css',
+        lambda request: '/static/admin/css/dashboard.css',
+        lambda request: '/static/admin/css/admin_ux.css',
     ],
     'COLORS': {
         'primary': {
@@ -161,6 +171,60 @@ UNFOLD = {
         'show_search': True,
         'show_all_applications': False,
         'navigation': [
+            {
+                'title': 'Guias de Operação',
+                'separator': False,
+                'items': [
+                    {
+                        'title': 'Guia do Portal Escolar',
+                        'icon': 'school',
+                        'link': reverse_lazy('admin_school_guide'),
+                        'permission': lambda request: _admin_has_any(
+                            request,
+                            'school.view_page',
+                            'school.view_schoolhomeconfig',
+                            'school.view_schoolfeature',
+                            'school.view_teammember',
+                            'school.view_testimonial',
+                            'hiring.view_jobposting',
+                            'hiring.view_department',
+                            'hiring.view_application',
+                            'contact.view_contactinquiry',
+                        ),
+                        'active': lambda request: request.path.startswith('/admin/guias/escola/'),
+                    },
+                    {
+                        'title': 'Guia Editorial',
+                        'icon': 'newspaper',
+                        'link': reverse_lazy('admin_news_guide'),
+                        'permission': lambda request: _admin_has_any(
+                            request,
+                            'news.view_article',
+                            'news.view_category',
+                            'news.view_tag',
+                            'news.view_comment',
+                            'news.view_newslettersubscription',
+                            'news.view_newsletterdelivery',
+                        ),
+                        'active': lambda request: request.path.startswith('/admin/guias/noticias/'),
+                    },
+                    {
+                        'title': 'Guia de Gerenciamento',
+                        'icon': 'admin_panel_settings',
+                        'link': reverse_lazy('admin_management_guide'),
+                        'permission': lambda request: _admin_has_any(
+                            request,
+                            'accounts.view_customuser',
+                            'auth.view_group',
+                            'sites.view_site',
+                            'common.view_siteextension',
+                            'media_library.view_mediafile',
+                            'media_library.view_mediafolder',
+                        ),
+                        'active': lambda request: request.path.startswith('/admin/guias/gerenciamento/'),
+                    },
+                ],
+            },
             {
                 'title': 'Visualizar Portais',
                 'separator': False,
@@ -289,19 +353,37 @@ UNFOLD = {
                         'title': 'Usuários',
                         'icon': 'manage_accounts',
                         'link': reverse_lazy('admin:accounts_customuser_changelist'),
-                        'permission': lambda request: request.user.is_superuser,
+                        'permission': lambda request: _admin_has_any(request, 'accounts.view_customuser'),
+                    },
+                    {
+                        'title': 'Grupos e Permissões',
+                        'icon': 'badge',
+                        'link': reverse_lazy('admin:auth_group_changelist'),
+                        'permission': lambda request: _admin_has_any(request, 'auth.view_group'),
                     },
                     {
                         'title': 'Configurações do Site',
                         'icon': 'settings',
                         'link': reverse_lazy('admin:common_siteextension_changelist'),
-                        'permission': lambda request: request.user.is_superuser,
+                        'permission': lambda request: _admin_has_any(request, 'common.view_siteextension'),
+                    },
+                    {
+                        'title': 'Biblioteca de Mídia',
+                        'icon': 'perm_media',
+                        'link': reverse_lazy('admin:media_library_mediafile_changelist'),
+                        'permission': lambda request: _admin_has_any(request, 'media_library.view_mediafile'),
+                    },
+                    {
+                        'title': 'Pastas de Mídia',
+                        'icon': 'folder',
+                        'link': reverse_lazy('admin:media_library_mediafolder_changelist'),
+                        'permission': lambda request: _admin_has_any(request, 'media_library.view_mediafolder'),
                     },
                     {
                         'title': 'Sites',
                         'icon': 'language',
                         'link': reverse_lazy('admin:sites_site_changelist'),
-                        'permission': lambda request: request.user.is_superuser,
+                        'permission': lambda request: _admin_has_any(request, 'sites.view_site'),
                     },
                 ],
             },
@@ -341,8 +423,9 @@ AXES_FAILURE_LIMIT = 5
 AXES_COOLOFF_TIME = 0.5  # 30 minutos (em horas)
 AXES_LOCKOUT_PARAMETERS = ['ip_address', 'username']
 AXES_RESET_ON_SUCCESS = True
-AXES_PROXY_COUNT = 1
-AXES_META_PRECEDENCE_ORDER = [
+# axes 6+ delega a detecção de IP ao python-ipware (prefixo AXES_IPWARE_*).
+AXES_IPWARE_PROXY_COUNT = 1
+AXES_IPWARE_META_PRECEDENCE_ORDER = [
     'HTTP_X_FORWARDED_FOR',
     'REMOTE_ADDR',
 ]
@@ -360,9 +443,6 @@ CONTENT_SECURITY_POLICY = {
             SELF,
             UNSAFE_INLINE,
             UNSAFE_EVAL,
-            'https://cdn.tailwindcss.com',
-            'https://unpkg.com',
-            'https://cdn.jsdelivr.net',
         ],
         'style-src': [
             SELF,
@@ -376,5 +456,50 @@ CONTENT_SECURITY_POLICY = {
         'base-uri': [SELF],
         'form-action': [SELF],
         'object-src': [NONE],
+    },
+}
+
+# ── Logging (12-factor: stdout/stderr; o orquestrador captura) ──────────────
+LOG_LEVEL = env('LOG_LEVEL', default='INFO')
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {name} {process:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': LOG_LEVEL,
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': env('DJANGO_LOG_LEVEL', default='INFO'),
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'apps': {
+            'handlers': ['console'],
+            'level': LOG_LEVEL,
+            'propagate': False,
+        },
     },
 }

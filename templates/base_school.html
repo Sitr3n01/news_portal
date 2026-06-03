@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}" class="antialiased">
 
@@ -19,8 +20,8 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
 
-    <!-- Tailwind CSS via CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind (engine auto-hospedado e pinado — sem CDN externo) -->
+    <script src="{% static 'js/vendor/tailwind.min.js' %}"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -163,9 +164,9 @@
 
     {% include 'components/footer_school.html' %}
 
-    <!-- HTMX & Alpine.js -->
-    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- HTMX & Alpine.js (vendorizados e pinados) -->
+    <script src="{% static 'js/vendor/htmx.min.js' %}"></script>
+    <script src="{% static 'js/vendor/alpine.min.js' %}"></script>
 
     {% block extra_js %}{% endblock %}
 </body>

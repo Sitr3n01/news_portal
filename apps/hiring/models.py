@@ -19,9 +19,9 @@ def resume_upload_path(instance, filename):
 
 
 class Department(models.Model):
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='departments')
-    name = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='departments', verbose_name='Site')
+    name = models.CharField('Nome', max_length=200)
+    slug = models.SlugField('URL amigável', max_length=200)
 
     objects = models.Manager()
     on_site = CurrentSiteManager()
@@ -50,18 +50,18 @@ class JobPosting(TimeStampedModel, SEOModel):
         OPEN = 'open', 'Aberta'
         CLOSED = 'closed', 'Fechada'
 
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='job_postings')
-    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='jobs')
-    title = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200)
-    description = models.TextField()
-    requirements = models.TextField()
-    employment_type = models.CharField(max_length=20, choices=EmploymentType.choices, default=EmploymentType.FULL_TIME)
-    location = models.CharField(max_length=200, blank=True)
-    salary_range = models.CharField(max_length=200, blank=True)
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT, help_text='Rascunho: não visível. Aberta: visível no site. Fechada: removida do site.')
-    published_at = models.DateTimeField(null=True, blank=True)
-    deadline = models.DateTimeField(null=True, blank=True, help_text='Data limite para receber candidaturas.')
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='job_postings', verbose_name='Site')
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='jobs', verbose_name='Departamento')
+    title = models.CharField('Título', max_length=200)
+    slug = models.SlugField('URL amigável', max_length=200)
+    description = models.TextField('Descrição')
+    requirements = models.TextField('Requisitos')
+    employment_type = models.CharField('Tipo de contratação', max_length=20, choices=EmploymentType.choices, default=EmploymentType.FULL_TIME)
+    location = models.CharField('Local', max_length=200, blank=True)
+    salary_range = models.CharField('Faixa salarial', max_length=200, blank=True)
+    status = models.CharField('Status', max_length=20, choices=Status.choices, default=Status.DRAFT, help_text='Rascunho: não visível. Aberta: visível no site. Fechada: removida do site.')
+    published_at = models.DateTimeField('Publicado em', null=True, blank=True)
+    deadline = models.DateTimeField('Prazo final', null=True, blank=True, help_text='Data limite para receber candidaturas.')
 
     objects = models.Manager()
     on_site = CurrentSiteManager()
@@ -92,15 +92,15 @@ class Application(TimeStampedModel):
         REJECTED = 'rejected', 'Rejeitada'
         ACCEPTED = 'accepted', 'Aceita'
 
-    job = models.ForeignKey(JobPosting, on_delete=models.CASCADE, related_name='applications')
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    email = models.EmailField()
-    phone = models.CharField(max_length=30)
-    cover_letter = models.TextField(blank=True)
-    resume = models.FileField(upload_to=resume_upload_path)
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.RECEIVED, help_text='Acompanhe o progresso desta candidatura.')
-    notes = models.TextField(blank=True, help_text='Notas internas sobre o candidato. Não visíveis ao candidato.')
+    job = models.ForeignKey(JobPosting, on_delete=models.CASCADE, related_name='applications', verbose_name='Vaga')
+    first_name = models.CharField('Nome', max_length=100)
+    last_name = models.CharField('Sobrenome', max_length=100)
+    email = models.EmailField('E-mail')
+    phone = models.CharField('Telefone', max_length=30)
+    cover_letter = models.TextField('Carta de apresentação', blank=True)
+    resume = models.FileField('Currículo', upload_to=resume_upload_path)
+    status = models.CharField('Status', max_length=20, choices=Status.choices, default=Status.RECEIVED, help_text='Acompanhe o progresso desta candidatura.')
+    notes = models.TextField('Notas internas', blank=True, help_text='Notas internas sobre o candidato. Não visíveis ao candidato.')
 
     class Meta:
         ordering = ['-created_at']

@@ -4,6 +4,8 @@ from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
 
+from apps.common import admin_guides
+from apps.common.views import health_check
 from apps.news.sitemaps import ArticleSitemap
 from apps.school.sitemaps import PageSitemap
 
@@ -13,7 +15,23 @@ sitemaps = {
 }
 
 urlpatterns = [
+    path('healthz/', health_check, name='healthz'),
     path('i18n/', include('django.conf.urls.i18n')),
+    path(
+        'admin/guias/escola/',
+        admin.site.admin_view(admin_guides.school_guide),
+        name='admin_school_guide',
+    ),
+    path(
+        'admin/guias/noticias/',
+        admin.site.admin_view(admin_guides.news_guide),
+        name='admin_news_guide',
+    ),
+    path(
+        'admin/guias/gerenciamento/',
+        admin.site.admin_view(admin_guides.management_guide),
+        name='admin_management_guide',
+    ),
     path('admin/', admin.site.urls),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('hiring/', include('apps.hiring.urls', namespace='hiring')),

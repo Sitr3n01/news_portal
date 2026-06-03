@@ -1,0 +1,23 @@
+<header class="kb-guide-hero">
+    <div class="kb-guide-hero-copy">
+        <span class="kb-guide-hero-icon kb-tone-primary" aria-hidden="true">
+            <span class="material-symbols-outlined">{{ guide.icon }}</span>
+        </span>
+        <div>
+            <p class="kb-eyebrow">{{ guide.eyebrow }}</p>
+            <h1>{{ guide.title }}</h1>
+            <p class="kb-subtitle">{{ guide.subtitle }}</p>
+        </div>
+    </div>
+
+    {% if guide.primary_actions %}
+        <nav class="kb-guide-actions" aria-label="Ações principais">
+            {% for action in guide.primary_actions %}
+                <a href="{{ action.url }}" class="kb-button {% if action.kind == 'primary' %}kb-button-primary{% endif %}">
+                    <span class="material-symbols-outlined" aria-hidden="true">{{ action.icon }}</span>
+                    <span>{{ action.title }}</span>
+                </a>
+            {% endfor %}
+        </nav>
+    {% endif %}
+</header>

@@ -6,13 +6,13 @@ from apps.common.models import SEOModel, TimeStampedModel
 
 
 class Page(TimeStampedModel, SEOModel):
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='pages')
-    title = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200)
-    content = models.TextField(blank=True)
-    featured_image = models.ImageField(upload_to='school/pages/', blank=True)
-    is_published = models.BooleanField(default=False)
-    order = models.PositiveIntegerField(default=0)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='pages', verbose_name='Site')
+    title = models.CharField('Título', max_length=200)
+    slug = models.SlugField('URL amigável', max_length=200)
+    content = models.TextField('Conteúdo', blank=True)
+    featured_image = models.ImageField('Imagem destacada', upload_to='school/pages/', blank=True)
+    is_published = models.BooleanField('Publicado', default=False)
+    order = models.PositiveIntegerField('Ordem', default=0)
 
     objects = models.Manager()
     on_site = CurrentSiteManager()
@@ -109,7 +109,7 @@ class SchoolFeature(TimeStampedModel):
         SLATE = 'slate', 'Slate'
         WHITE = 'white', 'Branco'
 
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='school_features')
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='school_features', verbose_name='Site')
     placement = models.CharField('Local de exibição', max_length=20, choices=Placement.choices)
     title = models.CharField('Título', max_length=160)
     description = models.TextField('Descrição')
@@ -133,14 +133,14 @@ class SchoolFeature(TimeStampedModel):
 
 
 class TeamMember(TimeStampedModel):
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='team_members')
-    name = models.CharField(max_length=200)
-    title = models.CharField(max_length=200)
-    photo = models.ImageField(upload_to='school/team/', blank=True)
-    bio = models.TextField(blank=True)
-    email = models.EmailField(blank=True)
-    is_active = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(default=0)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='team_members', verbose_name='Site')
+    name = models.CharField('Nome', max_length=200)
+    title = models.CharField('Cargo ou função', max_length=200)
+    photo = models.ImageField('Foto', upload_to='school/team/', blank=True)
+    bio = models.TextField('Biografia', blank=True)
+    email = models.EmailField('E-mail', blank=True)
+    is_active = models.BooleanField('Ativo', default=True)
+    order = models.PositiveIntegerField('Ordem', default=0)
 
     objects = models.Manager()
     on_site = CurrentSiteManager()
@@ -155,12 +155,12 @@ class TeamMember(TimeStampedModel):
 
 
 class Testimonial(TimeStampedModel):
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='testimonials')
-    name = models.CharField(max_length=200)
-    relationship = models.CharField(max_length=200, blank=True)
-    quote = models.TextField()
-    photo = models.ImageField(upload_to='school/testimonials/', blank=True)
-    is_featured = models.BooleanField(default=False)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='testimonials', verbose_name='Site')
+    name = models.CharField('Nome', max_length=200)
+    relationship = models.CharField('Relação com a escola', max_length=200, blank=True)
+    quote = models.TextField('Depoimento')
+    photo = models.ImageField('Foto', upload_to='school/testimonials/', blank=True)
+    is_featured = models.BooleanField('Destacado', default=False)
 
     objects = models.Manager()
     on_site = CurrentSiteManager()

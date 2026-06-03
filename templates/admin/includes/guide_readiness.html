@@ -1,0 +1,32 @@
+<section class="kb-guide-panel" aria-labelledby="kb-guide-readiness-title">
+    <div class="kb-guide-panel-header">
+        <div>
+            <p class="kb-eyebrow">Checklist</p>
+            <h2 id="kb-guide-readiness-title">Prontidão</h2>
+        </div>
+    </div>
+
+    <ul class="kb-readiness-list">
+        {% for item in guide.readiness %}
+            <li class="kb-readiness-item kb-tone-{{ item.tone }}">
+                {% if item.url %}
+                    <a href="{{ item.url }}">
+                        <span class="material-symbols-outlined" aria-hidden="true">{% if item.done %}check_circle{% else %}radio_button_unchecked{% endif %}</span>
+                        <span>
+                            <strong>{{ item.title }}</strong>
+                            <small>{{ item.hint }}</small>
+                        </span>
+                    </a>
+                {% else %}
+                    <div>
+                        <span class="material-symbols-outlined" aria-hidden="true">{% if item.done %}check_circle{% else %}radio_button_unchecked{% endif %}</span>
+                        <span>
+                            <strong>{{ item.title }}</strong>
+                            <small>{{ item.hint }}</small>
+                        </span>
+                    </div>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</section>

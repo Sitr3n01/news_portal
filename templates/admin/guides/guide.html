@@ -1,0 +1,39 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{{ guide.title }} | {{ site_title }}{% endblock %}
+
+{% block content %}
+<div class="kb-guide kb-guide-{{ guide.area }}">
+    {% include "admin/includes/guide_header.html" %}
+
+    {% if guide.has_access %}
+        {% if guide.metrics %}
+            {% include "admin/includes/guide_metrics.html" %}
+        {% endif %}
+
+        {% if guide.workflows %}
+            {% include "admin/includes/guide_workflows.html" %}
+        {% endif %}
+
+        <div class="kb-guide-two-column">
+            {% if guide.readiness %}
+                {% include "admin/includes/guide_readiness.html" %}
+            {% endif %}
+
+            {% if guide.resources %}
+                {% include "admin/includes/guide_resources.html" %}
+            {% endif %}
+        </div>
+
+        {% if guide.recent_cards %}
+            {% include "admin/includes/guide_recent.html" %}
+        {% endif %}
+    {% else %}
+        <section class="kb-guide-empty kb-empty-state">
+            <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+            <span>{{ guide.empty_message }}</span>
+        </section>
+    {% endif %}
+</div>
+{% endblock %}

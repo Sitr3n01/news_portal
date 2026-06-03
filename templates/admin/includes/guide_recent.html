@@ -1,0 +1,44 @@
+<section class="kb-guide-section" aria-labelledby="kb-guide-recent-title">
+    <div class="kb-section-header">
+        <div>
+            <p class="kb-eyebrow">Acompanhamento</p>
+            <h2 id="kb-guide-recent-title">Itens recentes</h2>
+        </div>
+        <p>Use esta área para retomar registros que costumam exigir decisão rápida.</p>
+    </div>
+
+    <div class="kb-recent-grid">
+        {% for card in guide.recent_cards %}
+            <article class="kb-recent-card">
+                <div class="kb-recent-card-header">
+                    <span class="material-symbols-outlined" aria-hidden="true">{{ card.icon }}</span>
+                    <h3>{{ card.title }}</h3>
+                </div>
+                <ul class="kb-mini-list">
+                    {% for item in card.items %}
+                        <li>
+                            {% if item.url %}
+                                <a href="{{ item.url }}">
+                                    <strong>{{ item.title }}</strong>
+                                    <span>{{ item.meta }}</span>
+                                    <small>{{ item.status }}</small>
+                                </a>
+                            {% else %}
+                                <div>
+                                    <strong>{{ item.title }}</strong>
+                                    <span>{{ item.meta }}</span>
+                                    <small>{{ item.status }}</small>
+                                </div>
+                            {% endif %}
+                        </li>
+                    {% empty %}
+                        <li class="kb-admin-empty-hint">
+                            <span class="material-symbols-outlined" aria-hidden="true">inbox</span>
+                            <span>{{ card.empty }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </article>
+        {% endfor %}
+    </div>
+</section>

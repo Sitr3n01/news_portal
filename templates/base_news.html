@@ -1,3 +1,4 @@
+{% load static %}
 <html class="scroll-smooth">
 
 <head>
@@ -53,8 +54,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet" />
 
-    <!-- Tailwind CSS via CDN -->
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Tailwind (engine auto-hospedado e pinado, com plugins forms+container-queries) -->
+    <script src="{% static 'js/vendor/tailwind.forms-cq.min.js' %}"></script>
     <script>
         tailwind.config = {
             darkMode: "class",
@@ -90,9 +91,9 @@
         }
     </script>
 
-    <!-- HTMX & Alpine.js -->
-    <script src="https://unpkg.com/htmx.org@2.0.0" defer></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- HTMX & Alpine.js (vendorizados e pinados) -->
+    <script src="{% static 'js/vendor/htmx.min.js' %}" defer></script>
+    <script defer src="{% static 'js/vendor/alpine.min.js' %}"></script>
 
     <style>
         /* Base typography */

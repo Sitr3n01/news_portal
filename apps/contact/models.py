@@ -17,13 +17,13 @@ class ContactInquiry(TimeStampedModel):
         SUPPORT = 'support', 'Suporte'
         OTHER = 'other', 'Outro'
 
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='inquiries')
-    name = models.CharField(max_length=200)
-    email = models.EmailField()
-    phone = models.CharField(max_length=30, blank=True)
-    subject = models.CharField(max_length=50, choices=Subject.choices, default=Subject.GENERAL)
-    message = models.TextField()
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.NEW, help_text='Marque como Lida, Respondida ou Arquivada conforme o atendimento.')
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='inquiries', verbose_name='Site')
+    name = models.CharField('Nome', max_length=200)
+    email = models.EmailField('E-mail')
+    phone = models.CharField('Telefone', max_length=30, blank=True)
+    subject = models.CharField('Assunto', max_length=50, choices=Subject.choices, default=Subject.GENERAL)
+    message = models.TextField('Mensagem')
+    status = models.CharField('Status', max_length=20, choices=Status.choices, default=Status.NEW, help_text='Marque como Lida, Respondida ou Arquivada conforme o atendimento.')
 
     class Meta:
         ordering = ['-created_at']

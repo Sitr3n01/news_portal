@@ -1,0 +1,21 @@
+{% with model_admin=adminform.model_admin %}
+    {% if model_admin.ux_after_save_actions %}
+        <section class="kb-form-next-steps">
+            <div>
+                <p class="kb-eyebrow">Próximos passos</p>
+                <h2>{{ model_admin.ux_after_save_title }}</h2>
+                {% if model_admin.ux_after_save_description %}
+                    <p>{{ model_admin.ux_after_save_description }}</p>
+                {% endif %}
+            </div>
+            <div class="kb-form-next-actions">
+                {% for action in model_admin.ux_after_save_actions %}
+                    <a href="{{ action.url }}" class="kb-action-link">
+                        <span class="material-symbols-outlined" aria-hidden="true">{{ action.icon }}</span>
+                        <span>{{ action.label }}</span>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+{% endwith %}

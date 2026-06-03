@@ -1,0 +1,40 @@
+{% with model_admin=cl.model_admin %}
+    {% if model_admin.ux_list_title %}
+        <section class="kb-model-guide kb-model-guide-list">
+            <div class="kb-model-guide-main">
+                <span class="kb-model-guide-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">{{ model_admin.ux_list_icon }}</span>
+                </span>
+                <div>
+                    <p class="kb-eyebrow">Rotina da tela</p>
+                    <h2>{{ model_admin.ux_list_title }}</h2>
+                    <p>{{ model_admin.ux_list_description }}</p>
+                </div>
+            </div>
+
+            {% if model_admin.ux_list_actions or model_admin.ux_list_filters %}
+                <div class="kb-model-guide-actions">
+                    {% for action in model_admin.ux_list_actions %}
+                        <a href="{{ action.url }}" class="kb-button {% if action.kind == 'primary' %}kb-button-primary{% endif %}">
+                            <span class="material-symbols-outlined" aria-hidden="true">{{ action.icon }}</span>
+                            <span>{{ action.label }}</span>
+                        </a>
+                    {% endfor %}
+                    {% for filter in model_admin.ux_list_filters %}
+                        <a href="{{ filter.url }}" class="kb-chip">
+                            <span class="material-symbols-outlined" aria-hidden="true">{{ filter.icon }}</span>
+                            <span>{{ filter.label }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    {% if cl.result_count == 0 and model_admin.ux_empty_message %}
+        <div class="kb-admin-empty-hint kb-admin-empty-wide">
+            <span class="material-symbols-outlined" aria-hidden="true">inbox</span>
+            <span>{{ model_admin.ux_empty_message }}</span>
+        </div>
+    {% endif %}
+{% endwith %}

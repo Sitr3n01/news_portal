@@ -1,0 +1,24 @@
+<section class="kb-guide-section" aria-labelledby="kb-guide-metrics-title">
+    <div class="kb-section-header">
+        <div>
+            <p class="kb-eyebrow">Resumo</p>
+            <h2 id="kb-guide-metrics-title">Estado atual</h2>
+        </div>
+        <p>Indicadores para decidir o próximo passo sem procurar em várias telas.</p>
+    </div>
+
+    <div class="kb-guide-metric-grid">
+        {% for metric in guide.metrics %}
+            <article class="kb-guide-metric kb-tone-{{ metric.tone }}">
+                <span class="kb-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">{{ metric.icon }}</span>
+                </span>
+                <div>
+                    <strong>{{ metric.value }}</strong>
+                    <span>{{ metric.title }}</span>
+                    <small>{{ metric.hint }}</small>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+</section>

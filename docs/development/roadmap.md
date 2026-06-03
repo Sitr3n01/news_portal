@@ -5,7 +5,7 @@
 Sistema web unificado que gerencia dois sites independentes de um grupo educacional:
 - **Portal de Notícias** ("The Chronicle") — portal público de notícias. **Quase pronto** — funcional com design aplicado, faltam refinamentos
 - **Site da Escola** — institucional com contratação e contato. **Funcional + CMS** — design completo, backend administrável e dados isolados por site
-- **Dashboard Admin** (Django Unfold) — painel unificado para gerenciar ambos. **Em correção** — dashboard customizado nunca funcionou, sendo reconstruído na Fase 7
+- **Dashboard Admin** (Django Unfold) — painel unificado para gerenciar ambos. **Funcional + UX operacional completa** — dashboard, guias por área, listas/formulários orientados a tarefa e perfis administrativos por função
 
 Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Único link cruzado: botão na navbar do news → escola.
 
@@ -177,13 +177,59 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 | 9.1F | Cobrir isolamento multi-site e conteúdo CMS com testes | ✅ Concluído |
 | 9.1G | Validar quality gate local completo | ✅ Concluído |
 
-### Fase 10: Hardening para Produção ⬜ (parcial — segurança já coberta)
+### Fase 10: Hardening para Produção ⬜
+> Segurança da aplicação já foi auditada na Fase 8.6. Esta fase fecha prontidão operacional: experiência de erro, logs, backup, configuração final e validação de deploy.
+
 | # | Tarefa | Status |
 |---|--------|--------|
-| 10.1 | Páginas de erro customizadas (404, 500) | ⬜ Pendente |
-| 10.2 | Monitoramento e logging | ⬜ Pendente |
-| 10.3 | Backup e recovery de dados | ⬜ Pendente |
-| 10.4 | Revisão de segurança (CSRF, XSS, headers) | ✅ Coberta pela Fase 8.6 |
+| 10.1 | Criar páginas de erro customizadas para 404, 500, 403 e 400 com identidade visual dos portais | ⬜ Pendente |
+| 10.2 | Configurar logging de produção com rotação, níveis por módulo e captura de erros críticos | ⬜ Pendente |
+| 10.3 | Definir monitoramento mínimo: healthcheck HTTP, status do container, espaço em disco e falhas de e-mail/newsletter | ⬜ Pendente |
+| 10.4 | Criar rotina de backup: dump PostgreSQL, cópia de `media/`, retenção e local de armazenamento | ⬜ Pendente |
+| 10.5 | Documentar e testar restore completo em ambiente local/staging com banco e arquivos de mídia | ⬜ Pendente |
+| 10.6 | Revisar configuração final de produção: `DEBUG=False`, `ALLOWED_HOSTS`, HTTPS, cookies seguros, `CSRF_TRUSTED_ORIGINS` e variáveis SMTP | ⬜ Pendente |
+| 10.7 | Validar pipeline de deploy: migrations, collectstatic, containers, Nginx, headers e rotas públicas/admin | ⬜ Pendente |
+| 10.8 | Criar checklist de go-live e runbook operacional em `docs/development/DEPLOY.md` | ⬜ Pendente |
+| 10.9 | Revisão de segurança final (CSRF, XSS, headers, uploads e permissões) | ✅ Coberta pela Fase 8.6; revisar apenas se houver mudança estrutural |
+
+#### Critérios de aceite da Fase 10
+- Produção sobe com `docker compose` sem depender de ferramentas locais.
+- Rotas `/`, `/news/`, `/admin/`, `sitemap.xml` e fluxos principais respondem corretamente.
+- Erros 404/500 exibem páginas próprias, sem stack trace para usuário final.
+- Logs e backups têm instruções claras de operação e recuperação.
+- Restore de banco e mídia foi testado pelo menos uma vez.
+- Checklist de go-live cobre DNS, HTTPS, e-mail, superusuário, Site Framework e smoke tests.
+
+### Fase 11: Go-live e Operação Inicial ⬜
+> Fase pós-hardening para colocar o projeto em uso real, validar conteúdo final e acompanhar os primeiros dias de operação.
+
+| # | Tarefa | Status |
+|---|--------|--------|
+| 11.1 | Revisar conteúdo inicial dos dois portais: textos, imagens, SEO e links internos | ⬜ Pendente |
+| 11.2 | Criar usuários/grupos reais do admin com permissões por área | ⬜ Pendente |
+| 11.3 | Testar fluxos reais: contato, candidatura, newsletter, comentário, login e reset de senha | ⬜ Pendente |
+| 11.4 | Executar validação responsiva final em mobile, tablet e desktop nos dois portais | ⬜ Pendente |
+| 11.5 | Acompanhar logs, backups e entregas de e-mail nos primeiros dias pós-publicação | ⬜ Pendente |
+
+### Fase 12: UX Operacional do Admin ✅
+> Camada operacional sobre Django Admin + Unfold para equipe não técnica gerenciar escola, notícias e sistema sem navegar por telas soltas.
+
+| # | Tarefa | Status |
+|---|--------|--------|
+| 12.1 | Criar guias autenticados `/admin/guias/escola/`, `/admin/guias/noticias/`, `/admin/guias/gerenciamento/` | ✅ Concluído |
+| 12.2 | Adicionar guias na dashboard e na sidebar como entradas principais | ✅ Concluído |
+| 12.3 | Criar templates reutilizáveis de cabeçalho, fluxos, checklist, empty states e próximos passos | ✅ Concluído |
+| 12.4 | Criar `static/admin/css/admin_ux.css` reaproveitando tokens `.kb-*` e Material Symbols | ✅ Concluído |
+| 12.5 | Refinar ModelAdmins com copy contextual, filtros rápidos, abas, radio fields e aviso de formulário não salvo | ✅ Concluído |
+| 12.6 | Criar perfis administrativos iniciais: Administrador Escolar, Editor de Notícias, Contratações e Administrador Geral | ✅ Concluído |
+| 12.7 | Traduzir e integrar Biblioteca de Mídia à navegação operacional | ✅ Concluído |
+| 12.8 | Validar `manage.py check`, `makemigrations --check`, testes automatizados e responsividade em 768px/390px | ✅ Concluído |
+
+#### Validação da Fase 12
+- `python manage.py check` → 0 erros; mantém apenas warnings conhecidos do `django-axes`.
+- `python manage.py makemigrations --check --dry-run` → sem mudanças pendentes.
+- `python -m pytest` → 36 testes passando.
+- Browser local validado em desktop, 768px e 390px para dashboard, guias e formulário de artigo.
 
 ---
 
@@ -265,8 +311,8 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 
 ## Estado Atual
 
-- **Fase:** 9.1 concluída — Backend CMS Escola + isolamento multi-site
-- **Tarefa ativa:** Nenhuma — Fase 9.1 implementada e verificada
+- **Fase:** 12 concluída — UX Operacional do Admin
+- **Tarefa ativa:** Nenhuma — guias administrativos, perfis e ModelAdmins operacionais concluídos e verificados
 - **Próximo:** Fase 10 (hardening produção)
 - **Bloqueios:** Nenhum para Fase 9.1. Warnings conhecidos do `django-axes` permanecem como dívida técnica separada.
 - **Última atualização:** 2026-06-02
@@ -275,7 +321,7 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 | Área | Estado | Nota |
 |------|--------|------|
 | **Portal de Notícias** | 🟢 Funcional + Seguro + Mobile validado | Bugs corrigidos (8.4), responsividade mobile concluída (8.5), segurança auditada em duas rodadas |
-| **Dashboard Admin** | 🟢 Funcional + Seguro | Export emails restrito, axes ativo, CSRF/session hardened |
+| **Dashboard Admin** | 🟢 Funcional + Seguro + UX operacional completa | Dashboard com guias por área, telas orientadas a tarefa, perfis administrativos e biblioteca de mídia em PT-BR |
 | **Site da Escola** | 🟢 Funcional + CMS administrável | Home, cards, páginas, equipe, depoimentos, departamentos e vagas integrados ao admin e isolados por site |
 | **Infraestrutura** | 🟢 Hardened | nginx com CSP/headers/rate-limit, Docker non-root, expose vs ports |
 | **Segurança** | 🟢 Auditada 2x | 20+ proteções ativas. Nenhum `\|safe` em templates. Bleach centralizado |

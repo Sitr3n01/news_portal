@@ -9,6 +9,16 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # Settings de teste herdam base.py, que lê SECRET_KEY/DB_* do ambiente no
+    # import. Compartilhado por todos os steps (collectstatic e pytest).
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.test
+      SECRET_KEY: ci-test-secret-key-not-for-production
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: news_portal_test
+      DB_USER: news_portal_user
+      DB_PASSWORD: news_portal_pass
     services:
       postgres:
         image: postgres:16-alpine
@@ -45,20 +55,9 @@ jobs:
     # templates for the vendored JS) resolves during template rendering in
     # tests — CompressedManifestStaticFilesStorage needs it.
     - name: Collect Static Files
-      env:
-        DJANGO_SETTINGS_MODULE: config.settings.test
-        SECRET_KEY: ci-test-secret-key-not-for-production
       run: |
         python manage.py collectstatic --noinput
 
     - name: Run Tests
-      env:
-        DJANGO_SETTINGS_MODULE: config.settings.test
-        SECRET_KEY: ci-test-secret-key-not-for-production
-        DB_HOST: localhost
-        DB_PORT: 5432
-        DB_NAME: news_portal_test
-        DB_USER: news_portal_user
-        DB_PASSWORD: news_portal_pass
       run: |
         pytest

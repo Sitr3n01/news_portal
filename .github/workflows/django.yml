@@ -41,6 +41,16 @@ jobs:
       run: |
         ruff check .
         
+    # Builds the staticfiles manifest so {% static %} (used by the base
+    # templates for the vendored JS) resolves during template rendering in
+    # tests — CompressedManifestStaticFilesStorage needs it.
+    - name: Collect Static Files
+      env:
+        DJANGO_SETTINGS_MODULE: config.settings.test
+        SECRET_KEY: ci-test-secret-key-not-for-production
+      run: |
+        python manage.py collectstatic --noinput
+
     - name: Run Tests
       env:
         DJANGO_SETTINGS_MODULE: config.settings.test

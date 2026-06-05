@@ -315,12 +315,12 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 - **Tarefa ativa:** Nenhuma — guias administrativos, perfis e ModelAdmins operacionais concluídos e verificados
 - **Próximo:** Fase 10 (hardening produção)
 - **Bloqueios:** Nenhum para Fase 9.1. Warnings conhecidos do `django-axes` permanecem como dívida técnica separada.
-- **Última atualização:** 2026-06-02
+- **Última atualização:** 2026-06-05
 
 ### Resumo do estado por área:
 | Área | Estado | Nota |
 |------|--------|------|
-| **Portal de Notícias** | 🟢 Funcional + Seguro + Mobile validado | Bugs corrigidos (8.4), responsividade mobile concluída (8.5), segurança auditada em duas rodadas |
+| **Portal de Notícias** | 🟢 Funcional + Seguro + Responsivo validado | Bugs corrigidos (8.4), mobile concluído (8.5), refinamento desktop/ultrawide, Turnstile e redes sociais de rodapé segregadas por portal em 2026-06-05 |
 | **Dashboard Admin** | 🟢 Funcional + Seguro + UX operacional completa | Dashboard com guias por área, telas orientadas a tarefa, perfis administrativos e biblioteca de mídia em PT-BR |
 | **Site da Escola** | 🟢 Funcional + CMS administrável | Home, cards, páginas, equipe, depoimentos, departamentos e vagas integrados ao admin e isolados por site |
 | **Infraestrutura** | 🟢 Hardened | nginx com CSP/headers/rate-limit, Docker non-root, expose vs ports |

@@ -5,7 +5,7 @@ from django.utils.html import format_html
 from django.utils.text import format_lazy
 from unfold.admin import ModelAdmin
 
-from apps.common.admin_mixins import AdminUXMixin
+from apps.common.admin_mixins import AdminUXMixin, SuperuserOnlyAdminMixin
 
 from .models import Article, ArticleBookmark, ArticleLike, Category, Comment, NewsletterDelivery, NewsletterSubscription, Tag
 
@@ -468,7 +468,7 @@ class CommentAdmin(AdminUXMixin, ModelAdmin):
 
 
 @admin.register(ArticleLike)
-class ArticleLikeAdmin(ModelAdmin):
+class ArticleLikeAdmin(SuperuserOnlyAdminMixin, ModelAdmin):
     list_display = ['article', 'user', 'ip_address', 'created_at']
     list_filter = ['created_at']
     search_fields = ['article__title', 'user__username', 'ip_address']
@@ -476,7 +476,7 @@ class ArticleLikeAdmin(ModelAdmin):
 
 
 @admin.register(ArticleBookmark)
-class ArticleBookmarkAdmin(ModelAdmin):
+class ArticleBookmarkAdmin(SuperuserOnlyAdminMixin, ModelAdmin):
     list_display = ['user', 'article', 'created_at']
     list_filter = ['created_at']
     search_fields = ['user__username', 'article__title']

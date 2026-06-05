@@ -546,17 +546,17 @@
     x-data="{
         theme: localStorage.getItem('theme') || 'light',
         lang: localStorage.getItem('lang') || 'pt',
-        t(pt, en) { return this.lang === 'en' ? en : pt; }
+        t(pt, en) { return this.lang === 'en' && en ? en : pt; }
     }" x-init="
         document.documentElement.classList.toggle('dark', theme === 'dark');
-        document.documentElement.lang = lang;
+        document.documentElement.lang = lang === 'en' ? 'en' : 'pt-BR';
         $watch('theme', val => {
             localStorage.setItem('theme', val);
             document.documentElement.classList.toggle('dark', val === 'dark');
         });
         $watch('lang', val => {
             localStorage.setItem('lang', val);
-            document.documentElement.lang = val;
+            document.documentElement.lang = val === 'en' ? 'en' : 'pt-BR';
         });
     ">
 

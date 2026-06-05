@@ -18,3 +18,22 @@ class AdminUXMixin:
     ux_after_save_title = 'Depois de salvar'
     ux_after_save_description = ''
     ux_after_save_actions = []
+
+
+class SuperuserOnlyAdminMixin:
+    """Guarda recursos fora do front atual sem remover modelos ou dados."""
+
+    def has_module_permission(self, request):
+        return request.user.is_superuser
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def has_add_permission(self, request):
+        return request.user.is_superuser
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser

@@ -1,12 +1,9 @@
 <header x-data="{ mobileMenuOpen: false }"
     class="sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800 transition-colors duration-200">
-    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+    <div class="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
         <!-- Logo Section -->
         <div class="flex min-w-0 items-center gap-3">
             <a href="{% url 'news:list' %}" class="flex min-w-0 items-center gap-3 group">
-                <div class="shrink-0 text-primary group-hover:text-primary/80 transition-colors">
-                    <span class="material-symbols-outlined text-[28px]">newspaper</span>
-                </div>
                 <h1
                     class="min-w-0 max-w-[9rem] truncate text-lg font-bold leading-none text-slate-900 transition-colors group-hover:text-primary dark:text-white sm:max-w-[18rem] sm:text-xl md:max-w-none md:text-2xl">
                     {{ news_portal_name }}

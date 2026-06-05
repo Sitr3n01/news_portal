@@ -1,6 +1,7 @@
 import pytest
 from django.contrib.sites.models import Site
 from django.urls import reverse
+from django.utils.html import escapejs
 
 from apps.school.models import Page, SchoolFeature, SchoolHomeConfig, TeamMember
 from apps.school.models import Testimonial as SchoolTestimonial
@@ -47,6 +48,94 @@ def test_school_homepage_uses_cms_backend_content(client, current_site):
 
 
 @pytest.mark.django_db
+def test_school_homepage_exposes_bilingual_cms_content(client, current_site):
+    SchoolHomeConfig.objects.update_or_create(
+        site=current_site,
+        defaults={
+            'hero_title': 'Home em português',
+            'hero_title_en': 'Editable English home',
+            'hero_subtitle': 'Texto principal em português.',
+            'hero_subtitle_en': 'Main English text.',
+            'proposal_description': 'Descrição em português.',
+            'proposal_description_en': 'English proposal description.',
+        },
+    )
+    SchoolFeature.objects.create(
+        site=current_site,
+        placement=SchoolFeature.Placement.TRUST,
+        title='Bloco em português',
+        title_en='English feature block',
+        description='Descrição do bloco em português.',
+        description_en='English feature description.',
+    )
+    SchoolTestimonial.objects.create(
+        site=current_site,
+        name='Aluno Teste',
+        relationship='Aluno',
+        relationship_en='Student',
+        quote='Depoimento em português.',
+        quote_en='English testimonial quote.',
+        is_featured=True,
+    )
+
+    response = client.get(reverse('school:home'))
+
+    content = response.content.decode()
+    assert response.status_code == 200
+    assert 'Editable English home' in content
+    assert 'English proposal description.' in content
+    assert 'English feature block' in content
+    assert 'English testimonial quote.' in content
+    assert 'Student' in content
+
+
+@pytest.mark.django_db
+def test_school_homepage_bilingual_fields_fall_back_to_portuguese(client, current_site):
+    SchoolHomeConfig.objects.update_or_create(
+        site=current_site,
+        defaults={
+            'hero_title': 'Custom PT fallback title',
+            'hero_title_en': '',
+        },
+    )
+    SchoolFeature.objects.create(
+        site=current_site,
+        placement=SchoolFeature.Placement.TRUST,
+        title='Custom PT fallback block',
+        title_en='',
+        description='Custom PT fallback description.',
+        description_en='',
+    )
+
+    response = client.get(reverse('school:home'))
+
+    content = response.content.decode()
+    assert response.status_code == 200
+    assert "t('Custom PT fallback title', 'Custom PT fallback title')" in content
+    assert "t('Custom PT fallback block', 'Custom PT fallback block')" in content
+
+
+@pytest.mark.django_db
+def test_school_homepage_exposes_legacy_communicator_translation(client, current_site):
+    description_en = 'A 420-hour course for people who want to become professionals in communication.'
+    SchoolFeature.objects.create(
+        site=current_site,
+        placement=SchoolFeature.Placement.LIFE,
+        title='Comunicador',
+        title_en='Communicator',
+        description='Curso de 420 horas para quem quer se profissionalizar na área de comunicação.',
+        description_en=description_en,
+    )
+
+    response = client.get(reverse('school:home'))
+
+    content = response.content.decode()
+    assert response.status_code == 200
+    assert 'Communicator' in content
+    assert escapejs(description_en) in content
+
+
+@pytest.mark.django_db
 def test_school_homepage_does_not_leak_other_site_content(client, current_site):
     other_site = Site.objects.create(domain='other.testserver', name='Outra Escola')
     SchoolFeature.objects.create(
@@ -78,6 +167,20 @@ def test_school_homepage_lists_current_course_cards(client, current_site):
     assert 'Apresentação de Palco e Eventos' in content
     assert 'Espanhol' in content
     assert 'Comunicação Destravada' in content
+    assert 'Professional Communicator' in content
+    assert 'Unlocked Communication' in content
+
+
+@pytest.mark.django_db
+def test_school_homepage_renders_kelly_intro_block(client, current_site):
+    response = client.get(reverse('school:home'))
+
+    content = response.content.decode()
+    assert response.status_code == 200
+    assert 'Kelly Farias, CEO da Komuniki' in content
+    assert 'Jornalista, atriz, radialista' in content
+    assert 'Kelly Farias, CEO of Komuniki' in content
+    assert 'images/kelly-farias-komuniki.jpeg' in content
 
 
 @pytest.mark.django_db
@@ -88,6 +191,22 @@ def test_school_team_page_redirects_to_news_blog(client, current_site):
 
     assert response.status_code == 302
     assert response['Location'] == reverse('news:list')
+
+
+@pytest.mark.django_db
+def test_school_privacy_page_renders_transparent_bilingual_policy(client, current_site):
+    response = client.get(reverse('school:privacy'))
+
+    content = response.content.decode()
+    assert response.status_code == 200
+    assert 'Como a Komuniki trata dados no site' in content
+    assert 'How Komuniki handles data on this site' in content
+    assert 'Dados enviados por formulários' in content
+    assert 'Data sent through forms' in content
+    assert 'Registros técnicos e compartilhamento' in content
+    assert 'Technical logs and sharing' in content
+    assert 'Retenção, correção e remoção' in content
+    assert 'Retention, correction and deletion' in content
 
 
 @pytest.mark.django_db

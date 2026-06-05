@@ -55,8 +55,8 @@ def dashboard_callback(request, context):
     """Enriquece o contexto do admin index com stats dos portais."""
     from apps.common.models import SiteExtension
     from apps.contact.models import ContactInquiry
-    from apps.hiring.models import Application, JobPosting
     from apps.news.models import Article, Comment, NewsletterDelivery, NewsletterSubscription
+    from apps.school.models import Page, SchoolFeature, SchoolHomeConfig, Testimonial
 
     user = request.user
     now = timezone.now()
@@ -71,17 +71,28 @@ def dashboard_callback(request, context):
     def _count(permission, queryset):
         return queryset.count() if _can(user, permission) else 0
 
-    open_jobs = _count(
-        'hiring.view_jobposting',
-        JobPosting.objects.filter(status=JobPosting.Status.OPEN),
-    )
-    pending_applications = _count(
-        'hiring.view_application',
-        Application.objects.filter(status=Application.Status.RECEIVED),
-    )
     unread_messages = _count(
         'contact.view_contactinquiry',
         ContactInquiry.objects.filter(status=ContactInquiry.Status.NEW),
+    )
+    home_configs = _count(
+        'school.view_schoolhomeconfig',
+        SchoolHomeConfig.objects.filter(is_active=True),
+    )
+    published_courses = _count(
+        'school.view_page',
+        Page.objects.filter(slug='cursos', is_published=True),
+    )
+    active_features = _count(
+        'school.view_schoolfeature',
+        SchoolFeature.objects.filter(
+            is_active=True,
+            placement__in=[SchoolFeature.Placement.TRUST, SchoolFeature.Placement.LIFE],
+        ),
+    )
+    featured_testimonials = _count(
+        'school.view_testimonial',
+        Testimonial.objects.filter(is_featured=True),
     )
 
     published_articles = _count(
@@ -174,17 +185,6 @@ def dashboard_callback(request, context):
         ),
         _metric(
             user,
-            'hiring.view_application',
-            'Candidaturas recebidas',
-            pending_applications,
-            'description',
-            'admin:hiring_application_changelist',
-            tone='warning' if pending_applications else 'neutral',
-            hint='Aguardando análise' if pending_applications else 'Sem novas candidaturas',
-            query={'status__exact': Application.Status.RECEIVED},
-        ),
-        _metric(
-            user,
             'news.view_comment',
             'Comentários para revisar',
             pending_comments,
@@ -214,25 +214,43 @@ def dashboard_callback(request, context):
     school_metrics = _visible([
         _metric(
             user,
-            'hiring.view_jobposting',
-            'Vagas abertas',
-            open_jobs,
-            'work',
-            'admin:hiring_jobposting_changelist',
-            tone='primary' if open_jobs else 'neutral',
-            hint='Disponíveis no site' if open_jobs else 'Nenhuma vaga aberta',
-            query={'status__exact': JobPosting.Status.OPEN},
+            'school.view_schoolhomeconfig',
+            'Home ativa',
+            home_configs,
+            'home',
+            'admin:school_schoolhomeconfig_changelist',
+            tone='success' if home_configs else 'warning',
+            hint='Configuração principal',
         ),
         _metric(
             user,
-            'hiring.view_application',
-            'Candidaturas recebidas',
-            pending_applications,
-            'person_add',
-            'admin:hiring_application_changelist',
-            tone='warning' if pending_applications else 'neutral',
-            hint='Aguardando análise' if pending_applications else 'Sem novas candidaturas',
-            query={'status__exact': Application.Status.RECEIVED},
+            'school.view_page',
+            'Página Cursos',
+            published_courses,
+            'article',
+            'admin:school_page_changelist',
+            tone='primary' if published_courses else 'warning',
+            hint='Link público da navegação',
+        ),
+        _metric(
+            user,
+            'school.view_schoolfeature',
+            'Blocos ativos',
+            active_features,
+            'auto_awesome',
+            'admin:school_schoolfeature_changelist',
+            tone='primary' if active_features else 'neutral',
+            hint='Home Komuniki',
+        ),
+        _metric(
+            user,
+            'school.view_testimonial',
+            'Depoimentos',
+            featured_testimonials,
+            'format_quote',
+            'admin:school_testimonial_changelist',
+            tone='primary' if featured_testimonials else 'neutral',
+            hint='Destacados na home',
         ),
         _metric(
             user,
@@ -333,24 +351,13 @@ def dashboard_callback(request, context):
             'contact.view_contactinquiry',
             query={'status__exact': ContactInquiry.Status.NEW},
         ),
-        _link(
-            user,
-            'Candidaturas',
-            'description',
-            'admin:hiring_application_changelist',
-            'hiring.view_application',
-            query={'status__exact': Application.Status.RECEIVED},
-        ),
     ])
 
     school_links = _visible([
-        _link(user, 'Páginas', 'article', 'admin:school_page_changelist', 'school.view_page'),
-        _link(user, 'Home escolar', 'home', 'admin:school_schoolhomeconfig_changelist', 'school.view_schoolhomeconfig'),
-        _link(user, 'Diferenciais', 'auto_awesome', 'admin:school_schoolfeature_changelist', 'school.view_schoolfeature'),
-        _link(user, 'Equipe', 'group', 'admin:school_teammember_changelist', 'school.view_teammember'),
+        _link(user, 'Página Cursos', 'article', 'admin:school_page_changelist', 'school.view_page'),
+        _link(user, 'Home Komuniki', 'home', 'admin:school_schoolhomeconfig_changelist', 'school.view_schoolhomeconfig'),
+        _link(user, 'Blocos da Home', 'auto_awesome', 'admin:school_schoolfeature_changelist', 'school.view_schoolfeature'),
         _link(user, 'Depoimentos', 'format_quote', 'admin:school_testimonial_changelist', 'school.view_testimonial'),
-        _link(user, 'Vagas', 'work', 'admin:hiring_jobposting_changelist', 'hiring.view_jobposting'),
-        _link(user, 'Candidaturas', 'description', 'admin:hiring_application_changelist', 'hiring.view_application'),
         _link(user, 'Mensagens', 'contact_mail', 'admin:contact_contactinquiry_changelist', 'contact.view_contactinquiry'),
     ])
 
@@ -365,11 +372,11 @@ def dashboard_callback(request, context):
 
     guide_cards = _visible([
         {
-            'title': 'Guia do Portal Escolar',
+            'title': 'Guia Komuniki',
             'icon': 'school',
             'url': _admin_url('admin_school_guide'),
             'tone': 'primary',
-            'hint': 'Conteúdo institucional, equipe, vagas, candidaturas e mensagens em um fluxo guiado.',
+            'hint': 'Home, cursos, blocos, depoimentos e mensagens em um fluxo guiado.',
         } if _can_any(user, SCHOOL_GUIDE_PERMISSIONS) else None,
         {
             'title': 'Guia Editorial',
@@ -386,20 +393,6 @@ def dashboard_callback(request, context):
             'hint': 'Usuários, permissões, sites, mídia, remetentes e saúde do sistema com linguagem operacional.',
         } if _can_any(user, MANAGEMENT_GUIDE_PERMISSIONS) else None,
     ])
-
-    recent_applications = []
-    if _can(user, 'hiring.view_application'):
-        recent_applications = [
-            {
-                'title': f'{application.first_name} {application.last_name}',
-                'meta': f'Candidatura para {application.job.title} · {application.job.site.name}',
-                'status': application.get_status_display(),
-                'when': application.created_at,
-                'url': _admin_url('admin:hiring_application_change', args=[application.pk]),
-                'action': 'Ver',
-            }
-            for application in Application.objects.select_related('job', 'job__site').order_by('-created_at')[:5]
-        ]
 
     recent_articles = []
     if _can(user, 'news.view_article'):
@@ -430,13 +423,6 @@ def dashboard_callback(request, context):
         ]
 
     activity_cards = _visible([
-        {
-            'title': 'Últimas candidaturas',
-            'icon': 'description',
-            'url': _admin_url('admin:hiring_application_changelist'),
-            'items': recent_applications,
-            'empty': 'Nenhuma candidatura recente',
-        } if _can(user, 'hiring.view_application') else None,
         {
             'title': 'Últimos artigos',
             'icon': 'newspaper',

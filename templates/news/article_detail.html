@@ -356,6 +356,7 @@
                     <form hx-post="{% url 'news:newsletter_subscribe' %}" hx-target="this" hx-swap="outerHTML"
                         class="mx-auto flex max-w-md flex-col gap-3">
                         {% csrf_token %}
+                        <input type="hidden" name="turnstile_size" value="flexible">
                         <div class="flex flex-col gap-3 sm:flex-row">
                             <input name="email" type="email" required
                                 :placeholder="t('Insira seu endereço de e-mail', 'Enter your email address')"

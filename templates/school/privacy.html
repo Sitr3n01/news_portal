@@ -1,60 +1,137 @@
 {% extends 'base_school.html' %}
 
 {% block title %}Política de privacidade - {{ current_site.name }}{% endblock %}
-{% block meta_description %}Informações sobre privacidade, uso de dados e canais de contato de {{ current_site.name }}.{% endblock %}
+{% block meta_description %}Informações claras sobre privacidade, uso de dados, segurança e canais de contato de {{ current_site.name }}.{% endblock %}
 
 {% block content %}
-<section class="liquid-section py-16 md:py-24">
-    <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-        <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Privacidade', 'Privacy')">Privacidade</p>
-        <h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-slate-950 md:text-6xl"
-            x-text="t('Política de privacidade e termos de uso', 'Privacy policy and terms of use')">Política de privacidade e termos de uso</h1>
-        <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-600"
-            x-text="t('Transparência sobre como tratamos informações enviadas por formulários, candidaturas e interações essenciais do site.', 'Transparency about how we handle information sent through forms, applications and essential interactions on the site.')">
-            Transparência sobre como tratamos informações enviadas por formulários, candidaturas e interações essenciais do site.
-        </p>
+<section class="liquid-section py-14 md:py-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl">
+            <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Privacidade', 'Privacy')">Privacidade</p>
+            <h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-slate-950 md:text-6xl"
+                x-text="t('Como a Komuniki trata dados no site', 'How Komuniki handles data on this site')">
+                Como a Komuniki trata dados no site
+            </h1>
+            <p class="mt-6 max-w-3xl text-lg leading-relaxed text-slate-600 md:text-xl"
+                x-text="t('Esta página explica, em linguagem direta, quais informações podem ser coletadas, por que elas são usadas e como você pode falar conosco sobre privacidade.', 'This page explains, in plain language, what information may be collected, why it is used, and how you can contact us about privacy.')">
+                Esta página explica, em linguagem direta, quais informações podem ser coletadas, por que elas são usadas e como você pode falar conosco sobre privacidade.
+            </p>
+        </div>
     </div>
 </section>
 
-<section class="liquid-section py-12 md:py-16">
-    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <article class="scroll-reveal liquid-panel school-prose rounded-[2.25rem] p-6 text-lg md:p-10"
-            data-scroll-reveal>
-            <h2 x-text="t('Uso do site', 'Use of the site')">Uso do site</h2>
-            <p>
-                <span x-text="t('Ao navegar no site institucional de', 'By browsing the institutional website of')">Ao navegar no site institucional de</span>
-                <strong>{{ current_site.name }}</strong><span x-text="t(', você concorda em utilizar os canais disponíveis de maneira respeitosa e compatível com sua finalidade educacional, cultural e institucional.', ', you agree to use the available channels in a respectful way, compatible with their educational, cultural and institutional purpose.')">, você concorda em utilizar os canais disponíveis de maneira respeitosa e compatível com sua finalidade educacional, cultural e institucional.</span>
-            </p>
+<section class="liquid-section pb-16 md:pb-24">
+    <div class="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.34fr_0.66fr] lg:px-8">
+        <aside class="space-y-5 lg:sticky lg:top-28 lg:self-start">
+            <div class="liquid-panel rounded-[2rem] p-6">
+                <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Resumo', 'Summary')">Resumo</p>
+                <ul class="mt-5 space-y-4 text-sm leading-relaxed text-slate-600">
+                    <li x-text="t('Usamos dados enviados por você para responder contatos, solicitações e interesses em cursos, mentorias e projetos.', 'We use data you send to answer contact requests and conversations about courses, mentoring and projects.')">
+                        Usamos dados enviados por você para responder contatos, solicitações e interesses em cursos, mentorias e projetos.
+                    </li>
+                    <li x-text="t('Não vendemos dados pessoais e não usamos suas informações para finalidades incompatíveis com o contato solicitado.', 'We do not sell personal data or use your information for purposes incompatible with your request.')">
+                        Não vendemos dados pessoais e não usamos suas informações para finalidades incompatíveis com o contato solicitado.
+                    </li>
+                    <li x-text="t('Cookies técnicos mantêm segurança, sessão, preferências de idioma/tema e proteção contra envios automatizados.', 'Technical cookies support security, sessions, language/theme preferences and protection against automated submissions.')">
+                        Cookies técnicos mantêm segurança, sessão, preferências de idioma/tema e proteção contra envios automatizados.
+                    </li>
+                    <li x-text="t('Você pode pedir informações, correção ou remoção de dados pelos canais oficiais da Komuniki.', 'You can request information, correction or deletion of data through Komuniki official channels.')">
+                        Você pode pedir informações, correção ou remoção de dados pelos canais oficiais da Komuniki.
+                    </li>
+                </ul>
+            </div>
 
-            <h2 x-text="t('Dados enviados por formulários', 'Data sent through forms')">Dados enviados por formulários</h2>
-            <p x-text="t('Os formulários de contato coletam apenas as informações necessárias para responder mensagens, registrar solicitações e conduzir conversas sobre cursos, mentorias, projetos e atendimento institucional.', 'Contact forms collect only the information needed to answer messages, record requests and hold conversations about courses, mentoring, projects and institutional support.')">
-                Os formulários de contato coletam apenas as informações necessárias para responder mensagens, registrar solicitações e conduzir conversas sobre cursos, mentorias, projetos e atendimento institucional.
-            </p>
-            <p x-text="t('Essas informações são usadas internamente pela equipe responsável e não devem ser comercializadas ou utilizadas para finalidades incompatíveis com o contato solicitado.', 'This information is used internally by the responsible team and must not be sold or used for purposes incompatible with the requested contact.')">
-                Essas informações são usadas internamente pela equipe responsável e não devem ser comercializadas ou utilizadas para finalidades incompatíveis com o contato solicitado.
-            </p>
+            <div class="liquid-card rounded-[1.75rem] p-6">
+                <h2 class="font-display text-xl font-bold text-slate-950" x-text="t('Contato de privacidade', 'Privacy contact')">Contato de privacidade</h2>
+                <p class="mt-3 text-sm leading-relaxed text-slate-600"
+                    x-text="t('Use o formulário de contato ou o e-mail oficial informado no site para dúvidas sobre dados pessoais.', 'Use the contact form or the official email listed on the site for questions about personal data.')">
+                    Use o formulário de contato ou o e-mail oficial informado no site para dúvidas sobre dados pessoais.
+                </p>
+                <a href="{% url 'contact:page' %}"
+                    class="jump-lift mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-primary-600 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4"
+                    x-text="t('Falar com a Komuniki', 'Talk to Komuniki')">
+                    Falar com a Komuniki
+                </a>
+            </div>
+        </aside>
 
-            <h2 x-text="t('Cookies e sessão', 'Cookies and session')">Cookies e sessão</h2>
-            <p x-text="t('O sistema pode utilizar cookies técnicos para segurança, autenticação, proteção contra CSRF e funcionamento básico da plataforma. Esses recursos ajudam a manter a experiência estável e segura.', 'The system may use technical cookies for security, authentication, CSRF protection and basic platform operation. These resources help keep the experience stable and secure.')">
-                O sistema pode utilizar cookies técnicos para segurança, autenticação, proteção contra CSRF e funcionamento básico da plataforma. Esses recursos ajudam a manter a experiência estável e segura.
-            </p>
+        <div class="space-y-5">
+            <article class="scroll-reveal liquid-panel rounded-[2rem] p-6 md:p-8" data-scroll-reveal>
+                <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Uso do site', 'Use of the site')">Uso do site</p>
+                <h2 class="mt-3 font-display text-3xl font-bold text-slate-950" x-text="t('O que o sistema faz', 'What the system does')">O que o sistema faz</h2>
+                <p class="mt-4 text-lg leading-relaxed text-slate-600"
+                    x-text="t('O site apresenta a Komuniki, seus cursos, mentorias, conteúdos e canais de atendimento. Algumas áreas permitem que você envie informações para iniciar uma conversa, solicitar atendimento, receber novidades ou acessar recursos de conta quando disponíveis.', 'The site presents Komuniki, its courses, mentoring, content and support channels. Some areas let you send information to start a conversation, request support, receive updates or access account features when available.')">
+                    O site apresenta a Komuniki, seus cursos, mentorias, conteúdos e canais de atendimento. Algumas áreas permitem que você envie informações para iniciar uma conversa, solicitar atendimento, receber novidades ou acessar recursos de conta quando disponíveis.
+                </p>
+            </article>
 
-            <h2 x-text="t('Candidaturas e arquivos enviados', 'Applications and uploaded files')">Candidaturas e arquivos enviados</h2>
-            <p x-text="t('Caso formulários de candidatura ou envio de arquivos sejam utilizados em algum processo futuro, os dados recebidos serão tratados como informações sensíveis e acessados apenas por pessoas autorizadas.', 'If application forms or file uploads are used in any future process, the data received will be treated as sensitive information and accessed only by authorized people.')">
-                Caso formulários de candidatura ou envio de arquivos sejam utilizados em algum processo futuro, os dados recebidos serão tratados como informações sensíveis e acessados apenas por pessoas autorizadas.
-            </p>
+            <article class="scroll-reveal liquid-panel rounded-[2rem] p-6 md:p-8" data-scroll-reveal>
+                <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Coleta voluntária', 'Voluntary collection')">Coleta voluntária</p>
+                <h2 class="mt-3 font-display text-3xl font-bold text-slate-950" x-text="t('Dados enviados por formulários', 'Data sent through forms')">Dados enviados por formulários</h2>
+                <p class="mt-4 text-lg leading-relaxed text-slate-600"
+                    x-text="t('Formulários de contato podem solicitar nome, e-mail, telefone, assunto e mensagem. Esses dados são usados para responder sua solicitação e conduzir conversas sobre cursos, mentorias, projetos, imprensa, parcerias ou atendimento institucional.', 'Contact forms may ask for name, email, phone, subject and message. This data is used to answer your request and hold conversations about courses, mentoring, projects, press, partnerships or institutional support.')">
+                    Formulários de contato podem solicitar nome, e-mail, telefone, assunto e mensagem. Esses dados são usados para responder sua solicitação e conduzir conversas sobre cursos, mentorias, projetos, imprensa, parcerias ou atendimento institucional.
+                </p>
+                <p class="mt-4 text-lg leading-relaxed text-slate-600"
+                    x-text="t('Se houver cadastro, newsletter ou área de conta, os dados informados servem para identificar o usuário, manter preferências, enviar comunicações solicitadas e proteger o acesso. Você pode cancelar comunicações ou pedir revisão dos dados quando necessário.', 'If there is registration, newsletter or an account area, the data provided is used to identify the user, maintain preferences, send requested communications and protect access. You may unsubscribe from communications or request data review when needed.')">
+                    Se houver cadastro, newsletter ou área de conta, os dados informados servem para identificar o usuário, manter preferências, enviar comunicações solicitadas e proteger o acesso. Você pode cancelar comunicações ou pedir revisão dos dados quando necessário.
+                </p>
+            </article>
 
-            <h2 x-text="t('Solicitações e contato', 'Requests and contact')">Solicitações e contato</h2>
-            <p x-text="t('Para solicitar informações, revisar dados enviados ou pedir remoção de registros quando aplicável, utilize os canais oficiais da Komuniki.', 'To request information, review submitted data or ask for removal of records when applicable, use the official Komuniki channels.')">
-                Para solicitar informações, revisar dados enviados ou pedir remoção de registros quando aplicável, utilize os canais oficiais da Komuniki.
-            </p>
+            <div class="grid gap-5 md:grid-cols-2">
+                <article class="scroll-reveal liquid-card rounded-[1.75rem] p-6" data-scroll-reveal>
+                    <h2 class="font-display text-2xl font-bold text-slate-950" x-text="t('Cookies técnicos', 'Technical cookies')">Cookies técnicos</h2>
+                    <p class="mt-4 leading-relaxed text-slate-600"
+                        x-text="t('O sistema pode usar cookies e armazenamento local para sessão, segurança, proteção contra CSRF, preferências de tema e idioma, autenticação e estabilidade da navegação.', 'The system may use cookies and local storage for sessions, security, CSRF protection, theme and language preferences, authentication and browsing stability.')">
+                        O sistema pode usar cookies e armazenamento local para sessão, segurança, proteção contra CSRF, preferências de tema e idioma, autenticação e estabilidade da navegação.
+                    </p>
+                </article>
 
-            <div class="liquid-card mt-10 rounded-[1.75rem] p-6 text-base">
-                <p class="mb-0 text-slate-600">
-                    <span x-text="t('Última atualização:', 'Last updated:')">Última atualização:</span> {% now "d/m/Y" %}. <span x-text="t('Mudanças futuras nesta página buscarão melhorar clareza, segurança e transparência.', 'Future changes to this page will aim to improve clarity, security and transparency.')">Mudanças futuras nesta página buscarão melhorar clareza, segurança e transparência.</span>
+                <article class="scroll-reveal liquid-card rounded-[1.75rem] p-6" data-scroll-reveal>
+                    <h2 class="font-display text-2xl font-bold text-slate-950" x-text="t('Segurança e anti-spam', 'Security and anti-spam')">Segurança e anti-spam</h2>
+                    <p class="mt-4 leading-relaxed text-slate-600"
+                        x-text="t('Podemos usar mecanismos como proteção anti-bot, registros de tentativa de acesso e validações de formulário para reduzir abuso, spam e uso automatizado indevido.', 'We may use mechanisms such as anti-bot protection, access-attempt records and form validation to reduce abuse, spam and improper automated use.')">
+                        Podemos usar mecanismos como proteção anti-bot, registros de tentativa de acesso e validações de formulário para reduzir abuso, spam e uso automatizado indevido.
+                    </p>
+                </article>
+            </div>
+
+            <article class="scroll-reveal liquid-panel rounded-[2rem] p-6 md:p-8" data-scroll-reveal>
+                <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Operação do serviço', 'Service operation')">Operação do serviço</p>
+                <h2 class="mt-3 font-display text-3xl font-bold text-slate-950" x-text="t('Registros técnicos e compartilhamento', 'Technical logs and sharing')">Registros técnicos e compartilhamento</h2>
+                <p class="mt-4 text-lg leading-relaxed text-slate-600"
+                    x-text="t('Como qualquer aplicação web, o servidor pode registrar informações técnicas de acesso, como data, rota acessada, endereço IP, agente do navegador e eventos de erro. Esses registros ajudam a investigar falhas, manter segurança e melhorar a estabilidade.', 'Like any web application, the server may record technical access information such as date, route visited, IP address, browser agent and error events. These logs help investigate failures, maintain security and improve stability.')">
+                    Como qualquer aplicação web, o servidor pode registrar informações técnicas de acesso, como data, rota acessada, endereço IP, agente do navegador e eventos de erro. Esses registros ajudam a investigar falhas, manter segurança e melhorar a estabilidade.
+                </p>
+                <p class="mt-4 text-lg leading-relaxed text-slate-600"
+                    x-text="t('Dados pessoais não são vendidos. Eles podem ser compartilhados apenas com fornecedores necessários para operar o site, entregar e-mails, proteger formulários, hospedar a aplicação ou cumprir obrigação legal.', 'Personal data is not sold. It may be shared only with providers needed to operate the site, deliver emails, protect forms, host the application or comply with legal obligations.')">
+                    Dados pessoais não são vendidos. Eles podem ser compartilhados apenas com fornecedores necessários para operar o site, entregar e-mails, proteger formulários, hospedar a aplicação ou cumprir obrigação legal.
+                </p>
+            </article>
+
+            <article class="scroll-reveal liquid-panel rounded-[2rem] p-6 md:p-8" data-scroll-reveal>
+                <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Controle do usuário', 'User control')">Controle do usuário</p>
+                <h2 class="mt-3 font-display text-3xl font-bold text-slate-950" x-text="t('Retenção, correção e remoção', 'Retention, correction and deletion')">Retenção, correção e remoção</h2>
+                <p class="mt-4 text-lg leading-relaxed text-slate-600"
+                    x-text="t('Mantemos dados pelo tempo necessário para atender a solicitação, preservar histórico administrativo, cumprir obrigações legais ou proteger a segurança do sistema. Quando não houver necessidade legítima, os dados podem ser removidos ou anonimizados.', 'We keep data for as long as needed to answer the request, preserve administrative history, comply with legal obligations or protect system security. When there is no legitimate need, data may be deleted or anonymized.')">
+                    Mantemos dados pelo tempo necessário para atender a solicitação, preservar histórico administrativo, cumprir obrigações legais ou proteger a segurança do sistema. Quando não houver necessidade legítima, os dados podem ser removidos ou anonimizados.
+                </p>
+                <p class="mt-4 text-lg leading-relaxed text-slate-600"
+                    x-text="t('Você pode solicitar confirmação de tratamento, acesso, correção, atualização ou remoção de dados pessoais pelos canais oficiais. A Komuniki poderá pedir informações mínimas para confirmar sua identidade antes de atender ao pedido.', 'You may request confirmation of processing, access, correction, update or deletion of personal data through official channels. Komuniki may ask for minimal information to confirm your identity before handling the request.')">
+                    Você pode solicitar confirmação de tratamento, acesso, correção, atualização ou remoção de dados pessoais pelos canais oficiais. A Komuniki poderá pedir informações mínimas para confirmar sua identidade antes de atender ao pedido.
+                </p>
+            </article>
+
+            <div class="scroll-reveal rounded-[1.75rem] border border-primary-700/15 bg-primary-50/70 p-6 text-sm leading-relaxed text-slate-600 dark:border-white/10 dark:bg-white/5" data-scroll-reveal>
+                <p>
+                    <span class="font-bold text-slate-900 dark:text-slate-100" x-text="t('Última atualização:', 'Last updated:')">Última atualização:</span>
+                    {% now "d/m/Y" %}.
+                    <span x-text="t('Esta página pode ser atualizada para refletir mudanças no site, nos canais de atendimento ou nas práticas de segurança.', 'This page may be updated to reflect changes to the site, support channels or security practices.')">
+                        Esta página pode ser atualizada para refletir mudanças no site, nos canais de atendimento ou nas práticas de segurança.
+                    </span>
                 </p>
             </div>
-        </article>
+        </div>
     </div>
 </section>
 {% endblock %}

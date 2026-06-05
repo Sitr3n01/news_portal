@@ -5,9 +5,9 @@ from django.db import models
 class CustomUser(AbstractUser):
     class Role(models.TextChoices):
         SUPER_ADMIN = 'super_admin', 'Super Administrador'
-        SCHOOL_ADMIN = 'school_admin', 'Administrador Escolar'
+        SCHOOL_ADMIN = 'school_admin', 'Administrador Komuniki'
         NEWS_EDITOR = 'news_editor', 'Editor de Notícias'
-        HIRING_MANAGER = 'hiring_manager', 'Gerente de Contratações'
+        HIRING_MANAGER = 'hiring_manager', 'Contratações (guardado)'
 
     email = models.EmailField(
         'E-mail', unique=True, blank=True,

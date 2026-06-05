@@ -3,7 +3,7 @@
 {% block title %}{% if query %}Busca: {{ query }}{% else %}Buscar{% endif %} - {{ news_portal_name }}{% endblock %}
 
 {% block content %}
-<div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+<div class="max-w-[1760px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
   <!-- Search Header -->
   <div class="mb-10 text-center sm:mb-12">
     <h1 class="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-slate-900 dark:text-white mb-6 sm:mb-8"
@@ -38,14 +38,14 @@
     {% endif %}
   </div>
 
-  <div class="flex flex-col lg:flex-row gap-10 lg:gap-12">
+  <div class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,24rem)] lg:gap-14 xl:gap-16">
     <!-- Results -->
-    <div class="flex-grow lg:w-2/3" id="search-results">
+    <div class="min-w-0" id="search-results">
       {% include 'news/partials/search_results.html' %}
     </div>
 
     <!-- Sidebar -->
-    <div class="lg:w-1/3">
+    <div class="min-w-0">
       {% include 'news/partials/sidebar.html' %}
     </div>
   </div>

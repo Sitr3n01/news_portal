@@ -136,6 +136,10 @@ def _admin_has_any(request, *permissions):
     return request.user.is_superuser or any(request.user.has_perm(permission) for permission in permissions)
 
 
+def _admin_is_superuser(request):
+    return request.user.is_superuser
+
+
 UNFOLD = {
     'SITE_TITLE': 'News Portal',
     'SITE_HEADER': 'Painel de Administração',
@@ -176,7 +180,7 @@ UNFOLD = {
                 'separator': False,
                 'items': [
                     {
-                        'title': 'Guia do Portal Escolar',
+                        'title': 'Guia Komuniki',
                         'icon': 'school',
                         'link': reverse_lazy('admin_school_guide'),
                         'permission': lambda request: _admin_has_any(
@@ -184,11 +188,7 @@ UNFOLD = {
                             'school.view_page',
                             'school.view_schoolhomeconfig',
                             'school.view_schoolfeature',
-                            'school.view_teammember',
                             'school.view_testimonial',
-                            'hiring.view_jobposting',
-                            'hiring.view_department',
-                            'hiring.view_application',
                             'contact.view_contactinquiry',
                         ),
                         'active': lambda request: request.path.startswith('/admin/guias/escola/'),
@@ -236,7 +236,7 @@ UNFOLD = {
                         'active': lambda request: False,  # Links externos — nunca marcar como ativo no admin
                     },
                     {
-                        'title': 'Portal Escolar',
+                        'title': 'Komuniki',
                         'icon': 'school',
                         'link': '/',  # Escola está montada no prefixo raiz (path('', include(school.urls)))
                         'active': lambda request: False,  # '/' seria substring de qualquer URL → sempre falso
@@ -244,59 +244,29 @@ UNFOLD = {
                 ],
             },
             {
-                'title': 'Portal Escolar',
+                'title': 'Komuniki',
                 'separator': True,
                 'items': [
                     {
-                        'title': 'Páginas',
+                        'title': 'Página Cursos',
                         'icon': 'article',
                         'link': reverse_lazy('admin:school_page_changelist'),
                         'permission': lambda request: request.user.has_perm('school.view_page'),
                     },
                     {
-                        'title': 'Home Escolar',
+                        'title': 'Home Komuniki',
                         'icon': 'home',
                         'link': reverse_lazy('admin:school_schoolhomeconfig_changelist'),
                         'permission': lambda request: request.user.has_perm('school.view_schoolhomeconfig'),
                     },
                     {
-                        'title': 'Diferenciais',
+                        'title': 'Blocos da Home',
                         'icon': 'auto_awesome',
                         'link': reverse_lazy('admin:school_schoolfeature_changelist'),
                         'permission': lambda request: request.user.has_perm('school.view_schoolfeature'),
                     },
                     {
-                        'title': 'Equipe',
-                        'icon': 'group',
-                        'link': reverse_lazy('admin:school_teammember_changelist'),
-                        'permission': lambda request: request.user.has_perm('school.view_teammember'),
-                    },
-                    {
-                        'title': 'Depoimentos',
-                        'icon': 'format_quote',
-                        'link': reverse_lazy('admin:school_testimonial_changelist'),
-                        'permission': lambda request: request.user.has_perm('school.view_testimonial'),
-                    },
-                    {
-                        'title': 'Vagas',
-                        'icon': 'work',
-                        'link': reverse_lazy('admin:hiring_jobposting_changelist'),
-                        'permission': lambda request: request.user.has_perm('hiring.view_jobposting'),
-                    },
-                    {
-                        'title': 'Departamentos',
-                        'icon': 'business',
-                        'link': reverse_lazy('admin:hiring_department_changelist'),
-                        'permission': lambda request: request.user.has_perm('hiring.view_department'),
-                    },
-                    {
-                        'title': 'Candidaturas',
-                        'icon': 'description',
-                        'link': reverse_lazy('admin:hiring_application_changelist'),
-                        'permission': lambda request: request.user.has_perm('hiring.view_application'),
-                    },
-                    {
-                        'title': 'Mensagens de Contato',
+                        'title': 'Mensagens',
                         'icon': 'contact_mail',
                         'link': reverse_lazy('admin:contact_contactinquiry_changelist'),
                         'permission': lambda request: request.user.has_perm('contact.view_contactinquiry'),
@@ -342,6 +312,54 @@ UNFOLD = {
                         'icon': 'mark_email_read',
                         'link': reverse_lazy('admin:news_newsletterdelivery_changelist'),
                         'permission': lambda request: request.user.has_perm('news.view_newsletterdelivery'),
+                    },
+                ],
+            },
+            {
+                'title': 'Recursos guardados',
+                'separator': True,
+                'items': [
+                    {
+                        'title': 'Depoimentos',
+                        'icon': 'format_quote',
+                        'link': reverse_lazy('admin:school_testimonial_changelist'),
+                        'permission': _admin_is_superuser,
+                    },
+                    {
+                        'title': 'Equipe',
+                        'icon': 'group',
+                        'link': reverse_lazy('admin:school_teammember_changelist'),
+                        'permission': _admin_is_superuser,
+                    },
+                    {
+                        'title': 'Vagas',
+                        'icon': 'work',
+                        'link': reverse_lazy('admin:hiring_jobposting_changelist'),
+                        'permission': _admin_is_superuser,
+                    },
+                    {
+                        'title': 'Departamentos',
+                        'icon': 'business',
+                        'link': reverse_lazy('admin:hiring_department_changelist'),
+                        'permission': _admin_is_superuser,
+                    },
+                    {
+                        'title': 'Candidaturas',
+                        'icon': 'description',
+                        'link': reverse_lazy('admin:hiring_application_changelist'),
+                        'permission': _admin_is_superuser,
+                    },
+                    {
+                        'title': 'Curtidas',
+                        'icon': 'favorite',
+                        'link': reverse_lazy('admin:news_articlelike_changelist'),
+                        'permission': _admin_is_superuser,
+                    },
+                    {
+                        'title': 'Favoritos',
+                        'icon': 'bookmark',
+                        'link': reverse_lazy('admin:news_articlebookmark_changelist'),
+                        'permission': _admin_is_superuser,
                     },
                 ],
             },

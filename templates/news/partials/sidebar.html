@@ -47,10 +47,11 @@
         <form hx-post="{% url 'news:newsletter_subscribe' %}" hx-target="this" hx-swap="outerHTML"
             class="flex flex-col gap-3">
             {% csrf_token %}
+            <input type="hidden" name="turnstile_size" value="flexible">
             <input name="email" type="email" required :placeholder="t('Endereço de e-mail', 'Email address')"
                 placeholder="Email address"
                 class="font-ui w-full px-4 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none">
-            {% include 'news/partials/newsletter_turnstile_fields.html' %}
+            {% include 'news/partials/newsletter_turnstile_fields.html' with turnstile_size='flexible' %}
             <button type="submit"
                 class="font-ui w-full py-2 bg-slate-900 dark:bg-white text-white dark:text-black text-sm font-bold rounded hover:opacity-90 transition-opacity">
                 <span x-text="t('Assinar', 'Sign Up')">Sign Up</span>

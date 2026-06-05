@@ -4,13 +4,13 @@ from django.utils.html import format_html
 from django.utils.text import format_lazy
 from unfold.admin import ModelAdmin
 
-from apps.common.admin_mixins import AdminUXMixin
+from apps.common.admin_mixins import AdminUXMixin, SuperuserOnlyAdminMixin
 
 from .models import Application, Department, JobPosting
 
 
 @admin.register(Department)
-class DepartmentAdmin(AdminUXMixin, ModelAdmin):
+class DepartmentAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
     list_display = ['name', 'site', 'slug']
     list_filter = ['site']
     list_filter_submit = True
@@ -44,7 +44,7 @@ class DepartmentAdmin(AdminUXMixin, ModelAdmin):
 
 
 @admin.register(JobPosting)
-class JobPostingAdmin(AdminUXMixin, ModelAdmin):
+class JobPostingAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
     list_display = ['title', 'site', 'department', 'employment_type', 'status', 'published_at', 'deadline']
     list_filter = ['site', 'status', 'employment_type', 'department']
     list_filter_submit = True
@@ -116,7 +116,7 @@ class JobPostingAdmin(AdminUXMixin, ModelAdmin):
 
 
 @admin.register(Application)
-class ApplicationAdmin(AdminUXMixin, ModelAdmin):
+class ApplicationAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
     list_display = ['first_name', 'last_name', 'job', 'job_site', 'status', 'created_at']
     list_filter = ['status', 'job__site', 'job', 'created_at']
     list_filter_submit = True

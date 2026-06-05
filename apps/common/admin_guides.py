@@ -107,29 +107,21 @@ def _guide_response(request, guide):
 
 def school_guide(request):
     from apps.contact.models import ContactInquiry
-    from apps.hiring.models import Application, JobPosting
-    from apps.school.models import Page, SchoolFeature, SchoolHomeConfig, TeamMember, Testimonial
+    from apps.school.models import Page, SchoolFeature, SchoolHomeConfig, Testimonial
 
     user = request.user
     has_access = _can_any(user, SCHOOL_PERMISSIONS)
     home_configs = SchoolHomeConfig.objects.filter(is_active=True).count()
-    published_pages = Page.objects.filter(is_published=True).count()
-    active_features = SchoolFeature.objects.filter(is_active=True).count()
-    active_team = TeamMember.objects.filter(is_active=True).count()
+    published_courses = Page.objects.filter(slug='cursos', is_published=True).count()
+    active_features = SchoolFeature.objects.filter(
+        is_active=True,
+        placement__in=[
+            SchoolFeature.Placement.TRUST,
+            SchoolFeature.Placement.LIFE,
+        ],
+    ).count()
     featured_testimonials = Testimonial.objects.filter(is_featured=True).count()
-    open_jobs = JobPosting.objects.filter(status=JobPosting.Status.OPEN).count()
-    received_applications = Application.objects.filter(status=Application.Status.RECEIVED).count()
     unread_messages = ContactInquiry.objects.filter(status=ContactInquiry.Status.NEW).count()
-
-    recent_applications = [
-        {
-            'title': f'{application.first_name} {application.last_name}',
-            'meta': f'Candidatura para {application.job.title}',
-            'url': _admin_url('admin:hiring_application_change', args=[application.pk]),
-            'status': application.get_status_display(),
-        }
-        for application in Application.objects.select_related('job').order_by('-created_at')[:5]
-    ] if _can(user, 'hiring.view_application') else []
 
     recent_messages = [
         {
@@ -144,43 +136,43 @@ def school_guide(request):
     guide = {
         'area': 'school',
         'has_access': has_access,
-        'eyebrow': 'Portal Escolar',
-        'title': 'Operação do Portal Escolar',
-        'subtitle': 'Gerencie conteúdo institucional, equipe, prova social, contatos e contratação em uma sequência clara.',
+        'eyebrow': 'Komuniki',
+        'title': 'Operação Komuniki',
+        'subtitle': 'Gerencie a presença pública atual: home, cursos, blocos visuais, depoimentos e mensagens.',
         'icon': 'school',
         'primary_actions': _visible([
-            _action(user, 'Editar home escolar', 'home', 'admin:school_schoolhomeconfig_changelist', 'school.view_schoolhomeconfig', kind='primary'),
-            _public_action('Ver portal escolar', 'open_in_new', '/'),
+            _action(user, 'Editar Home Komuniki', 'home', 'admin:school_schoolhomeconfig_changelist', 'school.view_schoolhomeconfig', kind='primary'),
+            _public_action('Ver Komuniki', 'open_in_new', '/'),
             _action(user, 'Mensagens novas', 'mail', 'admin:contact_contactinquiry_changelist', 'contact.view_contactinquiry', query={'status__exact': ContactInquiry.Status.NEW}),
         ]),
         'metrics': [
             _metric('Home ativa', home_configs, 'home', 'success' if home_configs else 'warning', 'Configuração principal'),
-            _metric('Páginas publicadas', published_pages, 'article', 'primary' if published_pages else 'neutral', 'Conteúdo institucional'),
-            _metric('Vagas abertas', open_jobs, 'work', 'primary' if open_jobs else 'neutral', 'Oportunidades visíveis'),
-            _metric('Pendências humanas', received_applications + unread_messages, 'priority_high', 'warning' if received_applications or unread_messages else 'neutral', 'Candidaturas e mensagens'),
+            _metric('Página Cursos', published_courses, 'article', 'primary' if published_courses else 'warning', 'Link público da navegação'),
+            _metric('Blocos ativos', active_features, 'auto_awesome', 'primary' if active_features else 'neutral', 'Home Komuniki'),
+            _metric('Mensagens novas', unread_messages, 'priority_high', 'warning' if unread_messages else 'neutral', 'Contato'),
         ],
         'workflows': [
             _workflow(
-                'Configurar presença institucional',
+                'Configurar Home Komuniki',
                 'home',
-                'Comece pela home, depois publique páginas e diferenciais para apresentar a escola com clareza.',
-                'Pronto' if home_configs and published_pages and active_features else 'Atenção',
-                'success' if home_configs and published_pages and active_features else 'warning',
+                'Comece pela home, depois revise blocos e depoimentos que aparecem na página inicial.',
+                'Pronto' if home_configs and active_features else 'Atenção',
+                'success' if home_configs and active_features else 'warning',
                 [
-                    _action(user, 'Home escolar', 'home', 'admin:school_schoolhomeconfig_changelist', 'school.view_schoolhomeconfig', kind='primary'),
-                    _action(user, 'Páginas', 'article', 'admin:school_page_changelist', 'school.view_page'),
-                    _action(user, 'Diferenciais', 'auto_awesome', 'admin:school_schoolfeature_changelist', 'school.view_schoolfeature'),
+                    _action(user, 'Home Komuniki', 'home', 'admin:school_schoolhomeconfig_changelist', 'school.view_schoolhomeconfig', kind='primary'),
+                    _action(user, 'Blocos da Home', 'auto_awesome', 'admin:school_schoolfeature_changelist', 'school.view_schoolfeature'),
+                    _action(user, 'Depoimentos', 'format_quote', 'admin:school_testimonial_changelist', 'school.view_testimonial'),
                 ],
             ),
             _workflow(
-                'Manter equipe e prova social',
-                'groups',
-                'Atualize educadores e depoimentos para manter confiança e contexto para famílias.',
-                'Completo' if active_team and featured_testimonials else 'Completar',
-                'success' if active_team and featured_testimonials else 'warning',
+                'Manter Página Cursos',
+                'article',
+                'A página Cursos precisa ficar publicada para a navegação pública continuar funcionando.',
+                'Publicada' if published_courses else 'Revisar',
+                'success' if published_courses else 'warning',
                 [
-                    _action(user, 'Equipe', 'group', 'admin:school_teammember_changelist', 'school.view_teammember', kind='primary'),
-                    _action(user, 'Depoimentos', 'format_quote', 'admin:school_testimonial_changelist', 'school.view_testimonial'),
+                    _action(user, 'Página Cursos', 'article', 'admin:school_page_changelist', 'school.view_page', kind='primary'),
+                    _public_action('Ver cursos', 'open_in_new', '/cursos/'),
                 ],
             ),
             _workflow(
@@ -198,73 +190,48 @@ def school_guide(request):
                     _action(user, 'Todas as mensagens', 'inbox', 'admin:contact_contactinquiry_changelist', 'contact.view_contactinquiry'),
                 ],
             ),
-            _workflow(
-                'Gerenciar contratações',
-                'work',
-                'Abra vagas quando houver oportunidades e revise candidaturas recebidas sem perder histórico.',
-                'Aguardando análise' if received_applications else 'Sem novas candidaturas',
-                'warning' if received_applications else 'neutral',
-                [
-                    _action(user, 'Abrir vaga', 'add_business', 'admin:hiring_jobposting_add', 'hiring.add_jobposting', kind='primary'),
-                    _action(user, 'Candidaturas recebidas', 'description', 'admin:hiring_application_changelist', 'hiring.view_application', query={'status__exact': Application.Status.RECEIVED}),
-                    _action(user, 'Departamentos', 'business', 'admin:hiring_department_changelist', 'hiring.view_department'),
-                ],
-            ),
         ],
         'readiness': [
             _check(
-                'Home escolar ativa',
+                'Home Komuniki ativa',
                 bool(home_configs),
-                'Configure a página inicial antes de divulgar o portal.',
+                'Configure a página inicial antes de divulgar o site.',
                 _admin_url('admin:school_schoolhomeconfig_changelist') if _can(user, 'school.view_schoolhomeconfig') else '',
             ),
             _check(
-                'Páginas institucionais publicadas',
-                published_pages > 0,
-                'Publique páginas essenciais como sobre, proposta e privacidade.',
+                'Página Cursos publicada',
+                published_courses > 0,
+                'Mantenha a página Cursos ativa para o link público funcionar.',
                 _admin_url('admin:school_page_changelist') if _can(user, 'school.view_page') else '',
             ),
             _check(
-                'Diferenciais ativos',
+                'Blocos da Home ativos',
                 active_features > 0,
-                'Cadastre benefícios e pontos fortes exibidos na home.',
+                'Cadastre blocos exibidos na home.',
                 _admin_url('admin:school_schoolfeature_changelist') if _can(user, 'school.view_schoolfeature') else '',
-            ),
-            _check(
-                'Equipe visível',
-                active_team > 0,
-                'Mostre pessoas responsáveis pela experiência escolar.',
-                _admin_url('admin:school_teammember_changelist') if _can(user, 'school.view_teammember') else '',
             ),
             _check(
                 'Depoimentos destacados',
                 featured_testimonials > 0,
-                'Use relatos para reforçar confiança.',
+                'Use relatos para reforçar confiança na Komuniki.',
                 _admin_url('admin:school_testimonial_changelist') if _can(user, 'school.view_testimonial') else '',
             ),
         ],
         'resources': _visible([
-            _resource_group('Conteúdo institucional', 'Textos e blocos que explicam a escola para famílias e comunidade.', [
-                _action(user, 'Home escolar', 'home', 'admin:school_schoolhomeconfig_changelist', 'school.view_schoolhomeconfig'),
-                _action(user, 'Páginas', 'article', 'admin:school_page_changelist', 'school.view_page'),
-                _action(user, 'Diferenciais', 'auto_awesome', 'admin:school_schoolfeature_changelist', 'school.view_schoolfeature'),
+            _resource_group('Presença Komuniki', 'Textos e blocos usados nas páginas públicas atuais.', [
+                _action(user, 'Home Komuniki', 'home', 'admin:school_schoolhomeconfig_changelist', 'school.view_schoolhomeconfig'),
+                _action(user, 'Página Cursos', 'article', 'admin:school_page_changelist', 'school.view_page'),
+                _action(user, 'Blocos da Home', 'auto_awesome', 'admin:school_schoolfeature_changelist', 'school.view_schoolfeature'),
             ]),
-            _resource_group('Relacionamento', 'Pessoas, relatos e mensagens recebidas pelo site.', [
-                _action(user, 'Equipe', 'group', 'admin:school_teammember_changelist', 'school.view_teammember'),
+            _resource_group('Relacionamento', 'Relatos e mensagens recebidas pelo site.', [
                 _action(user, 'Depoimentos', 'format_quote', 'admin:school_testimonial_changelist', 'school.view_testimonial'),
                 _action(user, 'Mensagens', 'contact_mail', 'admin:contact_contactinquiry_changelist', 'contact.view_contactinquiry'),
             ]),
-            _resource_group('Contratações', 'Vagas abertas e acompanhamento de candidatos.', [
-                _action(user, 'Vagas', 'work', 'admin:hiring_jobposting_changelist', 'hiring.view_jobposting'),
-                _action(user, 'Candidaturas', 'description', 'admin:hiring_application_changelist', 'hiring.view_application'),
-                _action(user, 'Departamentos', 'business', 'admin:hiring_department_changelist', 'hiring.view_department'),
-            ]),
         ]),
         'recent_cards': _visible([
-            _recent_card('Candidaturas recentes', 'description', 'Nenhuma candidatura recente', recent_applications) if _can(user, 'hiring.view_application') else None,
             _recent_card('Mensagens recentes', 'mail', 'Nenhuma mensagem recente', recent_messages) if _can(user, 'contact.view_contactinquiry') else None,
         ]),
-        'empty_message': 'Você ainda não tem permissões para operar o Portal Escolar.',
+        'empty_message': 'Você ainda não tem permissões para operar a Komuniki.',
     }
     return _guide_response(request, guide)
 

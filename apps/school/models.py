@@ -38,52 +38,78 @@ class Page(TimeStampedModel, SEOModel):
 class SchoolHomeConfig(TimeStampedModel, SEOModel):
     site = models.OneToOneField(Site, on_delete=models.CASCADE, related_name='school_home_config')
     hero_badge = models.CharField('Selo do hero', max_length=120, default='Educação com propósito')
+    hero_badge_en = models.CharField('Selo do hero (EN)', max_length=120, blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     hero_title = models.CharField('Título do hero', max_length=200, default='Educação que prepara para o futuro')
+    hero_title_en = models.CharField('Título do hero (EN)', max_length=200, blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     hero_subtitle = models.TextField(
         'Subtítulo do hero',
         default='Um ambiente de aprendizagem que une cuidado, conhecimento e desenvolvimento humano para acompanhar cada estudante de perto.',
     )
+    hero_subtitle_en = models.TextField('Subtítulo do hero (EN)', blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     visual_eyebrow = models.CharField('Chamada visual', max_length=120, default='Comunidade escolar')
+    visual_eyebrow_en = models.CharField('Chamada visual (EN)', max_length=120, blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     visual_title = models.CharField('Título do bloco visual', max_length=200, default='Aprender com presença, escuta e projeto.')
+    visual_title_en = models.CharField('Título do bloco visual (EN)', max_length=200, blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     visual_footer_title = models.CharField('Título do bloco de comunidade', max_length=200, default='Famílias, estudantes e educadores no mesmo projeto')
+    visual_footer_title_en = models.CharField('Título do bloco de comunidade (EN)', max_length=200, blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     visual_footer_text = models.TextField(
         'Texto do bloco de comunidade',
         default='Comunicação clara para que a comunidade acompanhe a vida escolar com confiança.',
     )
+    visual_footer_text_en = models.TextField('Texto do bloco de comunidade (EN)', blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     proposal_eyebrow = models.CharField('Chamada da proposta', max_length=120, default='Proposta pedagógica')
+    proposal_eyebrow_en = models.CharField('Chamada da proposta (EN)', max_length=120, blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     proposal_title = models.CharField('Título da proposta', max_length=200, default='Por que escolher nossa escola?')
+    proposal_title_en = models.CharField('Título da proposta (EN)', max_length=200, blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     proposal_description = models.TextField(
         'Descrição da proposta',
         default='Uma experiência escolar consistente nasce do equilíbrio entre método, vínculo humano, segurança e projetos que ampliam repertórios.',
     )
+    proposal_description_en = models.TextField('Descrição da proposta (EN)', blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     life_eyebrow = models.CharField('Chamada de vida escolar', max_length=120, default='Vida escolar')
+    life_eyebrow_en = models.CharField('Chamada de vida escolar (EN)', max_length=120, blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     life_title = models.CharField('Título de vida escolar', max_length=200, default='Uma escola com presença, projetos e comunidade')
+    life_title_en = models.CharField('Título de vida escolar (EN)', max_length=200, blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     life_description = models.TextField(
         'Descrição de vida escolar',
         default='O cotidiano escolar ganha força quando aprendizagem, cultura, movimento e convivência se encontram em experiências reais.',
     )
+    life_description_en = models.TextField('Descrição de vida escolar (EN)', blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     team_eyebrow = models.CharField('Chamada da equipe', max_length=120, default='Nossa equipe')
+    team_eyebrow_en = models.CharField('Chamada da equipe (EN)', max_length=120, blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     team_title = models.CharField('Título da equipe', max_length=200, default='Pessoas que constroem a experiência escolar')
+    team_title_en = models.CharField('Título da equipe (EN)', max_length=200, blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     team_description = models.TextField(
         'Descrição da equipe',
         default='Educadores e profissionais que acompanham a rotina da escola com cuidado, organização e compromisso formativo.',
     )
+    team_description_en = models.TextField('Descrição da equipe (EN)', blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     testimonials_eyebrow = models.CharField('Chamada de depoimentos', max_length=120, default='Depoimentos')
+    testimonials_eyebrow_en = models.CharField('Chamada de depoimentos (EN)', max_length=120, blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     testimonials_title = models.CharField('Título de depoimentos', max_length=200, default='Vozes da comunidade')
+    testimonials_title_en = models.CharField('Título de depoimentos (EN)', max_length=200, blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     testimonials_description = models.TextField(
         'Descrição de depoimentos',
         default='Relatos ajudam a mostrar a relação de confiança construída no cotidiano escolar.',
     )
+    testimonials_description_en = models.TextField('Descrição de depoimentos (EN)', blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     hiring_title = models.CharField('Título de trabalhe conosco', max_length=200, default='Faça parte da nossa equipe')
+    hiring_title_en = models.CharField('Título de trabalhe conosco (EN)', max_length=200, blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     hiring_description = models.TextField(
         'Descrição de trabalhe conosco',
         default='Profissionais da educação encontram aqui um espaço para conhecer oportunidades e participar de uma comunidade comprometida com formação humana.',
     )
+    hiring_description_en = models.TextField('Descrição de trabalhe conosco (EN)', blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     contact_title = models.CharField('Título de contato', max_length=200, default='Vamos conversar?')
+    contact_title_en = models.CharField('Título de contato (EN)', max_length=200, blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
     contact_description = models.TextField(
         'Descrição de contato',
         default='Pais, responsáveis e comunidade podem entrar em contato para tirar dúvidas, enviar mensagens ou iniciar uma conversa com a escola.',
     )
+    contact_description_en = models.TextField('Descrição de contato (EN)', blank=True, default='', help_text='Opcional. Se vazio, usa o texto em português.')
+    meta_title_en = models.CharField('Título SEO (EN)', max_length=70, blank=True, default='', help_text='Opcional. Se vazio, usa o título SEO em português.')
+    meta_description_en = models.CharField('Descrição SEO (EN)', max_length=160, blank=True, default='', help_text='Opcional. Se vazio, usa a descrição SEO em português.')
+    meta_keywords_en = models.CharField('Palavras-chave SEO (EN)', max_length=255, blank=True, default='', help_text='Opcional. Se vazio, usa as palavras-chave SEO em português.')
     is_active = models.BooleanField('Ativo', default=True)
 
     objects = models.Manager()
@@ -112,7 +138,9 @@ class SchoolFeature(TimeStampedModel):
     site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='school_features', verbose_name='Site')
     placement = models.CharField('Local de exibição', max_length=20, choices=Placement.choices)
     title = models.CharField('Título', max_length=160)
+    title_en = models.CharField('Título (EN)', max_length=160, blank=True, default='', help_text='Opcional. Se vazio, usa o título em português.')
     description = models.TextField('Descrição')
+    description_en = models.TextField('Descrição (EN)', blank=True, default='', help_text='Opcional. Se vazio, usa a descrição em português.')
     tone = models.CharField('Tom visual', max_length=20, choices=Tone.choices, default=Tone.EMERALD)
     is_active = models.BooleanField('Ativo', default=True)
     order = models.PositiveIntegerField('Ordem', default=0)
@@ -158,7 +186,9 @@ class Testimonial(TimeStampedModel):
     site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='testimonials', verbose_name='Site')
     name = models.CharField('Nome', max_length=200)
     relationship = models.CharField('Relação com a escola', max_length=200, blank=True)
+    relationship_en = models.CharField('Relação com a escola (EN)', max_length=200, blank=True, default='', help_text='Opcional. Se vazio, usa a relação em português.')
     quote = models.TextField('Depoimento')
+    quote_en = models.TextField('Depoimento (EN)', blank=True, default='', help_text='Opcional. Se vazio, usa o depoimento em português.')
     photo = models.ImageField('Foto', upload_to='school/testimonials/', blank=True)
     is_featured = models.BooleanField('Destacado', default=False)
 

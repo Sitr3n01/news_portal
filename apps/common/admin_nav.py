@@ -14,11 +14,7 @@ SCHOOL_PERMISSIONS = [
     'school.view_page',
     'school.view_schoolhomeconfig',
     'school.view_schoolfeature',
-    'school.view_teammember',
     'school.view_testimonial',
-    'hiring.view_jobposting',
-    'hiring.view_department',
-    'hiring.view_application',
     'contact.view_contactinquiry',
 ]
 

@@ -248,6 +248,9 @@ def article_list_page(request):
 def newsletter_subscribe(request):
     """Inscricao na newsletter (POST only, suporte HTMX)."""
     form = NewsletterSubscriptionForm(request.POST, request=request)
+    turnstile_size = request.POST.get('turnstile_size', 'flexible')
+    if turnstile_size not in {'normal', 'flexible', 'compact'}:
+        turnstile_size = 'flexible'
     if form.is_valid():
         site = get_current_site(request)
         obj, created = NewsletterSubscription.objects.get_or_create(
@@ -267,7 +270,7 @@ def newsletter_subscribe(request):
         messages.success(request, "Inscrição realizada com sucesso!")
         return safe_referer_redirect(request, 'news:list')
     if request.htmx:
-        return render(request, 'news/partials/newsletter_error.html', {'form': form})
+        return render(request, 'news/partials/newsletter_error.html', {'form': form, 'turnstile_size': turnstile_size})
     messages.error(request, "E-mail inválido. Tente novamente.")
     return safe_referer_redirect(request, 'news:list')
 

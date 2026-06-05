@@ -1,7 +1,7 @@
 from django.contrib.sites.shortcuts import get_current_site
 
 from apps.common.turnstile import get_turnstile_site_key
-
+from apps.news.models import Category
 
 NEWS_PORTAL_NAME = 'Blog da Kelly'
 
@@ -27,7 +27,6 @@ def news_nav_context(request):
     """
     if not request.path.startswith('/news/'):
         return {}
-    from apps.news.models import Category
     return {
         'nav_categories': (
             Category.objects

@@ -15,7 +15,8 @@
 
                 window.turnstile.render(widget, {
                     sitekey: widget.dataset.sitekey,
-                    theme: widget.dataset.theme || 'auto'
+                    theme: widget.dataset.theme || 'auto',
+                    size: widget.dataset.size || 'flexible'
                 });
                 widget.dataset.turnstileRendered = 'true';
             });

@@ -10,12 +10,14 @@
             <div class="fade-in mx-auto flex max-w-7xl min-[1600px]:max-w-[110rem] flex-col justify-center rounded-[2.5rem] p-7 sm:p-10 md:min-h-[56vh] md:p-14">
                 <span class="liquid-chip inline-flex items-center gap-2 self-start rounded-full !border-0 px-4 py-2 text-sm font-bold text-primary-800">
                     <span class="h-2 w-2 rounded-full bg-primary-600"></span>
-                    {{ home_config.hero_badge }}
+                    <span x-text="t('{{ home_config.hero_badge|escapejs }}', '{{ home_config.hero_badge_en|default:home_config.hero_badge|escapejs }}')">{{ home_config.hero_badge }}</span>
                 </span>
-                <h1 class="mt-8 max-w-5xl font-display text-5xl font-extrabold leading-[0.98] tracking-tight text-slate-950 md:text-7xl lg:text-8xl">
+                <h1 class="mt-8 max-w-5xl font-display text-5xl font-extrabold leading-[0.98] tracking-tight text-slate-950 md:text-7xl lg:text-8xl"
+                    x-text="t('{{ home_config.hero_title|escapejs }}', '{{ home_config.hero_title_en|default:home_config.hero_title|escapejs }}')">
                     {{ home_config.hero_title }}
                 </h1>
-                <p class="mt-7 max-w-2xl text-lg leading-relaxed text-slate-600 md:text-xl">
+                <p class="mt-7 max-w-2xl text-lg leading-relaxed text-slate-600 md:text-xl"
+                    x-text="t('{{ home_config.hero_subtitle|escapejs }}', '{{ home_config.hero_subtitle_en|default:home_config.hero_subtitle|escapejs }}')">
                     {{ home_config.hero_subtitle }}
                 </p>
                 <div class="mt-10 flex flex-col gap-3 sm:flex-row">
@@ -45,22 +47,29 @@
         <div class="scroll-glass-sheet mx-auto grid max-w-7xl min-[1600px]:max-w-[110rem] gap-10 rounded-[2.5rem] p-7 sm:p-9 md:min-h-[56vh] lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:p-12"
             data-scroll-sheet>
             <div>
-                <p class="text-sm font-bold uppercase text-primary-700">{{ home_config.visual_eyebrow }}</p>
-                <h2 class="mt-4 font-display text-4xl font-extrabold leading-tight tracking-tight text-slate-950 md:text-6xl">{{ home_config.visual_title }}</h2>
-                <p class="mt-5 max-w-xl text-lg leading-relaxed text-slate-600">{{ home_config.proposal_description }}</p>
+                <p class="text-sm font-bold uppercase text-primary-700"
+                    x-text="t('{{ home_config.visual_eyebrow|escapejs }}', '{{ home_config.visual_eyebrow_en|default:home_config.visual_eyebrow|escapejs }}')">{{ home_config.visual_eyebrow }}</p>
+                <h2 class="mt-4 font-display text-4xl font-extrabold leading-tight tracking-tight text-slate-950 md:text-6xl"
+                    x-text="t('{{ home_config.visual_title|escapejs }}', '{{ home_config.visual_title_en|default:home_config.visual_title|escapejs }}')">{{ home_config.visual_title }}</h2>
+                <p class="mt-5 max-w-xl text-lg leading-relaxed text-slate-600"
+                    x-text="t('{{ home_config.proposal_description|escapejs }}', '{{ home_config.proposal_description_en|default:home_config.proposal_description|escapejs }}')">{{ home_config.proposal_description }}</p>
             </div>
             <div>
                 <div class="stagger-children grid gap-4 sm:grid-cols-2">
                     {% for feature in hero_features %}
                     <div class="liquid-card jump-lift rounded-[1.75rem] p-5">
-                        <p class="font-display text-xl font-bold text-slate-950">{{ feature.title }}</p>
-                        <p class="mt-3 text-sm leading-relaxed text-slate-600">{{ feature.description }}</p>
+                        <p class="font-display text-xl font-bold text-slate-950"
+                            x-text="t('{{ feature.title|escapejs }}', '{{ feature.title_en|default:feature.title|escapejs }}')">{{ feature.title }}</p>
+                        <p class="mt-3 text-sm leading-relaxed text-slate-600"
+                            x-text="t('{{ feature.description|escapejs }}', '{{ feature.description_en|default:feature.description|escapejs }}')">{{ feature.description }}</p>
                     </div>
                     {% endfor %}
                 </div>
                 <div class="liquid-card mt-5 rounded-[1.75rem] p-6">
-                    <h3 class="font-display text-2xl font-bold text-slate-950">{{ home_config.visual_footer_title }}</h3>
-                    <p class="mt-3 leading-relaxed text-slate-600">{{ home_config.visual_footer_text }}</p>
+                    <h3 class="font-display text-2xl font-bold text-slate-950"
+                        x-text="t('{{ home_config.visual_footer_title|escapejs }}', '{{ home_config.visual_footer_title_en|default:home_config.visual_footer_title|escapejs }}')">{{ home_config.visual_footer_title }}</h3>
+                    <p class="mt-3 leading-relaxed text-slate-600"
+                        x-text="t('{{ home_config.visual_footer_text|escapejs }}', '{{ home_config.visual_footer_text_en|default:home_config.visual_footer_text|escapejs }}')">{{ home_config.visual_footer_text }}</p>
                 </div>
             </div>
         </div>
@@ -71,8 +80,10 @@
     <div class="stagger-children mx-auto grid max-w-7xl gap-4 px-4 py-6 sm:px-6 md:grid-cols-4 lg:px-8">
         {% for feature in trust_features %}
         <div class="liquid-card jump-lift rounded-[1.75rem] p-6">
-            <p class="font-display text-lg font-bold text-slate-950">{{ feature.title }}</p>
-            <p class="mt-2 text-sm leading-relaxed text-slate-600">{{ feature.description }}</p>
+            <p class="font-display text-lg font-bold text-slate-950"
+                x-text="t('{{ feature.title|escapejs }}', '{{ feature.title_en|default:feature.title|escapejs }}')">{{ feature.title }}</p>
+            <p class="mt-2 text-sm leading-relaxed text-slate-600"
+                x-text="t('{{ feature.description|escapejs }}', '{{ feature.description_en|default:feature.description|escapejs }}')">{{ feature.description }}</p>
         </div>
         {% endfor %}
     </div>
@@ -81,9 +92,12 @@
 <section class="liquid-section py-14 md:py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="max-w-3xl">
-            <p class="text-sm font-bold uppercase text-primary-700">{{ home_config.proposal_eyebrow }}</p>
-            <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl">{{ course_proposal_title }}</h2>
-            <p class="mt-5 text-lg leading-relaxed text-slate-600">
+            <p class="text-sm font-bold uppercase text-primary-700"
+                x-text="t('{{ home_config.proposal_eyebrow|escapejs }}', '{{ home_config.proposal_eyebrow_en|default:home_config.proposal_eyebrow|escapejs }}')">{{ home_config.proposal_eyebrow }}</p>
+            <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl"
+                x-text="t('{{ course_proposal_title|escapejs }}', '{{ course_proposal_title_en|default:course_proposal_title|escapejs }}')">{{ course_proposal_title }}</h2>
+            <p class="mt-5 text-lg leading-relaxed text-slate-600"
+                x-text="t('{{ course_proposal_description|escapejs }}', '{{ course_proposal_description_en|default:course_proposal_description|escapejs }}')">
                 {{ course_proposal_description }}
             </p>
         </div>
@@ -97,8 +111,10 @@
                             d="M12 3l8 4.5v6.2c0 3.2-3.4 5.8-8 7.3-4.6-1.5-8-4.1-8-7.3V7.5L12 3z" />
                     </svg>
                 </span>
-                <h3 class="mt-5 font-display text-2xl font-bold text-slate-950">{{ feature.title }}</h3>
-                <p class="mt-3 leading-relaxed text-slate-600">{{ feature.description }}</p>
+                <h3 class="mt-5 font-display text-2xl font-bold text-slate-950"
+                    x-text="t('{{ feature.title|escapejs }}', '{{ feature.title_en|default:feature.title|escapejs }}')">{{ feature.title }}</h3>
+                <p class="mt-3 leading-relaxed text-slate-600"
+                    x-text="t('{{ feature.description|escapejs }}', '{{ feature.description_en|default:feature.description|escapejs }}')">{{ feature.description }}</p>
             </article>
             {% endfor %}
         </div>
@@ -108,19 +124,65 @@
 <section class="liquid-section py-14 md:py-20">
     <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8 lg:items-end">
         <div>
-            <p class="text-sm font-bold uppercase text-primary-700">{{ home_config.life_eyebrow }}</p>
-            <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl">{{ home_config.life_title }}</h2>
-            <p class="mt-5 text-lg leading-relaxed text-slate-600">
+            <p class="text-sm font-bold uppercase text-primary-700"
+                x-text="t('{{ home_config.life_eyebrow|escapejs }}', '{{ home_config.life_eyebrow_en|default:home_config.life_eyebrow|escapejs }}')">{{ home_config.life_eyebrow }}</p>
+            <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl"
+                x-text="t('{{ home_config.life_title|escapejs }}', '{{ home_config.life_title_en|default:home_config.life_title|escapejs }}')">{{ home_config.life_title }}</h2>
+            <p class="mt-5 text-lg leading-relaxed text-slate-600"
+                x-text="t('{{ home_config.life_description|escapejs }}', '{{ home_config.life_description_en|default:home_config.life_description|escapejs }}')">
                 {{ home_config.life_description }}
             </p>
         </div>
         <div class="stagger-children grid gap-5 sm:grid-cols-2">
             {% for feature in life_features %}
             <article class="jump-lift min-h-56 rounded-[1.75rem] p-6 {% if feature.tone == 'white' %}liquid-card{% else %}liquid-card liquid-card-dark text-white{% endif %}">
-                <h3 class="font-display text-2xl font-bold">{{ feature.title }}</h3>
-                <p class="mt-4 text-sm leading-relaxed {% if feature.tone == 'white' %}text-slate-600{% else %}text-primary-100{% endif %}">{{ feature.description }}</p>
+                <h3 class="font-display text-2xl font-bold"
+                    x-text="t('{{ feature.title|escapejs }}', '{{ feature.title_en|default:feature.title|escapejs }}')">{{ feature.title }}</h3>
+                <p class="mt-4 text-sm leading-relaxed {% if feature.tone == 'white' %}text-slate-600{% else %}text-primary-100{% endif %}"
+                    x-text="t('{{ feature.description|escapejs }}', '{{ feature.description_en|default:feature.description|escapejs }}')">{{ feature.description }}</p>
             </article>
             {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="liquid-section py-14 md:py-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="scroll-reveal liquid-panel overflow-hidden rounded-[2.25rem]" data-scroll-reveal>
+            <div class="grid lg:grid-cols-[0.88fr_1.12fr]">
+                <figure class="min-h-80 bg-slate-100 dark:bg-slate-900">
+                    <img src="/static/images/kelly-farias-komuniki.jpeg"
+                        alt="Kelly Farias, CEO da Komuniki"
+                        loading="lazy"
+                        class="h-full min-h-80 w-full object-cover object-center">
+                </figure>
+                <div class="flex flex-col justify-center p-7 sm:p-9 md:p-12">
+                    <p class="text-sm font-bold uppercase text-primary-700"
+                        x-text="t('Quem está à frente', 'Who leads Komuniki')">Quem está à frente</p>
+                    <h2 class="mt-4 font-display text-3xl font-bold leading-tight text-slate-950 md:text-5xl"
+                        x-text="t('Kelly Farias, CEO da Komuniki', 'Kelly Farias, CEO of Komuniki')">
+                        Kelly Farias, CEO da Komuniki
+                    </h2>
+                    <p class="mt-5 text-lg leading-relaxed text-slate-600"
+                        x-text="t('Jornalista, atriz, radialista, diretora de produção executiva, editora-chefe, mentora e professora de comunicação, Kelly Farias une palco, mídia, produção cultural e educação para formar pessoas que precisam comunicar com clareza, presença e propósito.', 'Journalist, actress, radio host, executive production director, editor-in-chief, mentor and communication teacher, Kelly Farias brings together stage, media, cultural production and education to train people who need to communicate with clarity, presence and purpose.')">
+                        Jornalista, atriz, radialista, diretora de produção executiva, editora-chefe, mentora e professora de comunicação, Kelly Farias une palco, mídia, produção cultural e educação para formar pessoas que precisam comunicar com clareza, presença e propósito.
+                    </p>
+                    <p class="mt-4 leading-relaxed text-slate-600"
+                        x-text="t('À frente da Komuniki, ela transforma experiência profissional em cursos, mentorias e projetos de impacto para artistas, comunicadores, equipes e jovens em formação.', 'Leading Komuniki, she turns professional experience into courses, mentoring and impact projects for artists, communicators, teams and young people in training.')">
+                        À frente da Komuniki, ela transforma experiência profissional em cursos, mentorias e projetos de impacto para artistas, comunicadores, equipes e jovens em formação.
+                    </p>
+                    <div class="mt-7 flex flex-wrap gap-2">
+                        <span class="rounded-full border border-primary-700/15 bg-white/55 px-3 py-2 text-xs font-bold uppercase text-primary-800 dark:border-white/10 dark:bg-white/10 dark:text-primary-100"
+                            x-text="t('Jornalismo', 'Journalism')">Jornalismo</span>
+                        <span class="rounded-full border border-primary-700/15 bg-white/55 px-3 py-2 text-xs font-bold uppercase text-primary-800 dark:border-white/10 dark:bg-white/10 dark:text-primary-100"
+                            x-text="t('Artes cênicas', 'Performing arts')">Artes cênicas</span>
+                        <span class="rounded-full border border-primary-700/15 bg-white/55 px-3 py-2 text-xs font-bold uppercase text-primary-800 dark:border-white/10 dark:bg-white/10 dark:text-primary-100"
+                            x-text="t('Mentoria', 'Mentoring')">Mentoria</span>
+                        <span class="rounded-full border border-primary-700/15 bg-white/55 px-3 py-2 text-xs font-bold uppercase text-primary-800 dark:border-white/10 dark:bg-white/10 dark:text-primary-100"
+                            x-text="t('Produção executiva', 'Executive production')">Produção executiva</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -129,9 +191,12 @@
 <section class="liquid-section py-14 md:py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="max-w-3xl">
-            <p class="text-sm font-bold uppercase text-primary-700">{{ home_config.testimonials_eyebrow }}</p>
-            <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl">{{ home_config.testimonials_title }}</h2>
-            <p class="mt-5 text-lg leading-relaxed text-slate-600">
+            <p class="text-sm font-bold uppercase text-primary-700"
+                x-text="t('{{ home_config.testimonials_eyebrow|escapejs }}', '{{ home_config.testimonials_eyebrow_en|default:home_config.testimonials_eyebrow|escapejs }}')">{{ home_config.testimonials_eyebrow }}</p>
+            <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl"
+                x-text="t('{{ home_config.testimonials_title|escapejs }}', '{{ home_config.testimonials_title_en|default:home_config.testimonials_title|escapejs }}')">{{ home_config.testimonials_title }}</h2>
+            <p class="mt-5 text-lg leading-relaxed text-slate-600"
+                x-text="t('{{ home_config.testimonials_description|escapejs }}', '{{ home_config.testimonials_description_en|default:home_config.testimonials_description|escapejs }}')">
                 {{ home_config.testimonials_description }}
             </p>
         </div>
@@ -140,7 +205,8 @@
             {% for testimonial in testimonials %}
             <article class="liquid-card jump-lift rounded-[1.75rem] p-7">
                 <div class="text-5xl font-display font-bold leading-none text-primary-600">“</div>
-                <p class="mt-4 leading-relaxed text-slate-700">{{ testimonial.quote }}</p>
+                <p class="mt-4 leading-relaxed text-slate-700"
+                    x-text="t('{{ testimonial.quote|escapejs }}', '{{ testimonial.quote_en|default:testimonial.quote|escapejs }}')">{{ testimonial.quote }}</p>
                 <div class="mt-7 flex items-center gap-4">
                     {% if testimonial.photo %}
                     <img src="{{ testimonial.photo.url }}" alt="{{ testimonial.name }}" loading="lazy"
@@ -156,7 +222,8 @@
                     <div>
                         <p class="font-bold text-slate-950">{{ testimonial.name }}</p>
                         {% if testimonial.relationship %}
-                        <p class="text-sm text-slate-500">{{ testimonial.relationship }}</p>
+                        <p class="text-sm text-slate-500"
+                            x-text="t('{{ testimonial.relationship|escapejs }}', '{{ testimonial.relationship_en|default:testimonial.relationship|escapejs }}')">{{ testimonial.relationship }}</p>
                         {% endif %}
                     </div>
                 </div>
@@ -173,8 +240,10 @@
         <div class="stagger-children grid lg:grid-cols-2">
             <div class="bg-white/35 p-8 md:p-12 dark:bg-white/5">
                 <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Cursos e mentorias', 'Courses and mentoring')">Cursos e mentorias</p>
-                <h2 class="mt-4 font-display text-3xl font-bold text-slate-950 md:text-4xl">{{ home_config.hiring_title }}</h2>
-                <p class="mt-4 leading-relaxed text-slate-600">
+                <h2 class="mt-4 font-display text-3xl font-bold text-slate-950 md:text-4xl"
+                    x-text="t('{{ home_config.hiring_title|escapejs }}', '{{ home_config.hiring_title_en|default:home_config.hiring_title|escapejs }}')">{{ home_config.hiring_title }}</h2>
+                <p class="mt-4 leading-relaxed text-slate-600"
+                    x-text="t('{{ home_config.hiring_description|escapejs }}', '{{ home_config.hiring_description_en|default:home_config.hiring_description|escapejs }}')">
                     {{ home_config.hiring_description }}
                 </p>
                 <a href="{% url 'school:page_detail' 'cursos' %}"
@@ -185,8 +254,10 @@
             </div>
             <div class="bg-[linear-gradient(135deg,#06264f,#0b3a75)] p-8 text-white md:p-12">
                 <p class="text-sm font-bold uppercase text-primary-100" x-text="t('Fale com a Komuniki', 'Talk to Komuniki')">Fale com a Komuniki</p>
-                <h2 class="mt-4 font-display text-3xl font-bold md:text-4xl">{{ home_config.contact_title }}</h2>
-                <p class="mt-4 leading-relaxed text-primary-50">
+                <h2 class="mt-4 font-display text-3xl font-bold md:text-4xl"
+                    x-text="t('{{ home_config.contact_title|escapejs }}', '{{ home_config.contact_title_en|default:home_config.contact_title|escapejs }}')">{{ home_config.contact_title }}</h2>
+                <p class="mt-4 leading-relaxed text-primary-50"
+                    x-text="t('{{ home_config.contact_description|escapejs }}', '{{ home_config.contact_description_en|default:home_config.contact_description|escapejs }}')">
                     {{ home_config.contact_description }}
                 </p>
                 <a href="{% url 'contact:page' %}"

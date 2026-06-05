@@ -43,7 +43,7 @@ class SiteExtensionAdmin(AdminUXMixin, ModelAdmin):
     list_filter_submit = True
     search_fields = ['site__name', 'primary_email']
     ux_list_title = 'Configurações dos sites'
-    ux_list_description = 'Revise identidade, contato público e remetente de newsletter de cada portal.'
+    ux_list_description = 'Revise identidade, contato público e remetente da newsletter usados no front atual.'
     ux_list_icon = 'settings'
     ux_list_actions = [
         {'label': 'Guia de gerenciamento', 'icon': 'admin_panel_settings', 'url': reverse_lazy('admin_management_guide')},
@@ -84,6 +84,28 @@ class SiteExtensionAdmin(AdminUXMixin, ModelAdmin):
             'classes': ('collapse',),
         }),
     ]
+
+    def get_fieldsets(self, request, obj=None):
+        if request.user.is_superuser:
+            return super().get_fieldsets(request, obj)
+        return [
+            ('Site', {
+                'fields': ('site',),
+            }),
+            ('Identidade Visual', {
+                'fields': ('tagline', 'logo', 'favicon'),
+            }),
+            ('Contato', {
+                'fields': ('primary_email', 'phone_number', 'address'),
+            }),
+            ('Newsletter', {
+                'fields': ('newsletter_from_email', 'newsletter_from_name'),
+                'description': (
+                    'Configure o remetente visível para leitores. '
+                    'Servidor SMTP, usuário e senha continuam no .env.prod.'
+                ),
+            }),
+        ]
 
     @admin.display(description='Remetente Newsletter')
     def newsletter_sender(self, obj):

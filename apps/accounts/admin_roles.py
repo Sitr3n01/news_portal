@@ -2,24 +2,25 @@ from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 
 ROLE_TO_GROUP = {
-    'school_admin': 'Administrador Escolar',
+    'school_admin': 'Administrador Komuniki',
     'news_editor': 'Editor de Notícias',
-    'hiring_manager': 'Contratações',
+    'hiring_manager': 'Contratações (guardado)',
     'super_admin': 'Administrador Geral',
 }
 
 ALL_ACTIONS = ('view', 'add', 'change', 'delete')
 
+LEGACY_GROUP_RENAMES = {
+    'Administrador Escolar': 'Administrador Komuniki',
+    'Contratações': 'Contratações (guardado)',
+}
+
 ROLE_PERMISSION_SPECS = {
-    'Administrador Escolar': [
+    'Administrador Komuniki': [
         ('school', 'page', ALL_ACTIONS),
         ('school', 'schoolhomeconfig', ALL_ACTIONS),
         ('school', 'schoolfeature', ALL_ACTIONS),
-        ('school', 'teammember', ALL_ACTIONS),
         ('school', 'testimonial', ALL_ACTIONS),
-        ('hiring', 'department', ALL_ACTIONS),
-        ('hiring', 'jobposting', ALL_ACTIONS),
-        ('hiring', 'application', ('view', 'change')),
         ('contact', 'contactinquiry', ('view', 'change')),
         ('media_library', 'mediafile', ('view', 'add', 'change')),
         ('media_library', 'mediafolder', ('view', 'add', 'change')),
@@ -31,18 +32,10 @@ ROLE_PERMISSION_SPECS = {
         ('news', 'comment', ('view', 'change')),
         ('news', 'newslettersubscription', ('view', 'change')),
         ('news', 'newsletterdelivery', ('view', 'change')),
-        ('news', 'articlelike', ('view',)),
-        ('news', 'articlebookmark', ('view',)),
         ('media_library', 'mediafile', ('view', 'add', 'change')),
         ('media_library', 'mediafolder', ('view', 'add', 'change')),
     ],
-    'Contratações': [
-        ('hiring', 'department', ALL_ACTIONS),
-        ('hiring', 'jobposting', ALL_ACTIONS),
-        ('hiring', 'application', ('view', 'change')),
-        ('contact', 'contactinquiry', ('view', 'change')),
-        ('school', 'schoolhomeconfig', ('view',)),
-    ],
+    'Contratações (guardado)': [],
 }
 
 GENERAL_ADMIN_APP_LABELS = [
@@ -55,6 +48,12 @@ GENERAL_ADMIN_APP_LABELS = [
     'school',
     'sites',
 ]
+
+MANAGED_ROLE_GROUP_NAMES = {
+    *ROLE_TO_GROUP.values(),
+    *LEGACY_GROUP_RENAMES.keys(),
+    'Administrador Geral',
+}
 
 
 def _permission_codenames(model_name, actions):
@@ -92,13 +91,29 @@ def _general_admin_permissions():
     return permissions
 
 
+def _move_legacy_group_users():
+    for legacy_name, target_name in LEGACY_GROUP_RENAMES.items():
+        legacy_group = Group.objects.filter(name=legacy_name).first()
+        if not legacy_group:
+            continue
+
+        target_group, _ = Group.objects.get_or_create(name=target_name)
+        if legacy_group.pk == target_group.pk:
+            continue
+
+        target_group.user_set.add(*legacy_group.user_set.all())
+        legacy_group.permissions.clear()
+
+
 def ensure_admin_role_groups():
+    _move_legacy_group_users()
+
     for group_name, specs in ROLE_PERMISSION_SPECS.items():
         group, _ = Group.objects.get_or_create(name=group_name)
-        group.permissions.add(*_permissions_for_specs(specs))
+        group.permissions.set(_permissions_for_specs(specs))
 
     general_group, _ = Group.objects.get_or_create(name='Administrador Geral')
-    general_group.permissions.add(*_general_admin_permissions())
+    general_group.permissions.set(_general_admin_permissions())
 
     return Group.objects.filter(name__in=[*ROLE_PERMISSION_SPECS.keys(), 'Administrador Geral'])
 
@@ -113,9 +128,7 @@ def sync_user_role_group(user):
     """
     ensure_admin_role_groups()
     target_group_name = ROLE_TO_GROUP.get(getattr(user, 'role', None))
-    stale_role_groups = user.groups.filter(
-        name__in=set(ROLE_TO_GROUP.values()) - {target_group_name}
-    )
+    stale_role_groups = user.groups.filter(name__in=MANAGED_ROLE_GROUP_NAMES - {target_group_name})
     if stale_role_groups.exists():
         user.groups.remove(*stale_role_groups)
     if target_group_name:

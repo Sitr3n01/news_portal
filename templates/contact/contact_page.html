@@ -25,13 +25,6 @@
     .contact-turnstile {
         background: rgba(255, 255, 255, 0.46);
     }
-
-    /* Remove a camada de brilho interna (::before) apenas no card escuro do contato,
-       eliminando o efeito de "bloco dentro de bloco". Mantém fundo, borda, sombra e o
-       lift de hover do card (a animação fica no elemento, não no ::before). */
-    .contact-card-flat::before {
-        display: none;
-    }
 </style>
 {% endblock %}
 
@@ -180,17 +173,6 @@
                 </div>
                 {% endif %}
                 {% endif %}
-
-                <div class="liquid-card liquid-card-dark jump-lift rounded-[1.75rem] p-6 text-white contact-card-flat">
-                    <h2 class="font-display text-xl font-bold">Cursos e mentorias</h2>
-                    <p class="mt-3 text-sm leading-relaxed text-primary-100">
-                        Consulte turmas, formatos, cargas horárias, mentorias e projetos corporativos.
-                    </p>
-                    <a href="{% url 'school:page_detail' 'cursos' %}"
-                        class="jump-lift mt-5 inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-bold text-primary-900 transition-colors hover:bg-primary-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-primary-900">
-                        Conheça os cursos
-                    </a>
-                </div>
             </aside>
         </div>
     </div>

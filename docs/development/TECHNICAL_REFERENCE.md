@@ -513,7 +513,7 @@ Enums:
 Enums para `status`:
 - `RECEIVED` → `REVIEWING` → `SHORTLISTED` → `INTERVIEW` → `REJECTED` / `ACCEPTED`
 
-**Sem ForeignKey(Site)** — vagas são globais. Se no futuro houver multi-site para vagas, será necessária migration.
+**`Department` e `JobPosting` têm `ForeignKey(Site)` + `on_site`** (isolados por site, migration `0006_site_isolation`). `Application` não tem `Site` próprio — herda da vaga via `job.site`. Currículos usam nome UUID (`resume_upload_path`). Detalhes em [APP_HIRING.md](APP_HIRING.md).
 
 #### Form: ApplicationForm
 
@@ -526,7 +526,7 @@ MAX_SIZE = 5 * 1024 * 1024  # 5 MB
 # Rejeita se extensão não permitida ou arquivo > 5MB
 ```
 
-**Ponto de atenção:** A validação de MIME usa `file.content_type` (header HTTP), que pode ser forjado pelo cliente. Para segurança completa em prod, deveria usar `python-magic` para inspecionar bytes reais. Aceitável dado o contexto escolar.
+**Atualização:** `clean_resume` valida em três camadas — tipo MIME, extensão **e magic bytes** (`%PDF-`, `PK\x03\x04`, `\xd0\xcf\x11\xe0`). Os magic bytes são a defesa real, pois MIME e extensão são falsificáveis. Limite de 5 MB. Ver [APP_HIRING.md](APP_HIRING.md) e [SEGURANCA.md](SEGURANCA.md).
 
 #### Views
 
@@ -725,42 +725,37 @@ Não usa full-text search do PostgreSQL — usa LIKE. Para volumes maiores, migr
 
 #### Newsletter (`apps/news/newsletter.py`)
 
-**`send_article_newsletter(article, site=None)`:**
+> ⚠️ **Modelo atual = fila de entregas (`NewsletterDelivery`), não envio síncrono.** Documento canônico: **[FLUXO_NEWSLETTER.md](FLUXO_NEWSLETTER.md)**.
 
-1. Obtém `SiteExtension` para montar from_email
-2. Busca `NewsletterSubscription.objects.filter(site=site, is_active=True)`
-3. Renderiza `news/email/newsletter_article.html` para cada subscriber
-4. Envia via `send_mail()` individual (não usa `send_mass_mail` — permite personalização futura)
-5. Loga sucesso/falha via `logging.getLogger('apps.news.newsletter')`
+Funções principais (todas em `apps/news/newsletter.py`):
 
-**`get_newsletter_context(article, site=None, request=None)`:**
+- **`process_pending_newsletters(...)`** — ponto de entrada. Enfileira entregas pendentes para artigos publicados ainda não concluídos, envia até `batch_size`, e marca artigos completos. Aceita `site_id`, `article_id`, `retry_failed`, `dry_run`, `include_marked_sent`.
+- **`enqueue_article_newsletter(article)`** — cria `NewsletterDelivery` PENDING (via `get_or_create`) para cada inscrito ativo do site do artigo.
+- **`send_newsletter_delivery(delivery)`** — envia uma entrega (`EmailMultiAlternatives` HTML+texto); isola falhas por destinatário (`SENT`/`FAILED`/`SKIPPED`).
+- **`_mark_article_if_complete(article_id)`** — carimba `newsletter_sent_at` só quando não há entrega `pending`/`failed` em aberto.
+- **`send_article_newsletter(article)`** — wrapper de compatibilidade; retorna a contagem de enviados.
 
-Para determinar `base_url`:
-- Se `request` fornecido (admin preview): usa `request.build_absolute_uri('/')`
-- Se não (envio real): usa `f"https://{site.domain}"` — depende do domínio estar correto no banco
+**`get_newsletter_context(article, site=None, request=None, subscription=None)`** — determina `base_url`:
+- Com `request` (preview do admin): `request.get_host()` (links navegáveis no browser).
+- Sem `request` (envio real): `f"{protocol}://{site.domain}"` — depende do `domain` correto no banco.
 
-**Ponto crítico:** Se o `domain` do `Site` no banco estiver incorreto (ex: `example.com`), os links no email ficam quebrados. Verificar em `admin → Sites`.
+**Ponto crítico:** Se o `domain` do `Site` estiver incorreto (ex: `example.com`), os links do e-mail quebram. Verificar em `admin → Sites`.
 
 #### Signals (`apps/news/signals.py`)
 
+> ⚠️ O signal **não envia e-mail**. Ele apenas registra que há newsletter pendente. O envio é feito depois, pela fila (ver [FLUXO_NEWSLETTER.md](FLUXO_NEWSLETTER.md)).
+
 ```python
 @receiver(post_save, sender=Article)
-def auto_send_newsletter_on_publish(sender, instance, created, **kwargs):
+def mark_newsletter_pending_on_publish(sender, instance, **kwargs):
     if instance.status != Article.Status.PUBLISHED:
         return
     if instance.newsletter_sent_at is not None:
-        return   # Já enviado — evita re-send
-    
-    # Envia em thread separada? Não — é síncrono
-    send_article_newsletter(instance)
-    
-    # Usa .update() para não re-triggar o signal
-    Article.objects.filter(pk=instance.pk).update(newsletter_sent_at=timezone.now())
+        return
+    logger.info('Newsletter pendente para artigo pk=%s ... Rode send_pending_newsletters para processar.', ...)
 ```
 
-**Atenção de performance:** O envio é **síncrono** — a request do admin que publicou o artigo fica bloqueada enquanto todos os emails são enviados. Para listas grandes de subscribers, implementar Celery/task queue.
-
-**Atenção de re-entrância:** O `.update()` no final evita que o signal se chame recursivamente. **Nunca substitua por `instance.save()`** — causaria loop infinito.
+**Por que não envia no signal:** publicar não deve bloquear a request do admin enviando e-mails. O signal só sinaliza "pendente"; o disparo real é o comando `send_pending_newsletters` (cron) ou a ação do admin, ambos processando a fila `NewsletterDelivery` em lote, com isolamento de falha por destinatário.
 
 #### Feeds (`apps/news/feeds.py`)
 
@@ -1029,7 +1024,7 @@ Para análise de queries lentas: `EXPLAIN ANALYZE` no PostgreSQL ou `django-debu
 
 ### Fluxos de Email
 
-1. **Newsletter de artigo** — automático ao publicar, ou manual via admin action
+1. **Newsletter de artigo** — fila (`NewsletterDelivery`) processada pelo comando `send_pending_newsletters` (cron) ou pela ação do admin. Publicar apenas marca como pendente. Ver [FLUXO_NEWSLETTER.md](FLUXO_NEWSLETTER.md)
 2. **Password reset** — link com token de 1 hora
 3. **Notificações admin** — não implementadas ainda
 
@@ -1161,20 +1156,19 @@ location /media/ {
 ```
 Article.save() com status=PUBLISHED e newsletter_sent_at=None
     └─► post_save signal
-        └─► auto_send_newsletter_on_publish()
-            ├─► send_article_newsletter(article)
-            │   ├─► Busca NewsletterSubscription ativos
-            │   ├─► Renderiza email template
-            │   └─► Envia via SMTP (SÍNCRONO — bloqueia request)
-            └─► Article.objects.filter(pk=...).update(newsletter_sent_at=now())
+        └─► mark_newsletter_pending_on_publish()
+            └─► logger.info("Newsletter pendente...")   # SÓ registra; NÃO envia
+
+Envio real (separado): comando send_pending_newsletters OU ação do admin
+    └─► process_pending_newsletters() → fila NewsletterDelivery → SMTP em lote
 ```
 
 **Efeitos colaterais ao salvar um artigo:**
 1. `content` é sanitizado (no `save()` do model)
 2. `published_at` é setado se primeira publicação
-3. Newsletter é enviada se primeira publicação (via signal)
+3. Newsletter é apenas **marcada como pendente** (via signal) — o envio é uma etapa separada (fila)
 
-**Para evitar a newsletter ao publicar** (ex: em testes, migrações):
+**Para pular o signal ao publicar** (ex: em testes, migrações):
 ```python
 # Opção 1: usar .update() em vez de .save()
 Article.objects.filter(pk=pk).update(status='PUBLISHED', published_at=now())

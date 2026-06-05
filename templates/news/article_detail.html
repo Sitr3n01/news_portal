@@ -1,12 +1,12 @@
 {% extends 'base_news.html' %}
 {% load sanitize %}
 
-{% block title %}{{ article.meta_title|default:article.title }} - {{ current_site.name }}{% endblock %}
+{% block title %}{{ article.meta_title|default:article.title }} - {{ news_portal_name }}{% endblock %}
 {% block meta_description %}{{ article.meta_description|default:article.excerpt }}{% endblock %}
 
 {# ── Open Graph overrides ── #}
 {% block og_tags %}
-<meta property="og:site_name" content="{{ current_site.name }}">
+<meta property="og:site_name" content="{{ news_portal_name }}">
 <meta property="og:type" content="article">
 <meta property="og:title" content="{{ article.meta_title|default:article.title }}">
 <meta property="og:description" content="{{ article.meta_description|default:article.excerpt }}">
@@ -50,7 +50,7 @@
   },{% endif %}
   "publisher": {
     "@type": "Organization",
-    "name": "{{ current_site.name|escapejs }}"
+    "name": "{{ news_portal_name|escapejs }}"
   },
   "mainEntityOfPage": {
     "@type": "WebPage",
@@ -354,16 +354,19 @@
                         Gostou? Inscreva-se e receba minhas notícias mais recentes
                     </h3>
                     <form hx-post="{% url 'news:newsletter_subscribe' %}" hx-target="this" hx-swap="outerHTML"
-                        class="flex flex-col sm:flex-row gap-3 justify-center max-w-sm mx-auto">
+                        class="mx-auto flex max-w-md flex-col gap-3">
                         {% csrf_token %}
-                        <input name="email" type="email" required
-                            :placeholder="t('Insira seu endereço de e-mail', 'Enter your email address')"
-                            placeholder="Insira seu endereço de e-mail"
-                            class="flex-1 rounded-full border border-slate-300 bg-transparent px-5 py-2.5 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary dark:border-slate-700 dark:text-white dark:placeholder-slate-400 font-ui text-sm outline-none transition-all">
-                        <button type="submit"
-                            class="rounded-full bg-slate-900 dark:bg-white px-8 py-2.5 font-bold text-white dark:text-black transition-colors hover:opacity-90 font-ui text-sm shadow-sm">
-                            <span x-text="t('Assinar', 'Subscribe')">Assinar</span>
-                        </button>
+                        <div class="flex flex-col gap-3 sm:flex-row">
+                            <input name="email" type="email" required
+                                :placeholder="t('Insira seu endereço de e-mail', 'Enter your email address')"
+                                placeholder="Insira seu endereço de e-mail"
+                                class="flex-1 rounded-full border border-slate-300 bg-transparent px-5 py-2.5 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary dark:border-slate-700 dark:text-white dark:placeholder-slate-400 font-ui text-sm outline-none transition-all">
+                            <button type="submit"
+                                class="rounded-full bg-slate-900 dark:bg-white px-8 py-2.5 font-bold text-white dark:text-black transition-colors hover:opacity-90 font-ui text-sm shadow-sm">
+                                <span x-text="t('Assinar', 'Subscribe')">Assinar</span>
+                            </button>
+                        </div>
+                        {% include 'news/partials/newsletter_turnstile_fields.html' %}
                     </form>
                 </div>
 

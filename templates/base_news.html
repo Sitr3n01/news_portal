@@ -13,19 +13,19 @@
         }
     </script>
 
-    <title>{% block title %}{{ site_settings.tagline|default:current_site.name }}{% endblock %}</title>
+    <title>{% block title %}{{ news_portal_name }}{% endblock %}</title>
 
-    <meta name="description" content="{% block meta_description %}{{ site_settings.tagline }}{% endblock %}">
+    <meta name="description" content="{% block meta_description %}Conteúdos, notícias e bastidores da Komuniki com Kelly Farias.{% endblock %}">
     {% if site_settings.favicon %}
     <link rel="icon" href="{{ site_settings.favicon.url }}">
     {% endif %}
 
     <!-- Open Graph -->
     {% block og_tags %}
-    <meta property="og:site_name" content="{{ current_site.name }}">
+    <meta property="og:site_name" content="{{ news_portal_name }}">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="{% block og_title %}{{ current_site.name }}{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}{{ site_settings.tagline }}{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}{{ news_portal_name }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Conteúdos, notícias e bastidores da Komuniki com Kelly Farias.{% endblock %}">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
     {% block og_image %}{% endblock %}
     {% endblock %}
@@ -33,14 +33,14 @@
     <!-- Twitter Cards -->
     {% block twitter_tags %}
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{% block twitter_title %}{{ current_site.name }}{% endblock %}">
-    <meta name="twitter:description" content="{% block twitter_description %}{{ site_settings.tagline }}{% endblock %}">
+    <meta name="twitter:title" content="{% block twitter_title %}{{ news_portal_name }}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Conteúdos, notícias e bastidores da Komuniki com Kelly Farias.{% endblock %}">
     {% block twitter_image %}{% endblock %}
     {% endblock %}
 
     <!-- Canonical & RSS -->
     <link rel="canonical" href="{{ request.build_absolute_uri }}">
-    <link rel="alternate" type="application/rss+xml" title="{{ current_site.name }} RSS" href="{% url 'news:feed' %}">
+    <link rel="alternate" type="application/rss+xml" title="{{ news_portal_name }} RSS" href="{% url 'news:feed' %}">
 
     {% block json_ld %}{% endblock %}
 
@@ -196,6 +196,7 @@
         {% include 'components/footer_news.html' %}
     </div>
 
+    {% include 'components/turnstile_script.html' %}
     {% block extra_js %}{% endblock %}
 </body>
 

@@ -5,12 +5,11 @@
             <div class="lg:col-span-4">
                 <div class="flex min-w-0 items-center gap-2 mb-4 text-slate-900 dark:text-white">
                     <span class="material-symbols-outlined shrink-0 text-[24px] text-primary">newspaper</span>
-                    <span class="min-w-0 break-words font-bold text-lg font-display">{{ current_site.name|default:"The Chronicle" }}</span>
+                    <span class="min-w-0 break-words font-bold text-lg font-display">{{ news_portal_name }}</span>
                 </div>
                 <p class="text-sm text-slate-500 leading-relaxed font-ui mb-6"
-                    x-text="t('Jornalismo independente para o intelectual moderno. Dedicado à verdade, clareza e profundidade.', 'Independent journalism for the modern intellectual. Dedicated to truth, clarity, and depth.')">
-                    {{ site_settings.tagline|default:"Independent journalism for the modern intellectual. Dedicated to
-                    truth, clarity, and depth." }}
+                    x-text="t('Conteúdos, notícias e bastidores da Komuniki com Kelly Farias.', 'News, stories, and Komuniki updates with Kelly Farias.')">
+                    Conteúdos, notícias e bastidores da Komuniki com Kelly Farias.
                 </p>
 
                 <h6 class="font-ui text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white mb-4"
@@ -25,12 +24,6 @@
                         </svg>
                     </a>
                     {% endif %}
-                    <a class="hover:text-primary transition-colors" href="#"><span class="sr-only">Twitter</span><svg
-                            class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path
-                                d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84">
-                            </path>
-                        </svg></a>
                 </div>
             </div>
 
@@ -63,34 +56,24 @@
                 <h6 class="font-ui text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white mb-4"
                     x-text="t('Fale Conosco', 'Contact Us')">Fale Conosco</h6>
                 <ul class="flex flex-col gap-3 font-ui text-sm text-slate-500">
+                    {% if site_settings and site_settings.address %}
                     <li class="flex items-start gap-3">
                         <span
                             class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">location_on</span>
-                        <span>Edifício {{ current_site.name|default:"The Chronicle" }}, 125<br>Avenida Principal,
-                            Centro<br>Nova York, NY 10001</span>
-                    </li>
-                    {% if site_settings.contact_email %}
-                    <li class="flex items-start gap-3">
-                        <span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">mail</span>
-                        <a href="mailto:{{ site_settings.contact_email }}"
-                            class="break-all hover:text-primary transition-colors">{{ site_settings.contact_email }}</a>
-                    </li>
-                    {% else %}
-                    <li class="flex items-start gap-3">
-                        <span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">mail</span>
-                        <a href="mailto:contato@exemplo.com"
-                            class="break-all hover:text-primary transition-colors">contato@exemplo.com</a>
+                        <span class="whitespace-pre-line">{{ site_settings.address }}</span>
                     </li>
                     {% endif %}
-                    {% if site_settings.phone_number %}
+                    {% if site_settings and site_settings.primary_email %}
+                    <li class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">mail</span>
+                        <a href="mailto:{{ site_settings.primary_email }}"
+                            class="break-all hover:text-primary transition-colors">{{ site_settings.primary_email }}</a>
+                    </li>
+                    {% endif %}
+                    {% if site_settings and site_settings.phone_number %}
                     <li class="flex items-start gap-3">
                         <span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">call</span>
                         <span>{{ site_settings.phone_number }}</span>
-                    </li>
-                    {% else %}
-                    <li class="flex items-start gap-3">
-                        <span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">call</span>
-                        <span>+55 (11) 9999-9999</span>
                     </li>
                     {% endif %}
                 </ul>
@@ -99,7 +82,7 @@
 
         <div
             class="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-gray-100 dark:border-gray-800">
-            <p class="font-ui text-xs text-slate-400 mb-4 md:mb-0">© {% now "Y" %} {{ current_site.name }}. <span
+            <p class="font-ui text-xs text-slate-400 mb-4 md:mb-0">© {% now "Y" %} {{ news_portal_name }}. <span
                     x-text="t('Todos os direitos reservados.', 'All rights reserved.')">All rights reserved.</span></p>
             <div class="flex flex-wrap justify-center gap-x-6 gap-y-2 font-ui text-xs text-slate-400 md:justify-end">
                 <a class="hover:text-primary transition-colors" href="{% url 'school:privacy' %}"><span

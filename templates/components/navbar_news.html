@@ -9,7 +9,7 @@
                 </div>
                 <h1
                     class="min-w-0 max-w-[9rem] truncate text-lg font-bold leading-none text-slate-900 transition-colors group-hover:text-primary dark:text-white sm:max-w-[18rem] sm:text-xl md:max-w-none md:text-2xl">
-                    {{ current_site.name|default:"The Chronicle" }}
+                    {{ news_portal_name }}
                 </h1>
             </a>
         </div>
@@ -71,8 +71,8 @@
             <!-- Link to School -->
             <a href="{% url 'school:home' %}"
                 class="hidden lg:block font-ui text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-white hover:text-primary transition-colors"
-                x-text="t('Escola de Comunicação', 'School of Communication')">
-                Escola de Comunicação
+                x-text="t('Komuniki', 'Komuniki')">
+                Komuniki
             </a>
 
             <!-- Subscribe Button -->
@@ -191,8 +191,8 @@
 
             <a href="{% url 'school:home' %}"
                 class="font-ui text-sm font-semibold uppercase tracking-wider text-slate-500 hover:text-primary"
-                x-text="t('Ir para a Escola de Comunicação', 'Go to School of Communication')">
-                Ir para a Escola de Comunicação
+                x-text="t('Ir para a Komuniki', 'Go to Komuniki')">
+                Ir para a Komuniki
             </a>
         </div>
     </div>

@@ -2,12 +2,14 @@ from django.contrib.syndication.views import Feed
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
+from apps.common.context_processors import NEWS_PORTAL_NAME
+
 from .models import Article, Category
 
 
 class LatestArticlesFeed(Feed):
-    title = 'Portal de Notícias - Últimas Notícias'
-    description = 'As últimas notícias e eventos da nossa instituição.'
+    title = f'{NEWS_PORTAL_NAME} - Últimas publicações'
+    description = 'Conteúdos, notícias e bastidores da Komuniki com Kelly Farias.'
 
     def link(self):
         return reverse('news:list')
@@ -42,7 +44,7 @@ class CategoryFeed(Feed):
         return get_object_or_404(Category, slug=slug)
 
     def title(self, obj):
-        return f'Portal de Notícias - {obj.name}'
+        return f'{NEWS_PORTAL_NAME} - {obj.name}'
 
     def link(self, obj):
         return reverse('news:category_detail', kwargs={'slug': obj.slug})

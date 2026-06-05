@@ -4,27 +4,28 @@
 {% block meta_description %}Informações sobre privacidade, uso de dados e canais de contato de {{ current_site.name }}.{% endblock %}
 
 {% block content %}
-<section class="bg-[#f8faf7] py-16 md:py-24">
+<section class="liquid-section py-16 md:py-24">
     <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-        <p class="text-sm font-bold uppercase tracking-[0.2em] text-primary-700">Privacidade</p>
-        <h1 class="mt-4 font-display text-4xl font-bold tracking-tight text-slate-950 md:text-6xl">Política de privacidade e termos de uso</h1>
+        <p class="text-sm font-bold uppercase text-primary-700">Privacidade</p>
+        <h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-slate-950 md:text-6xl">Política de privacidade e termos de uso</h1>
         <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
             Transparência sobre como tratamos informações enviadas por formulários, candidaturas e interações essenciais do site.
         </p>
     </div>
 </section>
 
-<section class="bg-white py-12 md:py-16">
+<section class="liquid-section py-12 md:py-16">
     <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <article class="school-prose text-lg">
+        <article class="scroll-reveal liquid-panel school-prose rounded-[2.25rem] p-6 text-lg md:p-10"
+            data-scroll-reveal>
             <h2>Uso do site</h2>
             <p>
-                Ao navegar no site institucional de <strong>{{ current_site.name }}</strong>, você concorda em utilizar os canais disponíveis de maneira respeitosa e compatível com sua finalidade educacional e institucional.
+                Ao navegar no site institucional de <strong>{{ current_site.name }}</strong>, você concorda em utilizar os canais disponíveis de maneira respeitosa e compatível com sua finalidade educacional, cultural e institucional.
             </p>
 
             <h2>Dados enviados por formulários</h2>
             <p>
-                Os formulários de contato e candidatura coletam apenas as informações necessárias para responder mensagens, registrar solicitações e conduzir processos relacionados à escola.
+                Os formulários de contato coletam apenas as informações necessárias para responder mensagens, registrar solicitações e conduzir conversas sobre cursos, mentorias, projetos e atendimento institucional.
             </p>
             <p>
                 Essas informações são usadas internamente pela equipe responsável e não devem ser comercializadas ou utilizadas para finalidades incompatíveis com o contato solicitado.
@@ -35,17 +36,17 @@
                 O sistema pode utilizar cookies técnicos para segurança, autenticação, proteção contra CSRF e funcionamento básico da plataforma. Esses recursos ajudam a manter a experiência estável e segura.
             </p>
 
-            <h2>Candidaturas</h2>
+            <h2>Candidaturas e arquivos enviados</h2>
             <p>
-                Dados enviados em vagas abertas, incluindo currículo, são tratados como informações sensíveis de processo seletivo e devem ser acessados apenas por pessoas autorizadas.
+                Caso formulários de candidatura ou envio de arquivos sejam utilizados em algum processo futuro, os dados recebidos serão tratados como informações sensíveis e acessados apenas por pessoas autorizadas.
             </p>
 
             <h2>Solicitações e contato</h2>
             <p>
-                Para solicitar informações, revisar dados enviados ou pedir remoção de registros quando aplicável, utilize os canais oficiais da escola.
+                Para solicitar informações, revisar dados enviados ou pedir remoção de registros quando aplicável, utilize os canais oficiais da Komuniki.
             </p>
 
-            <div class="mt-10 rounded-3xl border border-slate-200/70 bg-[#f8faf7] p-6 text-base">
+            <div class="liquid-card mt-10 rounded-[1.75rem] p-6 text-base">
                 <p class="mb-0 text-slate-600">
                     Última atualização: {% now "d/m/Y" %}. Mudanças futuras nesta página buscarão melhorar clareza, segurança e transparência.
                 </p>

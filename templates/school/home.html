@@ -1,105 +1,95 @@
 {% extends 'base_school.html' %}
 
-{% block title %}{{ current_site.name }} - {{ home_config.hero_badge }}{% endblock %}
+{% block title %}{{ current_site.name }} - {{ home_config.hero_title }}{% endblock %}
 {% block meta_description %}{{ home_config.meta_description|default:site_settings.tagline|default:home_config.hero_subtitle }}{% endblock %}
 
 {% block content %}
-<section class="relative overflow-hidden bg-[#f8faf7]">
-    <div class="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 md:py-20 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-24">
-        <div class="fade-in">
-            <span class="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-white px-4 py-2 text-sm font-bold text-primary-700 shadow-sm">
-                <span class="h-2 w-2 rounded-full bg-primary-500"></span>
-                {{ home_config.hero_badge }}
-            </span>
-            <h1 class="mt-7 max-w-4xl font-display text-4xl font-extrabold leading-tight tracking-tight text-slate-950 md:text-6xl lg:text-7xl">
-                {{ home_config.hero_title }}
-            </h1>
-            <p class="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 md:text-xl">
-                {{ home_config.hero_subtitle }}
-            </p>
-            <div class="mt-9 flex flex-col gap-3 sm:flex-row">
-                <a href="{% url 'contact:page' %}"
-                    class="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-7 py-3 text-base font-bold text-white shadow-xl shadow-primary-600/20 transition-all hover:-translate-y-0.5 hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
-                    Fale com a escola
-                </a>
-                <a href="{% url 'school:team_list' %}"
-                    class="inline-flex min-h-12 items-center justify-center rounded-full border border-slate-200 bg-white px-7 py-3 text-base font-bold text-slate-900 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary-200 hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
-                    Conheça nossa equipe
-                </a>
-            </div>
-        </div>
-
-        <div class="relative fade-in" style="animation-delay: 0.12s;">
-            <div class="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-2xl shadow-slate-900/10">
-                <div class="bg-slate-950 p-6 text-white sm:p-8">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <p class="text-sm font-bold uppercase tracking-[0.2em] text-primary-300">{{ home_config.visual_eyebrow }}</p>
-                            <h2 class="mt-3 font-display text-2xl font-bold sm:text-3xl">{{ home_config.visual_title }}</h2>
-                        </div>
-                        <div class="hidden h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-primary-200 sm:flex">
-                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18s-3.332.477-4.5 1.253" />
-                            </svg>
-                        </div>
-                    </div>
+<section class="hero-glass-stack">
+    <div class="hero-impact-sheet sticky top-20 z-10 flex min-h-[calc(100svh-5rem)] items-center">
+        <div class="mx-auto w-full max-w-7xl min-[1600px]:max-w-[110rem] px-4 py-12 sm:px-6 lg:px-8">
+            <div class="fade-in mx-auto flex max-w-7xl min-[1600px]:max-w-[110rem] flex-col justify-center rounded-[2.5rem] p-7 sm:p-10 md:min-h-[56vh] md:p-14">
+                <span class="liquid-chip inline-flex items-center gap-2 self-start rounded-full !border-0 px-4 py-2 text-sm font-bold text-primary-800">
+                    <span class="h-2 w-2 rounded-full bg-primary-600"></span>
+                    {{ home_config.hero_badge }}
+                </span>
+                <h1 class="mt-8 max-w-5xl font-display text-5xl font-extrabold leading-[0.98] tracking-tight text-slate-950 md:text-7xl lg:text-8xl">
+                    {{ home_config.hero_title }}
+                </h1>
+                <p class="mt-7 max-w-2xl text-lg leading-relaxed text-slate-600 md:text-xl">
+                    {{ home_config.hero_subtitle }}
+                </p>
+                <div class="mt-10 flex flex-col gap-3 sm:flex-row">
+                    <a href="{% url 'contact:page' %}"
+                        class="jump-lift inline-flex min-h-12 items-center justify-center rounded-full bg-primary-700 px-7 py-3 text-base font-bold text-white shadow-xl shadow-primary-900/15 transition-all hover:bg-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                        Conte-nos mais
+                    </a>
+                    <a href="{% url 'school:page_detail' 'cursos' %}"
+                        class="liquid-chip jump-lift inline-flex min-h-12 items-center justify-center rounded-full px-7 py-3 text-base font-bold text-primary-900 transition-all hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                        Conheça os cursos
+                    </a>
                 </div>
-                <div class="grid gap-4 p-5 sm:grid-cols-2 sm:p-6">
+            </div>
+            <a href="#hero-support-sheet"
+                class="scroll-cue liquid-chip mx-auto mt-8 flex h-12 w-12 items-center justify-center rounded-full text-primary-800 transition-colors hover:text-primary-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4"
+                aria-label="Rolar para as informações complementares">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m0 0l-6-6m6 6l6-6" />
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <div id="hero-support-sheet" class="hero-support-sheet flex min-h-[calc(92svh-5rem)] scroll-mt-24 items-center px-4 py-16 sm:px-6 md:py-20 lg:px-8">
+        <div class="scroll-glass-sheet mx-auto grid max-w-7xl min-[1600px]:max-w-[110rem] gap-10 rounded-[2.5rem] p-7 sm:p-9 md:min-h-[56vh] lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:p-12"
+            data-scroll-sheet>
+            <div>
+                <p class="text-sm font-bold uppercase text-primary-700">{{ home_config.visual_eyebrow }}</p>
+                <h2 class="mt-4 font-display text-4xl font-extrabold leading-tight tracking-tight text-slate-950 md:text-6xl">{{ home_config.visual_title }}</h2>
+                <p class="mt-5 max-w-xl text-lg leading-relaxed text-slate-600">{{ home_config.proposal_description }}</p>
+            </div>
+            <div>
+                <div class="stagger-children grid gap-4 sm:grid-cols-2">
                     {% for feature in hero_features %}
-                    <div class="rounded-3xl border border-slate-200 {% if forloop.first %}bg-[#f8faf7]{% else %}bg-white{% endif %} p-5">
-                        <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-100 text-primary-700">
-                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                    d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m7-6a4 4 0 11-8 0 4 4 0 018 0zm6 2a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </span>
-                        <h3 class="mt-4 font-display text-xl font-bold text-slate-950">{{ feature.title }}</h3>
-                        <p class="mt-2 text-sm leading-relaxed text-slate-600">{{ feature.description }}</p>
+                    <div class="liquid-card jump-lift rounded-[1.75rem] p-5">
+                        <p class="font-display text-xl font-bold text-slate-950">{{ feature.title }}</p>
+                        <p class="mt-3 text-sm leading-relaxed text-slate-600">{{ feature.description }}</p>
                     </div>
                     {% endfor %}
-                    <div class="rounded-3xl border border-slate-200 bg-white p-5 sm:col-span-2">
-                        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                                <h3 class="font-display text-xl font-bold text-slate-950">{{ home_config.visual_footer_title }}</h3>
-                                <p class="mt-2 text-sm leading-relaxed text-slate-600">{{ home_config.visual_footer_text }}</p>
-                            </div>
-                            <a href="{% url 'contact:page' %}" class="inline-flex shrink-0 items-center justify-center rounded-full bg-slate-950 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
-                                Conversar
-                            </a>
-                        </div>
-                    </div>
+                </div>
+                <div class="liquid-card mt-5 rounded-[1.75rem] p-6">
+                    <h3 class="font-display text-2xl font-bold text-slate-950">{{ home_config.visual_footer_title }}</h3>
+                    <p class="mt-3 leading-relaxed text-slate-600">{{ home_config.visual_footer_text }}</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<section class="border-y border-slate-200/80 bg-white">
-    <div class="mx-auto grid max-w-7xl gap-4 px-4 py-6 sm:px-6 md:grid-cols-4 lg:px-8">
+<section class="liquid-section">
+    <div class="stagger-children mx-auto grid max-w-7xl gap-4 px-4 py-6 sm:px-6 md:grid-cols-4 lg:px-8">
         {% for feature in trust_features %}
-        <div class="rounded-3xl border border-slate-200/70 bg-[#f8faf7] p-5 shadow-sm">
+        <div class="liquid-card jump-lift rounded-[1.75rem] p-6">
             <p class="font-display text-lg font-bold text-slate-950">{{ feature.title }}</p>
-            <p class="mt-1 text-sm leading-relaxed text-slate-600">{{ feature.description }}</p>
+            <p class="mt-2 text-sm leading-relaxed text-slate-600">{{ feature.description }}</p>
         </div>
         {% endfor %}
     </div>
 </section>
 
-<section class="bg-[#f8faf7] py-16 md:py-24">
+<section class="liquid-section py-14 md:py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="max-w-3xl">
-            <p class="text-sm font-bold uppercase tracking-[0.2em] text-primary-700">{{ home_config.proposal_eyebrow }}</p>
-            <h2 class="mt-3 font-display text-3xl font-bold tracking-tight text-slate-950 md:text-5xl">{{ home_config.proposal_title }}</h2>
+            <p class="text-sm font-bold uppercase text-primary-700">{{ home_config.proposal_eyebrow }}</p>
+            <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl">{{ course_proposal_title }}</h2>
             <p class="mt-5 text-lg leading-relaxed text-slate-600">
-                {{ home_config.proposal_description }}
+                {{ course_proposal_description }}
             </p>
         </div>
 
-        <div class="mt-11 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div class="stagger-children mt-11 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {% for feature in proposal_features %}
-            <article class="hover-lift rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm">
-                <span class="flex h-12 w-12 items-center justify-center rounded-2xl {% if feature.tone == 'amber' %}bg-amber-100 text-amber-700{% elif feature.tone == 'slate' %}bg-slate-100 text-slate-800{% else %}bg-primary-100 text-primary-700{% endif %}">
+            <article class="liquid-card jump-lift rounded-[1.75rem] p-6">
+                <span class="flex h-12 w-12 items-center justify-center rounded-lg {% if feature.tone == 'slate' %}bg-slate-100 text-slate-800{% else %}bg-primary-100 text-primary-700{% endif %}">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                             d="M12 3l8 4.5v6.2c0 3.2-3.4 5.8-8 7.3-4.6-1.5-8-4.1-8-7.3V7.5L12 3z" />
@@ -113,104 +103,52 @@
     </div>
 </section>
 
-<section class="bg-slate-950 py-16 text-white md:py-24">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
-            <div>
-                <p class="text-sm font-bold uppercase tracking-[0.2em] text-primary-300">{{ home_config.life_eyebrow }}</p>
-                <h2 class="mt-3 font-display text-3xl font-bold tracking-tight md:text-5xl">{{ home_config.life_title }}</h2>
-                <p class="mt-5 text-lg leading-relaxed text-slate-300">
-                    {{ home_config.life_description }}
-                </p>
-            </div>
-            <div class="grid gap-5 sm:grid-cols-2">
-                {% for feature in life_features %}
-                <article class="min-h-64 rounded-3xl border border-white/10 {% if feature.tone == 'white' %}bg-white text-slate-950{% else %}bg-white/10{% endif %} p-6">
-                    <span class="flex h-12 w-12 items-center justify-center rounded-2xl {% if feature.tone == 'amber' %}bg-white/10 text-amber-200{% elif feature.tone == 'white' %}bg-primary-100 text-primary-700{% else %}bg-primary-400/20 text-primary-200{% endif %}">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6h16M4 12h16M4 18h10" />
-                        </svg>
-                    </span>
-                    <h3 class="mt-16 font-display text-2xl font-bold">{{ feature.title }}</h3>
-                    <p class="mt-3 text-sm leading-relaxed {% if feature.tone == 'white' %}text-slate-600{% else %}text-slate-300{% endif %}">{{ feature.description }}</p>
-                </article>
-                {% endfor %}
-            </div>
+<section class="liquid-section py-14 md:py-20">
+    <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8 lg:items-end">
+        <div>
+            <p class="text-sm font-bold uppercase text-primary-700">{{ home_config.life_eyebrow }}</p>
+            <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl">{{ home_config.life_title }}</h2>
+            <p class="mt-5 text-lg leading-relaxed text-slate-600">
+                {{ home_config.life_description }}
+            </p>
         </div>
-    </div>
-</section>
-
-<section class="bg-[#f8faf7] py-16 md:py-24">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <div class="max-w-3xl">
-                <p class="text-sm font-bold uppercase tracking-[0.2em] text-primary-700">{{ home_config.team_eyebrow }}</p>
-                <h2 class="mt-3 font-display text-3xl font-bold tracking-tight text-slate-950 md:text-5xl">{{ home_config.team_title }}</h2>
-                <p class="mt-5 text-lg leading-relaxed text-slate-600">
-                    {{ home_config.team_description }}
-                </p>
-            </div>
-            <a href="{% url 'school:team_list' %}"
-                class="inline-flex min-h-12 items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-950 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary-200 hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
-                Conheça toda a equipe
-            </a>
-        </div>
-
-        <div class="mt-11 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-            {% for member in team_members %}
-            <article class="hover-lift overflow-hidden rounded-3xl border border-slate-200/70 bg-white shadow-sm">
-                <div class="aspect-[4/3] bg-slate-100">
-                    {% if member.photo %}
-                    <img src="{{ member.photo.url }}" alt="{{ member.name }}" loading="lazy"
-                        class="h-full w-full object-cover">
-                    {% else %}
-                    <div class="flex h-full w-full items-center justify-center bg-primary-100 text-5xl font-bold text-primary-700">
-                        {{ member.name|slice:":1" }}
-                    </div>
-                    {% endif %}
-                </div>
-                <div class="p-6">
-                    <h3 class="font-display text-xl font-bold text-slate-950">{{ member.name }}</h3>
-                    <p class="mt-1 text-sm font-bold text-primary-700">{{ member.title }}</p>
-                    {% if member.bio %}
-                    <p class="mt-4 text-sm leading-relaxed text-slate-600">{{ member.bio|truncatewords:18 }}</p>
-                    {% endif %}
-                </div>
+        <div class="stagger-children grid gap-5 sm:grid-cols-2">
+            {% for feature in life_features %}
+            <article class="jump-lift min-h-56 rounded-[1.75rem] p-6 {% if feature.tone == 'white' %}liquid-card{% else %}liquid-card liquid-card-dark text-white{% endif %}">
+                <h3 class="font-display text-2xl font-bold">{{ feature.title }}</h3>
+                <p class="mt-4 text-sm leading-relaxed {% if feature.tone == 'white' %}text-slate-600{% else %}text-primary-100{% endif %}">{{ feature.description }}</p>
             </article>
-            {% empty %}
-            <div class="rounded-3xl border border-dashed border-slate-300 bg-white p-8 md:col-span-2 lg:col-span-4">
-                <p class="font-display text-2xl font-bold text-slate-950">A equipe será apresentada em breve.</p>
-                <p class="mt-3 max-w-2xl leading-relaxed text-slate-600">
-                    Enquanto os perfis são cadastrados, a escola mantém este espaço reservado para apresentar os profissionais da comunidade escolar.
-                </p>
-            </div>
             {% endfor %}
         </div>
     </div>
 </section>
 
-<section class="bg-white py-16 md:py-24">
+{% if testimonials %}
+<section class="liquid-section py-14 md:py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="max-w-3xl">
-            <p class="text-sm font-bold uppercase tracking-[0.2em] text-primary-700">{{ home_config.testimonials_eyebrow }}</p>
-            <h2 class="mt-3 font-display text-3xl font-bold tracking-tight text-slate-950 md:text-5xl">{{ home_config.testimonials_title }}</h2>
+            <p class="text-sm font-bold uppercase text-primary-700">{{ home_config.testimonials_eyebrow }}</p>
+            <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl">{{ home_config.testimonials_title }}</h2>
             <p class="mt-5 text-lg leading-relaxed text-slate-600">
                 {{ home_config.testimonials_description }}
             </p>
         </div>
 
-        <div class="mt-11 grid gap-5 lg:grid-cols-3">
+        <div class="stagger-children mt-11 grid gap-5 lg:grid-cols-3">
             {% for testimonial in testimonials %}
-            <article class="rounded-3xl border border-slate-200/70 bg-[#f8faf7] p-7 shadow-sm">
-                <div class="text-5xl font-display font-bold leading-none text-primary-500">“</div>
+            <article class="liquid-card jump-lift rounded-[1.75rem] p-7">
+                <div class="text-5xl font-display font-bold leading-none text-primary-600">“</div>
                 <p class="mt-4 leading-relaxed text-slate-700">{{ testimonial.quote }}</p>
                 <div class="mt-7 flex items-center gap-4">
                     {% if testimonial.photo %}
                     <img src="{{ testimonial.photo.url }}" alt="{{ testimonial.name }}" loading="lazy"
                         class="h-12 w-12 rounded-full object-cover">
                     {% else %}
-                    <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-950 font-bold text-white">
-                        {{ testimonial.name|slice:":1" }}
+                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-900 text-white">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                d="M8 10h.01M12 10h.01M16 10h.01M7 16h7l4 4v-4h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2z" />
+                        </svg>
                     </div>
                     {% endif %}
                     <div>
@@ -221,41 +159,36 @@
                     </div>
                 </div>
             </article>
-            {% empty %}
-            <div class="rounded-3xl border border-slate-200/70 bg-[#f8faf7] p-8 lg:col-span-3">
-                <p class="font-display text-2xl font-bold text-slate-950">Depoimentos serão publicados em breve.</p>
-                <p class="mt-3 max-w-2xl leading-relaxed text-slate-600">
-                    Este espaço está preparado para receber relatos de famílias, estudantes e equipe quando houver depoimentos destacados no admin.
-                </p>
-            </div>
             {% endfor %}
         </div>
     </div>
 </section>
+{% endif %}
 
-<section class="bg-[#f8faf7] px-4 py-16 sm:px-6 md:py-24 lg:px-8">
-    <div class="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-slate-950 shadow-2xl shadow-slate-900/15">
-        <div class="grid gap-px bg-white/10 lg:grid-cols-2">
-            <div class="bg-slate-950 p-8 text-white md:p-12">
-                <p class="text-sm font-bold uppercase tracking-[0.2em] text-primary-300">Trabalhe conosco</p>
-                <h2 class="mt-4 font-display text-3xl font-bold md:text-4xl">{{ home_config.hiring_title }}</h2>
-                <p class="mt-4 leading-relaxed text-slate-300">
+<section class="liquid-section px-4 py-10 sm:px-6 md:py-14 lg:px-8">
+    <div class="scroll-reveal liquid-panel mx-auto max-w-7xl overflow-hidden rounded-[2.25rem]"
+        data-scroll-reveal>
+        <div class="stagger-children grid lg:grid-cols-2">
+            <div class="bg-white/35 p-8 md:p-12">
+                <p class="text-sm font-bold uppercase text-primary-700">Cursos e mentorias</p>
+                <h2 class="mt-4 font-display text-3xl font-bold text-slate-950 md:text-4xl">{{ home_config.hiring_title }}</h2>
+                <p class="mt-4 leading-relaxed text-slate-600">
                     {{ home_config.hiring_description }}
                 </p>
-                <a href="{% url 'hiring:list' %}"
-                    class="mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-bold text-slate-950 transition-colors hover:bg-primary-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-4 focus-visible:ring-offset-slate-950">
-                    Ver vagas abertas
+                <a href="{% url 'school:page_detail' 'cursos' %}"
+                    class="jump-lift mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                    Conheça os cursos
                 </a>
             </div>
-            <div class="bg-primary-700 p-8 text-white md:p-12">
-                <p class="text-sm font-bold uppercase tracking-[0.2em] text-primary-100">Fale com a escola</p>
+            <div class="bg-[linear-gradient(135deg,#06264f,#0b3a75)] p-8 text-white md:p-12">
+                <p class="text-sm font-bold uppercase text-primary-100">Fale com a Komuniki</p>
                 <h2 class="mt-4 font-display text-3xl font-bold md:text-4xl">{{ home_config.contact_title }}</h2>
                 <p class="mt-4 leading-relaxed text-primary-50">
                     {{ home_config.contact_description }}
                 </p>
                 <a href="{% url 'contact:page' %}"
-                    class="mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-primary-700">
-                    Entrar em contato
+                    class="jump-lift mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-bold text-primary-900 transition-colors hover:bg-primary-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-primary-800">
+                    Conte-nos mais
                 </a>
             </div>
         </div>

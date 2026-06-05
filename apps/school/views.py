@@ -1,54 +1,144 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Page, SchoolFeature, SchoolHomeConfig, TeamMember, Testimonial
 
 HOME_FALLBACK = {
-    'hero_badge': 'Educação com propósito',
-    'hero_title': 'Educação que prepara para o futuro',
-    'hero_subtitle': 'Um ambiente de aprendizagem que une cuidado, conhecimento e desenvolvimento humano para acompanhar cada estudante de perto.',
-    'visual_eyebrow': 'Comunidade escolar',
-    'visual_title': 'Aprender com presença, escuta e projeto.',
-    'visual_footer_title': 'Famílias, estudantes e educadores no mesmo projeto',
-    'visual_footer_text': 'Comunicação clara para que a comunidade acompanhe a vida escolar com confiança.',
-    'proposal_eyebrow': 'Proposta pedagógica',
-    'proposal_title': 'Por que escolher nossa escola?',
-    'proposal_description': 'Uma experiência escolar consistente nasce do equilíbrio entre método, vínculo humano, segurança e projetos que ampliam repertórios.',
-    'life_eyebrow': 'Vida escolar',
-    'life_title': 'Uma escola com presença, projetos e comunidade',
-    'life_description': 'O cotidiano escolar ganha força quando aprendizagem, cultura, movimento e convivência se encontram em experiências reais.',
-    'team_eyebrow': 'Nossa equipe',
-    'team_title': 'Pessoas que constroem a experiência escolar',
-    'team_description': 'Educadores e profissionais que acompanham a rotina da escola com cuidado, organização e compromisso formativo.',
-    'testimonials_eyebrow': 'Depoimentos',
-    'testimonials_title': 'Vozes da comunidade',
-    'testimonials_description': 'Relatos ajudam a mostrar a relação de confiança construída no cotidiano escolar.',
-    'hiring_title': 'Faça parte da nossa equipe',
-    'hiring_description': 'Profissionais da educação encontram aqui um espaço para conhecer oportunidades e participar de uma comunidade comprometida com formação humana.',
-    'contact_title': 'Vamos conversar?',
-    'contact_description': 'Pais, responsáveis e comunidade podem entrar em contato para tirar dúvidas, enviar mensagens ou iniciar uma conversa com a escola.',
+    'hero_badge': 'Escola de comunicação, artes e liderança',
+    'hero_title': 'Comunicação que gera resultados',
+    'hero_subtitle': 'Mentorias e cursos para quem quer se expressar melhor, atuar nos meios audiovisuais, empreender na arte e construir presença com clareza.',
+    'visual_eyebrow': 'Komuniki',
+    'visual_title': 'Educação para comunicação e artes',
+    'visual_footer_title': 'Cursos, mentorias e projetos com aplicação real',
+    'visual_footer_text': 'A Komuniki une formação técnica, prática de mercado e acompanhamento próximo para pessoas, artistas, comunicadores e equipes corporativas.',
+    'proposal_eyebrow': 'O que fazemos',
+    'proposal_title': 'Cursos para comunicação, cultura e presença profissional',
+    'proposal_description': 'Criada por Kelly Farias, a Komuniki oferece formações profissionalizantes, cursos livres e mentorias para comunicação, cultura, palco, escrita e autoconfiança.',
+    'life_eyebrow': 'Projetos e impacto',
+    'life_title': 'Comunicação, cultura e protagonismo',
+    'life_description': 'A Komuniki também realiza o projeto social Jovem Comunicador, voltado a jovens em situação de vulnerabilidade social, e promove conexões entre formação, arte e mercado.',
+    'team_eyebrow': 'Mentorias com Kelly',
+    'team_title': 'Kelly Farias à frente da Komuniki',
+    'team_description': 'Jornalista, atriz, radialista, diretora de produção executiva, editora-chefe, mentora e professora de comunicação.',
+    'testimonials_eyebrow': 'Alunos',
+    'testimonials_title': 'Trajetórias em comunicação e artes',
+    'testimonials_description': 'Depoimentos reais podem ser destacados no admin quando a Komuniki quiser publicar relatos de alunos e participantes.',
+    'hiring_title': 'Cursos e mentorias',
+    'hiring_description': 'Conheça formações para comunicação, artes, apresentação, produção, locução, assessoria e desenvolvimento de estilo de comunicação.',
+    'contact_title': 'Conte-nos mais',
+    'contact_description': 'Fale com a Komuniki para tirar dúvidas, consultar turmas, solicitar mentorias ou conversar sobre projetos corporativos e culturais.',
 }
 
 TRUST_FEATURES_FALLBACK = [
-    {'title': 'Acompanhamento próximo', 'description': 'Olhar atento para ritmos, histórias e objetivos.', 'tone': 'emerald'},
-    {'title': 'Equipe qualificada', 'description': 'Educadores comprometidos com aprendizagem e cuidado.', 'tone': 'slate'},
-    {'title': 'Projetos formativos', 'description': 'Cultura, investigação e convivência no cotidiano.', 'tone': 'amber'},
-    {'title': 'Comunicação com famílias', 'description': 'Relação transparente entre escola e responsáveis.', 'tone': 'emerald'},
+    {'title': 'Mentorias com Kelly Farias', 'description': 'Acompanhamento para desenvolver presença, estilo de comunicação e clareza na expressão.', 'tone': 'emerald'},
+    {'title': 'Cursos online, híbridos e presenciais', 'description': 'Formações flexíveis para comunicação, artes, liderança e produção.', 'tone': 'slate'},
+    {'title': 'Atuação corporativa', 'description': 'Mentorias, palestras e comunicação interna para equipes e projetos.', 'tone': 'emerald'},
+    {'title': 'Projeto Jovem Comunicador', 'description': 'Iniciativa social voltada a jovens em situação de vulnerabilidade social.', 'tone': 'slate'},
 ]
 
 PROPOSAL_FEATURES_FALLBACK = [
-    {'title': 'Formação integral', 'description': 'Projetos, convivência e aprendizagem caminham juntos na formação da nossa comunidade.', 'tone': 'emerald'},
-    {'title': 'Metodologia ativa', 'description': 'Os estudantes participam, investigam e constroem sentidos em experiências bem orientadas.', 'tone': 'amber'},
-    {'title': 'Acompanhamento individual', 'description': 'Acompanhamos cada estudante de perto, respeitando ritmos, histórias e objetivos.', 'tone': 'slate'},
-    {'title': 'Ambiente seguro', 'description': 'Cuidado, organização e escuta sustentam uma rotina escolar acolhedora e confiável.', 'tone': 'emerald'},
-    {'title': 'Projetos e cultura', 'description': 'A escola é construída todos os dias por estudantes, famílias e educadores.', 'tone': 'amber'},
-    {'title': 'Tecnologia com propósito', 'description': 'A tecnologia aparece como ferramenta de aprendizagem, não como fim em si mesma.', 'tone': 'slate'},
+    {'title': 'Comunicador Profissionalizante', 'description': 'Formação de 350 horas em 18 meses, com encaminhamento para registro profissional de Comunicador.', 'tone': 'emerald'},
+    {'title': 'Produção Cultural', 'description': 'Formação de 250 horas em 12 meses, com encaminhamento para registro profissional Diretor de produção.', 'tone': 'slate'},
+    {'title': 'Jornalismo Cultural', 'description': 'Curso livre de 30 horas para jornalistas, influenciadores e produtores de conteúdo.', 'tone': 'emerald'},
+    {'title': 'Apresentação de Palco e Eventos', 'description': 'Curso livre de 50 horas com técnicas de apresentação e condução de eventos.', 'tone': 'slate'},
+    {'title': 'Espanhol – Conversação e Escrita', 'description': 'Curso livre para desenvolvimento da comunicação oral e escrita.', 'tone': 'emerald'},
+    {'title': 'Comunicação Destravada', 'description': '20 horas em curso coletivo ou mentoria individual para oratória, comunicação e autoconfiança.', 'tone': 'slate'},
 ]
 
 LIFE_FEATURES_FALLBACK = [
-    {'title': 'Projetos pedagógicos', 'description': 'Percursos de investigação que conectam conhecimento, autoria e colaboração.', 'tone': 'emerald'},
-    {'title': 'Cultura e arte', 'description': 'Expressão, repertório e sensibilidade fazem parte da formação cotidiana.', 'tone': 'white'},
-    {'title': 'Esportes e movimento', 'description': 'Corpo, cooperação e saúde aparecem como dimensões importantes do aprender.', 'tone': 'white'},
-    {'title': 'Eventos e comunidade', 'description': 'Encontros que aproximam famílias, estudantes e educadores.', 'tone': 'amber'},
+    {'title': 'Comunicador Profissionalizante', 'description': 'Formação de 350 horas, com encaminhamento para registro profissional de Comunicador.', 'tone': 'emerald'},
+    {'title': 'Arte e empreendedorismo', 'description': 'Formações como Artista Empreendedor, Estilo de Comunicação e Conexão.', 'tone': 'white'},
+    {'title': 'Eventos e palestras', 'description': 'Encontros, fórum de protagonismo juvenil e experiências formativas ao vivo.', 'tone': 'white'},
+    {'title': 'Certificação e registro profissional', 'description': 'Cursos com certificação e consulta de disponibilidade para autorização via sindicatos.', 'tone': 'slate'},
+]
+
+COURSE_AWARD = 'Vencedor do Prêmio Paulo Freire de Educação 2024'
+COURSE_PROPOSAL_TITLE = 'Cursos para comunicação, cultura e presença profissional'
+COURSE_PROPOSAL_DESCRIPTION = 'Conheça formações profissionalizantes, cursos livres e mentorias para comunicar melhor, produzir cultura, conduzir eventos e destravar sua expressão.'
+
+COURSE_GROUPS = [
+    {
+        'eyebrow': 'Formação profissionalizante',
+        'title': 'Cursos com encaminhamento profissional',
+        'description': 'Percursos mais completos para quem quer atuar com comunicação, produção e reconhecimento profissional.',
+        'courses': [
+            {
+                'title': 'Comunicador Profissionalizante',
+                'summary': 'Formação para desenvolver repertório, presença e prática de comunicação.',
+                'details': [
+                    {'label': 'Carga horária', 'value': '350 horas'},
+                    {'label': 'Duração', 'value': '18 meses'},
+                    {'label': 'Requisito', 'value': 'Ensino Médio completo'},
+                ],
+                'notes': ['Encaminhamento para registro profissional de Comunicador'],
+                'highlight': True,
+            },
+            {
+                'title': 'Produção Cultural',
+                'summary': 'Formação para planejamento, organização e execução de projetos culturais.',
+                'details': [
+                    {'label': 'Carga horária', 'value': '250 horas'},
+                    {'label': 'Duração', 'value': '12 meses'},
+                    {'label': 'Requisito', 'value': 'Ensino Médio completo'},
+                ],
+                'notes': ['Encaminhamento para registro profissional Diretor de produção'],
+                'highlight': True,
+            },
+        ],
+    },
+    {
+        'eyebrow': 'Cursos livres',
+        'title': 'Aprofundamentos para comunicação, palco e escrita',
+        'description': 'Cursos objetivos para públicos específicos que querem técnica, segurança e prática aplicada.',
+        'courses': [
+            {
+                'title': 'Jornalismo Cultural',
+                'summary': 'Para jornalistas, influenciadores e produtores de conteúdo.',
+                'details': [
+                    {'label': 'Carga horária', 'value': '30 horas'},
+                    {'label': 'Requisito', 'value': 'Graduação na área de Comunicação'},
+                ],
+                'notes': [],
+                'highlight': False,
+            },
+            {
+                'title': 'Apresentação de Palco e Eventos',
+                'summary': 'Técnicas de apresentação e condução de eventos.',
+                'details': [
+                    {'label': 'Carga horária', 'value': '50 horas'},
+                    {'label': 'Requisito', 'value': 'Ensino Médio completo'},
+                ],
+                'notes': [],
+                'highlight': False,
+            },
+            {
+                'title': 'Espanhol – Conversação e Escrita',
+                'summary': 'Desenvolvimento da comunicação oral e escrita.',
+                'details': [
+                    {'label': 'Formato', 'value': 'Curso Livre'},
+                    {'label': 'Requisito', 'value': 'Ensino Fundamental completo'},
+                ],
+                'notes': [],
+                'highlight': False,
+            },
+        ],
+    },
+    {
+        'eyebrow': 'Desenvolvimento pessoal e comunicação',
+        'title': 'Comunicação com clareza, presença e autoconfiança',
+        'description': 'Experiências para destravar a fala, organizar ideias e fortalecer a expressão pessoal.',
+        'courses': [
+            {
+                'title': 'Comunicação Destravada',
+                'summary': 'Desenvolvimento da oratória, comunicação e autoconfiança.',
+                'details': [
+                    {'label': 'Carga horária', 'value': '20 horas'},
+                    {'label': 'Formato', 'value': 'Curso coletivo ou mentoria individual'},
+                ],
+                'notes': [],
+                'highlight': True,
+            },
+        ],
+    },
 ]
 
 
@@ -61,6 +151,26 @@ def _features_for_site(site, placement, fallback):
     return features or fallback
 
 
+def _course_features_for_home():
+    cards = []
+    for group_index, group in enumerate(COURSE_GROUPS):
+        for course_index, course in enumerate(group['courses']):
+            detail_values = [
+                detail['value']
+                for detail in course['details']
+                if detail['label'] in {'Carga horária', 'Duração', 'Formato'}
+            ]
+            description = course['summary']
+            if detail_values:
+                description = f'{description} {" · ".join(detail_values)}.'
+            cards.append({
+                'title': course['title'],
+                'description': description,
+                'tone': 'slate' if (group_index + course_index) % 2 else 'emerald',
+            })
+    return cards
+
+
 def home(request):
     site = request.site
     home_config = (
@@ -70,29 +180,34 @@ def home(request):
         or HOME_FALLBACK
     )
     trust_features = _features_for_site(site, SchoolFeature.Placement.TRUST, TRUST_FEATURES_FALLBACK)
-    proposal_features = _features_for_site(site, SchoolFeature.Placement.PROPOSAL, PROPOSAL_FEATURES_FALLBACK)
+    proposal_features = _course_features_for_home()
     life_features = _features_for_site(site, SchoolFeature.Placement.LIFE, LIFE_FEATURES_FALLBACK)
     testimonials = Testimonial.on_site.filter(site=site, is_featured=True)[:3]
-    team_members = TeamMember.on_site.filter(site=site, is_active=True).order_by('order', 'name')[:4]
     return render(request, 'school/home.html', {
         'home_config': home_config,
         'trust_features': trust_features,
         'hero_features': trust_features[:2],
         'proposal_features': proposal_features,
+        'course_proposal_title': COURSE_PROPOSAL_TITLE,
+        'course_proposal_description': COURSE_PROPOSAL_DESCRIPTION,
         'life_features': life_features,
         'testimonials': testimonials,
-        'team_members': team_members,
     })
 
 
 def page_detail(request, slug):
     page = get_object_or_404(Page.on_site, site=request.site, slug=slug, is_published=True)
-    return render(request, 'school/page_detail.html', {'page': page})
+    context = {'page': page}
+    if page.slug == 'cursos':
+        context.update({
+            'course_award': COURSE_AWARD,
+            'course_groups': COURSE_GROUPS,
+        })
+    return render(request, 'school/page_detail.html', context)
 
 
 def team_list(request):
-    members = TeamMember.on_site.filter(site=request.site, is_active=True)
-    return render(request, 'school/team_list.html', {'members': members})
+    return redirect('news:list')
 
 
 def privacy(request):

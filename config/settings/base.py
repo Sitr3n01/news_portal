@@ -230,7 +230,7 @@ UNFOLD = {
                 'separator': False,
                 'items': [
                     {
-                        'title': 'Portal de Notícias',
+                        'title': 'Blog da Kelly',
                         'icon': 'newspaper',
                         'link': '/news/',
                         'active': lambda request: False,  # Links externos — nunca marcar como ativo no admin
@@ -304,7 +304,7 @@ UNFOLD = {
                 ],
             },
             {
-                'title': 'Portal de Notícias',
+                'title': 'Blog da Kelly',
                 'separator': True,
                 'items': [
                     {
@@ -413,6 +413,12 @@ EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 
+# Cloudflare Turnstile anti-bot verification.
+# In DEBUG/local, apps.common.turnstile falls back to Cloudflare's official test keys.
+CLOUDFLARE_TURNSTILE_SITE_KEY = env('CLOUDFLARE_TURNSTILE_SITE_KEY', default='')
+CLOUDFLARE_TURNSTILE_SECRET_KEY = env('CLOUDFLARE_TURNSTILE_SECRET_KEY', default='')
+CLOUDFLARE_TURNSTILE_VERIFY_TIMEOUT = env.float('CLOUDFLARE_TURNSTILE_VERIFY_TIMEOUT', default=5.0)
+
 # ── Authentication Backends (axes brute-force protection) ──────────────────
 AUTHENTICATION_BACKENDS = [
     'axes.backends.AxesStandaloneBackend',
@@ -443,6 +449,7 @@ CONTENT_SECURITY_POLICY = {
             SELF,
             UNSAFE_INLINE,
             UNSAFE_EVAL,
+            'https://challenges.cloudflare.com',
         ],
         'style-src': [
             SELF,
@@ -451,8 +458,13 @@ CONTENT_SECURITY_POLICY = {
         ],
         'img-src': [SELF, 'data:', 'https:'],
         'font-src': [SELF, 'https://fonts.gstatic.com'],
-        'frame-src': [SELF, 'https://www.youtube.com', 'https://www.youtube-nocookie.com'],
-        'connect-src': [SELF],
+        'frame-src': [
+            SELF,
+            'https://www.youtube.com',
+            'https://www.youtube-nocookie.com',
+            'https://challenges.cloudflare.com',
+        ],
+        'connect-src': [SELF, 'https://challenges.cloudflare.com'],
         'base-uri': [SELF],
         'form-action': [SELF],
         'object-src': [NONE],

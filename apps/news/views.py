@@ -48,7 +48,7 @@ def article_list(request):
         'featured': featured,
         'page_obj': page_obj,
         'categories': categories,
-        **get_sidebar_context(),
+        **get_sidebar_context(request),
     })
 
 
@@ -97,7 +97,7 @@ def article_detail(request, slug):
         'comments': comments,
         'comment_count': comment_count,
         'like_count': like_count,
-        **get_sidebar_context(),
+        **get_sidebar_context(request),
     })
 
 
@@ -116,7 +116,7 @@ def category_detail(request, slug):
     return render(request, 'news/category_detail.html', {
         'category': category,
         'page_obj': page_obj,
-        **get_sidebar_context(),
+        **get_sidebar_context(request),
     })
 
 
@@ -135,7 +135,7 @@ def tag_detail(request, slug):
     return render(request, 'news/tag_detail.html', {
         'tag': tag,
         'page_obj': page_obj,
-        **get_sidebar_context(),
+        **get_sidebar_context(request),
     })
 
 
@@ -156,7 +156,7 @@ def author_detail(request, username):
     return render(request, 'news/author_detail.html', {
         'author': author,
         'page_obj': page_obj,
-        **get_sidebar_context(),
+        **get_sidebar_context(request),
     })
 
 
@@ -194,7 +194,7 @@ def article_search(request):
     return render(request, 'news/search.html', {
         'page_obj': page_obj,
         'query': query,
-        **get_sidebar_context(),
+        **get_sidebar_context(request),
     })
 
 
@@ -218,7 +218,7 @@ def article_archive(request, year, month=None):
         'page_obj': page_obj,
         'year': year,
         'month': month,
-        **get_sidebar_context(),
+        **get_sidebar_context(request),
     })
 
 
@@ -247,7 +247,7 @@ def article_list_page(request):
 @require_POST
 def newsletter_subscribe(request):
     """Inscricao na newsletter (POST only, suporte HTMX)."""
-    form = NewsletterSubscriptionForm(request.POST)
+    form = NewsletterSubscriptionForm(request.POST, request=request)
     if form.is_valid():
         site = get_current_site(request)
         obj, created = NewsletterSubscription.objects.get_or_create(
@@ -321,7 +321,7 @@ def user_dashboard(request):
         'liked_articles': liked_articles,
         'user_comments': user_comments,
         'has_newsletter': has_newsletter,
-        **get_sidebar_context(),
+        **get_sidebar_context(request),
     })
 
 

@@ -9,6 +9,7 @@
       Assinar
     </button>
   </div>
+  {% include 'news/partials/newsletter_turnstile_fields.html' %}
   {% if form.email.errors %}
   <p class="text-red-500 text-xs font-ui w-full text-center sm:text-left">{{ form.email.errors|first }}</p>
   {% endif %}

@@ -6,11 +6,7 @@
                 <img class="h-11 w-auto max-w-[12rem] object-contain transition-transform duration-200 group-hover:scale-[1.02]"
                     src="{{ site_settings.logo.url }}" alt="{{ current_site.name }}">
                 {% else %}
-                <span
-                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-xl font-bold text-white shadow-lg shadow-slate-900/15 ring-1 ring-slate-800">
-                    {{ current_site.name|slice:":1" }}
-                </span>
-                <span class="min-w-0 truncate font-display text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">
+                <span class="min-w-0 truncate font-display text-xl font-bold text-slate-950 sm:text-2xl">
                     {{ current_site.name }}
                 </span>
                 {% endif %}
@@ -18,22 +14,22 @@
 
             <div class="hidden items-center gap-7 md:flex">
                 <a href="{% url 'school:home' %}"
-                    class="rounded-xl text-sm font-semibold text-slate-700 transition-colors hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">Início</a>
-                <a href="{% url 'school:team_list' %}"
-                    class="rounded-xl text-sm font-semibold text-slate-700 transition-colors hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">Equipe</a>
-                <a href="{% url 'hiring:list' %}"
-                    class="rounded-xl text-sm font-semibold text-slate-700 transition-colors hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">Vagas</a>
+                    class="rounded-full px-1 text-sm font-semibold text-slate-700 transition-colors hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">Início</a>
+                <a href="{% url 'school:about' %}"
+                    class="rounded-full px-1 text-sm font-semibold text-slate-700 transition-colors hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">Sobre</a>
+                <a href="{% url 'school:page_detail' 'cursos' %}"
+                    class="rounded-full px-1 text-sm font-semibold text-slate-700 transition-colors hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">Cursos</a>
                 <a href="{% url 'news:list' %}"
-                    class="rounded-xl text-sm font-semibold text-slate-500 transition-colors hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">Notícias</a>
+                    class="liquid-chip jump-lift inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-bold text-primary-900 transition-all hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">Notícias</a>
                 <a href="{% url 'contact:page' %}"
-                    class="inline-flex items-center justify-center rounded-full bg-primary-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-primary-600/20 transition-all hover:-translate-y-0.5 hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
-                    Fale conosco
+                    class="jump-lift inline-flex items-center justify-center rounded-full bg-primary-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-primary-600/20 transition-all hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                    Fale com a Komuniki
                 </a>
             </div>
 
             <button type="button" @click="mobileMenuOpen = !mobileMenuOpen"
                 :aria-expanded="mobileMenuOpen.toString()" aria-controls="school-mobile-menu" aria-label="Abrir menu"
-                class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition-colors hover:border-primary-200 hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4 md:hidden">
+                class="liquid-chip inline-flex h-11 w-11 items-center justify-center rounded-2xl text-slate-700 transition-colors hover:border-primary-200 hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4 md:hidden">
                 <svg class="h-6 w-6" x-show="!mobileMenuOpen" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M4 7h16M4 12h16M4 17h16" />
@@ -51,19 +47,19 @@
         x-transition:enter-start="opacity-0 -translate-y-3" x-transition:enter-end="opacity-100 translate-y-0"
         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0"
         x-transition:leave-end="opacity-0 -translate-y-3"
-        class="absolute w-full border-t border-slate-200/70 bg-[#f8faf7] shadow-xl shadow-slate-900/10 md:hidden">
+        class="absolute w-full border-t border-white/70 bg-white/75 shadow-xl shadow-slate-900/10 backdrop-blur-xl md:hidden">
         <div class="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 sm:px-6">
             <a href="{% url 'school:home' %}"
-                class="rounded-2xl px-4 py-3 text-base font-semibold text-slate-800 transition-colors hover:bg-white hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600">Início</a>
-            <a href="{% url 'school:team_list' %}"
-                class="rounded-2xl px-4 py-3 text-base font-semibold text-slate-800 transition-colors hover:bg-white hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600">Equipe</a>
-            <a href="{% url 'hiring:list' %}"
-                class="rounded-2xl px-4 py-3 text-base font-semibold text-slate-800 transition-colors hover:bg-white hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600">Vagas</a>
+                class="rounded-2xl px-4 py-3 text-base font-semibold text-slate-800 transition-colors hover:bg-white/70 hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600">Início</a>
+            <a href="{% url 'school:about' %}"
+                class="rounded-2xl px-4 py-3 text-base font-semibold text-slate-800 transition-colors hover:bg-white/70 hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600">Sobre</a>
+            <a href="{% url 'school:page_detail' 'cursos' %}"
+                class="rounded-2xl px-4 py-3 text-base font-semibold text-slate-800 transition-colors hover:bg-white/70 hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600">Cursos</a>
             <a href="{% url 'news:list' %}"
-                class="rounded-2xl px-4 py-3 text-base font-semibold text-slate-600 transition-colors hover:bg-white hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600">Notícias</a>
+                class="rounded-2xl px-4 py-3 text-base font-semibold text-slate-800 transition-colors hover:bg-white/70 hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600">Notícias</a>
             <a href="{% url 'contact:page' %}"
-                class="mt-2 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-5 py-3 text-base font-bold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2">
-                Fale conosco
+                class="jump-lift mt-2 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-5 py-3 text-base font-bold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2">
+                Fale com a Komuniki
             </a>
         </div>
     </div>

@@ -1,41 +1,32 @@
-<nav x-data="{ mobileMenuOpen: false }" class="fixed w-full top-0 z-50 glass-nav shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-20 items-center">
-            <!-- Logo -->
-            <div class="flex-shrink-0 flex items-center">
-                <a href="{% url 'school:home' %}" class="flex items-center gap-3 group">
-                    {% if site_settings and site_settings.logo %}
-                    <img class="h-10 w-auto group-hover:scale-105 transition-transform"
-                        src="{{ site_settings.logo.url }}" alt="{{ current_site.name }}">
-                    {% else %}
-                    <div
-                        class="h-10 w-10 bg-gradient-to-tr from-primary-600 to-primary-400 rounded-xl flex items-center justify-center text-white font-display font-bold text-xl shadow-lg group-hover:shadow-primary-500/30 transition-shadow">
-                        {{ current_site.name|slice:":1" }}
-                    </div>
-                    <span
-                        class="font-display font-bold text-2xl tracking-tight text-gray-900 group-hover:text-primary-600 transition-colors">{{ current_site.name }}</span>
-                    {% endif %}
-                </a>
-            </div>
+<nav x-data="{ mobileMenuOpen: false }" class="fixed top-0 z-50 w-full glass-nav shadow-sm">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex h-20 items-center justify-between">
+            <a href="{% url 'school:home' %}" class="group flex items-center gap-3 rounded-lg">
+                {% if site_settings and site_settings.logo %}
+                <img class="h-10 w-auto transition-transform group-hover:scale-105"
+                    src="{{ site_settings.logo.url }}" alt="{{ current_site.name }}">
+                {% else %}
+                <span
+                    class="font-display text-2xl font-bold text-gray-900 transition-colors group-hover:text-primary-700">{{ current_site.name }}</span>
+                {% endif %}
+            </a>
 
-            <!-- Desktop Menu -->
-            <div class="hidden md:flex space-x-8 items-center">
+            <div class="hidden items-center space-x-8 md:flex">
                 <a href="{% url 'school:home' %}"
-                    class="text-gray-600 hover:text-primary-600 font-medium transition-colors">Início</a>
-                <a href="{% url 'school:team_list' %}"
-                    class="text-gray-600 hover:text-primary-600 font-medium transition-colors">Equipe</a>
+                    class="font-medium text-gray-600 transition-colors hover:text-primary-700">Início</a>
+                <a href="{% url 'school:about' %}"
+                    class="font-medium text-gray-600 transition-colors hover:text-primary-700">Sobre</a>
+                <a href="{% url 'school:page_detail' 'cursos' %}"
+                    class="font-medium text-gray-600 transition-colors hover:text-primary-700">Cursos</a>
                 <a href="{% url 'news:list' %}"
-                    class="text-gray-600 hover:text-primary-600 font-medium transition-colors">Notícias</a>
-                <a href="{% url 'hiring:list' %}"
-                    class="text-gray-600 hover:text-primary-600 font-medium transition-colors">Vagas</a>
+                    class="font-medium text-gray-600 transition-colors hover:text-primary-700">Notícias</a>
                 <a href="{% url 'contact:page' %}"
-                    class="px-5 py-2.5 rounded-full bg-primary-600 text-white font-medium hover:bg-primary-700 shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5">Contato</a>
+                    class="rounded-lg bg-primary-600 px-5 py-2.5 font-medium text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-lg">Contato</a>
             </div>
 
-            <!-- Mobile menu button -->
             <div class="flex items-center md:hidden">
                 <button @click="mobileMenuOpen = !mobileMenuOpen"
-                    class="text-gray-600 hover:text-primary-600 p-2 focus:outline-none">
+                    class="p-2 text-gray-600 hover:text-primary-700 focus:outline-none">
                     <svg class="h-6 w-6" x-show="!mobileMenuOpen" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 6h16M4 12h16M4 18h16" />
@@ -50,23 +41,22 @@
         </div>
     </div>
 
-    <!-- Mobile Menu -->
     <div x-cloak x-show="mobileMenuOpen" x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0 -translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0"
         x-transition:leave-end="opacity-0 -translate-y-4"
-        class="md:hidden bg-white border-t border-gray-100 absolute w-full shadow-xl">
-        <div class="px-4 pt-2 pb-6 space-y-2 flex flex-col">
+        class="absolute w-full border-t border-gray-100 bg-white shadow-xl md:hidden">
+        <div class="flex flex-col space-y-2 px-4 pb-6 pt-2">
             <a href="{% url 'school:home' %}"
-                class="block px-3 py-3 rounded-xl text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-colors">Início</a>
-            <a href="{% url 'school:team_list' %}"
-                class="block px-3 py-3 rounded-xl text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-colors">Equipe</a>
+                class="block rounded-lg px-3 py-3 text-base font-medium text-gray-700 transition-colors hover:bg-primary-50 hover:text-primary-700">Início</a>
+            <a href="{% url 'school:about' %}"
+                class="block rounded-lg px-3 py-3 text-base font-medium text-gray-700 transition-colors hover:bg-primary-50 hover:text-primary-700">Sobre</a>
+            <a href="{% url 'school:page_detail' 'cursos' %}"
+                class="block rounded-lg px-3 py-3 text-base font-medium text-gray-700 transition-colors hover:bg-primary-50 hover:text-primary-700">Cursos</a>
             <a href="{% url 'news:list' %}"
-                class="block px-3 py-3 rounded-xl text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-colors">Notícias</a>
-            <a href="{% url 'hiring:list' %}"
-                class="block px-3 py-3 rounded-xl text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-colors">Vagas</a>
+                class="block rounded-lg px-3 py-3 text-base font-medium text-gray-700 transition-colors hover:bg-primary-50 hover:text-primary-700">Notícias</a>
             <a href="{% url 'contact:page' %}"
-                class="block px-3 py-3 mt-4 text-center rounded-xl bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors">Contato</a>
+                class="mt-4 block rounded-lg bg-primary-600 px-3 py-3 text-center text-base font-medium text-white transition-colors hover:bg-primary-700">Contato</a>
         </div>
     </div>
 </nav>

@@ -1,106 +1,92 @@
 {% extends 'base_school.html' %}
 
-{% block title %}Sobre a escola - {{ current_site.name }}{% endblock %}
-{% block meta_description %}Conheça a proposta institucional, os valores e a comunidade escolar de {{ current_site.name }}.{% endblock %}
+{% block title %}Sobre a Komuniki - {{ current_site.name }}{% endblock %}
+{% block meta_description %}Conheça a Komuniki, escola de comunicação, artes e liderança criada por Kelly Farias.{% endblock %}
 
 {% block content %}
-<section class="bg-[#f8faf7] py-16 md:py-24">
+<section class="liquid-section py-16 md:py-24">
     <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
         <div>
-            <p class="text-sm font-bold uppercase tracking-[0.2em] text-primary-700">Nossa instituição</p>
-            <h1 class="mt-4 font-display text-4xl font-bold tracking-tight text-slate-950 md:text-6xl">Uma escola feita por pessoas</h1>
+            <p class="text-sm font-bold uppercase text-primary-700">Sobre a Komuniki</p>
+            <h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-slate-950 md:text-6xl">Comunicação, artes e liderança com presença real</h1>
         </div>
-        <div class="text-lg leading-relaxed text-slate-600 md:text-xl">
+        <div class="scroll-reveal liquid-panel rounded-[2rem] p-6 text-lg leading-relaxed text-slate-600 md:p-8 md:text-xl"
+            data-scroll-reveal>
             <p>
-                A escola é construída todos os dias por estudantes, famílias, educadores e profissionais que compartilham o compromisso com uma formação humana, organizada e significativa.
+                Criada em 2019 pela jornalista Kelly Farias, a Komuniki é uma escola de comunicação, artes e liderança com cursos voltados para jornalismo, apresentação de meios audiovisuais, interpretação teatral e outras formações para expressão profissional.
             </p>
             <p class="mt-5">
-                Nossa proposta valoriza o acompanhamento próximo, o conhecimento acadêmico, a convivência respeitosa e projetos que ajudam cada estudante a ampliar repertórios e autonomia.
+                Além dos cursos, a Komuniki oferece mentorias para o público corporativo e geral, palestras, projetos culturais e o Jovem Comunicador, iniciativa social voltada a jovens em situação de vulnerabilidade social.
             </p>
         </div>
     </div>
 </section>
 
-<section class="bg-white py-16 md:py-24">
+<section class="liquid-section py-16 md:py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid gap-5 md:grid-cols-3">
-            <article class="rounded-3xl border border-slate-200/70 bg-[#f8faf7] p-7 shadow-sm">
-                <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-100 text-primary-700">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6v12m6-6H6" />
-                    </svg>
-                </span>
-                <h2 class="mt-6 font-display text-2xl font-bold text-slate-950">Missão</h2>
+        <div class="stagger-children grid gap-5 md:grid-cols-3">
+            <article class="liquid-card jump-lift rounded-[1.75rem] p-7">
+                <h2 class="font-display text-2xl font-bold text-slate-950">Cursos</h2>
                 <p class="mt-3 leading-relaxed text-slate-600">
-                    Promover aprendizagens relevantes em um ambiente de cuidado, escuta e responsabilidade compartilhada.
+                    Formações online, híbridas e presenciais em comunicação, artes, teatro, produção, locução, apresentação, jornalismo cultural e assessoria de imprensa.
                 </p>
             </article>
-            <article class="rounded-3xl border border-slate-200/70 bg-[#f8faf7] p-7 shadow-sm">
-                <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
-                    </svg>
-                </span>
-                <h2 class="mt-6 font-display text-2xl font-bold text-slate-950">Visão</h2>
+            <article class="liquid-card jump-lift rounded-[1.75rem] p-7">
+                <h2 class="font-display text-2xl font-bold text-slate-950">Mentorias</h2>
                 <p class="mt-3 leading-relaxed text-slate-600">
-                    Ser uma comunidade escolar reconhecida pela clareza pedagógica, pela presença humana e pela confiança das famílias.
+                    Mentorias com Kelly Farias para estilo de comunicação, posicionamento, expressão, liderança, presença em câmera e desenvolvimento de projetos.
                 </p>
             </article>
-            <article class="rounded-3xl border border-slate-200/70 bg-[#f8faf7] p-7 shadow-sm">
-                <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-800">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 21s-7-4.35-7-10a4 4 0 017-2.65A4 4 0 0119 11c0 5.65-7 10-7 10z" />
-                    </svg>
-                </span>
-                <h2 class="mt-6 font-display text-2xl font-bold text-slate-950">Valores</h2>
+            <article class="liquid-card jump-lift rounded-[1.75rem] p-7">
+                <h2 class="font-display text-2xl font-bold text-slate-950">Projetos</h2>
                 <p class="mt-3 leading-relaxed text-slate-600">
-                    Respeito, colaboração, responsabilidade, curiosidade intelectual e cuidado com as pessoas.
+                    Atuação em eventos, comunicação interna, produção cultural, protagonismo juvenil e iniciativas que conectam formação, cultura e mercado.
                 </p>
             </article>
         </div>
     </div>
 </section>
 
-<section class="bg-slate-950 py-16 text-white md:py-24">
-    <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:px-8 lg:items-center">
+<section class="liquid-section py-16 md:py-24">
+    <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8 lg:items-end">
         <div>
-            <p class="text-sm font-bold uppercase tracking-[0.2em] text-primary-300">Comunidade</p>
-            <h2 class="mt-4 font-display text-3xl font-bold md:text-5xl">Aprender também é conviver</h2>
-            <p class="mt-5 text-lg leading-relaxed text-slate-300">
-                A vida escolar é feita de vínculos, combinados, experiências culturais, projetos coletivos e comunicação constante com as famílias.
+            <p class="text-sm font-bold uppercase text-primary-700">Nossos serviços</p>
+            <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl">Formação para quem precisa comunicar melhor</h2>
+            <p class="mt-5 text-lg leading-relaxed text-slate-600">
+                A Komuniki atende pessoas, artistas, comunicadores, empreendedores, equipes e organizações que querem transformar intenção em mensagem clara, técnica e presença.
             </p>
         </div>
-        <div class="grid gap-4 sm:grid-cols-2">
-            <div class="rounded-3xl border border-white/10 bg-white/10 p-6">
-                <h3 class="font-display text-xl font-bold">Escuta</h3>
-                <p class="mt-3 text-sm leading-relaxed text-slate-300">Relações próximas sustentam decisões pedagógicas mais cuidadosas.</p>
-            </div>
-            <div class="rounded-3xl border border-white/10 bg-white/10 p-6">
-                <h3 class="font-display text-xl font-bold">Pertencimento</h3>
-                <p class="mt-3 text-sm leading-relaxed text-slate-300">A escola se fortalece quando todos reconhecem seu papel na comunidade.</p>
-            </div>
-            <div class="rounded-3xl border border-white/10 bg-white/10 p-6">
-                <h3 class="font-display text-xl font-bold">Autonomia</h3>
-                <p class="mt-3 text-sm leading-relaxed text-slate-300">Os estudantes são incentivados a pensar, participar e assumir responsabilidades.</p>
-            </div>
-            <div class="rounded-3xl border border-white/10 bg-white/10 p-6">
-                <h3 class="font-display text-xl font-bold">Clareza</h3>
-                <p class="mt-3 text-sm leading-relaxed text-slate-300">Organização e comunicação ajudam famílias a acompanhar a vida escolar.</p>
-            </div>
+        <div class="stagger-children grid gap-5 sm:grid-cols-2">
+            <article class="liquid-card liquid-card-dark jump-lift min-h-56 rounded-[1.75rem] p-6 text-white">
+                <h3 class="font-display text-2xl font-bold">Jornalismo e cultura</h3>
+                <p class="mt-4 text-sm leading-relaxed text-primary-100">Jornalismo cultural, assessoria, produção e leitura crítica da cena cultural.</p>
+            </article>
+            <article class="liquid-card jump-lift min-h-56 rounded-[1.75rem] p-6">
+                <h3 class="font-display text-2xl font-bold text-slate-950">Meios audiovisuais</h3>
+                <p class="mt-4 text-sm leading-relaxed text-slate-600">Apresentação para rádio, TV, internet, podcast e locução publicitária.</p>
+            </article>
+            <article class="liquid-card jump-lift min-h-56 rounded-[1.75rem] p-6">
+                <h3 class="font-display text-2xl font-bold text-slate-950">Artes cênicas</h3>
+                <p class="mt-4 text-sm leading-relaxed text-slate-600">Interpretação teatral, TV, cinema, presença, corpo e voz.</p>
+            </article>
+            <article class="liquid-card liquid-card-dark jump-lift min-h-56 rounded-[1.75rem] p-6 text-white">
+                <h3 class="font-display text-2xl font-bold">Impacto social</h3>
+                <p class="mt-4 text-sm leading-relaxed text-primary-100">Jovem Comunicador e ações de protagonismo juvenil.</p>
+            </article>
         </div>
     </div>
 </section>
 
-<section class="bg-[#f8faf7] px-4 py-16 sm:px-6 lg:px-8">
-    <div class="mx-auto max-w-5xl rounded-[2rem] border border-slate-200/70 bg-white p-8 text-center shadow-sm md:p-12">
-        <h2 class="font-display text-3xl font-bold text-slate-950 md:text-4xl">Quer conhecer melhor a escola?</h2>
+<section class="liquid-section px-4 py-16 sm:px-6 lg:px-8">
+    <div class="scroll-reveal liquid-panel mx-auto max-w-5xl rounded-[2.25rem] p-8 text-center md:p-12"
+        data-scroll-reveal>
+        <h2 class="font-display text-3xl font-bold text-slate-950 md:text-4xl">Quer conversar sobre cursos ou mentorias?</h2>
         <p class="mx-auto mt-4 max-w-2xl leading-relaxed text-slate-600">
-            Entre em contato para tirar dúvidas e iniciar uma conversa com nossa equipe.
+            Entre em contato para consultar turmas, formatos, projetos corporativos e caminhos de formação.
         </p>
         <a href="{% url 'contact:page' %}"
-            class="mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
-            Fale conosco
+            class="jump-lift mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+            Conte-nos mais
         </a>
     </div>
 </section>

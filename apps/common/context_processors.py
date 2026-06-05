@@ -1,10 +1,17 @@
 from django.contrib.sites.shortcuts import get_current_site
 
+from apps.common.turnstile import get_turnstile_site_key
+
+
+NEWS_PORTAL_NAME = 'Blog da Kelly'
+
 
 def site_context(request):
     current_site = get_current_site(request)
     context = {
         'current_site': current_site,
+        'news_portal_name': NEWS_PORTAL_NAME,
+        'turnstile_site_key': get_turnstile_site_key(),
     }
     try:
         context['site_settings'] = current_site.extension

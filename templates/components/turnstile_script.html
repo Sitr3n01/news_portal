@@ -1,0 +1,39 @@
+{% if turnstile_site_key %}
+<script>
+    (function () {
+        function renderTurnstileWidgets(root) {
+            if (!window.turnstile) {
+                return;
+            }
+
+            var scope = root || document;
+            var widgets = scope.querySelectorAll('[data-turnstile-widget]');
+            widgets.forEach(function (widget) {
+                if (widget.dataset.turnstileRendered === 'true' || !widget.dataset.sitekey) {
+                    return;
+                }
+
+                window.turnstile.render(widget, {
+                    sitekey: widget.dataset.sitekey,
+                    theme: widget.dataset.theme || 'auto'
+                });
+                widget.dataset.turnstileRendered = 'true';
+            });
+        }
+
+        window.renderTurnstileWidgets = renderTurnstileWidgets;
+        window.onTurnstileLoaded = function () {
+            renderTurnstileWidgets(document);
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            renderTurnstileWidgets(document);
+        });
+
+        document.body.addEventListener('htmx:afterSwap', function (event) {
+            renderTurnstileWidgets(event.target);
+        });
+    })();
+</script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoaded" async defer></script>
+{% endif %}

@@ -1,7 +1,7 @@
 from django.db.models import Count, Q
 
 
-def get_sidebar_context():
+def get_sidebar_context(request=None):
     """Return sidebar data: popular articles, top categories, top tags."""
     from .models import Article, Category, Tag
 
@@ -33,8 +33,9 @@ def get_sidebar_context():
         .filter(article_count__gt=0)
         .order_by('-article_count')[:20]
     )
-    return {
+    context = {
         'popular_articles': popular_articles,
         'top_categories': top_categories,
         'top_tags': top_tags,
     }
+    return context

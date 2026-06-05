@@ -4,21 +4,177 @@
 {% block title %}{{ page.meta_title|default:page.title }} - {{ current_site.name }}{% endblock %}
 {% block meta_description %}{{ page.meta_description|default:site_settings.tagline }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .course-card-white {
+        border-color: rgba(148, 163, 184, 0.26);
+        background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.68)),
+            radial-gradient(circle at 18% 0%, rgba(248, 250, 252, 0.72), transparent 16rem);
+    }
+
+    .course-card-white::before {
+        background:
+            linear-gradient(115deg, rgba(255, 255, 255, 0.5), transparent 40%),
+            radial-gradient(circle at 100% 0%, rgba(248, 250, 252, 0.42), transparent 14rem);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<section class="bg-[#f8faf7] py-14 md:py-20">
+{% if page.slug == 'cursos' and course_groups %}
+<section class="liquid-section py-16 md:py-24">
+    <div class="fade-in mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:px-8">
+        <div class="flex flex-col justify-center">
+            <h1 class="max-w-4xl font-display text-5xl font-extrabold leading-[0.98] tracking-tight text-slate-950 md:text-7xl">
+                    Formação em comunicação, cultura e presença profissional
+                </h1>
+            <p class="mt-7 max-w-2xl text-lg leading-relaxed text-slate-600 md:text-xl">
+                    Cursos profissionalizantes, livres e mentorias para quem quer comunicar melhor, produzir cultura, conduzir eventos e desenvolver segurança na expressão.
+                </p>
+            <div class="mt-10 flex flex-col gap-3 sm:flex-row">
+                    <a href="{% url 'contact:page' %}"
+                        class="jump-lift inline-flex min-h-12 items-center justify-center rounded-full bg-primary-700 px-7 py-3 text-base font-bold text-white shadow-xl shadow-primary-900/15 transition-all hover:bg-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                        Fale com a Komuniki
+                    </a>
+                    <a href="#grade-cursos"
+                        class="liquid-chip jump-lift inline-flex min-h-12 items-center justify-center rounded-full px-7 py-3 text-base font-bold text-primary-900 transition-all hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                        Ver cursos
+                    </a>
+                </div>
+            </div>
+
+        <aside class="stagger-children grid gap-4">
+                <div class="liquid-card liquid-card-dark jump-lift rounded-[1.75rem] p-6 text-white">
+                    <p class="text-sm font-bold uppercase text-primary-100">Reconhecimento</p>
+                    <h2 class="mt-4 font-display text-3xl font-bold leading-tight">{{ course_award }}</h2>
+                    <p class="mt-4 text-sm leading-relaxed text-primary-50">
+                        Uma validação importante do impacto educacional e social da Komuniki.
+                    </p>
+                </div>
+                <div class="liquid-card jump-lift rounded-[1.75rem] p-6">
+                    <p class="text-sm font-bold uppercase text-primary-700">Trilhas disponíveis</p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        {% for group in course_groups %}
+                        <span class="rounded-full border border-primary-700/15 bg-white/55 px-3 py-2 text-xs font-bold uppercase tracking-wide text-primary-800">
+                            {{ group.eyebrow }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+        </aside>
+    </div>
+</section>
+
+<section id="grade-cursos" class="liquid-section py-10 md:py-14">
+    <div class="space-y-14 md:space-y-16">
+        {% for group in course_groups %}
+        <div class="mx-auto grid max-w-7xl gap-7 px-4 sm:px-6 lg:grid-cols-[0.35fr_0.65fr] lg:px-8">
+            <div class="scroll-reveal liquid-panel rounded-[2rem] p-6 md:p-8" data-scroll-reveal>
+                <p class="text-sm font-bold uppercase text-primary-700">{{ group.eyebrow }}</p>
+                <h2 class="mt-4 font-display text-3xl font-bold leading-tight text-slate-950 md:text-4xl">{{ group.title }}</h2>
+                <p class="mt-4 leading-relaxed text-slate-600">{{ group.description }}</p>
+            </div>
+
+            <div class="stagger-children grid gap-5 md:grid-cols-2">
+                {% for course in group.courses %}
+                <article class="course-card-white liquid-card jump-lift flex min-h-72 flex-col rounded-[1.75rem] p-6">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary-700">
+                                {{ group.eyebrow }}
+                            </p>
+                            <h3 class="mt-3 font-display text-2xl font-bold leading-tight text-slate-950">
+                                {{ course.title }}
+                            </h3>
+                        </div>
+                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-primary-700">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                    d="M7 4h10a2 2 0 0 1 2 2v16l-7-3-7 3V6a2 2 0 0 1 2-2zM9 9h6M9 13h4" />
+                            </svg>
+                        </span>
+                    </div>
+
+                    <p class="mt-5 leading-relaxed text-slate-600">
+                        {{ course.summary }}
+                    </p>
+
+                    <dl class="mt-6 grid gap-3">
+                        {% for detail in course.details %}
+                        <div class="rounded-2xl border border-slate-200/70 bg-white/65 px-4 py-3">
+                            <dt class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                                {{ detail.label }}
+                            </dt>
+                            <dd class="mt-1 font-display text-lg font-bold text-slate-950">
+                                {{ detail.value }}
+                            </dd>
+                        </div>
+                        {% endfor %}
+                    </dl>
+
+                    {% if course.notes %}
+                    <ul class="mt-5 space-y-2">
+                        {% for note in course.notes %}
+                        <li class="flex gap-2 text-sm leading-relaxed text-slate-600">
+                            <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary-600"></span>
+                            {{ note }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="liquid-section px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+    <div class="scroll-reveal liquid-panel mx-auto max-w-7xl overflow-hidden rounded-[2.25rem]"
+        data-scroll-reveal>
+        <div class="stagger-children grid lg:grid-cols-2">
+            <div class="bg-white/35 p-8 md:p-12">
+                <p class="text-sm font-bold uppercase text-primary-700">Próximas turmas</p>
+                <h2 class="mt-4 font-display text-3xl font-bold text-slate-950 md:text-4xl">Quer entender qual curso combina com seu momento?</h2>
+                <p class="mt-4 leading-relaxed text-slate-600">
+                    A Komuniki pode orientar formatos, requisitos, turmas e caminhos de formação conforme seu objetivo.
+                </p>
+                <a href="{% url 'contact:page' %}"
+                    class="jump-lift mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                    Conte-nos mais
+                </a>
+            </div>
+            <div class="bg-[linear-gradient(135deg,#06264f,#0b3a75)] p-8 text-white md:p-12">
+                <p class="text-sm font-bold uppercase text-primary-100">Blog de notícias</p>
+                <h2 class="mt-4 font-display text-3xl font-bold md:text-4xl">Acompanhe conteúdos e novidades</h2>
+                <p class="mt-4 leading-relaxed text-primary-50">
+                    Veja publicações, notícias e atualizações da Komuniki no portal de notícias.
+                </p>
+                <a href="{% url 'news:list' %}"
+                    class="jump-lift mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-bold text-primary-900 transition-colors hover:bg-primary-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-primary-800">
+                    Ir para notícias
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% else %}
+<section class="liquid-section py-14 md:py-20">
     <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <a href="{% url 'school:home' %}"
             class="inline-flex items-center gap-2 rounded-full text-sm font-bold text-primary-700 transition-colors hover:text-primary-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Voltar para a escola
+            Voltar para a Komuniki
         </a>
-        <h1 class="mt-6 font-display text-4xl font-bold tracking-tight text-slate-950 md:text-6xl">{{ page.title }}</h1>
+        <h1 class="mt-6 font-display text-4xl font-extrabold tracking-tight text-slate-950 md:text-6xl">{{ page.title }}</h1>
     </div>
 </section>
 
-<article class="bg-white py-12 md:py-16">
+<section class="liquid-section py-12 md:py-16">
     <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         {% if page.featured_image %}
         <div class="mb-10 overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-100 shadow-xl shadow-slate-900/10">
@@ -26,35 +182,31 @@
         </div>
         {% endif %}
 
-        <div class="mx-auto max-w-3xl">
+        <div class="scroll-reveal liquid-panel mx-auto max-w-3xl rounded-[2.25rem] p-6 md:p-10"
+            data-scroll-reveal>
             {% if page.content %}
             <div class="school-prose text-lg">
                 {{ page.content|sanitize_html }}
             </div>
-            {% else %}
-            <div class="rounded-3xl border border-dashed border-slate-300 bg-[#f8faf7] p-8">
-                <h2 class="font-display text-2xl font-bold text-slate-950">Conteúdo em atualização</h2>
-                <p class="mt-3 leading-relaxed text-slate-600">
-                    Esta página institucional já está disponível e receberá mais informações em breve.
-                </p>
-            </div>
             {% endif %}
         </div>
     </div>
-</article>
+</section>
 
-<section class="bg-[#f8faf7] px-4 py-12 sm:px-6 lg:px-8">
-    <div class="mx-auto max-w-5xl rounded-[2rem] border border-slate-200/70 bg-white p-8 shadow-sm md:p-10">
+<section class="liquid-section px-4 py-12 sm:px-6 lg:px-8">
+    <div class="scroll-reveal liquid-panel mx-auto max-w-5xl rounded-[2.25rem] p-8 md:p-10"
+        data-scroll-reveal>
         <div class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div>
-                <h2 class="font-display text-2xl font-bold text-slate-950">Quer falar com a escola?</h2>
-                <p class="mt-2 text-slate-600">Nossa equipe pode ajudar com dúvidas, visitas e informações institucionais.</p>
+                <h2 class="font-display text-2xl font-bold text-slate-950">Quer falar com a Komuniki?</h2>
+                <p class="mt-2 text-slate-600">Nossa equipe pode ajudar com cursos, mentorias, projetos e informações institucionais.</p>
             </div>
             <a href="{% url 'contact:page' %}"
-                class="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
-                Entrar em contato
+                class="jump-lift inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                Conte-nos mais
             </a>
         </div>
     </div>
 </section>
+{% endif %}
 {% endblock %}

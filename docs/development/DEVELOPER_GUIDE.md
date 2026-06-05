@@ -139,7 +139,7 @@ Gerencia páginas dinâmicas, time, e depoimentos. Conteúdo filtrado por site v
 
 O app mais complexo. Contém:
 - Artigos com categorias hierárquicas, tags, autores
-- Sistema de newsletter (envio manual via admin ou automático ao publicar)
+- Sistema de newsletter em fila (`NewsletterDelivery`) — envio via comando `send_pending_newsletters` (cron) ou ação do admin; ver [FLUXO_NEWSLETTER.md](FLUXO_NEWSLETTER.md)
 - Comentários, curtidas, bookmarks (HTMX)
 - Feed RSS por categoria
 - Sitemap
@@ -302,15 +302,15 @@ Checklist adicional:
 
 ## Fluxo de Newsletter
 
-1. Artigo é salvo com `status=PUBLISHED` pela primeira vez
-2. Signal `post_save` em `apps/news/signals.py` detecta o publish
-3. Chama `send_article_newsletter(article)` de `apps/news/newsletter.py`
-4. Envia email para todos `NewsletterSubscription.objects.filter(site=article.site, is_active=True)`
-5. Atualiza `newsletter_sent_at` com `.update()` (evita re-trigger do signal)
+> Documento canônico e detalhado: **[FLUXO_NEWSLETTER.md](FLUXO_NEWSLETTER.md)**.
 
-Para enviar manualmente: admin → Artigos → selecione → action "Enviar newsletter".
+O envio é em **duas etapas** (fila com auditoria por destinatário), **não** síncrono no signal:
 
-Para preview: `/news/newsletter/preview/<id>/` (requer staff).
+1. Artigo salvo com `status=PUBLISHED` pela 1ª vez → signal `post_save` apenas **marca como pendente** (loga). Nenhum e-mail é enviado nesse momento.
+2. O envio real roda depois, em lote, via comando `python manage.py send_pending_newsletters` (ideal em cron) ou pela ação do admin "Enviar Newsletter para inscritos".
+3. Cada par (artigo × inscrito) vira um registro `NewsletterDelivery` (`pending`/`sent`/`failed`/`skipped`); o artigo só é marcado concluído (`newsletter_sent_at`) quando não resta entrega em aberto.
+
+Preview do template: `/news/newsletter/preview/<id>/` (requer staff).
 
 ---
 

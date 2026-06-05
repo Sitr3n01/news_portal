@@ -39,10 +39,10 @@
             <span class="material-symbols-outlined text-[32px]">mail</span>
         </div>
         <h5 class="text-lg font-bold text-slate-900 dark:text-white mb-2 font-display"
-            x-text="t('Resumo Diário', 'The Daily Briefing')">Resumo Diário</h5>
+            x-text="t('Blog da Kelly', 'Kelly Blog')">Blog da Kelly</h5>
         <p class="text-sm text-slate-500 mb-4 leading-relaxed font-ui"
-            x-text="t('Notícias essenciais e análises exclusivas direto em seu e-mail.', 'Essential news, expert analysis, and exclusive content delivered straight to your inbox.')">
-            Notícias essenciais e análises exclusivas direto em seu e-mail.
+            x-text="t('Receba novidades da Komuniki, conteúdos de comunicação e bastidores com Kelly Farias.', 'Get Komuniki updates, communication content, and behind-the-scenes notes with Kelly Farias.')">
+            Receba novidades da Komuniki, conteúdos de comunicação e bastidores com Kelly Farias.
         </p>
         <form hx-post="{% url 'news:newsletter_subscribe' %}" hx-target="this" hx-swap="outerHTML"
             class="flex flex-col gap-3">
@@ -50,14 +50,14 @@
             <input name="email" type="email" required :placeholder="t('Endereço de e-mail', 'Email address')"
                 placeholder="Email address"
                 class="font-ui w-full px-4 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none">
+            {% include 'news/partials/newsletter_turnstile_fields.html' %}
             <button type="submit"
                 class="font-ui w-full py-2 bg-slate-900 dark:bg-white text-white dark:text-black text-sm font-bold rounded hover:opacity-90 transition-opacity">
                 <span x-text="t('Assinar', 'Sign Up')">Sign Up</span>
             </button>
         </form>
         <p class="text-xs text-slate-400 mt-3 text-center font-ui"
-            x-text="t('Sem spam, cancele quando quiser.', 'No spam, unsubscribe anytime.')">No spam, unsubscribe
-            anytime.</p>
+            x-text="t('Sem spam, cancele quando quiser.', 'No spam, unsubscribe anytime.')">Sem spam, cancele quando quiser.</p>
     </div>
 
     <!-- Categories & Tags (Optional, kept for completeness but styled cleanly) -->

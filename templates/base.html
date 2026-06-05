@@ -15,7 +15,7 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Tailwind (engine auto-hospedado e pinado — sem CDN externo) -->
   <script src="{% static 'js/vendor/tailwind.min.js' %}"></script>
@@ -24,19 +24,19 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            display: ['Outfit', 'sans-serif'],
+            sans: ['IBM Plex Sans', 'sans-serif'],
+            display: ['Manrope', 'sans-serif'],
           },
           colors: {
             primary: {
-              50: '#f0f9ff',
-              100: '#e0f2fe',
-              500: '#0ea5e9',
-              600: '#0284c7',
-              700: '#0369a1',
-              900: '#0c4a6e',
+              50: '#eef5ff',
+              100: '#d8e9ff',
+              500: '#2563c7',
+              600: '#0b3a75',
+              700: '#082f63',
+              900: '#041a36',
             },
-            accent: '#f43f5e',
+            accent: '#445eb8',
           }
         }
       }
@@ -56,18 +56,25 @@
       border-bottom: 1px solid rgba(255,255,255,0.3);
     }
     .hover-lift {
-      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.36s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .hover-lift:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      transform: translateY(-6px);
+      box-shadow: 0 24px 60px -34px rgba(4, 26, 54, 0.55);
     }
     .fade-in {
-      animation: fadeIn 0.6s ease-out forwards;
+      animation: fadeIn 0.78s cubic-bezier(0.22, 1, 0.36, 1) forwards;
       opacity: 0;
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    main > section {
+      animation: sectionReveal 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes sectionReveal {
+      from { opacity: 0; transform: translateY(18px); }
       to { opacity: 1; transform: translateY(0); }
     }
     [x-cloak] { display: none !important; }

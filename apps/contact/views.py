@@ -7,7 +7,7 @@ from .forms import ContactInquiryForm
 
 def contact_page(request):
     if request.method == 'POST':
-        form = ContactInquiryForm(request.POST)
+        form = ContactInquiryForm(request.POST, request=request)
         if form.is_valid():
             inquiry = form.save(commit=False)
             inquiry.site = get_current_site(request)
@@ -15,6 +15,6 @@ def contact_page(request):
             messages.success(request, 'Sua mensagem foi enviada. Entraremos em contato em breve!')
             return redirect('contact:page')
     else:
-        form = ContactInquiryForm()
+        form = ContactInquiryForm(request=request)
 
     return render(request, 'contact/contact_page.html', {'form': form})

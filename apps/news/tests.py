@@ -4,6 +4,7 @@ from django.core import mail
 from django.core.management import call_command
 from django.urls import reverse
 
+from apps.common import turnstile
 from apps.news.admin import _csv_safe
 from apps.news.models import Article, NewsletterDelivery, NewsletterSubscription
 from apps.news.newsletter import make_unsubscribe_token
@@ -28,6 +29,10 @@ def make_article(site, slug='artigo', status=Article.Status.PUBLISHED):
     )
 
 
+def mock_turnstile(monkeypatch, *, valid=True):
+    monkeypatch.setattr(turnstile, 'verify_turnstile', lambda token, remote_ip='': valid and token == 'valid-token')
+
+
 @pytest.mark.django_db
 def test_news_article_list(client):
     url = reverse('news:list')
@@ -48,8 +53,9 @@ def test_csv_safe_leaves_normal_values():
 
 
 @pytest.mark.django_db
-def test_newsletter_subscribe_htmx_reactivates_existing_email(client):
+def test_newsletter_subscribe_htmx_reactivates_existing_email(client, monkeypatch):
     site = make_site()
+    mock_turnstile(monkeypatch)
     NewsletterSubscription.objects.create(
         email='ana@example.com',
         site=site,
@@ -58,13 +64,50 @@ def test_newsletter_subscribe_htmx_reactivates_existing_email(client):
 
     response = client.post(
         reverse('news:newsletter_subscribe'),
-        {'email': 'ana@example.com'},
+        {
+            'email': 'ana@example.com',
+            'cf-turnstile-response': 'valid-token',
+        },
         HTTP_HX_REQUEST='true',
     )
 
     assert response.status_code == 200
     subscription = NewsletterSubscription.objects.get(email='ana@example.com', site=site)
     assert subscription.is_active is True
+
+
+@pytest.mark.django_db
+def test_newsletter_subscribe_rejects_invalid_turnstile(client, monkeypatch):
+    make_site()
+    mock_turnstile(monkeypatch, valid=False)
+
+    response = client.post(
+        reverse('news:newsletter_subscribe'),
+        {
+            'email': 'ana@example.com',
+            'cf-turnstile-response': 'bad-token',
+        },
+        HTTP_HX_REQUEST='true',
+    )
+
+    assert response.status_code == 200
+    assert NewsletterSubscription.objects.count() == 0
+    assert 'Confirme a verificação anti-bot' in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_newsletter_subscribe_rejects_missing_turnstile(client, monkeypatch):
+    make_site()
+    mock_turnstile(monkeypatch, valid=False)
+
+    response = client.post(
+        reverse('news:newsletter_subscribe'),
+        {'email': 'ana@example.com'},
+        HTTP_HX_REQUEST='true',
+    )
+
+    assert response.status_code == 200
+    assert NewsletterSubscription.objects.count() == 0
 
 
 @pytest.mark.django_db

@@ -1,21 +1,54 @@
 {% extends 'base_school.html' %}
 
 {% block title %}Fale conosco - {{ current_site.name }}{% endblock %}
-{% block meta_description %}Entre em contato com {{ current_site.name }} para dúvidas, informações e mensagens à escola.{% endblock %}
+{% block meta_description %}Entre em contato com {{ current_site.name }} para cursos, mentorias, projetos e informações institucionais.{% endblock %}
+
+{% block extra_css %}
+<style>
+    .contact-control {
+        border-color: rgba(203, 213, 225, 0.72);
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: none;
+    }
+
+    .contact-control:focus {
+        border-color: rgba(11, 58, 117, 0.5);
+        background: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 0 0 3px rgba(184, 215, 255, 0.24);
+    }
+
+    .contact-message {
+        min-height: 11rem;
+        resize: none;
+    }
+
+    .contact-turnstile {
+        background: rgba(255, 255, 255, 0.46);
+    }
+
+    /* Remove a camada de brilho interna (::before) apenas no card escuro do contato,
+       eliminando o efeito de "bloco dentro de bloco". Mantém fundo, borda, sombra e o
+       lift de hover do card (a animação fica no elemento, não no ::before). */
+    .contact-card-flat::before {
+        display: none;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<section class="bg-[#f8faf7] py-16 md:py-24">
+<section class="liquid-section py-16 md:py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
-            <p class="text-sm font-bold uppercase tracking-[0.2em] text-primary-700">Contato</p>
-            <h1 class="mt-4 font-display text-4xl font-bold tracking-tight text-slate-950 md:text-6xl">Estamos aqui para ouvir</h1>
+            <p class="text-sm font-bold uppercase text-primary-700">Contato</p>
+            <h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-slate-950 md:text-6xl">Conte-nos mais</h1>
             <p class="mt-6 text-lg leading-relaxed text-slate-600 md:text-xl">
-                Mande uma mensagem para tirar dúvidas, compartilhar solicitações ou iniciar uma conversa com a escola.
+                Mande uma mensagem para tirar dúvidas, consultar turmas, solicitar mentorias ou iniciar uma conversa sobre projetos de comunicação, arte e liderança.
             </p>
         </div>
 
         <div class="mt-12 grid gap-8 lg:grid-cols-[1fr_0.42fr]">
-            <div class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-xl shadow-slate-900/5 md:p-10">
+            <div class="scroll-reveal liquid-panel rounded-[2.25rem] p-6 md:p-10"
+                data-scroll-reveal>
                 <h2 class="font-display text-2xl font-bold text-slate-950 md:text-3xl">Envie sua mensagem</h2>
 
                 <form method="post" class="mt-8 space-y-6" x-data="{ isSubmitting: false }" @submit="isSubmitting = true">
@@ -34,7 +67,7 @@
                             <label for="{{ form.name.id_for_label }}" class="block text-sm font-bold text-slate-700">Nome completo</label>
                             <input type="text" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}" required autocomplete="name"
                                 value="{{ form.name.value|default_if_none:'' }}"
-                                class="mt-2 h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-slate-950 shadow-sm outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
+                                class="contact-control mt-2 h-12 w-full rounded-2xl border px-4 text-slate-950 outline-none transition-all"
                                 placeholder="Seu nome">
                             {% for error in form.name.errors %}
                             <p class="mt-2 text-sm text-red-600">{{ error }}</p>
@@ -44,8 +77,8 @@
                             <label for="{{ form.email.id_for_label }}" class="block text-sm font-bold text-slate-700">E-mail</label>
                             <input type="email" name="{{ form.email.name }}" id="{{ form.email.id_for_label }}" required autocomplete="email"
                                 value="{{ form.email.value|default_if_none:'' }}"
-                                class="mt-2 h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-slate-950 shadow-sm outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
-                                placeholder="voce@exemplo.com">
+                                class="contact-control mt-2 h-12 w-full rounded-2xl border px-4 text-slate-950 outline-none transition-all"
+                                placeholder="seuemail@dominio.com">
                             {% for error in form.email.errors %}
                             <p class="mt-2 text-sm text-red-600">{{ error }}</p>
                             {% endfor %}
@@ -57,7 +90,7 @@
                             <label for="{{ form.phone.id_for_label }}" class="block text-sm font-bold text-slate-700">Telefone</label>
                             <input type="tel" name="{{ form.phone.name }}" id="{{ form.phone.id_for_label }}" autocomplete="tel"
                                 value="{{ form.phone.value|default_if_none:'' }}"
-                                class="mt-2 h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-slate-950 shadow-sm outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
+                                class="contact-control mt-2 h-12 w-full rounded-2xl border px-4 text-slate-950 outline-none transition-all"
                                 placeholder="Opcional">
                             {% for error in form.phone.errors %}
                             <p class="mt-2 text-sm text-red-600">{{ error }}</p>
@@ -66,7 +99,7 @@
                         <div>
                             <label for="{{ form.subject.id_for_label }}" class="block text-sm font-bold text-slate-700">Assunto</label>
                             <select name="{{ form.subject.name }}" id="{{ form.subject.id_for_label }}"
-                                class="mt-2 h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-slate-950 shadow-sm outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-100">
+                                class="contact-control mt-2 h-12 w-full rounded-2xl border px-4 text-slate-950 outline-none transition-all">
                                 {% for value, name in form.fields.subject.choices %}
                                 <option value="{{ value }}"{% if form.subject.value == value %} selected{% endif %}>{{ name }}</option>
                                 {% endfor %}
@@ -80,16 +113,32 @@
                     <div>
                         <label for="{{ form.message.id_for_label }}" class="block text-sm font-bold text-slate-700">Mensagem</label>
                         <textarea name="{{ form.message.name }}" id="{{ form.message.id_for_label }}" rows="6" required
-                            class="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-950 shadow-sm outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
-                            placeholder="Escreva sua mensagem com os detalhes necessários.">{{ form.message.value|default_if_none:'' }}</textarea>
+                            class="contact-control contact-message mt-2 w-full rounded-[1.4rem] border px-4 py-4 text-slate-950 outline-none transition-all"
+                            placeholder="Conte qual curso, mentoria ou projeto você quer conversar.">{{ form.message.value|default_if_none:'' }}</textarea>
                         {% for error in form.message.errors %}
                         <p class="mt-2 text-sm text-red-600">{{ error }}</p>
                         {% endfor %}
                     </div>
 
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <div class="contact-turnstile rounded-[1.4rem] p-4">
+                        <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
+                            <div>
+                                <p class="text-sm font-bold text-slate-800">Verificação anti-bot</p>
+                                <p class="mt-1 text-sm leading-relaxed text-slate-500">
+                                    Confirme pelo Cloudflare Turnstile para proteger o formulário contra envios automatizados.
+                                </p>
+                            </div>
+                            {% if turnstile_site_key %}
+                            <div data-turnstile-widget data-sitekey="{{ turnstile_site_key }}" data-theme="light"></div>
+                            {% else %}
+                            <p class="text-sm font-semibold text-red-600">Verificação anti-bot indisponível.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-3 border-t border-slate-200/70 pt-5 sm:flex-row sm:items-center">
                         <button type="submit" x-show="!isSubmitting"
-                            class="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                            class="jump-lift inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
                             Enviar mensagem
                         </button>
                         <button type="button" disabled x-cloak x-show="isSubmitting"
@@ -101,41 +150,28 @@
                 </form>
             </div>
 
-            <aside class="space-y-5">
+            <aside class="stagger-children space-y-5">
                 {% if site_settings and site_settings.address %}
-                <div class="rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm">
-                    <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-100 text-primary-700">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                d="M12 21s7-5.1 7-11a7 7 0 10-14 0c0 5.9 7 11 7 11z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 13a3 3 0 100-6 3 3 0 000 6z" />
-                        </svg>
-                    </span>
-                    <h2 class="mt-5 font-display text-xl font-bold text-slate-950">Visite a escola</h2>
+                <div class="liquid-card jump-lift rounded-[1.75rem] p-6">
+                    <h2 class="font-display text-xl font-bold text-slate-950">Endereço</h2>
                     <p class="mt-3 whitespace-pre-line leading-relaxed text-slate-600">{{ site_settings.address }}</p>
                 </div>
                 {% endif %}
 
                 {% if site_settings %}
                 {% if site_settings.phone_number or site_settings.primary_email %}
-                <div class="rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm">
-                    <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                d="M3 8l8.5 5.5a1 1 0 001 0L21 8m-16 11h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                    </span>
-                    <h2 class="mt-5 font-display text-xl font-bold text-slate-950">Canais diretos</h2>
+                <div class="liquid-card jump-lift rounded-[1.75rem] p-6">
+                    <h2 class="font-display text-xl font-bold text-slate-950">Canais diretos</h2>
                     <div class="mt-4 space-y-4">
                         {% if site_settings.phone_number %}
                         <div>
-                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Telefone</p>
+                            <p class="text-xs font-bold uppercase text-slate-500">Telefone</p>
                             <p class="mt-1 font-semibold text-slate-900">{{ site_settings.phone_number }}</p>
                         </div>
                         {% endif %}
                         {% if site_settings.primary_email %}
                         <div>
-                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">E-mail</p>
+                            <p class="text-xs font-bold uppercase text-slate-500">E-mail</p>
                             <a href="mailto:{{ site_settings.primary_email }}"
                                 class="mt-1 inline-block break-all font-semibold text-primary-700 hover:text-primary-900">{{ site_settings.primary_email }}</a>
                         </div>
@@ -145,14 +181,14 @@
                 {% endif %}
                 {% endif %}
 
-                <div class="rounded-3xl border border-slate-200/70 bg-slate-950 p-6 text-white shadow-sm">
-                    <h2 class="font-display text-xl font-bold">Trabalhe conosco</h2>
-                    <p class="mt-3 text-sm leading-relaxed text-slate-300">
-                        Profissionais interessados em oportunidades podem acompanhar as vagas abertas da escola.
+                <div class="liquid-card liquid-card-dark jump-lift rounded-[1.75rem] p-6 text-white contact-card-flat">
+                    <h2 class="font-display text-xl font-bold">Cursos e mentorias</h2>
+                    <p class="mt-3 text-sm leading-relaxed text-primary-100">
+                        Consulte turmas, formatos, cargas horárias, mentorias e projetos corporativos.
                     </p>
-                    <a href="{% url 'hiring:list' %}"
-                        class="mt-5 inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-bold text-slate-950 transition-colors hover:bg-primary-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-4 focus-visible:ring-offset-slate-950">
-                        Ver vagas
+                    <a href="{% url 'school:page_detail' 'cursos' %}"
+                        class="jump-lift mt-5 inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-bold text-primary-900 transition-colors hover:bg-primary-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-primary-900">
+                        Conheça os cursos
                     </a>
                 </div>
             </aside>

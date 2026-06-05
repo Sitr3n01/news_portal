@@ -297,7 +297,7 @@ def news_guide(request):
     guide = {
         'area': 'news',
         'has_access': has_access,
-        'eyebrow': 'Portal de Notícias',
+        'eyebrow': 'Blog da Kelly',
         'title': 'Operação Editorial',
         'subtitle': 'Conduza o ciclo editorial completo: criar, organizar, publicar, enviar newsletter e moderar a comunidade.',
         'icon': 'newspaper',
@@ -406,7 +406,7 @@ def news_guide(request):
         'recent_cards': _visible([
             _recent_card('Artigos recentes', 'newspaper', 'Nenhum artigo recente', recent_articles) if _can(user, 'news.view_article') else None,
         ]),
-        'empty_message': 'Você ainda não tem permissões para operar o Portal de Notícias.',
+        'empty_message': 'Você ainda não tem permissões para operar o Blog da Kelly.',
     }
     return _guide_response(request, guide)
 

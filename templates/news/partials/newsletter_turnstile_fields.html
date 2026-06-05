@@ -1,0 +1,13 @@
+<div class="rounded-lg bg-white/70 p-3 dark:bg-black/20">
+    <p class="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+        Verificação anti-bot
+    </p>
+    {% if turnstile_site_key %}
+    <div data-turnstile-widget data-sitekey="{{ turnstile_site_key }}" data-theme="auto"></div>
+    {% else %}
+    <p class="text-xs font-ui text-red-500">Verificação anti-bot indisponível.</p>
+    {% endif %}
+    {% if form.non_field_errors %}
+    <p class="mt-2 text-xs text-red-500 font-ui">{{ form.non_field_errors|first }}</p>
+    {% endif %}
+</div>

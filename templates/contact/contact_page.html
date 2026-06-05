@@ -5,6 +5,23 @@
 
 {% block extra_css %}
 <style>
+    /* Painel de vidro líquido "limpo": reaproveita o vidro do sistema
+       (liquid-panel) mas desliga a camada ::before, evitando o efeito
+       "bloco dentro de bloco" que removemos antes. Mesma especificidade do
+       ::before original — vence por vir depois no CSS (igual a .contact-card-flat). */
+    .contact-glass::before {
+        display: none;
+    }
+
+    /* O formulário interno continua plano: o seletor global `main form`
+       (base_school.html) aplicaria box-shadow/border-radius a qualquer form;
+       zeramos aqui para não criar sombra dupla dentro do painel de vidro.
+       Uma classe vence o seletor de tipo, sem !important. */
+    .contact-form {
+        box-shadow: none;
+        border-radius: 0;
+    }
+
     .contact-control {
         border-color: rgba(203, 213, 225, 0.72);
         background: rgba(255, 255, 255, 0.9);
@@ -17,13 +34,26 @@
         box-shadow: 0 0 0 3px rgba(184, 215, 255, 0.24);
     }
 
+    /* Campos no modo escuro (escopado em .dark — modo claro intocado) */
+    .dark .contact-control {
+        border-color: rgba(148, 163, 184, 0.24);
+        background: rgba(15, 23, 42, 0.55);
+        color: #e2e8f0;
+    }
+
+    .dark .contact-control:focus {
+        border-color: rgba(88, 130, 253, 0.7);
+        background: rgba(15, 23, 42, 0.78);
+        box-shadow: 0 0 0 3px rgba(88, 130, 253, 0.22);
+    }
+
+    .dark .contact-control::placeholder {
+        color: rgba(148, 163, 184, 0.7);
+    }
+
     .contact-message {
         min-height: 11rem;
         resize: none;
-    }
-
-    .contact-turnstile {
-        background: rgba(255, 255, 255, 0.46);
     }
 </style>
 {% endblock %}
@@ -32,23 +62,25 @@
 <section class="liquid-section py-16 md:py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
-            <p class="text-sm font-bold uppercase text-primary-700">Contato</p>
-            <h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-slate-950 md:text-6xl">Conte-nos mais</h1>
-            <p class="mt-6 text-lg leading-relaxed text-slate-600 md:text-xl">
+            <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Contato', 'Contact')">Contato</p>
+            <h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-slate-950 md:text-6xl"
+                x-text="t('Conte-nos mais', 'Tell us more')">Conte-nos mais</h1>
+            <p class="mt-6 text-lg leading-relaxed text-slate-600 md:text-xl"
+                x-text="t('Mande uma mensagem para tirar dúvidas, consultar turmas, solicitar mentorias ou iniciar uma conversa sobre projetos de comunicação, arte e liderança.', 'Send a message to ask questions, check classes, request mentoring or start a conversation about communication, art and leadership projects.')">
                 Mande uma mensagem para tirar dúvidas, consultar turmas, solicitar mentorias ou iniciar uma conversa sobre projetos de comunicação, arte e liderança.
             </p>
         </div>
 
         <div class="mt-12 grid gap-8 lg:grid-cols-[1fr_0.42fr]">
-            <div class="scroll-reveal liquid-panel rounded-[2.25rem] p-6 md:p-10"
-                data-scroll-reveal>
-                <h2 class="font-display text-2xl font-bold text-slate-950 md:text-3xl">Envie sua mensagem</h2>
+            <div class="liquid-panel contact-glass scroll-reveal rounded-[2.25rem] p-6 md:p-10" data-scroll-reveal>
+                <h2 class="font-display text-2xl font-bold text-slate-950 md:text-3xl"
+                    x-text="t('Envie sua mensagem', 'Send your message')">Envie sua mensagem</h2>
 
-                <form method="post" class="mt-8 space-y-6" x-data="{ isSubmitting: false }" @submit="isSubmitting = true">
+                <form method="post" class="contact-form mt-8 space-y-6" x-data="{ isSubmitting: false }" @submit="isSubmitting = true">
                     {% csrf_token %}
 
                     {% if form.non_field_errors %}
-                    <div class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                    <div class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
                         {% for error in form.non_field_errors %}
                         <p>{{ error }}</p>
                         {% endfor %}
@@ -57,40 +89,40 @@
 
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div>
-                            <label for="{{ form.name.id_for_label }}" class="block text-sm font-bold text-slate-700">Nome completo</label>
+                            <label for="{{ form.name.id_for_label }}" class="block text-sm font-bold text-slate-700" x-text="t('Nome completo', 'Full name')">Nome completo</label>
                             <input type="text" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}" required autocomplete="name"
                                 value="{{ form.name.value|default_if_none:'' }}"
                                 class="contact-control mt-2 h-12 w-full rounded-2xl border px-4 text-slate-950 outline-none transition-all"
-                                placeholder="Seu nome">
+                                :placeholder="t('Seu nome', 'Your name')" placeholder="Seu nome">
                             {% for error in form.name.errors %}
-                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                            <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
                             {% endfor %}
                         </div>
                         <div>
-                            <label for="{{ form.email.id_for_label }}" class="block text-sm font-bold text-slate-700">E-mail</label>
+                            <label for="{{ form.email.id_for_label }}" class="block text-sm font-bold text-slate-700" x-text="t('E-mail', 'Email')">E-mail</label>
                             <input type="email" name="{{ form.email.name }}" id="{{ form.email.id_for_label }}" required autocomplete="email"
                                 value="{{ form.email.value|default_if_none:'' }}"
                                 class="contact-control mt-2 h-12 w-full rounded-2xl border px-4 text-slate-950 outline-none transition-all"
                                 placeholder="seuemail@dominio.com">
                             {% for error in form.email.errors %}
-                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                            <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
                             {% endfor %}
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div>
-                            <label for="{{ form.phone.id_for_label }}" class="block text-sm font-bold text-slate-700">Telefone</label>
+                            <label for="{{ form.phone.id_for_label }}" class="block text-sm font-bold text-slate-700" x-text="t('Telefone', 'Phone')">Telefone</label>
                             <input type="tel" name="{{ form.phone.name }}" id="{{ form.phone.id_for_label }}" autocomplete="tel"
                                 value="{{ form.phone.value|default_if_none:'' }}"
                                 class="contact-control mt-2 h-12 w-full rounded-2xl border px-4 text-slate-950 outline-none transition-all"
-                                placeholder="Opcional">
+                                :placeholder="t('Opcional', 'Optional')" placeholder="Opcional">
                             {% for error in form.phone.errors %}
-                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                            <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
                             {% endfor %}
                         </div>
                         <div>
-                            <label for="{{ form.subject.id_for_label }}" class="block text-sm font-bold text-slate-700">Assunto</label>
+                            <label for="{{ form.subject.id_for_label }}" class="block text-sm font-bold text-slate-700" x-text="t('Assunto', 'Subject')">Assunto</label>
                             <select name="{{ form.subject.name }}" id="{{ form.subject.id_for_label }}"
                                 class="contact-control mt-2 h-12 w-full rounded-2xl border px-4 text-slate-950 outline-none transition-all">
                                 {% for value, name in form.fields.subject.choices %}
@@ -98,47 +130,50 @@
                                 {% endfor %}
                             </select>
                             {% for error in form.subject.errors %}
-                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                            <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
                             {% endfor %}
                         </div>
                     </div>
 
                     <div>
-                        <label for="{{ form.message.id_for_label }}" class="block text-sm font-bold text-slate-700">Mensagem</label>
+                        <label for="{{ form.message.id_for_label }}" class="block text-sm font-bold text-slate-700" x-text="t('Mensagem', 'Message')">Mensagem</label>
                         <textarea name="{{ form.message.name }}" id="{{ form.message.id_for_label }}" rows="6" required
                             class="contact-control contact-message mt-2 w-full rounded-[1.4rem] border px-4 py-4 text-slate-950 outline-none transition-all"
+                            :placeholder="t('Conte qual curso, mentoria ou projeto você quer conversar.', 'Tell us which course, mentoring or project you would like to talk about.')"
                             placeholder="Conte qual curso, mentoria ou projeto você quer conversar.">{{ form.message.value|default_if_none:'' }}</textarea>
                         {% for error in form.message.errors %}
-                        <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
                         {% endfor %}
                     </div>
 
-                    <div class="contact-turnstile rounded-[1.4rem] p-4">
-                        <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
-                            <div>
-                                <p class="text-sm font-bold text-slate-800">Verificação anti-bot</p>
-                                <p class="mt-1 text-sm leading-relaxed text-slate-500">
-                                    Confirme pelo Cloudflare Turnstile para proteger o formulário contra envios automatizados.
-                                </p>
-                            </div>
-                            {% if turnstile_site_key %}
-                            <div data-turnstile-widget data-sitekey="{{ turnstile_site_key }}" data-theme="light"></div>
-                            {% else %}
-                            <p class="text-sm font-semibold text-red-600">Verificação anti-bot indisponível.</p>
-                            {% endif %}
+                    <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
+                        <div>
+                            <p class="text-sm font-bold text-slate-800" x-text="t('Verificação anti-bot', 'Anti-bot verification')">Verificação anti-bot</p>
+                            <p class="mt-1 text-sm leading-relaxed text-slate-500"
+                                x-text="t('Confirme pelo Cloudflare Turnstile para proteger o formulário contra envios automatizados.', 'Confirm with Cloudflare Turnstile to protect the form against automated submissions.')">
+                                Confirme pelo Cloudflare Turnstile para proteger o formulário contra envios automatizados.
+                            </p>
                         </div>
+                        {% if turnstile_site_key %}
+                        <div data-turnstile-widget data-sitekey="{{ turnstile_site_key }}" data-theme="light"></div>
+                        {% else %}
+                        <p class="text-sm font-semibold text-red-600 dark:text-red-400" x-text="t('Verificação anti-bot indisponível.', 'Anti-bot verification unavailable.')">Verificação anti-bot indisponível.</p>
+                        {% endif %}
                     </div>
 
-                    <div class="flex flex-col gap-3 border-t border-slate-200/70 pt-5 sm:flex-row sm:items-center">
+                    <div class="flex flex-col gap-3 border-t border-slate-200/70 pt-5 dark:border-white/10 sm:flex-row sm:items-center">
                         <button type="submit" x-show="!isSubmitting"
-                            class="jump-lift inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                            class="jump-lift inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4"
+                            x-text="t('Enviar mensagem', 'Send message')">
                             Enviar mensagem
                         </button>
                         <button type="button" disabled x-cloak x-show="isSubmitting"
-                            class="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-500 px-7 py-3 text-sm font-bold text-white">
+                            class="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-500 px-7 py-3 text-sm font-bold text-white"
+                            x-text="t('Enviando...', 'Sending...')">
                             Enviando...
                         </button>
-                        <p class="text-sm leading-relaxed text-slate-500">Responderemos pelos canais informados no formulário.</p>
+                        <p class="text-sm leading-relaxed text-slate-500"
+                            x-text="t('Responderemos pelos canais informados no formulário.', 'We will reply through the channels provided in the form.')">Responderemos pelos canais informados no formulário.</p>
                     </div>
                 </form>
             </div>
@@ -146,7 +181,7 @@
             <aside class="stagger-children space-y-5">
                 {% if site_settings and site_settings.address %}
                 <div class="liquid-card jump-lift rounded-[1.75rem] p-6">
-                    <h2 class="font-display text-xl font-bold text-slate-950">Endereço</h2>
+                    <h2 class="font-display text-xl font-bold text-slate-950" x-text="t('Endereço', 'Address')">Endereço</h2>
                     <p class="mt-3 whitespace-pre-line leading-relaxed text-slate-600">{{ site_settings.address }}</p>
                 </div>
                 {% endif %}
@@ -154,19 +189,19 @@
                 {% if site_settings %}
                 {% if site_settings.phone_number or site_settings.primary_email %}
                 <div class="liquid-card jump-lift rounded-[1.75rem] p-6">
-                    <h2 class="font-display text-xl font-bold text-slate-950">Canais diretos</h2>
+                    <h2 class="font-display text-xl font-bold text-slate-950" x-text="t('Canais diretos', 'Direct channels')">Canais diretos</h2>
                     <div class="mt-4 space-y-4">
                         {% if site_settings.phone_number %}
                         <div>
-                            <p class="text-xs font-bold uppercase text-slate-500">Telefone</p>
+                            <p class="text-xs font-bold uppercase text-slate-500" x-text="t('Telefone', 'Phone')">Telefone</p>
                             <p class="mt-1 font-semibold text-slate-900">{{ site_settings.phone_number }}</p>
                         </div>
                         {% endif %}
                         {% if site_settings.primary_email %}
                         <div>
-                            <p class="text-xs font-bold uppercase text-slate-500">E-mail</p>
+                            <p class="text-xs font-bold uppercase text-slate-500" x-text="t('E-mail', 'Email')">E-mail</p>
                             <a href="mailto:{{ site_settings.primary_email }}"
-                                class="mt-1 inline-block break-all font-semibold text-primary-700 hover:text-primary-900">{{ site_settings.primary_email }}</a>
+                                class="mt-1 inline-block break-all font-semibold text-primary-700 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200">{{ site_settings.primary_email }}</a>
                         </div>
                         {% endif %}
                     </div>

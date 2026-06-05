@@ -20,18 +20,20 @@
                 </p>
                 <div class="mt-10 flex flex-col gap-3 sm:flex-row">
                     <a href="{% url 'contact:page' %}"
-                        class="jump-lift inline-flex min-h-12 items-center justify-center rounded-full bg-primary-700 px-7 py-3 text-base font-bold text-white shadow-xl shadow-primary-900/15 transition-all hover:bg-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                        class="jump-lift inline-flex min-h-12 items-center justify-center rounded-full bg-primary-700 px-7 py-3 text-base font-bold text-white shadow-xl shadow-primary-900/15 transition-all hover:bg-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4"
+                        x-text="t('Conte-nos mais', 'Tell us more')">
                         Conte-nos mais
                     </a>
                     <a href="{% url 'school:page_detail' 'cursos' %}"
-                        class="liquid-chip jump-lift inline-flex min-h-12 items-center justify-center rounded-full px-7 py-3 text-base font-bold text-primary-900 transition-all hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                        class="liquid-chip jump-lift inline-flex min-h-12 items-center justify-center rounded-full px-7 py-3 text-base font-bold text-primary-900 transition-all hover:text-primary-700 dark:text-primary-100 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4"
+                        x-text="t('Conheça os cursos', 'Explore the courses')">
                         Conheça os cursos
                     </a>
                 </div>
             </div>
             <a href="#hero-support-sheet"
-                class="scroll-cue liquid-chip mx-auto mt-8 flex h-12 w-12 items-center justify-center rounded-full text-primary-800 transition-colors hover:text-primary-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4"
-                aria-label="Rolar para as informações complementares">
+                class="scroll-cue liquid-chip mx-auto mt-8 flex h-12 w-12 items-center justify-center rounded-full text-primary-800 transition-colors hover:text-primary-600 dark:text-primary-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4"
+                :aria-label="t('Rolar para as informações complementares', 'Scroll to additional information')">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m0 0l-6-6m6 6l6-6" />
                 </svg>
@@ -89,7 +91,7 @@
         <div class="stagger-children mt-11 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {% for feature in proposal_features %}
             <article class="liquid-card jump-lift rounded-[1.75rem] p-6">
-                <span class="flex h-12 w-12 items-center justify-center rounded-lg {% if feature.tone == 'slate' %}bg-slate-100 text-slate-800{% else %}bg-primary-100 text-primary-700{% endif %}">
+                <span class="flex h-12 w-12 items-center justify-center rounded-lg {% if feature.tone == 'slate' %}bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200{% else %}bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-200{% endif %}">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                             d="M12 3l8 4.5v6.2c0 3.2-3.4 5.8-8 7.3-4.6-1.5-8-4.1-8-7.3V7.5L12 3z" />
@@ -169,25 +171,27 @@
     <div class="scroll-reveal liquid-panel mx-auto max-w-7xl overflow-hidden rounded-[2.25rem]"
         data-scroll-reveal>
         <div class="stagger-children grid lg:grid-cols-2">
-            <div class="bg-white/35 p-8 md:p-12">
-                <p class="text-sm font-bold uppercase text-primary-700">Cursos e mentorias</p>
+            <div class="bg-white/35 p-8 md:p-12 dark:bg-white/5">
+                <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Cursos e mentorias', 'Courses and mentoring')">Cursos e mentorias</p>
                 <h2 class="mt-4 font-display text-3xl font-bold text-slate-950 md:text-4xl">{{ home_config.hiring_title }}</h2>
                 <p class="mt-4 leading-relaxed text-slate-600">
                     {{ home_config.hiring_description }}
                 </p>
                 <a href="{% url 'school:page_detail' 'cursos' %}"
-                    class="jump-lift mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                    class="jump-lift mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4"
+                    x-text="t('Conheça os cursos', 'Explore the courses')">
                     Conheça os cursos
                 </a>
             </div>
             <div class="bg-[linear-gradient(135deg,#06264f,#0b3a75)] p-8 text-white md:p-12">
-                <p class="text-sm font-bold uppercase text-primary-100">Fale com a Komuniki</p>
+                <p class="text-sm font-bold uppercase text-primary-100" x-text="t('Fale com a Komuniki', 'Talk to Komuniki')">Fale com a Komuniki</p>
                 <h2 class="mt-4 font-display text-3xl font-bold md:text-4xl">{{ home_config.contact_title }}</h2>
                 <p class="mt-4 leading-relaxed text-primary-50">
                     {{ home_config.contact_description }}
                 </p>
                 <a href="{% url 'contact:page' %}"
-                    class="jump-lift mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-bold text-primary-900 transition-colors hover:bg-primary-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-primary-800">
+                    class="jump-lift mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-bold text-primary-900 transition-colors hover:bg-primary-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-primary-800"
+                    x-text="t('Conte-nos mais', 'Tell us more')">
                     Conte-nos mais
                 </a>
             </div>

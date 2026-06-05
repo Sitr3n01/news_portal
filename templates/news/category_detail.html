@@ -3,7 +3,7 @@
 {% block title %}{{ category.name }} - {{ news_portal_name }}{% endblock %}
 
 {% block content %}
-<div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+<div class="max-w-[1760px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
     <div class="mb-10 border-b border-gray-200 pb-10 dark:border-gray-800 sm:mb-12 sm:pb-12">
         <a href="{% url 'news:list' %}"
             class="inline-flex items-center text-sm font-bold text-primary-600 uppercase tracking-widest hover:text-primary-800 mb-6 transition-colors">
@@ -16,25 +16,28 @@
         {% if category.description %}
         <p class="text-base sm:text-xl text-gray-600 dark:text-slate-300 max-w-3xl">{{ category.description }}</p>
         {% endif %}
-        <p class="text-sm text-gray-400 dark:text-slate-500 mt-3">{{ page_obj.paginator.count }} artigo{{ page_obj.paginator.count|pluralize:"s" }} nesta categoria.</p>
+        <p class="text-sm text-gray-400 dark:text-slate-500 mt-3"
+            x-text="t('{{ page_obj.paginator.count }} artigo{{ page_obj.paginator.count|pluralize }} nesta categoria.', '{{ page_obj.paginator.count }} article{{ page_obj.paginator.count|pluralize }} in this category.')">{{ page_obj.paginator.count }} artigo{{ page_obj.paginator.count|pluralize }} nesta categoria.</p>
     </div>
 
-    <div class="flex flex-col lg:flex-row gap-10 lg:gap-12">
+    <div class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,24rem)] lg:gap-14 xl:gap-16">
         <!-- Articles Grid -->
-        <div class="flex-grow lg:w-2/3">
+        <div class="min-w-0">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {% for article in page_obj %}
                 {% include 'news/partials/article_card.html' %}
                 {% empty %}
                 <div class="col-span-full py-24 text-center">
-                    <div class="inline-block p-6 rounded-full bg-gray-50 mb-4">
+                    <div class="inline-block p-6 rounded-full bg-gray-50 dark:bg-slate-800 mb-4">
                         <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                     </div>
-                    <h3 class="text-2xl font-display font-bold text-gray-900 dark:text-white mb-2">Categoria Vazia</h3>
-                    <p class="text-gray-500">Ainda não há artigos publicados nesta categoria.</p>
+                    <h3 class="text-2xl font-display font-bold text-gray-900 dark:text-white mb-2"
+                        x-text="t('Categoria Vazia', 'Empty Category')">Categoria Vazia</h3>
+                    <p class="text-gray-500 dark:text-slate-400"
+                        x-text="t('Ainda não há artigos publicados nesta categoria.', 'There are no published articles in this category yet.')">Ainda não há artigos publicados nesta categoria.</p>
                 </div>
                 {% endfor %}
             </div>
@@ -43,7 +46,7 @@
         </div>
 
         <!-- Sidebar -->
-        <div class="lg:w-1/3">
+        <div class="min-w-0">
             {% include 'news/partials/sidebar.html' %}
         </div>
     </div>

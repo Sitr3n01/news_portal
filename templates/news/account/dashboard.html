@@ -3,7 +3,7 @@
 {% block title %}Minha Conta - {{ news_portal_name }}{% endblock %}
 
 {% block content %}
-<div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-0 py-10 sm:py-16 md:py-20 font-display">
+<div class="max-w-[1760px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16 md:py-20 font-display">
 
     <!-- Flash Messages -->
     {% if messages %}
@@ -150,7 +150,7 @@
                         <div class="flex items-center justify-between gap-4 mb-4">
                             <a href="{% url 'news:article_detail' comment.article.slug %}#comments-section"
                                 class="font-ui text-sm font-semibold text-primary hover:underline line-clamp-1">
-                                Em: {{ comment.article.title }}
+                                <span x-text="t('Em:', 'On:')">Em:</span> {{ comment.article.title }}
                             </a>
                             <span class="text-xs text-slate-400 font-ui flex-shrink-0">{{ comment.created_at|date:"d M,
                                 Y" }}</span>

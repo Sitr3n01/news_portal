@@ -18,6 +18,19 @@
             linear-gradient(115deg, rgba(255, 255, 255, 0.5), transparent 40%),
             radial-gradient(circle at 100% 0%, rgba(248, 250, 252, 0.42), transparent 14rem);
     }
+
+    .dark .course-card-white {
+        border-color: rgba(148, 163, 184, 0.18);
+        background:
+            linear-gradient(135deg, rgba(17, 28, 47, 0.94), rgba(11, 58, 117, 0.34)),
+            radial-gradient(circle at 18% 0%, rgba(88, 130, 253, 0.14), transparent 16rem);
+    }
+
+    .dark .course-card-white::before {
+        background:
+            linear-gradient(115deg, rgba(255, 255, 255, 0.05), transparent 40%),
+            radial-gradient(circle at 100% 0%, rgba(88, 130, 253, 0.12), transparent 14rem);
+    }
 </style>
 {% endblock %}
 
@@ -26,19 +39,23 @@
 <section class="liquid-section py-16 md:py-24">
     <div class="fade-in mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:px-8">
         <div class="flex flex-col justify-center">
-            <h1 class="max-w-4xl font-display text-5xl font-extrabold leading-[0.98] tracking-tight text-slate-950 md:text-7xl">
+            <h1 class="max-w-4xl font-display text-5xl font-extrabold leading-[0.98] tracking-tight text-slate-950 md:text-7xl"
+                    x-text="t('Formação em comunicação, cultura e presença profissional', 'Training in communication, culture and professional presence')">
                     Formação em comunicação, cultura e presença profissional
                 </h1>
-            <p class="mt-7 max-w-2xl text-lg leading-relaxed text-slate-600 md:text-xl">
+            <p class="mt-7 max-w-2xl text-lg leading-relaxed text-slate-600 md:text-xl"
+                    x-text="t('Cursos profissionalizantes, livres e mentorias para quem quer comunicar melhor, produzir cultura, conduzir eventos e desenvolver segurança na expressão.', 'Professional and open courses plus mentoring for those who want to communicate better, produce culture, host events and build confidence in their expression.')">
                     Cursos profissionalizantes, livres e mentorias para quem quer comunicar melhor, produzir cultura, conduzir eventos e desenvolver segurança na expressão.
                 </p>
             <div class="mt-10 flex flex-col gap-3 sm:flex-row">
                     <a href="{% url 'contact:page' %}"
-                        class="jump-lift inline-flex min-h-12 items-center justify-center rounded-full bg-primary-700 px-7 py-3 text-base font-bold text-white shadow-xl shadow-primary-900/15 transition-all hover:bg-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                        class="jump-lift inline-flex min-h-12 items-center justify-center rounded-full bg-primary-700 px-7 py-3 text-base font-bold text-white shadow-xl shadow-primary-900/15 transition-all hover:bg-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4"
+                        x-text="t('Fale com a Komuniki', 'Talk to Komuniki')">
                         Fale com a Komuniki
                     </a>
                     <a href="#grade-cursos"
-                        class="liquid-chip jump-lift inline-flex min-h-12 items-center justify-center rounded-full px-7 py-3 text-base font-bold text-primary-900 transition-all hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                        class="liquid-chip jump-lift inline-flex min-h-12 items-center justify-center rounded-full px-7 py-3 text-base font-bold text-primary-900 transition-all hover:text-primary-700 dark:text-primary-100 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4"
+                        x-text="t('Ver cursos', 'View courses')">
                         Ver cursos
                     </a>
                 </div>
@@ -46,17 +63,18 @@
 
         <aside class="stagger-children grid gap-4">
                 <div class="liquid-card liquid-card-dark jump-lift rounded-[1.75rem] p-6 text-white">
-                    <p class="text-sm font-bold uppercase text-primary-100">Reconhecimento</p>
+                    <p class="text-sm font-bold uppercase text-primary-100" x-text="t('Reconhecimento', 'Recognition')">Reconhecimento</p>
                     <h2 class="mt-4 font-display text-3xl font-bold leading-tight">{{ course_award }}</h2>
-                    <p class="mt-4 text-sm leading-relaxed text-primary-50">
+                    <p class="mt-4 text-sm leading-relaxed text-primary-50"
+                        x-text="t('Uma validação importante do impacto educacional e social da Komuniki.', 'An important validation of the educational and social impact of Komuniki.')">
                         Uma validação importante do impacto educacional e social da Komuniki.
                     </p>
                 </div>
                 <div class="liquid-card jump-lift rounded-[1.75rem] p-6">
-                    <p class="text-sm font-bold uppercase text-primary-700">Trilhas disponíveis</p>
+                    <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Trilhas disponíveis', 'Available tracks')">Trilhas disponíveis</p>
                     <div class="mt-4 flex flex-wrap gap-2">
                         {% for group in course_groups %}
-                        <span class="rounded-full border border-primary-700/15 bg-white/55 px-3 py-2 text-xs font-bold uppercase tracking-wide text-primary-800">
+                        <span class="rounded-full border border-primary-700/15 bg-white/55 px-3 py-2 text-xs font-bold uppercase tracking-wide text-primary-800 dark:border-white/10 dark:bg-white/10">
                             {{ group.eyebrow }}
                         </span>
                         {% endfor %}
@@ -88,7 +106,7 @@
                                 {{ course.title }}
                             </h3>
                         </div>
-                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-primary-700">
+                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-primary-700 dark:bg-slate-800 dark:text-primary-200">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                                     d="M7 4h10a2 2 0 0 1 2 2v16l-7-3-7 3V6a2 2 0 0 1 2-2zM9 9h6M9 13h4" />
@@ -102,7 +120,7 @@
 
                     <dl class="mt-6 grid gap-3">
                         {% for detail in course.details %}
-                        <div class="rounded-2xl border border-slate-200/70 bg-white/65 px-4 py-3">
+                        <div class="rounded-2xl border border-slate-200/70 bg-white/65 px-4 py-3 dark:border-white/10 dark:bg-white/5">
                             <dt class="text-xs font-bold uppercase tracking-wide text-slate-500">
                                 {{ detail.label }}
                             </dt>
@@ -135,25 +153,31 @@
     <div class="scroll-reveal liquid-panel mx-auto max-w-7xl overflow-hidden rounded-[2.25rem]"
         data-scroll-reveal>
         <div class="stagger-children grid lg:grid-cols-2">
-            <div class="bg-white/35 p-8 md:p-12">
-                <p class="text-sm font-bold uppercase text-primary-700">Próximas turmas</p>
-                <h2 class="mt-4 font-display text-3xl font-bold text-slate-950 md:text-4xl">Quer entender qual curso combina com seu momento?</h2>
-                <p class="mt-4 leading-relaxed text-slate-600">
+            <div class="bg-white/35 p-8 md:p-12 dark:bg-white/5">
+                <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Próximas turmas', 'Upcoming classes')">Próximas turmas</p>
+                <h2 class="mt-4 font-display text-3xl font-bold text-slate-950 md:text-4xl"
+                    x-text="t('Quer entender qual curso combina com seu momento?', 'Want to find out which course fits your moment?')">Quer entender qual curso combina com seu momento?</h2>
+                <p class="mt-4 leading-relaxed text-slate-600"
+                    x-text="t('A Komuniki pode orientar formatos, requisitos, turmas e caminhos de formação conforme seu objetivo.', 'Komuniki can guide you on formats, requirements, classes and training paths according to your goal.')">
                     A Komuniki pode orientar formatos, requisitos, turmas e caminhos de formação conforme seu objetivo.
                 </p>
                 <a href="{% url 'contact:page' %}"
-                    class="jump-lift mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                    class="jump-lift mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4"
+                    x-text="t('Conte-nos mais', 'Tell us more')">
                     Conte-nos mais
                 </a>
             </div>
             <div class="bg-[linear-gradient(135deg,#06264f,#0b3a75)] p-8 text-white md:p-12">
-                <p class="text-sm font-bold uppercase text-primary-100">Blog de notícias</p>
-                <h2 class="mt-4 font-display text-3xl font-bold md:text-4xl">Acompanhe conteúdos e novidades</h2>
-                <p class="mt-4 leading-relaxed text-primary-50">
+                <p class="text-sm font-bold uppercase text-primary-100" x-text="t('Blog de notícias', 'News blog')">Blog de notícias</p>
+                <h2 class="mt-4 font-display text-3xl font-bold md:text-4xl"
+                    x-text="t('Acompanhe conteúdos e novidades', 'Follow content and updates')">Acompanhe conteúdos e novidades</h2>
+                <p class="mt-4 leading-relaxed text-primary-50"
+                    x-text="t('Veja publicações, notícias e atualizações da Komuniki no portal de notícias.', 'See posts, news and updates from Komuniki on the news portal.')">
                     Veja publicações, notícias e atualizações da Komuniki no portal de notícias.
                 </p>
                 <a href="{% url 'news:list' %}"
-                    class="jump-lift mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-bold text-primary-900 transition-colors hover:bg-primary-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-primary-800">
+                    class="jump-lift mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-bold text-primary-900 transition-colors hover:bg-primary-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-primary-800"
+                    x-text="t('Ir para notícias', 'Go to news')">
                     Ir para notícias
                 </a>
             </div>
@@ -164,11 +188,11 @@
 <section class="liquid-section py-14 md:py-20">
     <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <a href="{% url 'school:home' %}"
-            class="inline-flex items-center gap-2 rounded-full text-sm font-bold text-primary-700 transition-colors hover:text-primary-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+            class="inline-flex items-center gap-2 rounded-full text-sm font-bold text-primary-700 transition-colors hover:text-primary-900 dark:hover:text-primary-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Voltar para a Komuniki
+            <span x-text="t('Voltar para a Komuniki', 'Back to Komuniki')">Voltar para a Komuniki</span>
         </a>
         <h1 class="mt-6 font-display text-4xl font-extrabold tracking-tight text-slate-950 md:text-6xl">{{ page.title }}</h1>
     </div>
@@ -177,7 +201,7 @@
 <section class="liquid-section py-12 md:py-16">
     <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         {% if page.featured_image %}
-        <div class="mb-10 overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-100 shadow-xl shadow-slate-900/10">
+        <div class="mb-10 overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-100 shadow-xl shadow-slate-900/10 dark:border-slate-700 dark:bg-slate-800">
             <img src="{{ page.featured_image.url }}" alt="{{ page.title }}" class="aspect-video h-full w-full object-cover">
         </div>
         {% endif %}
@@ -198,11 +222,14 @@
         data-scroll-reveal>
         <div class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div>
-                <h2 class="font-display text-2xl font-bold text-slate-950">Quer falar com a Komuniki?</h2>
-                <p class="mt-2 text-slate-600">Nossa equipe pode ajudar com cursos, mentorias, projetos e informações institucionais.</p>
+                <h2 class="font-display text-2xl font-bold text-slate-950"
+                    x-text="t('Quer falar com a Komuniki?', 'Want to talk to Komuniki?')">Quer falar com a Komuniki?</h2>
+                <p class="mt-2 text-slate-600"
+                    x-text="t('Nossa equipe pode ajudar com cursos, mentorias, projetos e informações institucionais.', 'Our team can help with courses, mentoring, projects and institutional information.')">Nossa equipe pode ajudar com cursos, mentorias, projetos e informações institucionais.</p>
             </div>
             <a href="{% url 'contact:page' %}"
-                class="jump-lift inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                class="jump-lift inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4"
+                x-text="t('Conte-nos mais', 'Tell us more')">
                 Conte-nos mais
             </a>
         </div>

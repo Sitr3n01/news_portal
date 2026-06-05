@@ -3,29 +3,31 @@
 {% block title %}Arquivo {% if month %}{{ month }}/{% endif %}{{ year }} - {{ news_portal_name }}{% endblock %}
 
 {% block content %}
-<div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
-  <div class="flex flex-col lg:flex-row gap-10 lg:gap-12">
+<div class="max-w-[1760px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+  <div class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,24rem)] lg:gap-14 xl:gap-16">
     <!-- Main Content -->
-    <div class="flex-grow lg:w-2/3">
+    <div class="min-w-0">
       <div class="mb-10 sm:mb-12">
         <a href="{% url 'news:list' %}"
           class="inline-flex items-center text-sm font-bold text-primary-600 uppercase tracking-widest hover:text-primary-800 mb-6 transition-colors">
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Voltar para Notícias
+          <span x-text="t('Voltar para Notícias', 'Back to News')">Voltar para Notícias</span>
         </a>
         <h1 class="text-3xl sm:text-5xl font-display font-bold text-gray-900 dark:text-white mb-4">
-          Arquivo: {% if month %}{{ month }}/{% endif %}{{ year }}
+          <span x-text="t('Arquivo:', 'Archive:')">Arquivo:</span> {% if month %}{{ month }}/{% endif %}{{ year }}
         </h1>
-        <p class="text-base sm:text-xl text-gray-600 dark:text-slate-300">{{ page_obj.paginator.count }} artigo{{ page_obj.paginator.count|pluralize:"s" }} encontrado{{ page_obj.paginator.count|pluralize:"s" }}.</p>
+        <p class="text-base sm:text-xl text-gray-600 dark:text-slate-300"
+          x-text="t('{{ page_obj.paginator.count }} artigo{{ page_obj.paginator.count|pluralize }} encontrado{{ page_obj.paginator.count|pluralize }}.', '{{ page_obj.paginator.count }} article{{ page_obj.paginator.count|pluralize }} found.')">{{ page_obj.paginator.count }} artigo{{ page_obj.paginator.count|pluralize }} encontrado{{ page_obj.paginator.count|pluralize }}.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         {% for article in page_obj %}
         {% include 'news/partials/article_card.html' %}
         {% empty %}
-        <div class="col-span-full text-center py-16 text-gray-500 dark:text-slate-400">
+        <div class="col-span-full text-center py-16 text-gray-500 dark:text-slate-400"
+          x-text="t('Nenhum artigo encontrado neste período.', 'No articles found for this period.')">
           Nenhum artigo encontrado neste período.
         </div>
         {% endfor %}
@@ -35,7 +37,7 @@
     </div>
 
     <!-- Sidebar -->
-    <div class="lg:w-1/3">
+    <div class="min-w-0">
       {% include 'news/partials/sidebar.html' %}
     </div>
   </div>

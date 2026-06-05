@@ -3,7 +3,7 @@
 {% block title %}{{ author.get_full_name|default:author.username }} - {{ news_portal_name }}{% endblock %}
 
 {% block content %}
-<div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+<div class="max-w-[1760px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
   <!-- Author Header -->
   <div class="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 mb-10 sm:mb-12 border border-gray-100 dark:border-slate-800 shadow-sm">
     <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
@@ -22,21 +22,23 @@
         {% if author.bio %}
         <p class="text-gray-600 dark:text-slate-300 max-w-2xl">{{ author.bio }}</p>
         {% endif %}
-        <p class="text-sm text-gray-400 dark:text-slate-500 mt-4">{{ page_obj.paginator.count }} artigo{{ page_obj.paginator.count|pluralize:"s" }} publicado{{ page_obj.paginator.count|pluralize:"s" }}</p>
+        <p class="text-sm text-gray-400 dark:text-slate-500 mt-4"
+          x-text="t('{{ page_obj.paginator.count }} artigo{{ page_obj.paginator.count|pluralize }} publicado{{ page_obj.paginator.count|pluralize }}', '{{ page_obj.paginator.count }} published article{{ page_obj.paginator.count|pluralize }}')">{{ page_obj.paginator.count }} artigo{{ page_obj.paginator.count|pluralize }} publicado{{ page_obj.paginator.count|pluralize }}</p>
       </div>
     </div>
   </div>
 
-  <div class="flex flex-col lg:flex-row gap-10 lg:gap-12">
+  <div class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,24rem)] lg:gap-14 xl:gap-16">
     <!-- Articles Grid -->
-    <div class="flex-grow lg:w-2/3">
+    <div class="min-w-0">
       <h2 class="text-2xl font-display font-bold text-gray-900 dark:text-white mb-8"
         x-text="t('Artigos publicados', 'Published articles')">Artigos publicados</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         {% for article in page_obj %}
         {% include 'news/partials/article_card.html' %}
         {% empty %}
-        <div class="col-span-full text-center py-16 text-gray-500 dark:text-slate-400">
+        <div class="col-span-full text-center py-16 text-gray-500 dark:text-slate-400"
+          x-text="t('Este autor ainda não tem artigos publicados.', 'This author has no published articles yet.')">
           Este autor ainda não tem artigos publicados.
         </div>
         {% endfor %}
@@ -46,7 +48,7 @@
     </div>
 
     <!-- Sidebar -->
-    <div class="lg:w-1/3">
+    <div class="min-w-0">
       {% include 'news/partials/sidebar.html' %}
     </div>
   </div>

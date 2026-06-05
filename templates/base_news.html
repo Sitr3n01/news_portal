@@ -5,10 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
-        // Prevents Flash Of Unstyled Content (FOUC) on theme change
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        // Prevents Flash Of Unstyled Content (FOUC) on theme change.
+        // Padrão claro: só escurece quando o usuário escolheu 'dark' explicitamente.
+        if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.classList.add('dark');
-        } else if (localStorage.getItem('theme') === 'light') {
+        } else {
             document.documentElement.classList.remove('dark');
         }
     </script>
@@ -133,6 +134,28 @@
             opacity: 0;
         }
 
+        .news-turnstile {
+            overflow: hidden;
+        }
+
+        .news-turnstile [data-turnstile-widget] {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            max-width: 100%;
+            min-height: 65px;
+        }
+
+        .news-turnstile-compact [data-turnstile-widget] {
+            min-height: 140px;
+        }
+
+        .news-turnstile iframe {
+            display: block;
+            margin-inline: auto;
+            max-width: 100% !important;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -158,7 +181,7 @@
     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
     <div x-data="{
-        theme: localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
+        theme: localStorage.getItem('theme') || 'light',
         lang: localStorage.getItem('lang') || 'pt',
         t(pt, en) { return this.lang === 'en' ? en : pt; }
     }" x-init="

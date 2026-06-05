@@ -6,9 +6,11 @@
 {% block content %}
 <section class="liquid-section py-16 md:py-24">
     <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-        <p class="text-sm font-bold uppercase text-primary-700">Privacidade</p>
-        <h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-slate-950 md:text-6xl">Política de privacidade e termos de uso</h1>
-        <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
+        <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Privacidade', 'Privacy')">Privacidade</p>
+        <h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-slate-950 md:text-6xl"
+            x-text="t('Política de privacidade e termos de uso', 'Privacy policy and terms of use')">Política de privacidade e termos de uso</h1>
+        <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-600"
+            x-text="t('Transparência sobre como tratamos informações enviadas por formulários, candidaturas e interações essenciais do site.', 'Transparency about how we handle information sent through forms, applications and essential interactions on the site.')">
             Transparência sobre como tratamos informações enviadas por formulários, candidaturas e interações essenciais do site.
         </p>
     </div>
@@ -18,37 +20,38 @@
     <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <article class="scroll-reveal liquid-panel school-prose rounded-[2.25rem] p-6 text-lg md:p-10"
             data-scroll-reveal>
-            <h2>Uso do site</h2>
+            <h2 x-text="t('Uso do site', 'Use of the site')">Uso do site</h2>
             <p>
-                Ao navegar no site institucional de <strong>{{ current_site.name }}</strong>, você concorda em utilizar os canais disponíveis de maneira respeitosa e compatível com sua finalidade educacional, cultural e institucional.
+                <span x-text="t('Ao navegar no site institucional de', 'By browsing the institutional website of')">Ao navegar no site institucional de</span>
+                <strong>{{ current_site.name }}</strong><span x-text="t(', você concorda em utilizar os canais disponíveis de maneira respeitosa e compatível com sua finalidade educacional, cultural e institucional.', ', you agree to use the available channels in a respectful way, compatible with their educational, cultural and institutional purpose.')">, você concorda em utilizar os canais disponíveis de maneira respeitosa e compatível com sua finalidade educacional, cultural e institucional.</span>
             </p>
 
-            <h2>Dados enviados por formulários</h2>
-            <p>
+            <h2 x-text="t('Dados enviados por formulários', 'Data sent through forms')">Dados enviados por formulários</h2>
+            <p x-text="t('Os formulários de contato coletam apenas as informações necessárias para responder mensagens, registrar solicitações e conduzir conversas sobre cursos, mentorias, projetos e atendimento institucional.', 'Contact forms collect only the information needed to answer messages, record requests and hold conversations about courses, mentoring, projects and institutional support.')">
                 Os formulários de contato coletam apenas as informações necessárias para responder mensagens, registrar solicitações e conduzir conversas sobre cursos, mentorias, projetos e atendimento institucional.
             </p>
-            <p>
+            <p x-text="t('Essas informações são usadas internamente pela equipe responsável e não devem ser comercializadas ou utilizadas para finalidades incompatíveis com o contato solicitado.', 'This information is used internally by the responsible team and must not be sold or used for purposes incompatible with the requested contact.')">
                 Essas informações são usadas internamente pela equipe responsável e não devem ser comercializadas ou utilizadas para finalidades incompatíveis com o contato solicitado.
             </p>
 
-            <h2>Cookies e sessão</h2>
-            <p>
+            <h2 x-text="t('Cookies e sessão', 'Cookies and session')">Cookies e sessão</h2>
+            <p x-text="t('O sistema pode utilizar cookies técnicos para segurança, autenticação, proteção contra CSRF e funcionamento básico da plataforma. Esses recursos ajudam a manter a experiência estável e segura.', 'The system may use technical cookies for security, authentication, CSRF protection and basic platform operation. These resources help keep the experience stable and secure.')">
                 O sistema pode utilizar cookies técnicos para segurança, autenticação, proteção contra CSRF e funcionamento básico da plataforma. Esses recursos ajudam a manter a experiência estável e segura.
             </p>
 
-            <h2>Candidaturas e arquivos enviados</h2>
-            <p>
+            <h2 x-text="t('Candidaturas e arquivos enviados', 'Applications and uploaded files')">Candidaturas e arquivos enviados</h2>
+            <p x-text="t('Caso formulários de candidatura ou envio de arquivos sejam utilizados em algum processo futuro, os dados recebidos serão tratados como informações sensíveis e acessados apenas por pessoas autorizadas.', 'If application forms or file uploads are used in any future process, the data received will be treated as sensitive information and accessed only by authorized people.')">
                 Caso formulários de candidatura ou envio de arquivos sejam utilizados em algum processo futuro, os dados recebidos serão tratados como informações sensíveis e acessados apenas por pessoas autorizadas.
             </p>
 
-            <h2>Solicitações e contato</h2>
-            <p>
+            <h2 x-text="t('Solicitações e contato', 'Requests and contact')">Solicitações e contato</h2>
+            <p x-text="t('Para solicitar informações, revisar dados enviados ou pedir remoção de registros quando aplicável, utilize os canais oficiais da Komuniki.', 'To request information, review submitted data or ask for removal of records when applicable, use the official Komuniki channels.')">
                 Para solicitar informações, revisar dados enviados ou pedir remoção de registros quando aplicável, utilize os canais oficiais da Komuniki.
             </p>
 
             <div class="liquid-card mt-10 rounded-[1.75rem] p-6 text-base">
                 <p class="mb-0 text-slate-600">
-                    Última atualização: {% now "d/m/Y" %}. Mudanças futuras nesta página buscarão melhorar clareza, segurança e transparência.
+                    <span x-text="t('Última atualização:', 'Last updated:')">Última atualização:</span> {% now "d/m/Y" %}. <span x-text="t('Mudanças futuras nesta página buscarão melhorar clareza, segurança e transparência.', 'Future changes to this page will aim to improve clarity, security and transparency.')">Mudanças futuras nesta página buscarão melhorar clareza, segurança e transparência.</span>
                 </p>
             </div>
         </article>

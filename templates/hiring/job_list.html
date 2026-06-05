@@ -7,37 +7,38 @@
 <section class="bg-slate-950 py-16 text-white md:py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="max-w-3xl">
-            <p class="text-sm font-bold uppercase tracking-[0.2em] text-primary-300">Carreiras</p>
-            <h1 class="mt-4 font-display text-4xl font-bold tracking-tight md:text-6xl">Junte-se ao nosso time</h1>
-            <p class="mt-6 text-lg leading-relaxed text-slate-300 md:text-xl">
+            <p class="text-sm font-bold uppercase tracking-[0.2em] text-primary-300" x-text="t('Carreiras', 'Careers')">Carreiras</p>
+            <h1 class="mt-4 font-display text-4xl font-bold tracking-tight md:text-6xl" x-text="t('Junte-se ao nosso time', 'Join our team')">Junte-se ao nosso time</h1>
+            <p class="mt-6 text-lg leading-relaxed text-slate-300 md:text-xl"
+                x-text="t('Oportunidades para profissionais que acreditam no poder transformador da educação e no cuidado com a comunidade escolar.', 'Opportunities for professionals who believe in the transformative power of education and in caring for the school community.')">
                 Oportunidades para profissionais que acreditam no poder transformador da educação e no cuidado com a comunidade escolar.
             </p>
         </div>
     </div>
 </section>
 
-<section class="bg-[#f8faf7] py-12 md:py-16">
+<section class="bg-[#f8faf7] py-12 md:py-16 dark:bg-transparent">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="space-y-5">
             {% for job in jobs %}
             <a href="{% url 'hiring:job_detail' job.slug %}"
-                class="group block rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-xl hover:shadow-slate-900/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4 md:p-8">
+                class="group block rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-xl hover:shadow-slate-900/10 dark:border-white/10 dark:bg-slate-900/70 dark:hover:border-primary-500/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4 md:p-8">
                 <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                     <div>
                         <div class="flex flex-wrap gap-2">
-                            <span class="rounded-full bg-primary-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-primary-700">{{ job.department.name }}</span>
-                            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-slate-600">{{ job.get_employment_type_display }}</span>
+                            <span class="rounded-full bg-primary-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-primary-700 dark:bg-primary-900/40 dark:text-primary-200">{{ job.department.name }}</span>
+                            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ job.get_employment_type_display }}</span>
                             {% if job.location %}
-                            <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-amber-700">{{ job.location }}</span>
+                            <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">{{ job.location }}</span>
                             {% endif %}
                         </div>
-                        <h2 class="mt-4 font-display text-2xl font-bold text-slate-950 transition-colors group-hover:text-primary-700 md:text-3xl">{{ job.title }}</h2>
+                        <h2 class="mt-4 font-display text-2xl font-bold text-slate-950 transition-colors group-hover:text-primary-700 dark:group-hover:text-primary-300 md:text-3xl">{{ job.title }}</h2>
                         {% if job.deadline %}
-                        <p class="mt-2 text-sm text-slate-500">Inscrições até {{ job.deadline|date:"d/m/Y" }}</p>
+                        <p class="mt-2 text-sm text-slate-500"><span x-text="t('Inscrições até', 'Applications until')">Inscrições até</span> {{ job.deadline|date:"d/m/Y" }}</p>
                         {% endif %}
                     </div>
-                    <div class="inline-flex items-center text-sm font-bold text-primary-700">
-                        Ver detalhes da vaga
+                    <div class="inline-flex items-center text-sm font-bold text-primary-700 dark:text-primary-300">
+                        <span x-text="t('Ver detalhes da vaga', 'View job details')">Ver detalhes da vaga</span>
                         <svg class="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                         </svg>
@@ -45,19 +46,21 @@
                 </div>
             </a>
             {% empty %}
-            <div class="rounded-[2rem] border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm md:p-14">
-                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-primary-100 text-primary-700">
+            <div class="rounded-[2rem] border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900/70 md:p-14">
+                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-200">
                     <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                             d="M21 13.255A23.93 23.93 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                 </div>
-                <h2 class="mt-6 font-display text-3xl font-bold text-slate-950">Sem vagas abertas no momento</h2>
-                <p class="mx-auto mt-3 max-w-2xl leading-relaxed text-slate-600">
+                <h2 class="mt-6 font-display text-3xl font-bold text-slate-950" x-text="t('Sem vagas abertas no momento', 'No open positions at the moment')">Sem vagas abertas no momento</h2>
+                <p class="mx-auto mt-3 max-w-2xl leading-relaxed text-slate-600"
+                    x-text="t('Novas oportunidades serão publicadas nesta página quando houver processos seletivos ativos.', 'New opportunities will be posted on this page when there are active selection processes.')">
                     Novas oportunidades serão publicadas nesta página quando houver processos seletivos ativos.
                 </p>
                 <a href="{% url 'contact:page' %}"
-                    class="mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                    class="mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4"
+                    x-text="t('Falar com a escola', 'Talk to the school')">
                     Falar com a escola
                 </a>
             </div>

@@ -3,9 +3,9 @@
 {% block title %}{{ news_portal_name }}{% endblock %}
 
 {% block content %}
-<main class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
+<main class="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 w-full grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,24rem)] gap-10 lg:gap-14 xl:gap-16">
     <!-- Left Column: Editorial Content (8 cols) -->
-    <div class="lg:col-span-8 flex flex-col gap-16">
+    <div class="min-w-0 flex flex-col gap-16">
         <!-- Hero Story -->
         {% if featured %}
         <article class="flex flex-col gap-6 group cursor-pointer">
@@ -141,7 +141,8 @@
                     <button
                         hx-get="{% url 'news:article_list_page' %}?page={{ page_obj.next_page_number }}{% if featured %}&exclude={{ featured.pk }}{% endif %}"
                         hx-target="#load-more-container" hx-swap="outerHTML"
-                        class="bg-white border-2 border-primary text-primary px-8 py-3 rounded-full font-bold hover:bg-primary hover:text-white transition-colors">
+                        class="bg-white dark:bg-slate-900 border-2 border-primary text-primary px-8 py-3 rounded-full font-bold hover:bg-primary hover:text-white transition-colors"
+                        x-text="t('Carregar mais artigos', 'Load more articles')">
                         Carregar mais artigos
                     </button>
                 </div>
@@ -163,7 +164,7 @@
     </div>
 
     <!-- Right Column: Sidebar / Latest Updates (4 cols) -->
-    <aside class="lg:col-span-4 pl-0 lg:pl-12 border-l-0 lg:border-l border-gray-100 dark:border-gray-800 relative">
+    <aside class="min-w-0 pl-0 lg:pl-10 xl:pl-12 border-l-0 lg:border-l border-gray-100 dark:border-gray-800 relative">
         {% include 'news/partials/sidebar.html' %}
     </aside>
 </main>

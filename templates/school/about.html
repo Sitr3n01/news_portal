@@ -7,15 +7,17 @@
 <section class="liquid-section py-16 md:py-24">
     <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
         <div>
-            <p class="text-sm font-bold uppercase text-primary-700">Sobre a Komuniki</p>
-            <h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-slate-950 md:text-6xl">Comunicação, artes e liderança com presença real</h1>
+            <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Sobre a Komuniki', 'About Komuniki')">Sobre a Komuniki</p>
+            <h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-slate-950 md:text-6xl"
+                x-text="t('Comunicação, artes e liderança com presença real', 'Communication, arts and leadership with real presence')">Comunicação, artes e liderança com presença real</h1>
         </div>
         <div class="scroll-reveal liquid-panel rounded-[2rem] p-6 text-lg leading-relaxed text-slate-600 md:p-8 md:text-xl"
             data-scroll-reveal>
-            <p>
+            <p x-text="t('Criada em 2019 pela jornalista Kelly Farias, a Komuniki é uma escola de comunicação, artes e liderança com cursos voltados para jornalismo, apresentação de meios audiovisuais, interpretação teatral e outras formações para expressão profissional.', 'Founded in 2019 by journalist Kelly Farias, Komuniki is a school of communication, arts and leadership, with courses in journalism, audiovisual presenting, theatrical performance and other training paths for professional expression.')">
                 Criada em 2019 pela jornalista Kelly Farias, a Komuniki é uma escola de comunicação, artes e liderança com cursos voltados para jornalismo, apresentação de meios audiovisuais, interpretação teatral e outras formações para expressão profissional.
             </p>
-            <p class="mt-5">
+            <p class="mt-5"
+                x-text="t('Além dos cursos, a Komuniki oferece mentorias para o público corporativo e geral, palestras, projetos culturais e o Jovem Comunicador, iniciativa social voltada a jovens em situação de vulnerabilidade social.', 'Beyond courses, Komuniki offers mentoring for corporate and general audiences, talks, cultural projects and Jovem Comunicador, a social initiative for young people in situations of social vulnerability.')">
                 Além dos cursos, a Komuniki oferece mentorias para o público corporativo e geral, palestras, projetos culturais e o Jovem Comunicador, iniciativa social voltada a jovens em situação de vulnerabilidade social.
             </p>
         </div>
@@ -26,20 +28,23 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="stagger-children grid gap-5 md:grid-cols-3">
             <article class="liquid-card jump-lift rounded-[1.75rem] p-7">
-                <h2 class="font-display text-2xl font-bold text-slate-950">Cursos</h2>
-                <p class="mt-3 leading-relaxed text-slate-600">
+                <h2 class="font-display text-2xl font-bold text-slate-950" x-text="t('Cursos', 'Courses')">Cursos</h2>
+                <p class="mt-3 leading-relaxed text-slate-600"
+                    x-text="t('Formações online, híbridas e presenciais em comunicação, artes, teatro, produção, locução, apresentação, jornalismo cultural e assessoria de imprensa.', 'Online, hybrid and in-person training in communication, arts, theater, production, voice work, presenting, cultural journalism and press relations.')">
                     Formações online, híbridas e presenciais em comunicação, artes, teatro, produção, locução, apresentação, jornalismo cultural e assessoria de imprensa.
                 </p>
             </article>
             <article class="liquid-card jump-lift rounded-[1.75rem] p-7">
-                <h2 class="font-display text-2xl font-bold text-slate-950">Mentorias</h2>
-                <p class="mt-3 leading-relaxed text-slate-600">
+                <h2 class="font-display text-2xl font-bold text-slate-950" x-text="t('Mentorias', 'Mentoring')">Mentorias</h2>
+                <p class="mt-3 leading-relaxed text-slate-600"
+                    x-text="t('Mentorias com Kelly Farias para estilo de comunicação, posicionamento, expressão, liderança, presença em câmera e desenvolvimento de projetos.', 'Mentoring with Kelly Farias on communication style, positioning, expression, leadership, on-camera presence and project development.')">
                     Mentorias com Kelly Farias para estilo de comunicação, posicionamento, expressão, liderança, presença em câmera e desenvolvimento de projetos.
                 </p>
             </article>
             <article class="liquid-card jump-lift rounded-[1.75rem] p-7">
-                <h2 class="font-display text-2xl font-bold text-slate-950">Projetos</h2>
-                <p class="mt-3 leading-relaxed text-slate-600">
+                <h2 class="font-display text-2xl font-bold text-slate-950" x-text="t('Projetos', 'Projects')">Projetos</h2>
+                <p class="mt-3 leading-relaxed text-slate-600"
+                    x-text="t('Atuação em eventos, comunicação interna, produção cultural, protagonismo juvenil e iniciativas que conectam formação, cultura e mercado.', 'Work in events, internal communication, cultural production, youth leadership and initiatives that connect training, culture and the market.')">
                     Atuação em eventos, comunicação interna, produção cultural, protagonismo juvenil e iniciativas que conectam formação, cultura e mercado.
                 </p>
             </article>
@@ -50,28 +55,34 @@
 <section class="liquid-section py-16 md:py-24">
     <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8 lg:items-end">
         <div>
-            <p class="text-sm font-bold uppercase text-primary-700">Nossos serviços</p>
-            <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl">Formação para quem precisa comunicar melhor</h2>
-            <p class="mt-5 text-lg leading-relaxed text-slate-600">
+            <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Nossos serviços', 'Our services')">Nossos serviços</p>
+            <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl"
+                x-text="t('Formação para quem precisa comunicar melhor', 'Training for those who need to communicate better')">Formação para quem precisa comunicar melhor</h2>
+            <p class="mt-5 text-lg leading-relaxed text-slate-600"
+                x-text="t('A Komuniki atende pessoas, artistas, comunicadores, empreendedores, equipes e organizações que querem transformar intenção em mensagem clara, técnica e presença.', 'Komuniki serves individuals, artists, communicators, entrepreneurs, teams and organizations that want to turn intention into a clear message, technique and presence.')">
                 A Komuniki atende pessoas, artistas, comunicadores, empreendedores, equipes e organizações que querem transformar intenção em mensagem clara, técnica e presença.
             </p>
         </div>
         <div class="stagger-children grid gap-5 sm:grid-cols-2">
             <article class="liquid-card liquid-card-dark jump-lift min-h-56 rounded-[1.75rem] p-6 text-white">
-                <h3 class="font-display text-2xl font-bold">Jornalismo e cultura</h3>
-                <p class="mt-4 text-sm leading-relaxed text-primary-100">Jornalismo cultural, assessoria, produção e leitura crítica da cena cultural.</p>
+                <h3 class="font-display text-2xl font-bold" x-text="t('Jornalismo e cultura', 'Journalism and culture')">Jornalismo e cultura</h3>
+                <p class="mt-4 text-sm leading-relaxed text-primary-100"
+                    x-text="t('Jornalismo cultural, assessoria, produção e leitura crítica da cena cultural.', 'Cultural journalism, press relations, production and critical reading of the cultural scene.')">Jornalismo cultural, assessoria, produção e leitura crítica da cena cultural.</p>
             </article>
             <article class="liquid-card jump-lift min-h-56 rounded-[1.75rem] p-6">
-                <h3 class="font-display text-2xl font-bold text-slate-950">Meios audiovisuais</h3>
-                <p class="mt-4 text-sm leading-relaxed text-slate-600">Apresentação para rádio, TV, internet, podcast e locução publicitária.</p>
+                <h3 class="font-display text-2xl font-bold text-slate-950" x-text="t('Meios audiovisuais', 'Audiovisual media')">Meios audiovisuais</h3>
+                <p class="mt-4 text-sm leading-relaxed text-slate-600"
+                    x-text="t('Apresentação para rádio, TV, internet, podcast e locução publicitária.', 'Presenting for radio, TV, internet, podcasts and advertising voice work.')">Apresentação para rádio, TV, internet, podcast e locução publicitária.</p>
             </article>
             <article class="liquid-card jump-lift min-h-56 rounded-[1.75rem] p-6">
-                <h3 class="font-display text-2xl font-bold text-slate-950">Artes cênicas</h3>
-                <p class="mt-4 text-sm leading-relaxed text-slate-600">Interpretação teatral, TV, cinema, presença, corpo e voz.</p>
+                <h3 class="font-display text-2xl font-bold text-slate-950" x-text="t('Artes cênicas', 'Performing arts')">Artes cênicas</h3>
+                <p class="mt-4 text-sm leading-relaxed text-slate-600"
+                    x-text="t('Interpretação teatral, TV, cinema, presença, corpo e voz.', 'Theatrical performance, TV, film, presence, body and voice.')">Interpretação teatral, TV, cinema, presença, corpo e voz.</p>
             </article>
             <article class="liquid-card liquid-card-dark jump-lift min-h-56 rounded-[1.75rem] p-6 text-white">
-                <h3 class="font-display text-2xl font-bold">Impacto social</h3>
-                <p class="mt-4 text-sm leading-relaxed text-primary-100">Jovem Comunicador e ações de protagonismo juvenil.</p>
+                <h3 class="font-display text-2xl font-bold" x-text="t('Impacto social', 'Social impact')">Impacto social</h3>
+                <p class="mt-4 text-sm leading-relaxed text-primary-100"
+                    x-text="t('Jovem Comunicador e ações de protagonismo juvenil.', 'Jovem Comunicador and youth leadership initiatives.')">Jovem Comunicador e ações de protagonismo juvenil.</p>
             </article>
         </div>
     </div>
@@ -80,12 +91,15 @@
 <section class="liquid-section px-4 py-16 sm:px-6 lg:px-8">
     <div class="scroll-reveal liquid-panel mx-auto max-w-5xl rounded-[2.25rem] p-8 text-center md:p-12"
         data-scroll-reveal>
-        <h2 class="font-display text-3xl font-bold text-slate-950 md:text-4xl">Quer conversar sobre cursos ou mentorias?</h2>
-        <p class="mx-auto mt-4 max-w-2xl leading-relaxed text-slate-600">
+        <h2 class="font-display text-3xl font-bold text-slate-950 md:text-4xl"
+            x-text="t('Quer conversar sobre cursos ou mentorias?', 'Want to talk about courses or mentoring?')">Quer conversar sobre cursos ou mentorias?</h2>
+        <p class="mx-auto mt-4 max-w-2xl leading-relaxed text-slate-600"
+            x-text="t('Entre em contato para consultar turmas, formatos, projetos corporativos e caminhos de formação.', 'Get in touch to ask about classes, formats, corporate projects and training paths.')">
             Entre em contato para consultar turmas, formatos, projetos corporativos e caminhos de formação.
         </p>
         <a href="{% url 'contact:page' %}"
-            class="jump-lift mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+            class="jump-lift mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4"
+            x-text="t('Conte-nos mais', 'Tell us more')">
             Conte-nos mais
         </a>
     </div>

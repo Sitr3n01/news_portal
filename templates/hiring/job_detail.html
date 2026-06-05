@@ -4,32 +4,32 @@
 {% block meta_description %}Detalhes da vaga {{ job.title }} em {{ current_site.name }}.{% endblock %}
 
 {% block content %}
-<section class="bg-[#f8faf7] py-12 md:py-16">
+<section class="bg-[#f8faf7] py-12 md:py-16 dark:bg-transparent">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <a href="{% url 'hiring:list' %}"
-            class="inline-flex items-center gap-2 rounded-full text-sm font-bold text-primary-700 transition-colors hover:text-primary-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+            class="inline-flex items-center gap-2 rounded-full text-sm font-bold text-primary-700 transition-colors hover:text-primary-900 dark:hover:text-primary-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Voltar para vagas
+            <span x-text="t('Voltar para vagas', 'Back to jobs')">Voltar para vagas</span>
         </a>
 
         <div class="mt-8 max-w-4xl">
             <div class="flex flex-wrap gap-2">
-                <span class="rounded-full bg-primary-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-primary-700">{{ job.department.name }}</span>
-                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-slate-600">{{ job.get_employment_type_display }}</span>
+                <span class="rounded-full bg-primary-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-primary-700 dark:bg-primary-900/40 dark:text-primary-200">{{ job.department.name }}</span>
+                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ job.get_employment_type_display }}</span>
                 {% if job.location %}
-                <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-amber-700">{{ job.location }}</span>
+                <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">{{ job.location }}</span>
                 {% endif %}
             </div>
             <h1 class="mt-5 font-display text-4xl font-bold tracking-tight text-slate-950 md:text-6xl">{{ job.title }}</h1>
             {% if job.salary_range or job.deadline %}
             <div class="mt-6 flex flex-wrap gap-3 text-sm text-slate-600">
                 {% if job.salary_range %}
-                <span class="rounded-full border border-slate-200 bg-white px-4 py-2 font-semibold">{{ job.salary_range }}</span>
+                <span class="rounded-full border border-slate-200 bg-white px-4 py-2 font-semibold dark:border-white/10 dark:bg-slate-900/70">{{ job.salary_range }}</span>
                 {% endif %}
                 {% if job.deadline %}
-                <span class="rounded-full border border-slate-200 bg-white px-4 py-2 font-semibold">Inscrições até {{ job.deadline|date:"d/m/Y" }}</span>
+                <span class="rounded-full border border-slate-200 bg-white px-4 py-2 font-semibold dark:border-white/10 dark:bg-slate-900/70"><span x-text="t('Inscrições até', 'Applications until')">Inscrições até</span> {{ job.deadline|date:"d/m/Y" }}</span>
                 {% endif %}
             </div>
             {% endif %}
@@ -37,22 +37,23 @@
     </div>
 </section>
 
-<section class="bg-white py-12 md:py-16">
+<section class="bg-white py-12 md:py-16 dark:bg-transparent">
     <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1fr_0.46fr] lg:px-8">
         <div class="min-w-0">
             <div class="school-prose text-lg">
-                <h2>Sobre a vaga</h2>
+                <h2 x-text="t('Sobre a vaga', 'About the role')">Sobre a vaga</h2>
                 {{ job.description|linebreaks }}
 
-                <h2>Requisitos principais</h2>
+                <h2 x-text="t('Requisitos principais', 'Key requirements')">Requisitos principais</h2>
                 {{ job.requirements|linebreaks }}
             </div>
         </div>
 
         <aside>
-            <div class="sticky top-28 rounded-[2rem] border border-slate-200/70 bg-[#f8faf7] p-6 shadow-xl shadow-slate-900/5 md:p-8">
-                <h2 class="font-display text-2xl font-bold text-slate-950">Candidatar-se</h2>
-                <p class="mt-2 text-sm leading-relaxed text-slate-600">
+            <div class="sticky top-28 rounded-[2rem] border border-slate-200/70 bg-[#f8faf7] p-6 shadow-xl shadow-slate-900/5 dark:border-white/10 dark:bg-slate-900/70 md:p-8">
+                <h2 class="font-display text-2xl font-bold text-slate-950" x-text="t('Candidatar-se', 'Apply')">Candidatar-se</h2>
+                <p class="mt-2 text-sm leading-relaxed text-slate-600"
+                    x-text="t('Envie seus dados e currículo para participar do processo seletivo desta vaga.', 'Send your details and resume to take part in the selection process for this role.')">
                     Envie seus dados e currículo para participar do processo seletivo desta vaga.
                 </p>
 
@@ -60,7 +61,7 @@
                     {% csrf_token %}
 
                     {% if form.non_field_errors %}
-                    <div class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                    <div class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
                         {% for error in form.non_field_errors %}
                         <p>{{ error }}</p>
                         {% endfor %}
@@ -69,78 +70,82 @@
 
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
-                            <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-bold text-slate-700">Nome</label>
+                            <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-bold text-slate-700" x-text="t('Nome', 'First name')">Nome</label>
                             <input type="text" name="{{ form.first_name.name }}" id="{{ form.first_name.id_for_label }}" required autocomplete="given-name"
                                 value="{{ form.first_name.value|default_if_none:'' }}"
-                                class="mt-2 h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
-                                placeholder="Primeiro nome">
+                                class="mt-2 h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-primary-900/40"
+                                :placeholder="t('Primeiro nome', 'First name')" placeholder="Primeiro nome">
                             {% for error in form.first_name.errors %}
-                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                            <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
                             {% endfor %}
                         </div>
                         <div>
-                            <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-bold text-slate-700">Sobrenome</label>
+                            <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-bold text-slate-700" x-text="t('Sobrenome', 'Last name')">Sobrenome</label>
                             <input type="text" name="{{ form.last_name.name }}" id="{{ form.last_name.id_for_label }}" required autocomplete="family-name"
                                 value="{{ form.last_name.value|default_if_none:'' }}"
-                                class="mt-2 h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
-                                placeholder="Sobrenome">
+                                class="mt-2 h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-primary-900/40"
+                                :placeholder="t('Sobrenome', 'Last name')" placeholder="Sobrenome">
                             {% for error in form.last_name.errors %}
-                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                            <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
                             {% endfor %}
                         </div>
                     </div>
 
                     <div>
-                        <label for="{{ form.email.id_for_label }}" class="block text-sm font-bold text-slate-700">E-mail</label>
+                        <label for="{{ form.email.id_for_label }}" class="block text-sm font-bold text-slate-700" x-text="t('E-mail', 'Email')">E-mail</label>
                         <input type="email" name="{{ form.email.name }}" id="{{ form.email.id_for_label }}" required autocomplete="email"
                             value="{{ form.email.value|default_if_none:'' }}"
-                            class="mt-2 h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
+                            class="mt-2 h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-primary-900/40"
                             placeholder="seu@email.com">
                         {% for error in form.email.errors %}
-                        <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
                         {% endfor %}
                     </div>
 
                     <div>
-                        <label for="{{ form.phone.id_for_label }}" class="block text-sm font-bold text-slate-700">Telefone</label>
+                        <label for="{{ form.phone.id_for_label }}" class="block text-sm font-bold text-slate-700" x-text="t('Telefone', 'Phone')">Telefone</label>
                         <input type="tel" name="{{ form.phone.name }}" id="{{ form.phone.id_for_label }}" required autocomplete="tel"
                             value="{{ form.phone.value|default_if_none:'' }}"
-                            class="mt-2 h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
+                            class="mt-2 h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-primary-900/40"
                             placeholder="(11) 99999-9999">
                         {% for error in form.phone.errors %}
-                        <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
                         {% endfor %}
                     </div>
 
                     <div>
-                        <label for="{{ form.resume.id_for_label }}" class="block text-sm font-bold text-slate-700">Currículo</label>
+                        <label for="{{ form.resume.id_for_label }}" class="block text-sm font-bold text-slate-700" x-text="t('Currículo', 'Resume')">Currículo</label>
                         <input type="file" name="{{ form.resume.name }}" id="{{ form.resume.id_for_label }}" required accept=".pdf,.doc,.docx"
-                            class="mt-2 block w-full cursor-pointer rounded-2xl border border-slate-300 bg-white text-sm text-slate-600 file:mr-4 file:border-0 file:bg-primary-50 file:px-4 file:py-3 file:font-bold file:text-primary-700 hover:file:bg-primary-100">
-                        <p class="mt-2 text-xs text-slate-500">PDF, DOC ou DOCX, até 5 MB.</p>
+                            class="mt-2 block w-full cursor-pointer rounded-2xl border border-slate-300 bg-white text-sm text-slate-600 file:mr-4 file:border-0 file:bg-primary-50 file:px-4 file:py-3 file:font-bold file:text-primary-700 hover:file:bg-primary-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:file:bg-primary-900/40 dark:file:text-primary-200">
+                        <p class="mt-2 text-xs text-slate-500" x-text="t('PDF, DOC ou DOCX, até 5 MB.', 'PDF, DOC or DOCX, up to 5 MB.')">PDF, DOC ou DOCX, até 5 MB.</p>
                         {% for error in form.resume.errors %}
-                        <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
                         {% endfor %}
                     </div>
 
                     <div>
-                        <label for="{{ form.cover_letter.id_for_label }}" class="block text-sm font-bold text-slate-700">Apresentação breve</label>
+                        <label for="{{ form.cover_letter.id_for_label }}" class="block text-sm font-bold text-slate-700" x-text="t('Apresentação breve', 'Brief introduction')">Apresentação breve</label>
                         <textarea name="{{ form.cover_letter.name }}" id="{{ form.cover_letter.id_for_label }}" rows="4"
-                            class="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
+                            class="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-primary-900/40"
+                            :placeholder="t('Opcional: conte brevemente sobre sua experiência.', 'Optional: tell us briefly about your experience.')"
                             placeholder="Opcional: conte brevemente sobre sua experiência.">{{ form.cover_letter.value|default_if_none:'' }}</textarea>
                         {% for error in form.cover_letter.errors %}
-                        <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
                         {% endfor %}
                     </div>
 
                     <button type="submit" x-show="!isSubmitting"
-                        class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                        class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4"
+                        x-text="t('Enviar candidatura', 'Submit application')">
                         Enviar candidatura
                     </button>
                     <button type="button" disabled x-cloak x-show="isSubmitting"
-                        class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-primary-500 px-6 py-3 text-sm font-bold text-white">
+                        class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-primary-500 px-6 py-3 text-sm font-bold text-white"
+                        x-text="t('Enviando...', 'Sending...')">
                         Enviando...
                     </button>
-                    <p class="text-center text-xs leading-relaxed text-slate-500">
+                    <p class="text-center text-xs leading-relaxed text-slate-500"
+                        x-text="t('Ao enviar, seus dados serão usados apenas para conduzir o processo seletivo.', 'By submitting, your data will be used only to conduct the selection process.')">
                         Ao enviar, seus dados serão usados apenas para conduzir o processo seletivo.
                     </p>
                 </form>

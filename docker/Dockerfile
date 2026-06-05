@@ -30,6 +30,11 @@ COPY --chown=appuser:appuser . .
 # Compila estáticos (WhiteNoise CompressedManifest). SECRET_KEY dummy só para esta etapa,
 # não é persistido como env da imagem e não é um segredo real.
 RUN SECRET_KEY=build-only-not-a-secret \
+    DB_NAME=build_only \
+    DB_USER=build_only \
+    DB_PASSWORD=build_only \
+    DB_HOST=localhost \
+    DB_PORT=5432 \
     DJANGO_SETTINGS_MODULE=config.settings.production \
     python manage.py collectstatic --noinput
 

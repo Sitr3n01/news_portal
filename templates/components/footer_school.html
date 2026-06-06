@@ -43,7 +43,7 @@
                         <li><a href="{% url 'school:home' %}" class="text-slate-300 transition-colors hover:text-white" x-text="t('Início', 'Home')">Início</a></li>
                         <li><a href="{% url 'school:about' %}" class="text-slate-300 transition-colors hover:text-white" x-text="t('Sobre', 'About')">Sobre</a></li>
                         <li><a href="{% url 'school:page_detail' 'cursos' %}" class="text-slate-300 transition-colors hover:text-white" x-text="t('Cursos', 'Courses')">Cursos</a></li>
-                        <li><a href="{% url 'news:list' %}" class="text-slate-300 transition-colors hover:text-white" x-text="t('Notícias', 'News')">Notícias</a></li>
+                        <li><a href="{{ kelly_blog_public_url }}" class="text-slate-300 transition-colors hover:text-white" x-text="t('Notícias', 'News')">Notícias</a></li>
                     </ul>
                 </div>
 

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 
 from apps.common.turnstile import get_turnstile_site_key
@@ -6,11 +7,17 @@ from apps.news.models import Category
 NEWS_PORTAL_NAME = 'Blog da Kelly'
 
 
+def _with_trailing_slash(url):
+    return f'{str(url).rstrip("/")}/'
+
+
 def site_context(request):
     current_site = get_current_site(request)
     context = {
         'current_site': current_site,
         'news_portal_name': NEWS_PORTAL_NAME,
+        'komuniki_public_url': _with_trailing_slash(settings.KOMUNIKI_PUBLIC_URL),
+        'kelly_blog_public_url': _with_trailing_slash(settings.KELLY_BLOG_PUBLIC_URL),
         'turnstile_site_key': get_turnstile_site_key(),
     }
     try:

@@ -3,6 +3,15 @@ from .base import env
 
 DEBUG = False
 
+# ── Banco: conexões persistentes (pooling-lite) ──────────────────────────────
+# Sem isto, CONN_MAX_AGE=0 (default) → uma conexão PostgreSQL NOVA a cada request,
+# com custo de CPU em setup/teardown nos dois lados. 60s reaproveita a conexão por
+# worker entre requests; CONN_HEALTH_CHECKS (Django 4.1+) revalida conexões ociosas
+# antes de reusar, evitando erro em conexão derrubada. Teto seguro: poucos workers
+# × threads ficam muito abaixo do max_connections (100) do Postgres.
+DATABASES['default']['CONN_MAX_AGE'] = 60  # noqa: F405
+DATABASES['default']['CONN_HEALTH_CHECKS'] = True  # noqa: F405
+
 # Security
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SESSION_COOKIE_SECURE = True

@@ -141,8 +141,8 @@ def _admin_is_superuser(request):
 
 
 UNFOLD = {
-    'SITE_TITLE': 'Bem vindo!',
-    'SITE_HEADER': 'Bem vindo!',
+    'SITE_TITLE': 'Olá!',
+    'SITE_HEADER': 'Olá!',
     'SITE_URL': None,  # Removido — links de portal estão na sidebar (Visualizar Portais)
     'SITE_ICON': None,  # Deixar None ou apontar para um favicon estático
     # Força o tema escuro de fato (antes só o seletor era escondido via CSS, mas o

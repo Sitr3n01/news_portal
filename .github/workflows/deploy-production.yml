@@ -1,0 +1,113 @@
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  validate-ref:
+    name: Validate deploy branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Allow only master
+        run: test "${GITHUB_REF}" = "refs/heads/master"
+
+  test:
+    name: Test before deploy
+    runs-on: ubuntu-latest
+    needs: validate-ref
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.test
+      SECRET_KEY: ci-test-secret-key-not-for-production
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: news_portal_test
+      DB_USER: news_portal_user
+      DB_PASSWORD: news_portal_pass
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: news_portal_test
+          POSTGRES_USER: news_portal_user
+          POSTGRES_PASSWORD: news_portal_pass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/development.txt
+
+      - name: Run linting
+        run: ruff check .
+
+      - name: Collect static files
+        run: python manage.py collectstatic --noinput
+
+      - name: Run tests
+        run: pytest
+
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    needs: test
+    environment:
+      name: production
+    env:
+      VPS_HOST: ${{ vars.VPS_HOST }}
+      VPS_PORT: ${{ vars.VPS_PORT }}
+      VPS_USER: ${{ vars.VPS_USER }}
+
+    steps:
+      - name: Validate deployment variables
+        run: |
+          : "${VPS_HOST:?Set production variable VPS_HOST}"
+          : "${VPS_PORT:?Set production variable VPS_PORT}"
+          : "${VPS_USER:?Set production variable VPS_USER}"
+          : "${VPS_SSH_PRIVATE_KEY:?Set production secret VPS_SSH_PRIVATE_KEY}"
+          : "${VPS_HOST_KEY:?Set production secret VPS_HOST_KEY}"
+        env:
+          VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          VPS_HOST_KEY: ${{ secrets.VPS_HOST_KEY }}
+
+      - name: Prepare SSH credentials
+        run: |
+          install -m 0700 -d ~/.ssh
+          printf '%s\n' "${VPS_SSH_PRIVATE_KEY}" > ~/.ssh/id_ed25519
+          printf '%s\n' "${VPS_HOST_KEY}" > ~/.ssh/known_hosts
+          chmod 0600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+        env:
+          VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          VPS_HOST_KEY: ${{ secrets.VPS_HOST_KEY }}
+
+      - name: Run locked production deploy
+        run: |
+          ssh \
+            -i ~/.ssh/id_ed25519 \
+            -p "${VPS_PORT}" \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            "${VPS_USER}@${VPS_HOST}" \
+            'sudo /usr/local/sbin/kellysys-deploy'

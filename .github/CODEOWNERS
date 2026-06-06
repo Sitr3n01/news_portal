@@ -1,0 +1,5 @@
+# Require human review for security-sensitive deployment and runtime files.
+/.github/workflows/ @Sitr3n01
+/scripts/deploy/ @Sitr3n01
+/docker/ @Sitr3n01
+/config/settings/ @Sitr3n01

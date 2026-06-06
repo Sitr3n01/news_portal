@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+PROJECT_DIR="/opt/kelly_sys"
+COMPOSE_PROJECT="kellysys"
+COMPOSE_FILE="docker/docker-compose.prod.yml"
+BACKUP_DIR="${PROJECT_DIR}/backups"
+LOCK_FILE="/var/lock/kellysys-deploy.lock"
+BRANCH="master"
+
+log() {
+    printf '[%s] %s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$*"
+}
+
+fail() {
+    log "ERROR: $*"
+    exit 1
+}
+
+compose() {
+    docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" "$@"
+}
+
+wait_for_status() {
+    local host="$1"
+    local path="$2"
+    local expected="$3"
+    local status
+
+    for _ in $(seq 1 30); do
+        status="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 -H "Host: ${host}" "http://127.0.0.1${path}" || true)"
+        if [[ ",${expected}," == *",${status},"* ]]; then
+            log "Healthcheck OK: ${host}${path} -> ${status}"
+            return 0
+        fi
+        sleep 2
+    done
+
+    fail "Healthcheck failed: ${host}${path} expected ${expected}, got ${status:-none}"
+}
+
+exec 9>"${LOCK_FILE}"
+flock -n 9 || fail "another deploy is already running"
+
+[[ "$(id -u)" -eq 0 ]] || fail "run this script as root via sudo"
+cd "${PROJECT_DIR}"
+
+[[ -f ".env.prod" ]] || fail ".env.prod not found in ${PROJECT_DIR}"
+[[ -f "${COMPOSE_FILE}" ]] || fail "${COMPOSE_FILE} not found"
+[[ "$(git rev-parse --abbrev-ref HEAD)" == "${BRANCH}" ]] || fail "working tree is not on ${BRANCH}"
+
+git update-index -q --refresh
+git diff-files --quiet || fail "tracked working tree changes are present"
+git diff-index --cached --quiet HEAD -- || fail "staged changes are present"
+
+log "Fetching origin/${BRANCH}"
+git fetch --prune origin "${BRANCH}"
+git pull --ff-only origin "${BRANCH}"
+
+install -d -m 0700 "${BACKUP_DIR}"
+backup_file="${BACKUP_DIR}/postgres-$(date -u '+%Y%m%dT%H%M%SZ').sql.gz"
+log "Creating PostgreSQL backup: ${backup_file}"
+compose exec -T db sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' | gzip -9 > "${backup_file}"
+chmod 0600 "${backup_file}"
+find "${BACKUP_DIR}" -type f -name 'postgres-*.sql.gz' -mtime +30 -delete
+
+log "Building web image"
+compose build web
+
+log "Running migrations"
+compose run --rm web python manage.py migrate --noinput
+
+log "Collecting static files"
+compose run --rm web python manage.py collectstatic --noinput
+
+log "Recreating web container"
+compose up -d --no-deps --force-recreate web
+
+log "Validating nginx config"
+compose exec -T nginx nginx -t
+compose restart nginx
+
+log "Running healthchecks"
+wait_for_status "komuniki.com.br" "/healthz/" "200"
+wait_for_status "www.komuniki.com.br" "/healthz/" "200"
+wait_for_status "kellyfarias.com.br" "/news/" "200,301,302"
+wait_for_status "www.kellyfarias.com.br" "/news/" "200,301,302"
+wait_for_status "kellyfarias.com.br" "/" "301,302"
+wait_for_status "www.kellyfarias.com.br" "/" "301,302"
+
+log "Deploy completed successfully"

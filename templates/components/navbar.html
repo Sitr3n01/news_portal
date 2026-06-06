@@ -18,7 +18,7 @@
                     class="font-medium text-gray-600 transition-colors hover:text-primary-700">Sobre</a>
                 <a href="{% url 'school:page_detail' 'cursos' %}"
                     class="font-medium text-gray-600 transition-colors hover:text-primary-700">Cursos</a>
-                <a href="{% url 'news:list' %}"
+                <a href="{{ kelly_blog_public_url }}"
                     class="font-medium text-gray-600 transition-colors hover:text-primary-700">Notícias</a>
                 <a href="{% url 'contact:page' %}"
                     class="rounded-lg bg-primary-600 px-5 py-2.5 font-medium text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-lg">Contato</a>
@@ -53,7 +53,7 @@
                 class="block rounded-lg px-3 py-3 text-base font-medium text-gray-700 transition-colors hover:bg-primary-50 hover:text-primary-700">Sobre</a>
             <a href="{% url 'school:page_detail' 'cursos' %}"
                 class="block rounded-lg px-3 py-3 text-base font-medium text-gray-700 transition-colors hover:bg-primary-50 hover:text-primary-700">Cursos</a>
-            <a href="{% url 'news:list' %}"
+            <a href="{{ kelly_blog_public_url }}"
                 class="block rounded-lg px-3 py-3 text-base font-medium text-gray-700 transition-colors hover:bg-primary-50 hover:text-primary-700">Notícias</a>
             <a href="{% url 'contact:page' %}"
                 class="mt-4 block rounded-lg bg-primary-600 px-3 py-3 text-center text-base font-medium text-white transition-colors hover:bg-primary-700">Contato</a>

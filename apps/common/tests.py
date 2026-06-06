@@ -1,9 +1,11 @@
 import pytest
 from django.contrib.auth.models import Group, Permission
 from django.contrib.sites.models import Site
+from django.test import RequestFactory, override_settings
 from django.urls import reverse
 
 from apps.accounts.admin_roles import ensure_admin_role_groups
+from apps.common.context_processors import site_context
 from apps.common.models import SiteExtension
 from apps.school.models import Page, SchoolFeature, SchoolHomeConfig
 
@@ -203,6 +205,20 @@ def current_site(settings):
     )
     Site.objects.clear_cache()
     return site
+
+
+@pytest.mark.django_db
+@override_settings(
+    KOMUNIKI_PUBLIC_URL='https://komuniki.com.br',
+    KELLY_BLOG_PUBLIC_URL='https://kellyfarias.com.br/news/',
+)
+def test_site_context_exposes_public_cross_domain_urls(current_site):
+    request = RequestFactory().get('/news/', HTTP_HOST='kellyfarias.com.br')
+
+    context = site_context(request)
+
+    assert context['komuniki_public_url'] == 'https://komuniki.com.br/'
+    assert context['kelly_blog_public_url'] == 'https://kellyfarias.com.br/news/'
 
 
 @pytest.mark.django_db

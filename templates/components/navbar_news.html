@@ -66,7 +66,7 @@
             <div class="h-4 w-[1px] bg-gray-200 dark:bg-gray-700 mx-1 hidden lg:block"></div>
 
             <!-- Link to School -->
-            <a href="{% url 'school:home' %}"
+            <a href="{{ komuniki_public_url }}"
                 class="hidden lg:block font-ui text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-white hover:text-primary transition-colors"
                 x-text="t('Komuniki', 'Komuniki')">
                 Komuniki
@@ -186,7 +186,7 @@
 
             <div class="border-t border-gray-100 dark:border-gray-800 my-2"></div>
 
-            <a href="{% url 'school:home' %}"
+            <a href="{{ komuniki_public_url }}"
                 class="font-ui text-sm font-semibold uppercase tracking-wider text-slate-500 hover:text-primary"
                 x-text="t('Ir para a Komuniki', 'Go to Komuniki')">
                 Ir para a Komuniki

@@ -98,6 +98,11 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 
 SITE_ID = 1
 
+# Public portal URLs used by cross-domain navigation. The same Django app serves
+# both domains, so relative links would stay on the current host.
+KOMUNIKI_PUBLIC_URL = env('KOMUNIKI_PUBLIC_URL', default='https://komuniki.com.br')
+KELLY_BLOG_PUBLIC_URL = env('KELLY_BLOG_PUBLIC_URL', default='https://kellyfarias.com.br/news')
+
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},

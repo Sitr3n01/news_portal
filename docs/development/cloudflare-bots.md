@@ -114,6 +114,30 @@ curl -A "python-requests/2.31" -I https://komuniki.com.br/   # pode vir 403/chal
 # 4) Forms ainda funcionam (Turnstile da Camada A) e o rate-limit é por visitante.
 ```
 
+### B5 — Authenticated Origin Pulls (mTLS) — fecha o bypass de borda
+
+O firewall (B3) libera as faixas do Cloudflare, mas elas incluem o **WARP** e
+qualquer conta Cloudflare de terceiros que faça proxy para o IP da origem — um
+atacante nessas faixas poderia forjar `CF-Connecting-IP`, e o `realip` confiaria.
+A defesa definitiva troca a identidade de rede (IP de origem) por uma
+criptográfica: exigir o certificado de cliente do Cloudflare na origem.
+
+1. Painel: **SSL/TLS → Origin Server → Authenticated Origin Pulls** — ligar no zone.
+2. Baixar a CA de origin-pull do Cloudflare (publicada na doc oficial) para
+   `docker/nginx/cloudflare-origin-pull-ca.pem`, montá-la no container nginx
+   (como o `cloudflare-realip.conf`) e adicionar ao server `:443`:
+
+```nginx
+# dentro de server { listen 443 ssl; ... }
+ssl_client_certificate /etc/nginx/cloudflare-origin-pull-ca.pem;
+ssl_verify_client on;
+```
+
+3. `nginx -t && restart`. A origem passa a **recusar** qualquer TLS sem o
+   certificado do Cloudflare — nem WARP nem proxy de terceiros falam direto com
+   a origem. (Não ative `ssl_verify_client on` antes de montar o `.pem`: o nginx
+   não sobe sem o arquivo.)
+
 ---
 
 ## Rollback rápido

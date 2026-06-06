@@ -104,14 +104,16 @@ log "Running migrations"
 compose run --rm web python manage.py migrate --noinput
 
 log "Collecting static files"
-compose run --rm web python manage.py collectstatic --noinput
+compose run --rm web python manage.py collectstatic --clear --noinput
 
 log "Recreating web container"
 compose up -d --no-deps --force-recreate web
 
 log "Validating nginx config"
 compose exec -T nginx nginx -t
-compose restart nginx
+
+log "Recreating nginx container"
+compose up -d --no-deps --force-recreate nginx
 
 log "Running healthchecks"
 wait_for_http_status "komuniki.com.br" "/healthz/" "301,302"

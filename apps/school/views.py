@@ -78,13 +78,6 @@ TRUST_FEATURES_FALLBACK = [
         'description_en': 'Mentoring, talks and internal communication for teams and projects.',
         'tone': 'emerald',
     },
-    {
-        'title': 'Projeto Jovem Comunicador',
-        'title_en': 'Jovem Comunicador project',
-        'description': 'Iniciativa social voltada a jovens em situação de vulnerabilidade social.',
-        'description_en': 'A social initiative for young people in vulnerable situations.',
-        'tone': 'slate',
-    },
 ]
 
 PROPOSAL_FEATURES_FALLBACK = [
@@ -132,81 +125,38 @@ PROPOSAL_FEATURES_FALLBACK = [
     },
 ]
 
-LIFE_FEATURES_FALLBACK = [
-    {
-        'title': 'Comunicador Profissionalizante',
-        'title_en': 'Professional Communicator',
-        'description': 'Formação de 350 horas, com encaminhamento para registro profissional de Comunicador.',
-        'description_en': 'A 350-hour program with guidance toward professional Communicator registration.',
-        'tone': 'emerald',
-    },
-    {
-        'title': 'Arte e empreendedorismo',
-        'title_en': 'Art and entrepreneurship',
-        'description': 'Formações como Artista Empreendedor, Estilo de Comunicação e Conexão.',
-        'description_en': 'Training such as Entrepreneur Artist, Communication Style and Connection.',
-        'tone': 'white',
-    },
-    {
-        'title': 'Eventos e palestras',
-        'title_en': 'Events and talks',
-        'description': 'Encontros, fórum de protagonismo juvenil e experiências formativas ao vivo.',
-        'description_en': 'Meetups, a youth protagonism forum and live training experiences.',
-        'tone': 'white',
-    },
-    {
-        'title': 'Certificação e registro profissional',
-        'title_en': 'Certification and professional registration',
-        'description': 'Cursos com certificação e consulta de disponibilidade para autorização via sindicatos.',
-        'description_en': 'Courses with certification and availability checks for authorization through unions.',
-        'tone': 'slate',
-    },
-]
-
 COURSE_AWARD = 'Vencedor do Prêmio Paulo Freire de Educação 2024'
 COURSE_PROPOSAL_TITLE = 'Cursos para comunicação, cultura e presença profissional'
 COURSE_PROPOSAL_TITLE_EN = 'Courses for communication, culture and professional presence'
 COURSE_PROPOSAL_DESCRIPTION = 'Conheça formações profissionalizantes, cursos livres e mentorias para comunicar melhor, produzir cultura, conduzir eventos e destravar sua expressão.'
 COURSE_PROPOSAL_DESCRIPTION_EN = 'Explore professional training, open courses and mentoring to communicate better, produce culture, host events and unlock your expression.'
 
-COURSE_DETAIL_HOME_LABELS = {'Carga horária', 'Duração', 'Formato'}
-COURSE_DETAIL_VALUE_TRANSLATIONS = {
-    '350 horas': '350 hours',
-    '18 meses': '18 months',
-    '250 horas': '250 hours',
-    '12 meses': '12 months',
-    '30 horas': '30 hours',
-    '50 horas': '50 hours',
-    'Curso Livre': 'Open course',
-    '20 horas': '20 hours',
-    'Curso coletivo ou mentoria individual': 'Group course or individual mentoring',
-}
-COURSE_TRANSLATIONS = {
-    'Comunicador Profissionalizante': {
-        'title': 'Professional Communicator',
-        'summary': 'Training to develop repertoire, presence and practical communication skills.',
+COURSE_TRACKS = [
+    {
+        'eyebrow': 'Formação profissionalizante',
+        'eyebrow_en': 'Professional training',
+        'title': 'Cursos com encaminhamento profissional',
+        'title_en': 'Courses with professional pathways',
+        'description': 'Percursos completos para atuar com comunicação, produção e reconhecimento profissional.',
+        'description_en': 'Complete tracks to work in communication, production and gain professional recognition.',
     },
-    'Produção Cultural': {
-        'title': 'Cultural Production',
-        'summary': 'Training for planning, organizing and delivering cultural projects.',
+    {
+        'eyebrow': 'Cursos livres',
+        'eyebrow_en': 'Open courses',
+        'title': 'Comunicação, palco e escrita',
+        'title_en': 'Communication, stage and writing',
+        'description': 'Cursos objetivos para quem quer técnica, segurança e prática aplicada.',
+        'description_en': 'Focused courses for those who want technique, confidence and applied practice.',
     },
-    'Jornalismo Cultural': {
-        'title': 'Cultural Journalism',
-        'summary': 'For journalists, influencers and content producers.',
+    {
+        'eyebrow': 'Desenvolvimento pessoal',
+        'eyebrow_en': 'Personal development',
+        'title': 'Clareza, presença e autoconfiança',
+        'title_en': 'Clarity, presence and self-confidence',
+        'description': 'Experiências para destravar a fala, organizar ideias e fortalecer a expressão.',
+        'description_en': 'Experiences to unlock your speech, organize ideas and strengthen expression.',
     },
-    'Apresentação de Palco e Eventos': {
-        'title': 'Stage and Event Presenting',
-        'summary': 'Presenting and event-hosting techniques.',
-    },
-    'Espanhol – Conversação e Escrita': {
-        'title': 'Spanish - Conversation and Writing',
-        'summary': 'Development of oral and written communication.',
-    },
-    'Comunicação Destravada': {
-        'title': 'Unlocked Communication',
-        'summary': 'Development of public speaking, communication and self-confidence.',
-    },
-}
+]
 
 COURSE_GROUPS = [
     {
@@ -304,36 +254,6 @@ def _features_for_site(site, placement, fallback):
     return features or fallback
 
 
-def _course_features_for_home():
-    cards = []
-    for group_index, group in enumerate(COURSE_GROUPS):
-        for course_index, course in enumerate(group['courses']):
-            detail_values = [
-                detail['value']
-                for detail in course['details']
-                if detail['label'] in COURSE_DETAIL_HOME_LABELS
-            ]
-            detail_values_en = [
-                COURSE_DETAIL_VALUE_TRANSLATIONS.get(value, value)
-                for value in detail_values
-            ]
-            course_translation = COURSE_TRANSLATIONS.get(course['title'], {})
-            description = course['summary']
-            description_en = course_translation.get('summary', course['summary'])
-            if detail_values:
-                description = f'{description} {" · ".join(detail_values)}.'
-            if detail_values_en:
-                description_en = f'{description_en} {" · ".join(detail_values_en)}.'
-            cards.append({
-                'title': course['title'],
-                'title_en': course_translation.get('title', course['title']),
-                'description': description,
-                'description_en': description_en,
-                'tone': 'slate' if (group_index + course_index) % 2 else 'emerald',
-            })
-    return cards
-
-
 def home(request):
     site = request.site
     home_config = (
@@ -343,19 +263,15 @@ def home(request):
         or HOME_FALLBACK
     )
     trust_features = _features_for_site(site, SchoolFeature.Placement.TRUST, TRUST_FEATURES_FALLBACK)
-    proposal_features = _course_features_for_home()
-    life_features = _features_for_site(site, SchoolFeature.Placement.LIFE, LIFE_FEATURES_FALLBACK)
     testimonials = Testimonial.on_site.filter(site=site, is_featured=True)[:3]
     return render(request, 'school/home.html', {
         'home_config': home_config,
         'trust_features': trust_features,
-        'hero_features': trust_features[:2],
-        'proposal_features': proposal_features,
+        'course_tracks': COURSE_TRACKS,
         'course_proposal_title': COURSE_PROPOSAL_TITLE,
         'course_proposal_title_en': COURSE_PROPOSAL_TITLE_EN,
         'course_proposal_description': COURSE_PROPOSAL_DESCRIPTION,
         'course_proposal_description_en': COURSE_PROPOSAL_DESCRIPTION_EN,
-        'life_features': life_features,
         'testimonials': testimonials,
     })
 

@@ -46,38 +46,26 @@
     <div id="hero-support-sheet" class="hero-support-sheet flex min-h-[calc(92svh-5rem)] scroll-mt-24 items-center px-4 py-16 sm:px-6 md:py-20 lg:px-8">
         <div class="scroll-glass-sheet mx-auto grid max-w-7xl min-[1600px]:max-w-[110rem] gap-10 rounded-[2.5rem] p-7 sm:p-9 md:min-h-[56vh] lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:p-12"
             data-scroll-sheet>
-            <div>
+            <div class="order-2 lg:order-1">
+                <div class="liquid-card jump-lift rounded-[1.75rem] p-6">
+                    <p class="font-display text-lg font-bold leading-relaxed text-slate-950"
+                        x-text="t('Metodologia Comunicação Destravada criada em 2015 por Kelly Farias foi premiada em 2024 com o Prêmio Paulo Freire de Educação pela Câmara Legislativa do Distrito Federal', 'The Comunicação Destravada methodology, created in 2015 by Kelly Farias, received the 2024 Paulo Freire Education Award from the Legislative Chamber of the Federal District')">Metodologia Comunicação Destravada criada em 2015 por Kelly Farias foi premiada em 2024 com o Prêmio Paulo Freire de Educação pela Câmara Legislativa do Distrito Federal</p>
+                </div>
+            </div>
+            <div class="order-1 lg:order-2 lg:text-right">
                 <p class="text-sm font-bold uppercase text-primary-700"
                     x-text="t('{{ home_config.visual_eyebrow|escapejs }}', '{{ home_config.visual_eyebrow_en|default:home_config.visual_eyebrow|escapejs }}')">{{ home_config.visual_eyebrow }}</p>
                 <h2 class="mt-4 font-display text-4xl font-extrabold leading-tight tracking-tight text-slate-950 md:text-6xl"
                     x-text="t('{{ home_config.visual_title|escapejs }}', '{{ home_config.visual_title_en|default:home_config.visual_title|escapejs }}')">{{ home_config.visual_title }}</h2>
-                <p class="mt-5 max-w-xl text-lg leading-relaxed text-slate-600"
+                <p class="mt-5 max-w-xl text-lg leading-relaxed text-slate-600 lg:ml-auto"
                     x-text="t('{{ home_config.proposal_description|escapejs }}', '{{ home_config.proposal_description_en|default:home_config.proposal_description|escapejs }}')">{{ home_config.proposal_description }}</p>
-            </div>
-            <div>
-                <div class="stagger-children grid gap-4 sm:grid-cols-2">
-                    {% for feature in hero_features %}
-                    <div class="liquid-card jump-lift rounded-[1.75rem] p-5">
-                        <p class="font-display text-xl font-bold text-slate-950"
-                            x-text="t('{{ feature.title|escapejs }}', '{{ feature.title_en|default:feature.title|escapejs }}')">{{ feature.title }}</p>
-                        <p class="mt-3 text-sm leading-relaxed text-slate-600"
-                            x-text="t('{{ feature.description|escapejs }}', '{{ feature.description_en|default:feature.description|escapejs }}')">{{ feature.description }}</p>
-                    </div>
-                    {% endfor %}
-                </div>
-                <div class="liquid-card mt-5 rounded-[1.75rem] p-6">
-                    <h3 class="font-display text-2xl font-bold text-slate-950"
-                        x-text="t('{{ home_config.visual_footer_title|escapejs }}', '{{ home_config.visual_footer_title_en|default:home_config.visual_footer_title|escapejs }}')">{{ home_config.visual_footer_title }}</h3>
-                    <p class="mt-3 leading-relaxed text-slate-600"
-                        x-text="t('{{ home_config.visual_footer_text|escapejs }}', '{{ home_config.visual_footer_text_en|default:home_config.visual_footer_text|escapejs }}')">{{ home_config.visual_footer_text }}</p>
-                </div>
             </div>
         </div>
     </div>
 </section>
 
 <section class="liquid-section">
-    <div class="stagger-children mx-auto grid max-w-7xl gap-4 px-4 py-6 sm:px-6 md:grid-cols-4 lg:px-8">
+    <div class="stagger-children mx-auto grid max-w-7xl gap-4 px-4 py-6 sm:px-6 md:grid-cols-3 lg:px-8">
         {% for feature in trust_features %}
         <div class="liquid-card jump-lift rounded-[1.75rem] p-6">
             <p class="font-display text-lg font-bold text-slate-950"
@@ -103,44 +91,28 @@
         </div>
 
         <div class="stagger-children mt-11 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {% for feature in proposal_features %}
-            <article class="liquid-card jump-lift rounded-[1.75rem] p-6">
-                <span class="flex h-12 w-12 items-center justify-center rounded-lg {% if feature.tone == 'slate' %}bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200{% else %}bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-200{% endif %}">
+            {% for track in course_tracks %}
+            <a href="{% url 'school:page_detail' 'cursos' %}"
+                class="liquid-card jump-lift flex flex-col rounded-[1.75rem] p-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4">
+                <span class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-200">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                             d="M12 3l8 4.5v6.2c0 3.2-3.4 5.8-8 7.3-4.6-1.5-8-4.1-8-7.3V7.5L12 3z" />
                     </svg>
                 </span>
-                <h3 class="mt-5 font-display text-2xl font-bold text-slate-950"
-                    x-text="t('{{ feature.title|escapejs }}', '{{ feature.title_en|default:feature.title|escapejs }}')">{{ feature.title }}</h3>
+                <p class="mt-5 text-sm font-bold uppercase text-primary-700"
+                    x-text="t('{{ track.eyebrow|escapejs }}', '{{ track.eyebrow_en|default:track.eyebrow|escapejs }}')">{{ track.eyebrow }}</p>
+                <h3 class="mt-2 font-display text-2xl font-bold text-slate-950"
+                    x-text="t('{{ track.title|escapejs }}', '{{ track.title_en|default:track.title|escapejs }}')">{{ track.title }}</h3>
                 <p class="mt-3 leading-relaxed text-slate-600"
-                    x-text="t('{{ feature.description|escapejs }}', '{{ feature.description_en|default:feature.description|escapejs }}')">{{ feature.description }}</p>
-            </article>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-
-<section class="liquid-section py-14 md:py-20">
-    <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8 lg:items-end">
-        <div>
-            <p class="text-sm font-bold uppercase text-primary-700"
-                x-text="t('{{ home_config.life_eyebrow|escapejs }}', '{{ home_config.life_eyebrow_en|default:home_config.life_eyebrow|escapejs }}')">{{ home_config.life_eyebrow }}</p>
-            <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl"
-                x-text="t('{{ home_config.life_title|escapejs }}', '{{ home_config.life_title_en|default:home_config.life_title|escapejs }}')">{{ home_config.life_title }}</h2>
-            <p class="mt-5 text-lg leading-relaxed text-slate-600"
-                x-text="t('{{ home_config.life_description|escapejs }}', '{{ home_config.life_description_en|default:home_config.life_description|escapejs }}')">
-                {{ home_config.life_description }}
-            </p>
-        </div>
-        <div class="stagger-children grid gap-5 sm:grid-cols-2">
-            {% for feature in life_features %}
-            <article class="jump-lift min-h-56 rounded-[1.75rem] p-6 {% if feature.tone == 'white' %}liquid-card{% else %}liquid-card liquid-card-dark text-white{% endif %}">
-                <h3 class="font-display text-2xl font-bold"
-                    x-text="t('{{ feature.title|escapejs }}', '{{ feature.title_en|default:feature.title|escapejs }}')">{{ feature.title }}</h3>
-                <p class="mt-4 text-sm leading-relaxed {% if feature.tone == 'white' %}text-slate-600{% else %}text-primary-100{% endif %}"
-                    x-text="t('{{ feature.description|escapejs }}', '{{ feature.description_en|default:feature.description|escapejs }}')">{{ feature.description }}</p>
-            </article>
+                    x-text="t('{{ track.description|escapejs }}', '{{ track.description_en|default:track.description|escapejs }}')">{{ track.description }}</p>
+                <span class="mt-auto pt-6 inline-flex items-center gap-1.5 text-sm font-bold text-primary-700">
+                    <span x-text="t('Ver cursos', 'View courses')">Ver cursos</span>
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </span>
+            </a>
             {% endfor %}
         </div>
     </div>

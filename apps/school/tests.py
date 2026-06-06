@@ -1,7 +1,6 @@
 import pytest
 from django.contrib.sites.models import Site
 from django.urls import reverse
-from django.utils.html import escapejs
 
 from apps.school.models import Page, SchoolFeature, SchoolHomeConfig, TeamMember
 from apps.school.models import Testimonial as SchoolTestimonial
@@ -116,26 +115,6 @@ def test_school_homepage_bilingual_fields_fall_back_to_portuguese(client, curren
 
 
 @pytest.mark.django_db
-def test_school_homepage_exposes_legacy_communicator_translation(client, current_site):
-    description_en = 'A 420-hour course for people who want to become professionals in communication.'
-    SchoolFeature.objects.create(
-        site=current_site,
-        placement=SchoolFeature.Placement.LIFE,
-        title='Comunicador',
-        title_en='Communicator',
-        description='Curso de 420 horas para quem quer se profissionalizar na área de comunicação.',
-        description_en=description_en,
-    )
-
-    response = client.get(reverse('school:home'))
-
-    content = response.content.decode()
-    assert response.status_code == 200
-    assert 'Communicator' in content
-    assert escapejs(description_en) in content
-
-
-@pytest.mark.django_db
 def test_school_homepage_does_not_leak_other_site_content(client, current_site):
     other_site = Site.objects.create(domain='other.testserver', name='Outra Escola')
     SchoolFeature.objects.create(
@@ -156,19 +135,23 @@ def test_school_homepage_does_not_leak_other_site_content(client, current_site):
 
 
 @pytest.mark.django_db
-def test_school_homepage_lists_current_course_cards(client, current_site):
+def test_school_homepage_shows_course_tracks_linking_to_courses(client, current_site):
     response = client.get(reverse('school:home'))
 
     content = response.content.decode()
+    courses_url = reverse('school:page_detail', args=['cursos'])
     assert response.status_code == 200
-    assert 'Comunicador Profissionalizante' in content
-    assert 'Produção Cultural' in content
-    assert 'Jornalismo Cultural' in content
-    assert 'Apresentação de Palco e Eventos' in content
-    assert 'Espanhol' in content
-    assert 'Comunicação Destravada' in content
-    assert 'Professional Communicator' in content
-    assert 'Unlocked Communication' in content
+    # Mostra as 3 trilhas-resumo, não o catálogo completo
+    assert 'Formação profissionalizante' in content
+    assert 'Cursos livres' in content
+    assert 'Desenvolvimento pessoal' in content
+    assert 'Cursos com encaminhamento profissional' in content
+    # Os cards-trilha levam à página de cursos
+    assert content.count(f'href="{courses_url}"') >= 3
+    assert "t('Ver cursos', 'View courses')" in content
+    # O catálogo detalhado vive em /cursos e não é duplicado na home
+    assert 'Apresentação de Palco e Eventos' not in content
+    assert 'Jornalismo Cultural' not in content
 
 
 @pytest.mark.django_db

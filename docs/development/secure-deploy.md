@@ -1,8 +1,9 @@
 # Secure Deploy GitHub Actions -> VPS
 
 Este deploy foi desenhado para repositorio publico. Ele evita deploy automatico
-em push, nao usa secrets em pull requests e limita o GitHub a chamar um unico
-script root-owned na VPS.
+em push, nao usa secrets em pull requests e evita SSH inbound vindo do GitHub.
+O GitHub apenas marca o commit aprovado com a tag `production-approved`; a VPS
+busca essa tag por HTTPS e executa o deploy localmente.
 
 ## 1. GitHub
 
@@ -10,13 +11,6 @@ Crie um environment chamado `production`:
 
 - Required reviewers: habilitado.
 - Deployment branches: apenas `master`.
-- Environment variables:
-  - `VPS_HOST=2.25.178.16`
-  - `VPS_PORT=2222`
-  - `VPS_USER=deploy`
-- Environment secrets:
-  - `VPS_SSH_PRIVATE_KEY`
-  - `VPS_HOST_KEY`
 
 Proteja a branch `master`:
 
@@ -28,94 +22,57 @@ Proteja a branch `master`:
 
 Nao use `pull_request_target` para deploy.
 
+O workflow `Deploy Production`:
+
+- roda lint, collectstatic e testes;
+- aguarda aprovacao do environment `production`;
+- move a tag `production-approved` para o commit aprovado.
+
 ## 2. VPS
 
-Crie o usuario de deploy e instale o script root-owned:
+Instale os scripts root-owned:
 
 ```bash
-adduser --disabled-password --gecos "" deploy
-install -d -m 0700 -o deploy -g deploy /home/deploy/.ssh
-
 cd /opt/kelly_sys
 git pull --ff-only origin master
 install -o root -g root -m 0755 scripts/deploy/kellysys-deploy /usr/local/sbin/kellysys-deploy
+install -o root -g root -m 0755 scripts/deploy/kellysys-deploy-approved /usr/local/sbin/kellysys-deploy-approved
+```
 
-cat >/etc/sudoers.d/kellysys-deploy <<'EOF'
-deploy ALL=(root) NOPASSWD: /usr/local/sbin/kellysys-deploy
+Crie um timer para a VPS procurar commits aprovados:
+
+```bash
+cat >/etc/systemd/system/kellysys-approved-deploy.service <<'EOF'
+[Unit]
+Description=Deploy latest GitHub-approved KellySys commit
+Wants=network-online.target docker.service
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/kellysys-deploy-approved
 EOF
-chmod 0440 /etc/sudoers.d/kellysys-deploy
-visudo -cf /etc/sudoers.d/kellysys-deploy
-```
 
-Nao adicione o usuario `deploy` ao grupo `docker`. A permissao de deploy deve
-passar apenas pelo comando permitido no sudoers.
+cat >/etc/systemd/system/kellysys-approved-deploy.timer <<'EOF'
+[Unit]
+Description=Poll GitHub-approved KellySys deploy tag
 
-Para evitar bloqueios contra conexoes vindas de GitHub-hosted runners, mantenha
-o SSH humano na porta 22 e exponha uma porta alternativa para o deploy:
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1min
+AccuracySec=15s
+Persistent=true
 
-```bash
-sed -i '/^#\?Port 22$/a Port 2222' /etc/ssh/sshd_config
-sshd -t
-systemctl restart ssh
-ufw allow 2222/tcp
-ufw reload
-```
-
-No firewall da Hostinger, libere tambem `TCP 2222` e sincronize as regras.
-
-Gere uma chave SSH exclusiva para o GitHub Actions em uma maquina local segura:
-
-```bash
-ssh-keygen -t ed25519 -C "github-actions-kellysys-production" -f ./kellysys_deploy_ed25519
-```
-
-Instale a chave publica no usuario `deploy`:
-
-```bash
-cat >>/home/deploy/.ssh/authorized_keys <<'EOF'
-restrict ssh-ed25519 COLE_A_CHAVE_PUBLICA_AQUI github-actions-kellysys-production
+[Install]
+WantedBy=timers.target
 EOF
-chown deploy:deploy /home/deploy/.ssh/authorized_keys
-chmod 0600 /home/deploy/.ssh/authorized_keys
+
+systemctl daemon-reload
+systemctl enable --now kellysys-approved-deploy.timer
+systemctl start kellysys-approved-deploy.service
 ```
 
-Opcao mais restritiva: substitua `restrict` por um forced command:
-
-```text
-restrict,command="/usr/bin/sudo /usr/local/sbin/kellysys-deploy" ssh-ed25519 COLE_A_CHAVE_PUBLICA_AQUI github-actions-kellysys-production
-```
-
-Nesse modo, a chave so executa o deploy, mesmo que alguem tente abrir shell.
-
-## 3. Host key
-
-Nunca use `StrictHostKeyChecking=no`. Coloque a host key real da VPS no secret
-`VPS_HOST_KEY`.
-
-Na VPS, confira a fingerprint:
-
-```bash
-ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
-cat /etc/ssh/ssh_host_ed25519_key.pub
-```
-
-Em uma maquina local, colete e compare:
-
-```bash
-ssh-keyscan -p 22 2.25.178.16
-```
-
-O secret `VPS_HOST_KEY` deve conter uma ou mais linhas `ssh-keyscan` validas,
-por exemplo:
-
-```text
-2.25.178.16 ssh-ed25519 AAAA...
-```
-
-O workflow usa `HostKeyAlias=2.25.178.16`, entao o mesmo secret continua valido
-mesmo quando `VPS_PORT=2222`.
-
-## 4. Validacao
+## 3. Validacao
 
 Antes de rodar pelo GitHub:
 
@@ -129,6 +86,8 @@ Resultados esperados:
 
 - CI passa antes do deploy.
 - GitHub pede aprovacao do environment `production`.
+- A tag `production-approved` passa a apontar para o commit aprovado.
+- O timer da VPS detecta a tag e executa `/usr/local/sbin/kellysys-deploy-approved`.
 - `/opt/kelly_sys/backups/` recebe um dump PostgreSQL gzipado.
 - `docker compose -p kellysys -f docker/docker-compose.prod.yml ps` mostra
   `db`, `web` e `nginx` saudaveis.

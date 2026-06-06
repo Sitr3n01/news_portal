@@ -43,9 +43,8 @@ Passos para colocar o projeto em producao com seguranca. Itens marcados como
 
 ## 5. Deploy GitHub -> VPS
 
-- [ ] Manter SSH humano em `22` e liberar SSH de deploy em `2222`.
-- [ ] No firewall da Hostinger, liberar `TCP 2222` e sincronizar.
-- [ ] No GitHub Environment `production`, definir `VPS_PORT=2222`.
+- [ ] Instalar `/usr/local/sbin/kellysys-deploy` e `/usr/local/sbin/kellysys-deploy-approved`.
+- [ ] Ativar `kellysys-approved-deploy.timer` para a VPS buscar a tag `production-approved`.
 - [ ] Rodar o workflow `Deploy Production` manualmente em `master`.
 
 ## 6. Verificacao final

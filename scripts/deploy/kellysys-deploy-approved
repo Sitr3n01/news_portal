@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+PROJECT_DIR="/opt/kelly_sys"
+APPROVED_TAG="production-approved"
+STATE_DIR="/var/lib/kellysys-deploy"
+STATE_FILE="${STATE_DIR}/last-approved-sha"
+LOCK_FILE="/var/lock/kellysys-deploy.lock"
+DEPLOY_SCRIPT="/usr/local/sbin/kellysys-deploy"
+
+log() {
+    printf '[%s] %s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$*"
+}
+
+fail() {
+    log "ERROR: $*"
+    exit 1
+}
+
+exec 9>"${LOCK_FILE}"
+flock -n 9 || fail "another deploy is already running"
+
+[[ "$(id -u)" -eq 0 ]] || fail "run this script as root"
+[[ -x "${DEPLOY_SCRIPT}" ]] || fail "${DEPLOY_SCRIPT} is not executable"
+
+cd "${PROJECT_DIR}"
+
+git update-index -q --refresh
+git diff-files --quiet || fail "tracked working tree changes are present"
+git diff-index --cached --quiet HEAD -- || fail "staged changes are present"
+
+log "Fetching origin/master and ${APPROVED_TAG}"
+git fetch --prune origin master
+if ! git fetch --force origin "refs/tags/${APPROVED_TAG}:refs/tags/${APPROVED_TAG}"; then
+    log "No approved production tag found yet: ${APPROVED_TAG}"
+    exit 0
+fi
+
+approved_sha="$(git rev-parse "refs/tags/${APPROVED_TAG}^{commit}")"
+master_sha="$(git rev-parse origin/master)"
+last_sha="$(cat "${STATE_FILE}" 2>/dev/null || true)"
+
+if [[ "${approved_sha}" == "${last_sha}" ]]; then
+    log "Approved commit already deployed: ${approved_sha}"
+    exit 0
+fi
+
+git merge-base --is-ancestor "${approved_sha}" origin/master || fail "${APPROVED_TAG} is not an ancestor of origin/master"
+
+log "Deploying approved commit ${approved_sha} (origin/master ${master_sha})"
+git checkout --detach "${approved_sha}"
+
+KELLYSYS_SKIP_DEPLOY_LOCK=1 KELLYSYS_SKIP_GIT_UPDATE=1 "${DEPLOY_SCRIPT}"
+
+install -d -m 0700 "${STATE_DIR}"
+printf '%s\n' "${approved_sha}" > "${STATE_FILE}"
+chmod 0600 "${STATE_FILE}"
+
+log "Recorded deployed approved commit ${approved_sha}"

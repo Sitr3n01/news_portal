@@ -18,6 +18,10 @@ SECURE_HSTS_PRELOAD = True
 SECURE_SSL_REDIRECT = env.bool('SECURE_SSL_REDIRECT', default=True)  # noqa: F405
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+# Referrer-Policy no nível do Django — paridade com o header `always` do nginx,
+# garantindo a proteção mesmo se a request chegar sem passar pelo reverse proxy.
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
 # Token de reset de senha expira em 1 hora (padrão Django: 24h)
 PASSWORD_RESET_TIMEOUT = 3600
 

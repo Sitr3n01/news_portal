@@ -30,6 +30,9 @@
 | Flood/scrapers | Rate limit no nginx (10 req/s, burst 20) | `nginx.conf` |
 | Container comprometido | Processo como usuário não-root | `Dockerfile` |
 | Vazamento entre portais | Manager `on_site` em views/feeds/sitemaps | Toda a camada pública |
+| Bots/spam em formulários | Cloudflare Turnstile (widget + siteverify) | `apps/common/turnstile.py` + forms |
+| Bots/scraping na borda | Cloudflare proxy + Bot Fight Mode + firewall só-CF | Cloudflare + `cloudflare-firewall.sh` |
+| IP real atrás do proxy | `realip` lendo `CF-Connecting-IP` | `nginx.conf` + `cloudflare-realip.conf` |
 
 ---
 
@@ -103,7 +106,7 @@ Configurada em `base.py` via `django-csp` e **espelhada** no [`nginx.conf`](../.
 - `style-src` permite estilos inline + Google Fonts;
 - `img-src` permite `data:` e `https:`;
 - `frame-src` permite apenas YouTube;
-- `object-src` bloqueado (`none`); `base-uri` e `form-action` restritos à origem.
+- `object-src` bloqueado (`none`); `base-uri` e `form-action` restritos à origem; `frame-ancestors 'none'` (anti-clickjacking moderno, complementa `X-Frame-Options`).
 
 > O preço de `script-src` liberar inline/eval é mitigado por: sanitização do conteúdo, `frame-src` restrito e `object-src` bloqueado.
 
@@ -127,6 +130,7 @@ Configurada em `base.py` via `django-csp` e **espelhada** no [`nginx.conf`](../.
 | `CSRF_TRUSTED_ORIGINS` | via `.env` | Origens confiáveis |
 | `SECURE_REDIRECT_EXEMPT` | `^healthz/$` | Healthcheck interno não recebe 301 |
 | `X_FRAME_OPTIONS` | `DENY` | Anti-clickjacking |
+| `SECURE_REFERRER_POLICY` | `strict-origin-when-cross-origin` | Paridade Django com o header do nginx |
 
 **Sentry** é habilitado apenas se `SENTRY_DSN` existir, com `send_default_pii=False` (não envia dados pessoais).
 
@@ -138,7 +142,9 @@ Configurada em `base.py` via `django-csp` e **espelhada** no [`nginx.conf`](../.
 - **Limite de upload:** `client_max_body_size 10M` (alinhado com `DATA_UPLOAD_MAX_MEMORY_SIZE` do Django).
 - **Locations internas:** `/protected/` e `/media/hiring/resumes/` são `internal` — só acessíveis via `X-Accel-Redirect`.
 - **Container não-root:** o processo roda como `appuser` (UID 1000), reduzindo impacto de um comprometimento.
-- **TLS:** preparado para Certbot/Let's Encrypt (bloco `:443` comentado, pronto para o go-live).
+- **TLS:** Certbot/Let's Encrypt no nginx (bloco `:443` ativo).
+- **Proteção de bots (Cloudflare):** duas camadas — Turnstile nos formulários (app) e Bot Fight Mode + firewall só-Cloudflare na borda. Blocos de comando em [cloudflare-bots.md](cloudflare-bots.md).
+- **IP real atrás do proxy:** o nginx usa `realip` com `CF-Connecting-IP` e encaminha `X-Forwarded-For $remote_addr` — `rate-limit`, `axes` e Turnstile veem o visitante real, não o Cloudflare.
 
 ---
 
@@ -177,4 +183,4 @@ Configurada em `base.py` via `django-csp` e **espelhada** no [`nginx.conf`](../.
 
 ---
 
-_Última atualização: 2026-06-03 — gerado a partir de leitura direta do código (`sanitization.py`, `accounts/views.py` e `forms.py`, `hiring/forms.py` e `views.py`, `production.py`, `nginx.conf`, `news/admin.py`)._
+_Última atualização: 2026-06-06 — adicionada a camada Cloudflare (Turnstile + borda + real-IP) e os cabeçalhos `frame-ancestors`/`SECURE_REFERRER_POLICY`. Runbook em [cloudflare-bots.md](cloudflare-bots.md)._

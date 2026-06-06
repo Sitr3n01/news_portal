@@ -61,10 +61,7 @@ docker compose -p kellysys -f docker/docker-compose.prod.yml up -d --force-recre
 
 ### B2 — nginx restaura o IP real (já versionado, aplica no deploy)
 
-Já entregue no repositório:
-- [`docker/nginx/cloudflare-realip.conf`](../../docker/nginx/cloudflare-realip.conf) — `set_real_ip_from` (faixas CF) + `real_ip_header CF-Connecting-IP`.
-- [`nginx.conf`](../../docker/nginx/nginx.conf) faz `include` dele e encaminha `X-Forwarded-For $remote_addr` (IP real restaurado).
-- Montado no container via [`docker-compose.prod.yml`](../../docker/docker-compose.prod.yml).
+Já entregue no repositório, **inline** no [`nginx.conf`](../../docker/nginx/nginx.conf) (bloco entre `# >>> cloudflare-realip >>>` e `# <<< cloudflare-realip <<<`): `set_real_ip_from` (faixas CF) + `real_ip_header CF-Connecting-IP`, e `X-Forwarded-For $remote_addr` (IP real restaurado). É **inline de propósito** (não include/volume externo): o `kellysys-deploy` recarrega o nginx com `compose restart` — que aplica o `nginx.conf` (bind-mount vivo) **sem recriar** o container. Um volume novo exigiria `--force-recreate`, que o deploy não faz para o nginx.
 
 Aplica sozinho no próximo deploy aprovado. Para conferir após o deploy:
 
@@ -75,11 +72,12 @@ docker compose -p kellysys -f docker/docker-compose.prod.yml logs --tail=20 ngin
 # Os IPs nos logs devem ser de VISITANTES, não faixas do Cloudflare.
 ```
 
-Atualizar as faixas (raro) — rode **localmente**, nunca na VPS, e abra um PR:
+Atualizar as faixas (raro) — rode **localmente**, cole a saída entre os marcadores no `nginx.conf` e abra um PR:
 
 ```bash
-scripts/deploy/cloudflare-realip-update.sh
-git diff docker/nginx/cloudflare-realip.conf
+scripts/deploy/cloudflare-realip-update.sh   # imprime o bloco atualizado
+# substitua o bloco entre os marcadores em docker/nginx/nginx.conf pela saída
+git diff docker/nginx/nginx.conf
 ```
 
 ### B3 — Firewall: origem só aceita o Cloudflare

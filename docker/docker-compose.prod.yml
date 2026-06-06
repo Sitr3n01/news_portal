@@ -1,3 +1,10 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+    compress: "true"
+
 services:
   web:
     build:
@@ -6,7 +13,9 @@ services:
     # --max-requests/-jitter: cada worker é reciclado a ~1000±200 requests, devolvendo
     # memória ao SO e impedindo o crescimento monotônico de RSS (causa nº 1 de "memória
     # sempre subindo" em gunicorn). --workers: usar (2×núcleos)+1; em 1 vCPU = 3.
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --threads 2 --max-requests 1000 --max-requests-jitter 200 --access-logfile - --error-logfile -
+    # O access log HTTP fica no nginx/Cloudflare; Gunicorn mantem apenas erros no
+    # stderr para evitar log duplicado em stdout.
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --threads 2 --max-requests 1000 --max-requests-jitter 200 --error-logfile -
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
@@ -20,6 +29,7 @@ services:
       db:
         condition: service_healthy
     restart: always
+    logging: *default-logging
     # Teto de memória = rede de segurança: se algo crescer, o container é morto e
     # reiniciado em vez de derrubar a VPS inteira por OOM. Aplicado ao recriar o web.
     # cpus omitido de propósito: em 1 vCPU um teto rígido de CPU estrangularia o web.
@@ -40,6 +50,7 @@ services:
       timeout: 5s
       retries: 5
     restart: always
+    logging: *default-logging
     deploy:
       resources:
         limits:
@@ -59,6 +70,7 @@ services:
     depends_on:
       - web
     restart: always
+    logging: *default-logging
     deploy:
       resources:
         limits:
@@ -71,6 +83,7 @@ services:
     volumes:
       - certbot_conf:/etc/letsencrypt
       - certbot_www:/var/www/certbot
+    logging: *default-logging
 
 volumes:
   postgres_data:

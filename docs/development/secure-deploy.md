@@ -37,6 +37,7 @@ cd /opt/kelly_sys
 git pull --ff-only origin master
 install -o root -g root -m 0755 scripts/deploy/kellysys-deploy /usr/local/sbin/kellysys-deploy
 install -o root -g root -m 0755 scripts/deploy/kellysys-deploy-approved /usr/local/sbin/kellysys-deploy-approved
+install -o root -g root -m 0755 scripts/deploy/kellysys-maintenance /usr/local/sbin/kellysys-maintenance
 ```
 
 Crie um timer para a VPS procurar commits aprovados:
@@ -72,6 +73,40 @@ systemctl enable --now kellysys-approved-deploy.timer
 systemctl start kellysys-approved-deploy.service
 ```
 
+Crie tambem o timer de manutencao diaria. Ele limpa sessoes expiradas,
+atualiza estatisticas da tabela `django_session`, remove backups antigos,
+remove containers/imagens/build cache nao usados e limita o journal. Ele nunca
+executa `docker volume prune`.
+
+```bash
+cat >/etc/systemd/system/kellysys-maintenance.service <<'EOF'
+[Unit]
+Description=KellySys safe daily maintenance
+Wants=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env bash /usr/local/sbin/kellysys-maintenance
+EOF
+
+cat >/etc/systemd/system/kellysys-maintenance.timer <<'EOF'
+[Unit]
+Description=Run KellySys safe daily maintenance
+
+[Timer]
+OnCalendar=*-*-* 03:20:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+systemctl daemon-reload
+systemctl enable --now kellysys-maintenance.timer
+systemctl start kellysys-maintenance.service
+```
+
 ## 3. Validacao
 
 Antes de rodar pelo GitHub:
@@ -89,6 +124,7 @@ Resultados esperados:
 - A tag `production-approved` passa a apontar para o commit aprovado.
 - O timer da VPS detecta a tag e executa `/usr/local/sbin/kellysys-deploy-approved`.
 - `/opt/kelly_sys/backups/` recebe um dump PostgreSQL gzipado.
+- O timer `kellysys-maintenance.timer` esta ativo e a ultima execucao termina sem erro.
 - `docker compose -p kellysys -f docker/docker-compose.prod.yml ps` mostra
   `db`, `web` e `nginx` saudaveis.
 - `komuniki.com.br/healthz/` retorna 200.

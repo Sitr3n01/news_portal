@@ -46,6 +46,6 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
     CMD python -c "import sys, urllib.request; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz/', timeout=4).status == 200 else 1)"
 
-# --max-requests/-jitter reciclam o worker (~1000±200 req) e devolvem memória ao SO,
-# evitando o crescimento contínuo de RSS. Em paridade com o command do compose de prod.
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--threads", "2", "--max-requests", "1000", "--max-requests-jitter", "200", "--access-logfile", "-", "--error-logfile", "-"]
+# --max-requests/-jitter reciclam o worker (~1000±200 req) e devolvem memória ao SO.
+# Access log HTTP fica no nginx/Cloudflare; Gunicorn mantem apenas erros no stderr.
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--threads", "2", "--max-requests", "1000", "--max-requests-jitter", "200", "--error-logfile", "-"]

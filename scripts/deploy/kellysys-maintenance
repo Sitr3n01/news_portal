@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+PROJECT_DIR="${PROJECT_DIR:-/opt/kelly_sys}"
+COMPOSE_PROJECT="${COMPOSE_PROJECT:-kellysys}"
+COMPOSE_FILE="${COMPOSE_FILE:-docker/docker-compose.prod.yml}"
+BACKUP_DIR="${BACKUP_DIR:-${PROJECT_DIR}/backups}"
+LOCK_FILE="${LOCK_FILE:-/var/lock/kellysys-maintenance.lock}"
+IMAGE_PRUNE_UNTIL="${IMAGE_PRUNE_UNTIL:-168h}"
+BUILDER_PRUNE_UNTIL="${BUILDER_PRUNE_UNTIL:-168h}"
+CONTAINER_PRUNE_UNTIL="${CONTAINER_PRUNE_UNTIL:-24h}"
+JOURNAL_VACUUM_TIME="${JOURNAL_VACUUM_TIME:-14d}"
+
+log() {
+    printf '[%s] %s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$*"
+}
+
+fail() {
+    log "ERROR: $*"
+    exit 1
+}
+
+compose() {
+    docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" "$@"
+}
+
+exec 9>"${LOCK_FILE}"
+flock -n 9 || fail "another maintenance run is already running"
+
+[[ "$(id -u)" -eq 0 ]] || fail "run this script as root via sudo"
+cd "${PROJECT_DIR}"
+
+[[ -f ".env.prod" ]] || fail ".env.prod not found in ${PROJECT_DIR}"
+[[ -f "${COMPOSE_FILE}" ]] || fail "${COMPOSE_FILE} not found"
+
+log "Cleaning expired Django sessions"
+compose exec -T web python manage.py clearsessions
+
+log "Refreshing PostgreSQL planner stats for django_session"
+compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "VACUUM (ANALYZE) django_session;"'
+
+if [[ -d "${BACKUP_DIR}" ]]; then
+    log "Pruning PostgreSQL backups older than 30 days"
+    find "${BACKUP_DIR}" -type f -name 'postgres-*.sql.gz' -mtime +30 -delete
+fi
+
+log "Pruning stopped containers older than ${CONTAINER_PRUNE_UNTIL}"
+docker container prune -f --filter "until=${CONTAINER_PRUNE_UNTIL}"
+
+log "Pruning unused Docker images older than ${IMAGE_PRUNE_UNTIL}"
+docker image prune -af --filter "until=${IMAGE_PRUNE_UNTIL}"
+
+log "Pruning Docker build cache older than ${BUILDER_PRUNE_UNTIL}"
+docker builder prune -af --filter "until=${BUILDER_PRUNE_UNTIL}"
+
+if command -v journalctl >/dev/null 2>&1; then
+    log "Vacuuming journald older than ${JOURNAL_VACUUM_TIME}"
+    journalctl --vacuum-time="${JOURNAL_VACUUM_TIME}" >/dev/null
+fi
+
+log "Docker disk usage after maintenance"
+docker system df
+
+log "Maintenance completed successfully"

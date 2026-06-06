@@ -46,6 +46,14 @@ services:
       - web
     restart: always
 
+  certbot:
+    image: certbot/certbot:latest
+    profiles:
+      - tools
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+
 volumes:
   postgres_data:
   static_volume:

@@ -1,53 +1,58 @@
-# Checklist de Go-Live — news_portal
+# Checklist de Go-Live - news_portal
 
-Passos para colocar o projeto em produção com segurança. Itens marcados como
-**[domínio]** dependem de ter o domínio real definido.
+Passos para colocar o projeto em producao com seguranca. Itens marcados como
+**[dominio]** dependem de DNS publico resolvendo corretamente.
 
 ## 1. Segredos e ambiente
 
-- [ ] Copiar `.env.prod.example` → `.env.prod` (nunca commitar).
+- [ ] Copiar `.env.prod.example` para `.env.prod` (nunca commitar).
 - [ ] Gerar `SECRET_KEY` forte: `python -c "import secrets; print(secrets.token_urlsafe(64))"`.
 - [ ] Definir senhas fortes do Postgres (`POSTGRES_PASSWORD` == `DB_PASSWORD`).
-- [ ] **[domínio]** Preencher `ALLOWED_HOSTS` e `CSRF_TRUSTED_ORIGINS` (com `https://`).
-- [ ] Confirmar `DB_HOST=db` (nome do serviço no compose, não `localhost`).
+- [ ] **[dominio]** Preencher `ALLOWED_HOSTS` com:
+      `komuniki.com.br,www.komuniki.com.br,kellyfarias.com.br,www.kellyfarias.com.br,2.25.178.16,localhost,127.0.0.1`.
+- [ ] **[dominio]** Preencher `CSRF_TRUSTED_ORIGINS` com:
+      `https://komuniki.com.br,https://www.komuniki.com.br,https://kellyfarias.com.br,https://www.kellyfarias.com.br`.
+- [ ] Confirmar `DB_HOST=db` (nome do servico no compose, nao `localhost`).
 
 ## 2. E-mail (newsletter/contato)
 
 - [ ] Configurar SMTP real em `.env.prod` (`EMAIL_BACKEND=...smtp...`, host, user, senha).
-- [ ] Definir `DEFAULT_FROM_EMAIL` com o domínio real.
-- [ ] No admin → Configurações do Site, definir o remetente de newsletter por site.
+- [ ] Definir `DEFAULT_FROM_EMAIL` com o dominio real.
+- [ ] No admin -> Configuracoes do Site, definir o remetente de newsletter por site.
 
 ## 3. Banco e dados iniciais
 
-- [ ] `docker compose -f docker/docker-compose.prod.yml run --rm web python manage.py migrate`
-- [ ] **[domínio]** Corrigir o domínio do Site (seed inicial usa `example.com`, o que
-      quebra links de e-mail):
-      `... run --rm web python manage.py set_site_domain` (lê `SITE_DOMAIN`/`SITE_NAME`)
-      — ou ajustar manualmente em **admin → Sites**.
-- [ ] Criar superusuário: `... run --rm web python manage.py createsuperuser`.
+- [ ] `docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py migrate`
+- [ ] **[dominio]** Corrigir o dominio do Site:
+      `docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py set_site_domain`
+      ou ajustar manualmente em admin -> Sites.
+- [ ] Criar superusuario:
+      `docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py createsuperuser`.
 
-## 4. TLS / Nginx (docker/nginx/nginx.conf)
+## 4. TLS / Nginx
 
-- [ ] **[domínio]** Trocar `server_name _;` pelo domínio real.
-- [ ] **[domínio]** Emitir o certificado via certbot (volumes `certbot_conf`/`certbot_www`
-      já montados no `docker-compose.prod.yml`).
-- [ ] No server `:80`, ativar o redirect `301` para HTTPS (mantendo o
-      `location /.well-known/acme-challenge/`).
-- [ ] Descomentar o server `:443` (bloco "GO-LIVE TLS" já preparado no arquivo) e
-      preencher `SEU_DOMINIO` nos caminhos do certificado.
+- [ ] **[dominio]** Confirmar que estes quatro DNS resolvem para `2.25.178.16`:
+      `komuniki.com.br`, `www.komuniki.com.br`, `kellyfarias.com.br`,
+      `www.kellyfarias.com.br`.
+- [ ] Emitir um unico certificado com nome principal `komuniki.com.br` e SANs para os quatro dominios:
+      `docker compose --profile tools -p kellysys -f docker/docker-compose.prod.yml run --rm certbot certonly --webroot --webroot-path=/var/www/certbot --email SEU_EMAIL --agree-tos --no-eff-email -d komuniki.com.br -d www.komuniki.com.br -d kellyfarias.com.br -d www.kellyfarias.com.br`.
+- [ ] Aplicar o `docker/nginx/nginx.conf` final, que mantem ACME em HTTP,
+      redireciona HTTP para HTTPS e serve HTTPS com
+      `/etc/letsencrypt/live/komuniki.com.br/`.
 - [ ] Confirmar `SECURE_SSL_REDIRECT=True` no `.env.prod`.
 
-## 5. Observabilidade (opcional, recomendado)
+## 5. Deploy GitHub -> VPS
 
-- [ ] Definir `SENTRY_DSN` no `.env.prod` para ativar rastreamento de erros.
-- [ ] Ajustar `LOG_LEVEL`/`DJANGO_LOG_LEVEL` se necessário (default `INFO`).
+- [ ] Manter SSH humano em `22` e liberar SSH de deploy em `2222`.
+- [ ] No firewall da Hostinger, liberar `TCP 2222` e sincronizar.
+- [ ] No GitHub Environment `production`, definir `VPS_PORT=2222`.
+- [ ] Rodar o workflow `Deploy Production` manualmente em `master`.
 
-## 6. Verificação final
+## 6. Verificacao final
 
-- [ ] `... run --rm web python manage.py check --deploy` → **0 avisos**.
-- [ ] Subir o stack: `docker compose -f docker/docker-compose.prod.yml up -d`.
-- [ ] Healthcheck do container `web` fica `healthy` (probe em `/healthz/`).
-- [ ] Abrir as 3 famílias (escola `/`, notícias `/news/`, página escolar) e conferir,
-      no DevTools → Network, que **nenhuma** requisição sai para CDNs externos
-      (`cdn.tailwindcss.com`, `unpkg.com`, `jsdelivr.net`) e **0 erros** no console.
-- [ ] Enviar um e-mail de teste (newsletter/contato) e confirmar links com o domínio real.
+- [ ] `docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py check --deploy`.
+- [ ] `docker compose -p kellysys -f docker/docker-compose.prod.yml up -d`.
+- [ ] Healthcheck do container `web` fica `healthy`.
+- [ ] `https://komuniki.com.br/` e `https://www.komuniki.com.br/` retornam 200.
+- [ ] `https://kellyfarias.com.br/` e `https://www.kellyfarias.com.br/` redirecionam para `/news/`.
+- [ ] `/admin/` mostra "Bem vindo!" e nao mostra `kelly_sys`.

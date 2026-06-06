@@ -12,7 +12,7 @@ Crie um environment chamado `production`:
 - Deployment branches: apenas `master`.
 - Environment variables:
   - `VPS_HOST=2.25.178.16`
-  - `VPS_PORT=22`
+  - `VPS_PORT=2222`
   - `VPS_USER=deploy`
 - Environment secrets:
   - `VPS_SSH_PRIVATE_KEY`
@@ -49,6 +49,19 @@ visudo -cf /etc/sudoers.d/kellysys-deploy
 
 Nao adicione o usuario `deploy` ao grupo `docker`. A permissao de deploy deve
 passar apenas pelo comando permitido no sudoers.
+
+Para evitar bloqueios contra conexoes vindas de GitHub-hosted runners, mantenha
+o SSH humano na porta 22 e exponha uma porta alternativa para o deploy:
+
+```bash
+sed -i '/^#\?Port 22$/a Port 2222' /etc/ssh/sshd_config
+sshd -t
+systemctl restart ssh
+ufw allow 2222/tcp
+ufw reload
+```
+
+No firewall da Hostinger, libere tambem `TCP 2222` e sincronize as regras.
 
 Gere uma chave SSH exclusiva para o GitHub Actions em uma maquina local segura:
 
@@ -98,6 +111,9 @@ por exemplo:
 ```text
 2.25.178.16 ssh-ed25519 AAAA...
 ```
+
+O workflow usa `HostKeyAlias=2.25.178.16`, entao o mesmo secret continua valido
+mesmo quando `VPS_PORT=2222`.
 
 ## 4. Validacao
 

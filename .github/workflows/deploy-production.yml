@@ -101,12 +101,21 @@ jobs:
           VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           VPS_HOST_KEY: ${{ secrets.VPS_HOST_KEY }}
 
+      - name: Check SSH port reachability
+        run: |
+          if ! timeout 20 bash -c '</dev/tcp/"${VPS_HOST}"/"${VPS_PORT}"'; then
+            echo "::error::Cannot reach ${VPS_HOST}:${VPS_PORT}. Check Hostinger firewall, ufw and sshd ListenAddress/Port."
+            exit 1
+          fi
+
       - name: Run locked production deploy
         run: |
           ssh \
             -i ~/.ssh/id_ed25519 \
             -p "${VPS_PORT}" \
             -o BatchMode=yes \
+            -o ConnectTimeout=20 \
+            -o HostKeyAlias="${VPS_HOST}" \
             -o IdentitiesOnly=yes \
             -o StrictHostKeyChecking=yes \
             "${VPS_USER}@${VPS_HOST}" \

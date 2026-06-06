@@ -21,7 +21,7 @@ compose() {
     docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" "$@"
 }
 
-wait_for_status() {
+wait_for_http_status() {
     local host="$1"
     local path="$2"
     local expected="$3"
@@ -37,6 +37,32 @@ wait_for_status() {
     done
 
     fail "Healthcheck failed: ${host}${path} expected ${expected}, got ${status:-none}"
+}
+
+wait_for_https_status() {
+    local host="$1"
+    local path="$2"
+    local expected="$3"
+    local status
+
+    for _ in $(seq 1 30); do
+        status="$(
+            curl \
+                -sS \
+                -o /dev/null \
+                -w '%{http_code}' \
+                --max-time 5 \
+                --resolve "${host}:443:127.0.0.1" \
+                "https://${host}${path}" || true
+        )"
+        if [[ ",${expected}," == *",${status},"* ]]; then
+            log "Healthcheck OK: https://${host}${path} -> ${status}"
+            return 0
+        fi
+        sleep 2
+    done
+
+    fail "Healthcheck failed: https://${host}${path} expected ${expected}, got ${status:-none}"
 }
 
 exec 9>"${LOCK_FILE}"
@@ -81,11 +107,13 @@ compose exec -T nginx nginx -t
 compose restart nginx
 
 log "Running healthchecks"
-wait_for_status "komuniki.com.br" "/healthz/" "200"
-wait_for_status "www.komuniki.com.br" "/healthz/" "200"
-wait_for_status "kellyfarias.com.br" "/news/" "200,301,302"
-wait_for_status "www.kellyfarias.com.br" "/news/" "200,301,302"
-wait_for_status "kellyfarias.com.br" "/" "301,302"
-wait_for_status "www.kellyfarias.com.br" "/" "301,302"
+wait_for_http_status "komuniki.com.br" "/healthz/" "301,302"
+wait_for_http_status "www.komuniki.com.br" "/healthz/" "301,302"
+wait_for_https_status "komuniki.com.br" "/healthz/" "200"
+wait_for_https_status "www.komuniki.com.br" "/healthz/" "200"
+wait_for_https_status "kellyfarias.com.br" "/news/" "200,301,302"
+wait_for_https_status "www.kellyfarias.com.br" "/news/" "200,301,302"
+wait_for_https_status "kellyfarias.com.br" "/" "301,302"
+wait_for_https_status "www.kellyfarias.com.br" "/" "301,302"
 
 log "Deploy completed successfully"

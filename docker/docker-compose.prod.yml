@@ -3,7 +3,10 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 2 --access-logfile - --error-logfile -
+    # --max-requests/-jitter: cada worker é reciclado a ~1000±200 requests, devolvendo
+    # memória ao SO e impedindo o crescimento monotônico de RSS (causa nº 1 de "memória
+    # sempre subindo" em gunicorn). --workers: usar (2×núcleos)+1; em 1 vCPU = 3.
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --threads 2 --max-requests 1000 --max-requests-jitter 200 --access-logfile - --error-logfile -
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
@@ -17,6 +20,13 @@ services:
       db:
         condition: service_healthy
     restart: always
+    # Teto de memória = rede de segurança: se algo crescer, o container é morto e
+    # reiniciado em vez de derrubar a VPS inteira por OOM. Aplicado ao recriar o web.
+    # cpus omitido de propósito: em 1 vCPU um teto rígido de CPU estrangularia o web.
+    deploy:
+      resources:
+        limits:
+          memory: 1500M
 
   db:
     image: postgres:16-alpine
@@ -30,6 +40,10 @@ services:
       timeout: 5s
       retries: 5
     restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
 
   nginx:
     image: nginx:alpine
@@ -45,6 +59,10 @@ services:
     depends_on:
       - web
     restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 128M
 
   certbot:
     image: certbot/certbot:latest

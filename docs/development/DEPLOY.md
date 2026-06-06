@@ -100,3 +100,10 @@ Para automatizar o envio de newsletters pendentes do portal de notícias:
 ```bash
 */5 * * * * docker compose -f /opt/news_portal/docker/docker-compose.prod.yml exec -T web python manage.py send_pending_newsletters --batch-size 100
 ```
+
+Para expurgar sessões expiradas (a tabela `django_session` cresce a cada visitante, inclusive anônimo; sem limpeza ela incha e pressiona CPU/memória do Postgres ao longo do tempo):
+```bash
+@daily docker compose -p kellysys -f /opt/kelly_sys/docker/docker-compose.prod.yml exec -T web python manage.py clearsessions
+```
+
+> **Caminhos canônicos:** os scripts em `scripts/deploy/` usam `/opt/kelly_sys` e o projeto compose `-p kellysys` — são a fonte da verdade. Onde este guia ainda mostra `/opt/news_portal`, prefira os valores dos scripts. Faça uma limpeza única agora executando o comando de `clearsessions` uma vez e, em seguida, rode `ANALYZE django_session;` no Postgres para atualizar as estatísticas do planejador.

@@ -53,7 +53,7 @@ After=docker.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/sbin/kellysys-maintenance
+ExecStart=/usr/bin/env bash /usr/local/sbin/kellysys-maintenance
 EOF
 
 sudo tee /etc/systemd/system/kellysys-maintenance.timer >/dev/null <<'EOF'
@@ -85,4 +85,20 @@ systemctl status kellysys-maintenance.timer --no-pager
 journalctl -u kellysys-maintenance.service -n 80 --no-pager
 curl -sI https://komuniki.com.br/ | head
 curl -sI https://kellyfarias.com.br/news/ | head
+```
+
+## Erro 203/EXEC no timer
+
+`status=203/EXEC` significa que o systemd nao conseguiu executar o comando do
+unit file. Reinstale o script e force LF antes de reiniciar o servico:
+
+```bash
+cd /opt/kelly_sys
+sudo install -o root -g root -m 0755 scripts/deploy/kellysys-maintenance /usr/local/sbin/kellysys-maintenance
+sudo sed -i 's/\r$//' /usr/local/sbin/kellysys-maintenance
+sudo sed -i 's#^ExecStart=.*#ExecStart=/usr/bin/env bash /usr/local/sbin/kellysys-maintenance#' /etc/systemd/system/kellysys-maintenance.service
+sudo systemctl daemon-reload
+sudo systemctl reset-failed kellysys-maintenance.service
+sudo systemctl start kellysys-maintenance.service
+journalctl -u kellysys-maintenance.service -n 80 --no-pager
 ```

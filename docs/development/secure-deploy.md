@@ -87,7 +87,7 @@ After=docker.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/sbin/kellysys-maintenance
+ExecStart=/usr/bin/env bash /usr/local/sbin/kellysys-maintenance
 EOF
 
 cat >/etc/systemd/system/kellysys-maintenance.timer <<'EOF'

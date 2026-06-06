@@ -47,7 +47,16 @@ Passos para colocar o projeto em producao com seguranca. Itens marcados como
 - [ ] Ativar `kellysys-approved-deploy.timer` para a VPS buscar a tag `production-approved`.
 - [ ] Rodar o workflow `Deploy Production` manualmente em `master`.
 
-## 6. Verificacao final
+## 6. Cloudflare anti-bot
+
+- [ ] Camada Turnstile: criar widget no Cloudflare e preencher
+      `CLOUDFLARE_TURNSTILE_SITE_KEY`/`SECRET_KEY` no `.env.prod`; recriar o `web`.
+- [ ] **[dominio]** Camada de borda: ativar proxy (nuvem laranja), SSL **Full (strict)** e **Bot Fight Mode**.
+- [ ] Travar o firewall as faixas Cloudflare: `sudo scripts/deploy/cloudflare-firewall.sh` (preserve o SSH).
+- [ ] Validar: forms enviam, IP real nos logs, origem fechada a nao-Cloudflare.
+- [ ] Runbook completo: `docs/development/cloudflare-bots.md`.
+
+## 7. Verificacao final
 
 - [ ] `docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py check --deploy`.
 - [ ] `docker compose -p kellysys -f docker/docker-compose.prod.yml up -d`.

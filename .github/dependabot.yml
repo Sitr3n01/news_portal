@@ -1,0 +1,25 @@
+# Monitoramento de supply-chain: alerta e abre PRs para dependências
+# desatualizadas ou vulneráveis. Cobre o Python (requirements/) e as GitHub
+# Actions (que hoje são pinadas por SHA — Dependabot mantém o SHA atualizado).
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/requirements"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "deps"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "ci"

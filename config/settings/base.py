@@ -486,6 +486,8 @@ CONTENT_SECURITY_POLICY = {
         'base-uri': [SELF],
         'form-action': [SELF],
         'object-src': [NONE],
+        # Anti-clickjacking moderno — complementa X-Frame-Options: DENY (legado).
+        'frame-ancestors': [NONE],
     },
 }
 

@@ -6,6 +6,22 @@ x-logging: &default-logging
     compress: "true"
 
 services:
+  # ── Init: corrige o dono dos volumes nomeados ────────────────────────────────
+  # Volumes nomeados sobem como root:root quando criados vazios — o caminho não existe
+  # na imagem (o .dockerignore exclui media/ e staticfiles/, que "vêm de volumes"). Como
+  # o web roda como appuser (UID 1000), ele não conseguia escrever uploads em /app/media
+  # → PermissionError → HTTP 500 ao criar/alterar imagens no admin. Este init roda ANTES
+  # do web (idempotente, a cada `up`), conserta o dono e encerra — mantendo o web 100%
+  # não-root. O -R cura também subpastas que tenham ficado como root num deploy anterior.
+  init-volumes:
+    image: alpine:3.20
+    command: chown -R 1000:1000 /app/media /app/staticfiles
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    restart: "no"
+    logging: *default-logging
+
   web:
     build:
       context: ..
@@ -28,6 +44,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      init-volumes:
+        condition: service_completed_successfully
     restart: always
     logging: *default-logging
     # Teto de memória = rede de segurança: se algo crescer, o container é morto e

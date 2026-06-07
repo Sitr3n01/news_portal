@@ -71,7 +71,11 @@ def register_view(request):
                     defaults={'is_active': True},
                 )
 
-            login(request, user)
+            # backend explícito: o projeto tem múltiplos AUTHENTICATION_BACKENDS
+            # (axes + ModelBackend, em base.py), então login() não consegue inferir o
+            # backend de um usuário recém-criado (não veio de authenticate()). Sem
+            # isto, login() levanta ValueError e o cadastro retorna HTTP 500.
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('news:list')
     else:
         initial = {}

@@ -1,0 +1,35 @@
+{# Bloco de embed (YouTube/Instagram/TikTok) com facade clique-para-carregar.
+   O iframe só é injetado no clique (performance + privacidade: sem cookies de
+   terceiros antes da interação). Os domínios estão liberados no CSP frame-src. #}
+{% with e=block.embed %}
+{% if e %}
+<figure class="article-block-embed embed-{{ e.provider }}" x-data="{ loaded: false }">
+    <div class="embed-frame" style="aspect-ratio: {{ e.aspect }};">
+        <template x-if="!loaded">
+            <button type="button" @click="loaded = true" class="embed-facade group"
+                    :aria-label="t('Carregar vídeo do {{ e.provider_label }}', 'Load {{ e.provider_label }} video')">
+                {% if e.thumbnail_url %}
+                <img src="{{ e.thumbnail_url }}" alt="" loading="lazy" class="embed-thumb">
+                {% else %}
+                <span class="embed-thumb embed-placeholder embed-placeholder-{{ e.provider }}"></span>
+                {% endif %}
+                <span class="embed-overlay">
+                    <span class="embed-play">
+                        <span class="material-symbols-outlined">play_arrow</span>
+                    </span>
+                    <span class="embed-label">{{ e.provider_label }}</span>
+                </span>
+            </button>
+        </template>
+        <template x-if="loaded">
+            <iframe src="{{ e.embed_url }}?autoplay=1" loading="lazy" allowfullscreen
+                    allow="autoplay; encrypted-media; picture-in-picture; clipboard-write; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" class="embed-iframe"></iframe>
+        </template>
+    </div>
+    {% if block.caption %}
+    <figcaption>{{ block.caption }}</figcaption>
+    {% endif %}
+</figure>
+{% endif %}
+{% endwith %}

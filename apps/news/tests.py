@@ -1,12 +1,18 @@
+from io import BytesIO
+
 import pytest
 from django.contrib.sites.models import Site
 from django.core import mail
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.urls import reverse
+from PIL import Image
 
 from apps.common import turnstile
+from apps.common.validators import ARTICLE_IMAGE_MAX_WIDTH
+from apps.media_library.models import MediaFile
 from apps.news.admin import _csv_safe
-from apps.news.models import Article, NewsletterDelivery, NewsletterSubscription
+from apps.news.models import Article, ArticleBlock, NewsletterDelivery, NewsletterSubscription
 from apps.news.newsletter import make_unsubscribe_token
 
 
@@ -31,6 +37,56 @@ def make_article(site, slug='artigo', status=Article.Status.PUBLISHED):
 
 def mock_turnstile(monkeypatch, *, valid=True):
     monkeypatch.setattr(turnstile, 'verify_turnstile', lambda token, remote_ip='': valid and token == 'valid-token')
+
+
+def make_image_upload(name='capa.png', size=(2400, 1200), fmt='PNG'):
+    """Gera um upload de imagem real (Pillow) para os testes de capa."""
+    buf = BytesIO()
+    Image.new('RGB', size, (30, 90, 180)).save(buf, format=fmt)
+    buf.seek(0)
+    return SimpleUploadedFile(name, buf.read(), content_type=f'image/{fmt.lower()}')
+
+
+# ── Capa de artigo: mesma higiene do avatar (ProcessedImageField) ────────────
+
+@pytest.mark.django_db
+def test_article_featured_image_stored_as_optimized_jpeg(settings, tmp_path):
+    settings.MEDIA_ROOT = str(tmp_path)
+    site = make_site()
+
+    article = Article.objects.create(
+        title='Artigo com capa',
+        slug='com-capa',
+        content='Conteúdo.',
+        site=site,
+        featured_image=make_image_upload('capa.png', size=(2400, 1200)),
+    )
+
+    assert article.featured_image.name.endswith('.jpg')
+    with Image.open(article.featured_image.path) as img:
+        assert img.format == 'JPEG'
+        # 2400×1200 (2:1) cabe em 1600×1600 → 1600×800, sem distorcer nem cortar.
+        assert img.width == ARTICLE_IMAGE_MAX_WIDTH
+        assert img.height == 800
+
+
+@pytest.mark.django_db
+def test_article_featured_image_rejects_non_image(settings, tmp_path):
+    from django.core.exceptions import ValidationError
+
+    settings.MEDIA_ROOT = str(tmp_path)
+    site = make_site()
+    article = Article(
+        title='Artigo ruim',
+        slug='artigo-ruim',
+        content='Conteúdo.',
+        site=site,
+        featured_image=SimpleUploadedFile('fake.jpg', b'isto nao e imagem', content_type='image/jpeg'),
+    )
+
+    # O validador centralizado está plugado no campo: full_clean deve rejeitar.
+    with pytest.raises(ValidationError):
+        article.full_clean()
 
 
 @pytest.mark.django_db
@@ -237,3 +293,115 @@ def test_send_pending_newsletters_ignores_unpublished_articles():
 
     assert len(mail.outbox) == 0
     assert NewsletterDelivery.objects.count() == 0
+
+
+# ── Blocos de conteúdo do artigo ─────────────────────────────────────────────
+
+def make_image_media(name='inline.jpg'):
+    return MediaFile.objects.create(
+        title='Inline',
+        file=make_image_upload(name, size=(800, 600), fmt='JPEG'),
+        file_type='image',
+        alt_text='alt',
+    )
+
+
+@pytest.mark.django_db
+def test_blocks_rebuild_content_cache_and_reading_time():
+    site = make_site()
+    art = make_article(site, slug='cache')
+
+    ArticleBlock.objects.create(article=art, order=0, block_type=ArticleBlock.BlockType.RICH_TEXT, rich_text='<p>uma duas tres quatro cinco seis</p>')
+    ArticleBlock.objects.create(article=art, order=1, block_type=ArticleBlock.BlockType.IMAGE, caption='legenda da foto')
+
+    art.refresh_from_db()
+    assert 'uma duas tres' in art.content
+    assert 'legenda da foto' in art.content  # legenda entra no cache de busca
+    assert art.reading_time >= 1
+
+
+@pytest.mark.django_db
+def test_block_delete_updates_content_cache():
+    site = make_site()
+    art = make_article(site, slug='cache-del')
+    ArticleBlock.objects.create(article=art, order=0, block_type=ArticleBlock.BlockType.RICH_TEXT, rich_text='<p>permanece</p>')
+    removido = ArticleBlock.objects.create(article=art, order=1, block_type=ArticleBlock.BlockType.RICH_TEXT, rich_text='<p>removido</p>')
+
+    removido.delete()
+
+    art.refresh_from_db()
+    assert 'permanece' in art.content
+    assert 'removido' not in art.content
+
+
+@pytest.mark.django_db
+def test_embed_block_resolves_provider_on_save():
+    site = make_site()
+    art = make_article(site, slug='emb')
+
+    block = ArticleBlock.objects.create(
+        article=art, order=0,
+        block_type=ArticleBlock.BlockType.EMBED,
+        embed_url='https://youtu.be/dQw4w9WgXcQ',
+    )
+
+    assert block.embed_provider == 'youtube'
+    assert block.embed_id == 'dQw4w9WgXcQ'
+    assert block.embed.embed_url == 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ'
+
+
+@pytest.mark.django_db
+def test_embed_block_blank_for_unrecognized_url():
+    site = make_site()
+    art = make_article(site, slug='emb-bad')
+
+    block = ArticleBlock.objects.create(
+        article=art, order=0,
+        block_type=ArticleBlock.BlockType.EMBED,
+        embed_url='https://example.com/qualquer',
+    )
+
+    assert block.embed_provider == ''
+    assert block.embed is None
+
+
+@pytest.mark.django_db
+def test_article_detail_renders_blocks(client, settings, tmp_path):
+    settings.MEDIA_ROOT = str(tmp_path)
+    site = make_site(pk=settings.SITE_ID, domain='testserver')
+    art = make_article(site, slug='render-blocks', status=Article.Status.PUBLISHED)
+    media = make_image_media()
+    ArticleBlock.objects.create(article=art, order=0, block_type=ArticleBlock.BlockType.RICH_TEXT, rich_text='<p>Texto do bloco</p>')
+    ArticleBlock.objects.create(article=art, order=1, block_type=ArticleBlock.BlockType.IMAGE, media=media, caption='Foto')
+    ArticleBlock.objects.create(article=art, order=2, block_type=ArticleBlock.BlockType.EMBED, embed_url='https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+
+    response = client.get(reverse('news:article_detail', args=['render-blocks']))
+    html = response.content.decode()
+
+    assert response.status_code == 200
+    assert 'Texto do bloco' in html          # bloco de texto
+    assert media.file.url in html            # imagem inline da biblioteca
+    assert 'embed-youtube' in html           # facade do embed
+    assert 'embed-facade' in html            # botão clique-para-carregar
+
+
+@pytest.mark.django_db
+def test_article_detail_falls_back_to_content_without_blocks(client, settings):
+    site = make_site(pk=settings.SITE_ID, domain='testserver')
+    art = make_article(site, slug='legacy', status=Article.Status.PUBLISHED)
+    assert not art.blocks.exists()
+
+    response = client.get(reverse('news:article_detail', args=['legacy']))
+
+    assert response.status_code == 200
+    assert 'Conteúdo do artigo' in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_csp_allows_instagram_and_tiktok_frames(client):
+    response = client.get(reverse('news:list'))
+    csp = response.headers.get('Content-Security-Policy', '')
+
+    assert 'https://www.instagram.com' in csp
+    assert 'https://www.tiktok.com' in csp
+    assert 'https://www.youtube-nocookie.com' in csp  # YouTube segue permitido

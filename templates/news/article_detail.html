@@ -154,6 +154,29 @@
             font-size: 3.75rem;
         }
     }
+
+    /* ── Inline blocks: images & social embeds ── */
+    .article-body figure { margin: 2.5rem 0; }
+    .article-body figure img { width: 100%; border-radius: 0.75rem; display: block; }
+    .article-body figcaption { margin-top: 0.75rem; text-align: center; font-size: 0.875rem; line-height: 1.5; color: #64748b; }
+    .dark .article-body figcaption { color: #94a3b8; }
+
+    .article-body .embed-frame { position: relative; width: 100%; overflow: hidden; border-radius: 0.75rem; background: #0f172a; }
+    .article-body .embed-facade { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; border: 0; padding: 0; background: transparent; }
+    .article-body .embed-thumb { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .article-body .embed-placeholder-instagram { background: linear-gradient(135deg, #7c3aed, #ec4899, #f59e0b); }
+    .article-body .embed-placeholder-tiktok { background: linear-gradient(135deg, #0f172a, #334155); }
+    .article-body .embed-placeholder-youtube { background: linear-gradient(135deg, #1e293b, #0f172a); }
+    .article-body .embed-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; color: #fff; background: rgba(0,0,0,0.15); transition: background 0.2s; }
+    .article-body .embed-facade:hover .embed-overlay { background: rgba(0,0,0,0.30); }
+    .article-body .embed-play { display: flex; align-items: center; justify-content: center; width: 4rem; height: 4rem; border-radius: 9999px; background: rgba(255,255,255,0.92); color: #0f172a; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.6); transition: transform 0.2s; }
+    .article-body .embed-facade:hover .embed-play { transform: scale(1.08); }
+    .article-body .embed-play .material-symbols-outlined { font-size: 32px; }
+    .article-body .embed-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+    .article-body .embed-iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+    /* Vertical formats (Reels/TikTok) shouldn't dominate the column on desktop */
+    .article-body .embed-instagram, .article-body .embed-tiktok { max-width: 28rem; margin-left: auto; margin-right: auto; }
 </style>
 {% endblock %}
 
@@ -276,9 +299,9 @@
                 </div>
             </div>
 
-            <!-- Article Body -->
+            <!-- Article Body (structured content blocks) -->
             <div class="article-body font-display">
-                {{ article.content|sanitize_html }}
+                {% for block in article.blocks.all %}{% include block.partial_template %}{% empty %}{{ article.content|sanitize_html }}{% endfor %}
             </div>
 
             <!-- Article Footer -->

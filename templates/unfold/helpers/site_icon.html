@@ -1,0 +1,19 @@
+{% load i18n %}
+
+{% comment %}
+   Override do projeto: remove o ícone (engrenagem padrão do Unfold, exibido
+   quando SITE_ICON é None) do cabeçalho da sidebar, deixando apenas o nome do
+   site ("Olá!"). Mantemos só o bloco de texto do branding do template original.
+{% endcomment %}
+
+<div class="flex flex-col grow justify-center min-w-0">
+    <div class="text-important tracking-tight *:truncate {% if site_subheader %}xl:text-sm{% else %}xl:text-base{% endif %}">
+        {{ branding }}
+    </div>
+
+    {% if site_subheader %}
+        <div class="font-normal text-subtle text-xs truncate">
+            {{ site_subheader }}
+        </div>
+    {% endif %}
+</div>

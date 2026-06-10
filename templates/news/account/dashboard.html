@@ -244,6 +244,72 @@
                 <h2 class="text-2xl font-bold text-slate-900 dark:text-white" x-text="t('Configurações', 'Settings')">
                     Configurações</h2>
 
+                <!-- Foto de Perfil -->
+                <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
+                    x-data="{ preview: '', fileName: '' }">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[20px] text-slate-400">account_circle</span>
+                        <span x-text="t('Foto de Perfil', 'Profile Photo')">Foto de Perfil</span>
+                    </h3>
+
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-6">
+                        <!-- Preview instantâneo (data: URL) ou foto atual -->
+                        <div class="flex-shrink-0">
+                            <template x-if="preview">
+                                <img :src="preview" alt=""
+                                    class="w-24 h-24 rounded-full object-cover ring-2 ring-primary/30">
+                            </template>
+                            <div x-show="!preview">
+                                {% include 'components/avatar.html' with user=request.user size='w-24 h-24' text='text-3xl' %}
+                            </div>
+                        </div>
+
+                        <!-- Form de envio -->
+                        <form action="{% url 'accounts:update_profile' %}" method="post"
+                            enctype="multipart/form-data" class="flex-grow space-y-4">
+                            {% csrf_token %}
+
+                            <!-- Seletor customizado: input nativo escondido (sr-only) + label estilizado -->
+                            <div class="flex flex-wrap items-center gap-3">
+                                <input type="file" name="avatar" id="avatar-input" accept="image/*" required
+                                    class="peer sr-only"
+                                    @change="const f = $event.target.files[0]; if (f) { fileName = f.name; const r = new FileReader(); r.onload = e => preview = e.target.result; r.readAsDataURL(f); }">
+                                <label for="avatar-input"
+                                    class="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg font-ui font-semibold text-sm border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-primary/50 peer-focus-visible:ring-2 peer-focus-visible:ring-primary/50 transition-all">
+                                    <span class="material-symbols-outlined text-[18px]">add_photo_alternate</span>
+                                    <span x-text="t('Enviar foto', 'Upload photo')">Enviar foto</span>
+                                </label>
+                                <span class="text-sm text-slate-500 dark:text-slate-400 font-ui truncate max-w-[200px]"
+                                    x-text="fileName || t('Nenhum arquivo selecionado', 'No file selected')">Nenhum arquivo selecionado</span>
+                            </div>
+
+                            <p class="text-xs text-slate-400 font-ui"
+                                x-text="t('JPG, PNG ou WebP, até 5 MB. A foto é recortada em quadrado e otimizada automaticamente.', 'JPG, PNG or WebP, up to 5 MB. The photo is cropped to a square and optimized automatically.')">
+                                JPG, PNG ou WebP, até 5 MB.</p>
+
+                            <button type="submit" :disabled="!fileName"
+                                class="px-4 py-2 rounded-lg font-ui font-semibold text-sm bg-primary text-white hover:bg-primary-600 transition-all inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span class="material-symbols-outlined text-[18px]">check</span>
+                                <span x-text="t('Salvar', 'Save')">Salvar</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    {% if request.user.avatar %}
+                    <form action="{% url 'accounts:update_profile' %}" method="post"
+                        class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="remove">
+                        <button type="submit"
+                            onclick="return confirm('Remover sua foto de perfil?')"
+                            class="text-xs font-ui font-semibold text-red-500 hover:text-red-700 transition-colors inline-flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[16px]">delete</span>
+                            <span x-text="t('Remover foto atual', 'Remove current photo')">Remover foto atual</span>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+
                 <!-- Account Info -->
                 <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                     <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">

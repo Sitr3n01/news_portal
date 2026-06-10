@@ -3,11 +3,11 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.text import format_lazy
-from unfold.admin import ModelAdmin
+from unfold.admin import ModelAdmin, StackedInline
 
 from apps.common.admin_mixins import AdminUXMixin, SuperuserOnlyAdminMixin
 
-from .models import Article, ArticleBookmark, ArticleLike, Category, Comment, NewsletterDelivery, NewsletterSubscription, Tag
+from .models import Article, ArticleBlock, ArticleBookmark, ArticleLike, Category, Comment, NewsletterDelivery, NewsletterSubscription, Tag
 
 
 def _csv_safe(value):
@@ -104,8 +104,34 @@ class TagAdmin(AdminUXMixin, ModelAdmin):
     ]
 
 
+class ArticleBlockInline(StackedInline):
+    """Blocos que formam o corpo do artigo (texto, imagem, vídeo/post).
+
+    O JS article_blocks.js mostra só os campos do tipo escolhido, deixando a
+    edição amigável (sem HTML cru e sem campos irrelevantes na tela).
+    """
+    model = ArticleBlock
+    extra = 0
+    autocomplete_fields = ['media']
+    ordering = ['order']
+    fieldsets = [
+        (None, {
+            'fields': ('block_type', 'order'),
+            'description': 'Escolha o tipo do bloco. Só os campos desse tipo aparecem abaixo.',
+        }),
+        ('Texto', {'fields': ('rich_text',), 'classes': ('block-fields', 'block-fields-rich_text')}),
+        ('Imagem', {'fields': ('media',), 'classes': ('block-fields', 'block-fields-image')}),
+        ('Vídeo / Post', {'fields': ('embed_url',), 'classes': ('block-fields', 'block-fields-embed')}),
+        ('Legenda', {'fields': ('caption',), 'classes': ('block-fields', 'block-fields-caption')}),
+    ]
+
+    class Media:
+        js = ('admin/js/article_blocks.js',)
+
+
 @admin.register(Article)
 class ArticleAdmin(AdminUXMixin, ModelAdmin):
+    inlines = [ArticleBlockInline]
     list_display = [
         'title', 'category', 'status', 'published_at',
         'is_featured', 'view_count', 'newsletter_status', 'newsletter_preview_link',
@@ -149,8 +175,8 @@ class ArticleAdmin(AdminUXMixin, ModelAdmin):
     ]
     fieldsets = [
         ('Conteúdo', {
-            'fields': ('title', 'slug', 'excerpt', 'content'),
-            'description': 'Preencha o título e o conteúdo do artigo. O campo URL amigável é gerado automaticamente.',
+            'fields': ('title', 'slug', 'excerpt'),
+            'description': 'Título e resumo. O corpo do artigo é montado nos blocos de conteúdo (abaixo do formulário).',
             'classes': ('tab',),
         }),
         ('Mídia', {

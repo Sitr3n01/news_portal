@@ -8,8 +8,8 @@
     <div class="hero-impact-sheet sticky top-20 z-10 flex min-h-[calc(100svh-5rem)] items-center">
         <div class="mx-auto w-full max-w-7xl min-[1600px]:max-w-[110rem] px-4 py-12 sm:px-6 lg:px-8">
             <div class="fade-in mx-auto flex max-w-7xl min-[1600px]:max-w-[110rem] flex-col justify-center rounded-[2.5rem] p-7 sm:p-10 md:min-h-[56vh] md:p-14">
-                <span class="liquid-chip inline-flex items-center gap-2 self-start rounded-full !border-0 px-4 py-2 text-sm font-bold text-primary-800">
-                    <span class="h-2 w-2 rounded-full bg-primary-600"></span>
+                <span class="inline-flex items-start gap-2 self-start text-sm font-bold text-primary-800">
+                    <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary-600"></span>
                     <span x-text="t('{{ home_config.hero_badge|escapejs }}', '{{ home_config.hero_badge_en|default:home_config.hero_badge|escapejs }}')">{{ home_config.hero_badge }}</span>
                 </span>
                 <h1 class="mt-8 max-w-5xl font-display text-5xl font-extrabold leading-[0.98] tracking-tight text-slate-950 md:text-7xl lg:text-8xl"
@@ -47,33 +47,33 @@
         <div class="scroll-glass-sheet mx-auto grid max-w-7xl min-[1600px]:max-w-[110rem] gap-10 rounded-[2.5rem] p-7 sm:p-9 md:min-h-[56vh] lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:p-12"
             data-scroll-sheet>
             <div class="order-2 lg:order-1">
-                <div class="liquid-card jump-lift rounded-[1.75rem] p-6">
-                    <p class="font-display text-lg font-bold leading-relaxed text-slate-950"
-                        x-text="t('Metodologia Comunicação Destravada criada em 2015 por Kelly Farias foi premiada em 2024 com o Prêmio Paulo Freire de Educação pela Câmara Legislativa do Distrito Federal', 'The Comunicação Destravada methodology, created in 2015 by Kelly Farias, received the 2024 Paulo Freire Education Award from the Legislative Chamber of the Federal District')">Metodologia Comunicação Destravada criada em 2015 por Kelly Farias foi premiada em 2024 com o Prêmio Paulo Freire de Educação pela Câmara Legislativa do Distrito Federal</p>
-                </div>
+                <article class="award-card" aria-labelledby="award-card-title">
+                    <div class="award-header">
+                        <span class="award-icon" aria-hidden="true">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15.75a5.25 5.25 0 1 0 0-10.5 5.25 5.25 0 0 0 0 10.5Z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m9.25 14.6-.95 5.15L12 17.8l3.7 1.95-.95-5.15" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m10.35 10.4 1.1 1.1 2.25-2.45" />
+                            </svg>
+                        </span>
+                        <span class="award-label" x-text="t('RECONHECIMENTO', 'RECOGNITION')">RECONHECIMENTO</span>
+                    </div>
+                    <h3 id="award-card-title" class="award-title"
+                        x-text="t('Premiada com o Prêmio Paulo Freire de Educação 2024', 'Awarded the 2024 Paulo Freire Education Award')">Premiada com o Prêmio Paulo Freire de Educação 2024</h3>
+                    <div class="award-divider" aria-hidden="true"></div>
+                    <p class="award-text"
+                        x-text="t('A metodologia Comunicação Destravada, criada por Kelly Farias em 2015, foi reconhecida pela Câmara Legislativa do Distrito Federal.', 'The Comunicação Destravada methodology, created by Kelly Farias in 2015, was recognized by the Legislative Chamber of the Federal District.')">A metodologia Comunicação Destravada, criada por Kelly Farias em 2015, foi reconhecida pela Câmara Legislativa do Distrito Federal.</p>
+                </article>
             </div>
-            <div class="order-1 lg:order-2 lg:text-right">
+            <div class="order-1 lg:order-2 text-right">
                 <p class="text-sm font-bold uppercase text-primary-700"
                     x-text="t('{{ home_config.visual_eyebrow|escapejs }}', '{{ home_config.visual_eyebrow_en|default:home_config.visual_eyebrow|escapejs }}')">{{ home_config.visual_eyebrow }}</p>
                 <h2 class="mt-4 font-display text-4xl font-extrabold leading-tight tracking-tight text-slate-950 md:text-6xl"
                     x-text="t('{{ home_config.visual_title|escapejs }}', '{{ home_config.visual_title_en|default:home_config.visual_title|escapejs }}')">{{ home_config.visual_title }}</h2>
-                <p class="mt-5 max-w-xl text-lg leading-relaxed text-slate-600 lg:ml-auto"
+                <p class="mt-5 max-w-xl text-lg leading-relaxed text-slate-600 ml-auto"
                     x-text="t('{{ home_config.proposal_description|escapejs }}', '{{ home_config.proposal_description_en|default:home_config.proposal_description|escapejs }}')">{{ home_config.proposal_description }}</p>
             </div>
         </div>
-    </div>
-</section>
-
-<section class="liquid-section">
-    <div class="stagger-children mx-auto grid max-w-7xl gap-4 px-4 py-6 sm:px-6 md:grid-cols-3 lg:px-8">
-        {% for feature in trust_features %}
-        <div class="liquid-card jump-lift rounded-[1.75rem] p-6">
-            <p class="font-display text-lg font-bold text-slate-950"
-                x-text="t('{{ feature.title|escapejs }}', '{{ feature.title_en|default:feature.title|escapejs }}')">{{ feature.title }}</p>
-            <p class="mt-2 text-sm leading-relaxed text-slate-600"
-                x-text="t('{{ feature.description|escapejs }}', '{{ feature.description_en|default:feature.description|escapejs }}')">{{ feature.description }}</p>
-        </div>
-        {% endfor %}
     </div>
 </section>
 
@@ -88,6 +88,17 @@
                 x-text="t('{{ course_proposal_description|escapejs }}', '{{ course_proposal_description_en|default:course_proposal_description|escapejs }}')">
                 {{ course_proposal_description }}
             </p>
+        </div>
+
+        <div class="stagger-children mt-9 grid gap-4 md:grid-cols-3">
+            {% for feature in trust_features %}
+            <div class="liquid-card rounded-[1.75rem] p-6">
+                <p class="font-display text-lg font-bold text-slate-950"
+                    x-text="t('{{ feature.title|escapejs }}', '{{ feature.title_en|default:feature.title|escapejs }}')">{{ feature.title }}</p>
+                <p class="mt-2 text-sm leading-relaxed text-slate-600"
+                    x-text="t('{{ feature.description|escapejs }}', '{{ feature.description_en|default:feature.description|escapejs }}')">{{ feature.description }}</p>
+            </div>
+            {% endfor %}
         </div>
 
         <div class="stagger-children mt-11 grid gap-5 md:grid-cols-2 lg:grid-cols-3">

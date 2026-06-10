@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.contrib.sites.admin import SiteAdmin as DjangoSiteAdmin
 from django.contrib.sites.models import Site
 from django.urls import reverse_lazy
 from unfold.admin import ModelAdmin
@@ -8,33 +7,13 @@ from apps.common.admin_mixins import AdminUXMixin
 
 from .models import SiteExtension
 
+# O Sites Framework permanece ativo (contexto multi-site, domínio de e-mail), mas
+# não tem mais página no admin: domínios raramente mudam e a tela só confundia
+# usuários. Ajustes de domínio, quando necessários, são feitos via shell/migração.
 try:
     admin.site.unregister(Site)
 except admin.sites.NotRegistered:
     pass
-
-
-@admin.register(Site)
-class SiteDomainAdmin(AdminUXMixin, ModelAdmin, DjangoSiteAdmin):
-    ux_list_title = 'Domínios e sites'
-    ux_list_description = 'Cada site define o contexto de conteúdo dos portais. Altere domínios com cuidado para não misturar dados.'
-    ux_list_icon = 'language'
-    ux_list_actions = [
-        {'label': 'Guia de gerenciamento', 'icon': 'admin_panel_settings', 'url': reverse_lazy('admin_management_guide')},
-    ]
-    ux_empty_message = 'Nenhum site cadastrado. O projeto precisa de pelo menos um registro no Sites Framework.'
-    ux_form_title = 'Site e domínio'
-    ux_form_description = 'Use nome amigável para identificação interna e domínio conforme ambiente atual.'
-    ux_form_icon = 'language'
-    ux_form_steps = [
-        'Confirme o domínio usado pelo ambiente.',
-        'Use nome interno que ajude a equipe a reconhecer o portal.',
-        'Depois revise as configurações públicas do site correspondente.',
-    ]
-    ux_after_save_actions = [
-        {'label': 'Guia de gerenciamento', 'icon': 'admin_panel_settings', 'url': reverse_lazy('admin_management_guide')},
-        {'label': 'Configurações do site', 'icon': 'settings', 'url': reverse_lazy('admin:common_siteextension_changelist')},
-    ]
 
 
 @admin.register(SiteExtension)
@@ -54,8 +33,8 @@ class SiteExtensionAdmin(AdminUXMixin, ModelAdmin):
     ux_form_icon = 'settings'
     ux_form_steps = [
         'Confirme qual site está sendo configurado.',
+        'Defina o e-mail remetente da newsletter logo no topo.',
         'Revise marca, contatos e endereço público.',
-        'Defina remetente de newsletter amigável para leitores.',
     ]
     ux_after_save_actions = [
         {'label': 'Guia de gerenciamento', 'icon': 'admin_panel_settings', 'url': reverse_lazy('admin_management_guide')},
@@ -64,20 +43,22 @@ class SiteExtensionAdmin(AdminUXMixin, ModelAdmin):
     fieldsets = [
         ('Site', {
             'fields': ('site',),
+            'description': 'Portal ao qual estas configurações se aplicam.',
+        }),
+        ('Newsletter — e-mail remetente', {
+            'fields': ('newsletter_from_email', 'newsletter_from_name'),
+            'description': (
+                'E-mail e nome que aparecem como remetente das newsletters deste portal. '
+                'É este o endereço que os leitores veem ao receber os artigos. '
+                'O servidor SMTP (host, usuário e senha) continua no .env.prod e a '
+                'dashboard mostra se está pronto para envio.'
+            ),
         }),
         ('Identidade Visual', {
             'fields': ('tagline', 'logo', 'favicon'),
         }),
         ('Contato', {
             'fields': ('primary_email', 'phone_number', 'address'),
-        }),
-        ('Newsletter', {
-            'fields': ('newsletter_from_email', 'newsletter_from_name'),
-            'description': (
-                'Configure o remetente visível para o cliente. '
-                'Servidor SMTP, usuário e senha continuam no .env.prod e a dashboard '
-                'mostra se essas variáveis estão prontas para envio.'
-            ),
         }),
         ('Analytics e Redes Sociais', {
             'fields': ('google_analytics_id', 'facebook_url', 'instagram_url', 'youtube_url'),
@@ -91,6 +72,15 @@ class SiteExtensionAdmin(AdminUXMixin, ModelAdmin):
         return [
             ('Site', {
                 'fields': ('site',),
+                'description': 'Portal ao qual estas configurações se aplicam.',
+            }),
+            ('Newsletter — e-mail remetente', {
+                'fields': ('newsletter_from_email', 'newsletter_from_name'),
+                'description': (
+                    'E-mail e nome que aparecem como remetente das newsletters deste portal. '
+                    'É este o endereço que os leitores veem. '
+                    'O servidor SMTP continua no .env.prod.'
+                ),
             }),
             ('Identidade Visual', {
                 'fields': ('tagline', 'logo', 'favicon'),
@@ -98,14 +88,15 @@ class SiteExtensionAdmin(AdminUXMixin, ModelAdmin):
             ('Contato', {
                 'fields': ('primary_email', 'phone_number', 'address'),
             }),
-            ('Newsletter', {
-                'fields': ('newsletter_from_email', 'newsletter_from_name'),
-                'description': (
-                    'Configure o remetente visível para leitores. '
-                    'Servidor SMTP, usuário e senha continuam no .env.prod.'
-                ),
-            }),
         ]
+
+    def get_readonly_fields(self, request, obj=None):
+        """O site é fixo depois de criado: a configuração é 1-para-1 com o portal,
+        então editamos a linha existente em vez de reatribuir o site."""
+        readonly = list(super().get_readonly_fields(request, obj))
+        if obj is not None and 'site' not in readonly:
+            readonly.append('site')
+        return readonly
 
     @admin.display(description='Remetente Newsletter')
     def newsletter_sender(self, obj):

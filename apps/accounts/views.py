@@ -6,10 +6,10 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_POST
 
-from .forms import CustomUserCreationForm
+from .forms import CustomUserCreationForm, ProfileForm
 
 
 class CustomLoginView(LoginView):
@@ -103,6 +103,45 @@ def delete_account(request):
 
     messages.success(request, 'Sua conta foi excluída com sucesso.')
     return redirect('news:list')
+
+
+@login_required
+@require_POST
+def update_profile(request):
+    """Atualiza a foto de perfil do usuário (envio ou remoção).
+
+    Envio: valida via ProfileForm (validador do modelo) e, ao trocar, apaga o
+    arquivo anterior do disco para não deixar órfãos no volume de mídia.
+    """
+    user = request.user
+    dashboard = f"{reverse('news:user_dashboard')}?tab=settings"
+
+    # Remoção explícita: apaga o arquivo e limpa o campo.
+    if request.POST.get('action') == 'remove':
+        if user.avatar:
+            user.avatar.delete(save=True)
+            messages.success(request, 'Foto de perfil removida.')
+        return redirect(dashboard)
+
+    if 'avatar' not in request.FILES:
+        messages.error(request, 'Selecione uma imagem para enviar.')
+        return redirect(dashboard)
+
+    old_file = user.avatar or None
+    old_name = old_file.name if old_file else ''
+
+    form = ProfileForm(request.POST, request.FILES, instance=user)
+    if form.is_valid():
+        form.save()
+        # Higiene de disco: remove a foto anterior se o arquivo mudou.
+        if old_name and user.avatar.name != old_name:
+            old_file.storage.delete(old_name)
+        messages.success(request, 'Foto de perfil atualizada!')
+    else:
+        errors = form.errors.get('avatar')
+        messages.error(request, errors[0] if errors else 'Não foi possível atualizar a foto.')
+
+    return redirect(dashboard)
 
 
 @login_required

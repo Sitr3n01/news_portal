@@ -55,7 +55,7 @@ def article_list(request):
 def article_detail(request, slug):
     """Detalhe do artigo com artigos relacionados, comentarios e likes."""
     article = get_object_or_404(
-        Article.on_site.select_related('category', 'author').prefetch_related('tags'),
+        Article.on_site.select_related('category', 'author').prefetch_related('tags', 'blocks', 'blocks__media'),
         slug=slug,
         status=Article.Status.PUBLISHED,
     )

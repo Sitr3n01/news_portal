@@ -436,7 +436,6 @@ def management_guide(request):
                 'warning' if configured_sites < sites else 'success',
                 [
                     _action(user, 'Configurações dos sites', 'settings', 'admin:common_siteextension_changelist', 'common.view_siteextension', kind='primary'),
-                    _action(user, 'Domínios e sites', 'language', 'admin:sites_site_changelist', 'sites.view_site'),
                 ],
             ),
             _workflow(
@@ -468,7 +467,7 @@ def management_guide(request):
         ],
         'readiness': [
             _check('Grupos administrativos criados', groups >= 4, 'Perfis reduzem risco de permissões excessivas.', _admin_url('admin:auth_group_changelist') if _can(user, 'auth.view_group') else ''),
-            _check('Sites cadastrados', sites > 0, 'O Sites Framework define contexto dos portais.', _admin_url('admin:sites_site_changelist') if _can(user, 'sites.view_site') else ''),
+            _check('Sites cadastrados', sites > 0, 'O Sites Framework define contexto dos portais.', ''),
             _check(
                 'Contatos dos sites configurados',
                 configured_sites >= sites and sites > 0,
@@ -488,9 +487,8 @@ def management_guide(request):
                 _action(user, 'Usuários', 'manage_accounts', 'admin:accounts_customuser_changelist', 'accounts.view_customuser'),
                 _action(user, 'Grupos de permissões', 'badge', 'admin:auth_group_changelist', 'auth.view_group'),
             ]),
-            _resource_group('Sites e configuração', 'Identidade, domínios e remetentes.', [
+            _resource_group('Sites e configuração', 'Identidade e remetentes dos portais.', [
                 _action(user, 'Configurações dos sites', 'settings', 'admin:common_siteextension_changelist', 'common.view_siteextension'),
-                _action(user, 'Sites', 'language', 'admin:sites_site_changelist', 'sites.view_site'),
             ]),
             _resource_group('Mídia compartilhada', 'Arquivos reutilizáveis em páginas e artigos.', [
                 _action(user, 'Arquivos', 'perm_media', 'admin:media_library_mediafile_changelist', 'media_library.view_mediafile'),

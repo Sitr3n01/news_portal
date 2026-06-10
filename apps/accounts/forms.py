@@ -29,3 +29,12 @@ class CustomUserChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
         model = CustomUser
         fields = UserChangeForm.Meta.fields
+
+
+class ProfileForm(forms.ModelForm):
+    """Form público de edição do perfil. Hoje só a foto; o validador de imagem
+    vem do próprio campo do modelo (apps.common.validators)."""
+
+    class Meta:
+        model = CustomUser
+        fields = ('avatar',)

@@ -5,13 +5,7 @@ Context: comments (queryset), article
 <div id="comments-list" class="flex flex-col gap-8">
     {% for comment in comments %}
     <div id="comment-{{ comment.pk }}" class="flex gap-4">
-        <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex-shrink-0 flex items-center justify-center font-bold text-slate-500 text-sm">
-            {% if comment.user.avatar %}
-            <img src="{{ comment.user.avatar.url }}" alt="{{ comment.user.get_full_name|default:comment.user.username }}" class="w-full h-full rounded-full object-cover">
-            {% else %}
-            {{ comment.user.get_full_name|default:comment.user.username|first|upper }}
-            {% endif %}
-        </div>
+        {% include 'components/avatar.html' with user=comment.user size='w-10 h-10' bg='bg-slate-200 dark:bg-slate-700' fg='text-slate-500' %}
         <div class="flex-1">
             <div class="flex items-center gap-2 mb-1">
                 <span class="font-bold font-ui text-slate-900 dark:text-white text-sm">{{ comment.user.get_full_name|default:comment.user.username }}</span>

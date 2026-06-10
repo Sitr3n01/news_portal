@@ -1,0 +1,14 @@
+{% comment %}
+Avatar reutilizável — foto-ou-iniciais (fonte de verdade do visual de avatar).
+Params:
+  user  (obrigatório) — usuário com .avatar, .get_full_name, .username
+  size  — dimensões do container (default 'w-10 h-10')
+  text  — tamanho da fonte das iniciais (default 'text-sm')
+  bg    — fundo do placeholder (default 'bg-primary/20')
+  fg    — cor das iniciais (default 'text-primary')
+  extra — classes adicionais no container (ex.: 'shadow-sm')
+  alt   — texto alternativo da imagem (default: nome do usuário)
+{% endcomment %}
+<div class="{{ size|default:'w-10 h-10' }} {{ bg|default:'bg-primary/20' }} {{ fg|default:'text-primary' }} {{ text|default:'text-sm' }} {{ extra }} rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center font-bold">
+  {% if user.avatar %}<img src="{{ user.avatar.url }}" alt="{{ alt|default:user.get_full_name|default:user.username }}" class="w-full h-full object-cover" width="256" height="256" loading="lazy">{% else %}{{ user.get_full_name|default:user.username|first|upper }}{% endif %}
+</div>

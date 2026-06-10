@@ -1,0 +1,11 @@
+{# Bloco de imagem — usa o arquivo já otimizado da Biblioteca de Mídia. #}
+{% if block.media and block.media.file %}
+<figure class="article-block-image">
+    <img src="{{ block.media.file.url }}"
+         alt="{{ block.media.alt_text|default:block.caption|default:'' }}"
+         loading="lazy">
+    {% if block.caption %}
+    <figcaption>{{ block.caption }}</figcaption>
+    {% endif %}
+</figure>
+{% endif %}

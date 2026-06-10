@@ -1,0 +1,35 @@
+{% load i18n unfold %}
+
+{% comment %}
+   Override do projeto: acrescenta um backdrop ao drawer mobile.
+
+   O Unfold de fábrica abre a sidebar no mobile (hamburger em welcomemsg.html) mas
+   só oferece o "X" minúsculo do cabeçalho para fechar — e nenhum clique-fora. Aqui
+   adicionamos um fundo escuro que cobre a viewport e fecha o drawer ao toque,
+   resolvendo o "botão de fechar não funciona". Em telas xl+ o backdrop nunca
+   aparece (a navegação é fixa no desktop). O markup do drawer abaixo é o mesmo do
+   Unfold; só o backdrop é nosso.
+{% endcomment %}
+
+<div
+    x-show="sidebarMobileOpen"
+    x-on:click="sidebarMobileOpen = false"
+    x-transition.opacity
+    x-cloak
+    class="bg-base-900/60 fixed inset-0 z-50 xl:hidden!"
+    aria-hidden="true"
+></div>
+
+<div class="relative z-60">
+    <div class="fixed hidden xl:relative xl:block w-[288px] {% element_classes 'navigation_wrapper' %}" x-bind:class="{'xl:hidden!': !sidebarDesktopOpen, 'block!': sidebarMobileOpen}">
+        <div class="bg-base-50 relative z-30 dark:bg-base-900">
+            <div id="nav-sidebar" class="bg-base-50 border-r border-base-200 bottom-0 fixed max-h-screen top-0 w-[288px] dark:border-base-800 dark:bg-base-900 {% element_classes 'navigation' %}">
+                {% if templates.navigation %}
+                    {% include templates.navigation %}
+                {% else %}
+                    {% include "unfold/helpers/navigation.html" %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

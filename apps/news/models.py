@@ -231,8 +231,8 @@ class ArticleBlock(TimeStampedModel):
         return resolve_embed(self.embed_url)
 
     def save(self, *args, **kwargs):
-        from apps.common.sanitization import sanitize_content
         from apps.common.embeds import resolve_embed
+        from apps.common.sanitization import sanitize_content
 
         if self.block_type == self.BlockType.RICH_TEXT and self.rich_text:
             self.rich_text = sanitize_content(self.rich_text)

@@ -3,7 +3,6 @@ import pytest
 
 from apps.common.embeds import resolve_embed
 
-
 # ── YouTube ──────────────────────────────────────────────────────────────────
 
 @pytest.mark.parametrize('url', [

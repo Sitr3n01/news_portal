@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual do Portal de Notícias — Blog da Kelly</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8f9fa; color: #1a1a1a; line-height: 1.6; }
+  .hero { background: #0f1b2d; color: #fff; padding: 2.5rem 1.5rem; }
+  .hero-inner { max-width: 900px; margin: 0 auto; }
+  .hero .back { font-size: .85rem; color: rgba(255,255,255,.65); text-decoration: none; display: inline-block; margin-bottom: .75rem; }
+  .hero .back:hover { color: #fff; }
+  .hero h1 { font-size: 1.8rem; font-weight: 600; }
+  .hero p { opacity: .8; margin-top: .4rem; max-width: 600px; }
+  .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+  nav.toc { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 2.5rem; }
+  nav.toc h2 { font-size: .9rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .75rem; }
+  nav.toc ol { padding-left: 1.2rem; }
+  nav.toc li { margin: .35rem 0; }
+  nav.toc a { color: #1152d4; font-size: .9rem; text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  .section { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; }
+  .section-num { display: inline-block; width: 28px; height: 28px; background: #1152d4; color: #fff; border-radius: 50%; font-size: .8rem; font-weight: 700; line-height: 28px; text-align: center; margin-right: .6rem; flex-shrink: 0; }
+  .section h2 { display: flex; align-items: center; font-size: 1.15rem; font-weight: 600; color: #0f1b2d; margin-bottom: 1.25rem; padding-bottom: .75rem; border-bottom: 1px solid #f1f5f9; }
+  h3 { font-size: .95rem; font-weight: 600; color: #0f1b2d; margin: 1.25rem 0 .5rem; }
+  p { color: #444; font-size: .95rem; margin-bottom: .9rem; }
+  ol, ul { padding-left: 1.4rem; margin-bottom: .9rem; }
+  li { color: #444; font-size: .95rem; margin: .35rem 0; }
+  code { background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: .875rem; color: #374151; }
+  .data-table { width: 100%; border-collapse: collapse; margin: 1rem 0; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; }
+  .data-table th { background: #f8fafc; text-align: left; padding: .6rem 1rem; font-size: .8rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid #e2e8f0; }
+  .data-table td { padding: .65rem 1rem; border-bottom: 1px solid #f8fafc; font-size: .88rem; color: #374151; vertical-align: top; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .note { background: #f0fdf4; border-left: 4px solid #22c55e; padding: .9rem 1.1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: .88rem; color: #15803d; }
+  .warn { background: #fffbeb; border-left: 4px solid #f59e0b; padding: .9rem 1.1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: .88rem; color: #92400e; }
+  .info { background: #eff6ff; border-left: 4px solid #3b82f6; padding: .9rem 1.1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: .88rem; color: #1e40af; }
+  .step { display: flex; gap: .75rem; align-items: flex-start; margin: .6rem 0; }
+  .step-num { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; background: #1152d4; color: #fff; border-radius: 50%; font-size: .75rem; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .step p { margin: 0; }
+  .flow-box { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin: 1rem 0; }
+  .flow-step { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: .5rem .9rem; font-size: .85rem; color: #374151; font-weight: 500; }
+  .flow-arrow { color: #94a3b8; font-size: 1rem; }
+  footer { text-align: center; padding: 2rem; color: #aaa; font-size: .85rem; }
+  a { color: #1152d4; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <a href="index.html" class="back">&larr; Índice de documentação</a>
+    <h1>Manual do Portal de Notícias</h1>
+    <p>Blog da Kelly &mdash; Como publicar artigos, gerenciar newsletter e moderar comentários</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <nav class="toc">
+    <h2>Neste manual</h2>
+    <ol>
+      <li><a href="#s1">Publicar um artigo</a></li>
+      <li><a href="#s2">Categorias e tags</a></li>
+      <li><a href="#s3">Newsletter</a></li>
+      <li><a href="#s4">Comentários</a></li>
+      <li><a href="#s5">Biblioteca de mídia</a></li>
+      <li><a href="#s6">Usuários e acesso</a></li>
+      <li><a href="#s7">Perguntas frequentes</a></li>
+    </ol>
+  </nav>
+
+  <!-- SECTION 1 -->
+  <div class="section" id="s1">
+    <h2><span class="section-num">1</span>Publicar um artigo</h2>
+
+    <h3>1.1 Criar um novo artigo</h3>
+    <div class="step"><span class="step-num">1</span><p>Na barra lateral, clique em <strong>Blog da Kelly → Artigos → Adicionar Artigo</strong>.</p></div>
+
+    <h3>Campos obrigatórios</h3>
+    <table class="data-table">
+      <thead><tr><th>Campo</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td><code>Título</code></td><td>Cabeçalho principal da matéria (H1 na página)</td></tr>
+        <tr><td><code>URL amigável (slug)</code></td><td>Gerado automaticamente do título. Ex.: <code>minha-materia</code> → <code>kellyfarias.com.br/news/minha-materia/</code></td></tr>
+        <tr><td><code>Categoria</code></td><td>Seção principal (aparece no menu de navegação)</td></tr>
+        <tr><td><code>Autor</code></td><td>Usuário responsável pela matéria</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Campos opcionais</h3>
+    <table class="data-table">
+      <thead><tr><th>Campo</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td><code>Resumo</code></td><td>Texto curto exibido nas listagens e compartilhamentos</td></tr>
+        <tr><td><code>Imagem de capa</code></td><td>Redimensionada e otimizada automaticamente (JPEG, máx. 1200×800px)</td></tr>
+        <tr><td><code>Legenda da imagem</code></td><td>Texto exibido abaixo da imagem de capa</td></tr>
+        <tr><td><code>Tags</code></td><td>Palavras-chave livres. Digite para buscar ou criar.</td></tr>
+        <tr><td><code>Destaque</code></td><td>Marque para posição de destaque na home do portal</td></tr>
+        <tr><td><code>Título SEO</code></td><td>Como aparece no Google (máx. 70 caracteres). Se vazio, usa o título.</td></tr>
+        <tr><td><code>Descrição SEO</code></td><td>Descrição para buscadores (máx. 160 caracteres). Se vazia, usa o resumo.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Status do artigo</h3>
+    <table class="data-table">
+      <thead><tr><th>Status</th><th>Efeito</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Rascunho</strong></td><td>Salvo mas invisível no site público</td></tr>
+        <tr><td><strong>Publicado</strong></td><td>Visível no site. A data de publicação é marcada automaticamente na primeira vez que você salva com este status.</td></tr>
+        <tr><td><strong>Arquivado</strong></td><td>Remove o artigo do site sem excluir do banco</td></tr>
+      </tbody>
+    </table>
+
+    <h3>1.2 Blocos de conteúdo</h3>
+    <p>O corpo do artigo é composto por <strong>blocos ordenados</strong>, adicionados na seção "Blocos de conteúdo" dentro do formulário.</p>
+    <table class="data-table">
+      <thead><tr><th>Tipo de bloco</th><th>Para que serve</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Texto</strong></td><td>Parágrafos, subtítulos, listas, links, negrito/itálico.</td></tr>
+        <tr><td><strong>Imagem</strong></td><td>Imagem da Biblioteca de Mídia, com legenda opcional.</td></tr>
+        <tr><td><strong>Vídeo / Post</strong></td><td>Link de YouTube, Instagram ou TikTok. O embed é gerado automaticamente.</td></tr>
+      </tbody>
+    </table>
+    <div class="note">Use o campo <strong>Ordem</strong> para controlar a sequência. O campo <strong>Conteúdo</strong> do artigo é gerado automaticamente a partir dos blocos.</div>
+    <div class="info">O sistema sanitiza o HTML ao salvar e monta embeds a partir da URL, sem colar HTML cru no artigo.</div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section" id="s2">
+    <h2><span class="section-num">2</span>Categorias e tags</h2>
+
+    <h3>Categorias</h3>
+    <p>Organizam o portal em seções. Categorias-raiz (sem categoria pai) aparecem como abas no menu de navegação.</p>
+    <ol>
+      <li>Clique em <strong>Blog da Kelly → Categorias → Adicionar Categoria</strong>.</li>
+      <li>Preencha: <code>Nome</code>, <code>URL amigável</code>, <code>Descrição</code> (opcional), <code>Categoria pai</code> (opcional, para subcategorias) e <code>Ordem</code>.</li>
+      <li>Salve.</li>
+    </ol>
+
+    <h3>Tags</h3>
+    <p>Palavras-chave livres que criam páginas de arquivo automáticas para leitores navegarem.</p>
+    <ol>
+      <li>Clique em <strong>Blog da Kelly → Tags → Adicionar Tag</strong>.</li>
+      <li>Preencha <code>Nome</code> e <code>URL amigável</code>.</li>
+      <li>Para usar num artigo: no campo <code>Tags</code> do formulário do artigo, pesquise pela tag ou crie ali mesmo.</li>
+    </ol>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section" id="s3">
+    <h2><span class="section-num">3</span>Newsletter</h2>
+
+    <h3>Como funciona — duas etapas separadas</h3>
+    <div class="flow-box">
+      <div class="flow-step">1. Publicar artigo</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">Sistema registra como candidato</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">2. Disparar manualmente</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">E-mails saem para os inscritos</div>
+    </div>
+    <div class="warn">Publicar um artigo <strong>não envia o e-mail automaticamente</strong>. É necessário disparar manualmente pela ação do admin (ou um administrador técnico executa o comando de envio).</div>
+
+    <h3>3.1 Disparar a newsletter pelo admin</h3>
+    <ol>
+      <li>Clique em <strong>Blog da Kelly → Artigos</strong>.</li>
+      <li>Marque os artigos publicados que deseja enviar.</li>
+      <li>No menu <strong>Ação</strong>, selecione <strong>"Enviar Newsletter para inscritos"</strong> e clique em <strong>Executar</strong>.</li>
+      <li>Um resumo de resultado (<em>enviadas / falhas / ignoradas</em>) aparecerá na tela.</li>
+    </ol>
+    <div class="note">Esta ação pode ser executada mesmo em artigos já enviados anteriormente, permitindo reenvio pontual.</div>
+
+    <h3>3.2 Monitorar entregas</h3>
+    <p>Acesse <strong>Blog da Kelly → Entregas de Newsletter</strong>. Cada linha representa um par (artigo × inscrito):</p>
+    <table class="data-table">
+      <thead><tr><th>Campo</th><th>Significado</th></tr></thead>
+      <tbody>
+        <tr><td><code>Status</code></td><td><strong>Pendente</strong> (aguardando), <strong>Enviado</strong>, <strong>Falhou</strong>, <strong>Ignorado</strong> (inscrito inativo)</td></tr>
+        <tr><td><code>Tentativas</code></td><td>Quantas vezes o sistema tentou enviar</td></tr>
+        <tr><td><code>Último erro</code></td><td>Mensagem de erro detalhada, se houver falha</td></tr>
+        <tr><td><code>Enviado em</code></td><td>Horário de confirmação do envio bem-sucedido</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3.3 Gerenciar inscritos</h3>
+    <ol>
+      <li>Clique em <strong>Blog da Kelly → Newsletter</strong>.</li>
+      <li>Para cancelar manualmente: abra o registro e desmarque <code>Ativo</code>.</li>
+    </ol>
+
+    <h3>3.4 Pré-visualizar o e-mail</h3>
+    <p>Para ver como o e-mail ficará antes de enviar, acesse no navegador (requer login de staff):</p>
+    <p><code>seudominio.com.br/news/newsletter/preview/&lt;id-do-artigo&gt;/</code></p>
+
+    <h3>3.5 Configurar o remetente</h3>
+    <p>Se os e-mails saem com remetente genérico:</p>
+    <ol>
+      <li>Clique em <strong>Sistema → Configurações do Site</strong>.</li>
+      <li>Preencha <code>E-mail remetente da Newsletter</code> (ex.: <code>noticias@kellyfarias.com.br</code>) e <code>Nome remetente da Newsletter</code> (ex.: "Blog da Kelly").</li>
+      <li>Salve.</li>
+    </ol>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section" id="s4">
+    <h2><span class="section-num">4</span>Comentários</h2>
+    <p>Leitores registrados podem comentar nos artigos.</p>
+
+    <h3>Moderar comentários</h3>
+    <ol>
+      <li>Clique em <strong>Blog da Kelly → Comentários</strong>.</li>
+      <li>Para <strong>ocultar</strong> sem excluir: abra o registro, desmarque <code>Visível</code> e salve. O comentário desaparece do site mas permanece no banco.</li>
+      <li>Para <strong>excluir permanentemente</strong>: clique em <strong>Excluir</strong> na tela do comentário.</li>
+    </ol>
+    <div class="note">O autor do comentário pode excluir o próprio comentário diretamente na página do artigo no site. Comentários de outros usuários só são removidos por administradores no painel.</div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="section" id="s5">
+    <h2><span class="section-num">5</span>Biblioteca de mídia</h2>
+    <p>Repositório central de arquivos compartilhado entre os dois portais.</p>
+
+    <h3>Enviar um arquivo</h3>
+    <ol>
+      <li>Clique em <strong>Sistema → Biblioteca de Mídia → Adicionar Arquivo de Mídia</strong>.</li>
+      <li>Preencha: <code>Título</code> (nome descritivo), <code>Arquivo</code> (upload do computador), <code>Tipo de arquivo</code> (Imagem/Documento/Vídeo/Áudio/Outro), <code>Texto alternativo</code> (para imagens — acessibilidade e SEO) e <code>Pasta</code> (opcional).</li>
+      <li>Salve.</li>
+    </ol>
+
+    <h3>Organizar em pastas</h3>
+    <ol>
+      <li>Clique em <strong>Pastas de Mídia → Adicionar</strong>, dê um nome e, opcionalmente, selecione uma <code>Pasta superior</code> para criar subpastas.</li>
+      <li>Ao enviar arquivos, selecione a pasta no campo <code>Pasta</code>.</li>
+    </ol>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section" id="s6">
+    <h2><span class="section-num">6</span>Usuários e acesso</h2>
+    <p><em>Esta seção é para Super Administradores apenas.</em></p>
+
+    <h3>Criar um usuário</h3>
+    <ol>
+      <li>Clique em <strong>Sistema → Usuários → Adicionar Usuário</strong>.</li>
+      <li>Preencha <code>Username</code>, <code>E-mail</code>, <code>Senha</code> e escolha o <code>Cargo</code>:</li>
+    </ol>
+    <table class="data-table">
+      <thead><tr><th>Cargo</th><th>Acesso</th></tr></thead>
+      <tbody>
+        <tr><td>Super Administrador</td><td>Acesso total ao sistema</td></tr>
+        <tr><td>Administrador Komuniki</td><td>Home, páginas, depoimentos, mensagens, mídia</td></tr>
+        <tr><td>Editor de Notícias</td><td>Artigos, categorias, tags, comentários, newsletter, mídia</td></tr>
+      </tbody>
+    </table>
+    <div class="note">O sistema sincroniza automaticamente o grupo de permissões com o cargo selecionado. Mudar o cargo revoga os privilégios do cargo anterior.</div>
+
+    <h3>Alterar a senha</h3>
+    <ol>
+      <li>Abra o usuário em <strong>Sistema → Usuários</strong>.</li>
+      <li>Clique no link <strong>"Alterar senha"</strong> no topo do formulário.</li>
+      <li>Digite a nova senha duas vezes e confirme.</li>
+    </ol>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section" id="s7">
+    <h2><span class="section-num">7</span>Perguntas frequentes</h2>
+
+    <h3>O artigo não aparece no site</h3>
+    <p>Verifique: (1) o status está como <strong>Publicado</strong>? (2) o site correto está selecionado no campo <code>Site</code> do artigo?</p>
+
+    <h3>A newsletter não foi enviada mesmo publicando o artigo</h3>
+    <p>Esperado por design. Publicar não envia automaticamente. Use a ação manual descrita na seção 3.1.</p>
+
+    <h3>Um inscrito recebeu o e-mail com links quebrados</h3>
+    <p>Verifique em <strong>Sistema → Sites</strong> se o campo <code>Domain</code> está correto (ex.: <code>kellyfarias.com.br</code>). Links do e-mail usam este domínio.</p>
+
+    <h3>Como ver quantas pessoas acessaram o artigo?</h3>
+    <p>O campo <strong>Visualizações</strong> é contado automaticamente por sessão (um acesso por sessão de navegador). Veja na lista de artigos ou no detalhe do artigo.</p>
+
+    <h3>O artigo continua listado como "pendente de newsletter"</h3>
+    <p>Há uma ou mais entregas com status <strong>Falhou</strong> em aberto. Acesse <strong>Entregas de Newsletter</strong>, verifique o campo <code>Último erro</code> e tente reprocessar via ação manual ou solicite ao administrador técnico.</p>
+  </div>
+
+</div>
+
+<footer>news_portal &mdash; Manual do Portal de Notícias (Blog da Kelly)</footer>
+</body>
+</html>

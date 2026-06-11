@@ -17,6 +17,7 @@
    - [contact](#45-contact)
    - [news](#46-news)
    - [media_library](#47-media_library)
+   - [social](#48-social)
 5. [URL Routing](#5-url-routing)
 6. [Template Engine](#6-template-engine)
 7. [Banco de Dados](#7-banco-de-dados)
@@ -42,7 +43,7 @@ Nginx (porta 80/443)
   │  Serve static/media diretamente
   │
   ▼
-Gunicorn (porta 8000, 4 workers, 2 threads)
+Gunicorn (porta 8000, 3 workers, 2 threads)
   │
   ▼
 Django WSGI Application
@@ -67,7 +68,7 @@ FBV (Function-Based View)
 Response
 ```
 
-**Multi-site:** Django Sites Framework com `SITE_ID`. Cada portal é um `Site` diferente no banco. `CurrentSiteManager` filtra queries por `request.site` automaticamente. O middleware `CurrentSiteMiddleware` popula `request.site` em cada request.
+**Sites Framework:** hoje existe um único `Site` ativo (`SITE_ID = 1`). Komuniki e Blog da Kelly são separados por path e domínio no Nginx, não por dois registros `Site` em produção. `CurrentSiteManager` (`on_site`) filtra pelo site atual e deve continuar sendo usado em views públicas para preservar o isolamento quando o multi-site real for ativado.
 
 ---
 
@@ -573,7 +574,7 @@ inquiry.save()
 
 **Localização:** `apps/news/`
 
-O app mais complexo do projeto. Contém 7 models, ~20 views, signals, newsletter, feeds, sitemaps.
+O app mais complexo do projeto. Contém 9 models, views públicas, signals, newsletter, feeds e sitemaps.
 
 #### Models
 
@@ -605,8 +606,8 @@ Hierarquia de dois níveis. `parent=None` = categoria raiz (aparece na navbar). 
 | `title` | CharField(200) | — |
 | `slug` | SlugField(200) | unique_together com site |
 | `excerpt` | TextField | blank=True |
-| `content` | TextField | blank=True |
-| `featured_image` | ImageField(upload_to='news/articles/') | blank=True |
+| `content` | TextField | blank=True, editable=False |
+| `featured_image` | ProcessedImageField(upload_to='news/articles/') | blank=True |
 | `featured_image_caption` | CharField(200) | blank=True |
 | `category` | ForeignKey(Category, SET_NULL) | null=True, blank=True |
 | `tags` | ManyToManyField(Tag) | blank=True |
@@ -633,12 +634,30 @@ def reading_time(self) -> int:
 ```
 
 **`save()` lifecycle:**
-1. `self.content = sanitize_content(self.content)`
-2. Se `status=PUBLISHED` e `published_at is None`: `self.published_at = timezone.now()`
-3. `super().save()`
-4. Signal `post_save` dispara → newsletter (se primeira publicação)
+1. Sanitiza `content` quando preenchido.
+2. Se `status=PUBLISHED` e `published_at is None`, carimba `published_at`.
+3. `super().save()`.
+4. Signal `post_save` apenas marca newsletter pendente.
+
+**`rebuild_content_cache()`** concatena textos/legendas dos blocos em `content` usando `update()` para não disparar sinais novamente. Esse campo alimenta busca, tempo de leitura e newsletter.
 
 **Atenção:** Chamar `article.save()` em código após mudança de status para PUBLISHED dispara o signal de newsletter. Para evitar, use `Article.objects.filter(pk=article.pk).update(field=value)`.
+
+##### ArticleBlock
+
+| Campo | Tipo | Null/Blank |
+|-------|------|------------|
+| `article` | ForeignKey(Article, CASCADE) | — |
+| `order` | PositiveIntegerField | default=0 |
+| `block_type` | CharField(choices) | rich_text/image/embed |
+| `rich_text` | TextField | blank=True |
+| `media` | ForeignKey(MediaFile, SET_NULL) | null=True, blank=True |
+| `caption` | CharField(255) | blank=True |
+| `embed_url` | URLField | blank=True |
+| `embed_provider` | CharField | editable=False |
+| `embed_id` | CharField | editable=False |
+
+Blocos são renderizados por partials em `templates/news/partials/blocks/`. Embeds passam por `apps.common.embeds.resolve_embed()` e nunca viram HTML cru do usuário.
 
 ##### NewsletterSubscription
 
@@ -784,9 +803,9 @@ Ambos usam `Article.on_site` para filtrar por site atual.
 #### Admin — Funcionalidades Especiais
 
 **`ArticleAdmin.send_newsletter` action:**
-- Chama `send_article_newsletter(article)` para cada artigo selecionado
-- Não verifica `newsletter_sent_at` — permite re-envio manual
-- Diferente do signal automático que verifica
+- Chama `process_article_newsletter(article, retry_failed=True, include_marked_sent=True)` para cada artigo publicado selecionado.
+- Permite reenvio manual pontual mesmo quando `newsletter_sent_at` já está preenchido.
+- Reporta totais de enviadas, falhas e ignoradas.
 
 **`NewsletterSubscriptionAdmin.export_emails` action:**
 - Só disponível para superuser (`if not request.user.is_superuser: return`)
@@ -825,6 +844,49 @@ Hierarquia de pastas. Sem limite de profundidade.
 `FileType`: IMAGE, DOCUMENT, VIDEO, AUDIO, OTHER
 
 **`file_size` não é populado automaticamente** — precisa ser definido antes de salvar. O admin não faz isso automaticamente (campo manual ou precisa de signal/override de save).
+
+---
+
+### 4.8 social
+
+**Localização:** `apps/social/`
+
+App de contas e posts de Instagram/TikTok para a seção social da home.
+
+#### Models
+
+##### SocialAccount
+
+| Campo | Papel |
+|-------|-------|
+| `site` | Site dono da conta |
+| `platform` | `instagram` ou `tiktok` |
+| `display_name`, `username`, `profile_url` | Identidade pública/admin |
+| `external_user_id`, `access_token`, `refresh_token`, `token_expires_at` | Credenciais opcionais de API |
+| `is_active` | Conta aparece/sincroniza quando ativa |
+| `last_sync_at`, `last_sync_status`, `last_sync_error` | Auditoria da sincronização |
+
+Tem `objects` e `on_site`.
+
+##### SocialPost
+
+| Campo | Papel |
+|-------|-------|
+| `account`, `platform`, `external_id` | Origem e deduplicação |
+| `permalink`, `caption`, `media_type` | Conteúdo público |
+| `thumbnail_url`, `media_url`, `thumbnail_image` | Imagem exibida no card |
+| `published_at`, `is_visible`, `is_manual` | Exibição e origem |
+| `sync_payload` | Resumo técnico sem tokens |
+
+`thumbnail_image` tem prioridade sobre `thumbnail_url`. Posts manuais geram `external_id=manual-<uuid>`.
+
+#### Sync
+
+Comando: `python manage.py sync_social_posts`.
+
+Argumentos principais: `--platform`, `--account-id`, `--limit`, `--dry-run`, `--verbose`.
+
+O comando faz upsert, preserva visibilidade manual, não apaga posts antigos e registra falhas por conta sem derrubar as demais.
 
 ---
 
@@ -1080,7 +1142,7 @@ services:
 ```yaml
 services:
   web:
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 2
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --threads 2 --max-requests 1000 --max-requests-jitter 200
     volumes: [static_volume, media_volume]   # Sem volume mount de código
     
   nginx:
@@ -1088,7 +1150,7 @@ services:
     volumes: [nginx.conf, static_volume, media_volume, certbot_certs]
 ```
 
-**Workers Gunicorn:** 4 workers × 2 threads = 8 requisições simultâneas. Para mais carga, aumentar `--workers` (regra: 2×CPU+1).
+**Workers Gunicorn:** 3 workers × 2 threads = 6 requisições simultâneas por processo web. Em VPS de 1 vCPU, isso segue a regra `2×CPU+1`; aumente apenas depois de medir CPU, memória e conexões PostgreSQL.
 
 ### Nginx — Configuração Crítica
 
@@ -1114,9 +1176,9 @@ location /media/ {
 }
 ```
 
-**`server_name _`** — catch-all até domínio real ser configurado. Em produção, substituir por domínio real.
+**`server_name`** — a configuração versionada atende `komuniki.com.br`, `www.komuniki.com.br`, `kellyfarias.com.br` e `www.kellyfarias.com.br`.
 
-**TLS/HTTPS:** Configurado para Certbot/Let's Encrypt. Certificados em `certbot/conf/` (volume). Renovação automática via `/.well-known/acme-challenge/`.
+**TLS/HTTPS:** Configurado para Certbot/Let's Encrypt. Certificados ficam no volume `certbot_conf`. O challenge ACME usa `/.well-known/acme-challenge/`.
 
 ---
 
@@ -1151,7 +1213,7 @@ location /media/ {
 ### post_save em Article
 
 **Arquivo:** `apps/news/signals.py`  
-**Registrado em:** `apps/news/apps.py` via `ready()` (assumido — padrão Django)
+**Registrado em:** `apps/news/apps.py` via `ready()`
 
 ```
 Article.save() com status=PUBLISHED e newsletter_sent_at=None
@@ -1290,6 +1352,6 @@ Em produção, configurar `LOGGING` em `production.py` para escrever em arquivo 
 Em desenvolvimento, logs vão para stdout (console do Docker ou terminal).
 
 Loggers usados pelo projeto:
-- `apps.news.signals` — envio automático de newsletter
+- `apps.news.signals` — marcação de newsletter pendente após publicação
 - `apps.news.newsletter` — detalhes de envio (sucesso/falha por email)
 - `apps.accounts` — eventos de autenticação (se configurado)

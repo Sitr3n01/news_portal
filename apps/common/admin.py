@@ -61,8 +61,18 @@ class SiteExtensionAdmin(AdminUXMixin, ModelAdmin):
             'fields': ('primary_email', 'phone_number', 'address'),
         }),
         ('Analytics e Redes Sociais', {
-            'fields': ('google_analytics_id', 'facebook_url', 'instagram_url', 'youtube_url'),
+            'fields': ('google_analytics_id', 'facebook_url', 'instagram_url', 'tiktok_url', 'youtube_url'),
             'classes': ('collapse',),
+        }),
+        ('Seção de redes na home — textos', {
+            'fields': (
+                'social_section_title', 'social_section_title_en',
+                'social_section_subtitle', 'social_section_subtitle_en',
+            ),
+            'description': (
+                'Título e subtítulo da seção de redes na home. Para LIGAR/DESLIGAR a seção '
+                'e cada rede (Instagram/TikTok), use os toggles no topo de "Posts de Redes Sociais".'
+            ),
         }),
     ]
 
@@ -87,6 +97,16 @@ class SiteExtensionAdmin(AdminUXMixin, ModelAdmin):
             }),
             ('Contato', {
                 'fields': ('primary_email', 'phone_number', 'address'),
+            }),
+            ('Seção de redes na home — textos', {
+                'fields': (
+                    'social_section_title', 'social_section_title_en',
+                    'social_section_subtitle', 'social_section_subtitle_en',
+                ),
+                'description': (
+                    'Título e subtítulo da seção de redes na home. Para LIGAR/DESLIGAR a seção '
+                    'e cada rede, use os toggles no topo de "Posts de Redes Sociais".'
+                ),
             }),
         ]
 

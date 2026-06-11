@@ -38,7 +38,40 @@ class SiteExtension(models.Model):
     google_analytics_id = models.CharField(max_length=30, blank=True)
     facebook_url = models.URLField(blank=True)
     instagram_url = models.URLField(blank=True)
+    tiktok_url = models.URLField('TikTok', blank=True)
     youtube_url = models.URLField(blank=True)
+
+    # ── Seção "Redes sociais" da home ────────────────────────────────────────
+    social_section_enabled = models.BooleanField(
+        'Exibir seção de redes na home', default=True,
+        help_text='Quando ativo, a home mostra a seção de redes sociais (botões e posts recentes).',
+    )
+    social_show_instagram = models.BooleanField(
+        'Exibir Instagram na seção', default=True,
+        help_text='Mostra o botão e os posts do Instagram na seção da home.',
+    )
+    social_show_tiktok = models.BooleanField(
+        'Exibir TikTok na seção', default=True,
+        help_text='Mostra os posts do TikTok na seção da home.',
+    )
+    social_section_title = models.CharField(
+        'Título da seção de redes', max_length=120,
+        default='Acompanhe a Komuniki nas redes',
+    )
+    social_section_title_en = models.CharField(
+        'Título da seção de redes (EN)', max_length=120, blank=True,
+        default='Follow Komuniki on social media',
+        help_text='Opcional. Se vazio, usa o título em português.',
+    )
+    social_section_subtitle = models.CharField(
+        'Subtítulo da seção de redes', max_length=255,
+        default='Veja bastidores, conteúdos, eventos e novidades publicados no Instagram e TikTok.',
+    )
+    social_section_subtitle_en = models.CharField(
+        'Subtítulo da seção de redes (EN)', max_length=255, blank=True,
+        default='See behind the scenes, content, events and news posted on Instagram and TikTok.',
+        help_text='Opcional. Se vazio, usa o subtítulo em português.',
+    )
 
     class Meta:
         verbose_name = 'Configuração do Site'

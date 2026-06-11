@@ -1,0 +1,71 @@
+{% comment %}
+Topo da tela "Posts de Redes Sociais": banner de ajuda padrão + os toggles de
+exibição da seção da home (recurso geral, Instagram, TikTok). O formulário grava em
+SiteExtension via a view social_socialpost_toggle_feed.
+{% endcomment %}
+{% include 'admin/includes/model_list_help.html' %}
+
+{% if feed_settings %}
+<style>
+    .feed-toggles-card {
+        margin: 0 0 1.25rem;
+        padding: 1.25rem 1.5rem;
+        border: 1px solid rgba(120, 130, 150, 0.28);
+        border-radius: 0.85rem;
+        background: rgba(125, 145, 190, 0.06);
+    }
+    .feed-toggles-card h2 { margin: 0; font-size: 1rem; font-weight: 700; }
+    .feed-toggles-card .feed-toggles-sub { margin: 0.25rem 0 1rem; font-size: 0.8125rem; opacity: 0.75; }
+    .feed-toggles-list { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1rem; }
+    .feed-toggle { display: inline-flex; align-items: center; gap: 0.75rem; cursor: pointer; }
+    .feed-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .feed-toggle-track {
+        position: relative; flex: 0 0 auto; width: 42px; height: 24px;
+        border-radius: 999px; background: #cbd5e1; transition: background 0.2s ease;
+    }
+    .feed-toggle-track::after {
+        content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
+        border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        transition: transform 0.2s ease;
+    }
+    .feed-toggle input:checked + .feed-toggle-track { background: #1152d4; }
+    .feed-toggle input:checked + .feed-toggle-track::after { transform: translateX(18px); }
+    .feed-toggle input:focus-visible + .feed-toggle-track { outline: 2px solid #1152d4; outline-offset: 2px; }
+    .feed-toggle-label { font-size: 0.875rem; font-weight: 600; }
+    .feed-toggle-label small { display: block; font-weight: 400; opacity: 0.7; }
+    .feed-toggles-save {
+        display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.55rem 1.1rem;
+        border: 0; border-radius: 0.55rem; background: #1152d4; color: #fff;
+        font-size: 0.8125rem; font-weight: 700; cursor: pointer;
+    }
+    .feed-toggles-save:hover { background: #0e44ad; }
+</style>
+<section class="feed-toggles-card" aria-labelledby="feed-toggles-title">
+    <h2 id="feed-toggles-title">Exibição na home</h2>
+    <p class="feed-toggles-sub">Ligue ou desligue a seção de redes da home e cada rede separadamente. Desligado, o site fica sem aquela parte.</p>
+    <form method="post" action="{% url 'admin:social_socialpost_toggle_feed' %}">
+        {% csrf_token %}
+        <div class="feed-toggles-list">
+            <label class="feed-toggle">
+                <input type="checkbox" name="enabled" {% if feed_settings.social_section_enabled %}checked{% endif %}>
+                <span class="feed-toggle-track" aria-hidden="true"></span>
+                <span class="feed-toggle-label">Exibir a seção de redes na home<small>Desligado: a home fica normal, sem a seção.</small></span>
+            </label>
+            <label class="feed-toggle">
+                <input type="checkbox" name="show_instagram" {% if feed_settings.social_show_instagram %}checked{% endif %}>
+                <span class="feed-toggle-track" aria-hidden="true"></span>
+                <span class="feed-toggle-label">Exibir Instagram<small>Mostra o botão e os posts do Instagram.</small></span>
+            </label>
+            <label class="feed-toggle">
+                <input type="checkbox" name="show_tiktok" {% if feed_settings.social_show_tiktok %}checked{% endif %}>
+                <span class="feed-toggle-track" aria-hidden="true"></span>
+                <span class="feed-toggle-label">Exibir TikTok<small>Mostra os posts do TikTok.</small></span>
+            </label>
+        </div>
+        <button type="submit" class="feed-toggles-save">
+            <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px;">save</span>
+            Salvar exibição
+        </button>
+    </form>
+</section>
+{% endif %}

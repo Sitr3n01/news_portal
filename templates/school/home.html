@@ -217,6 +217,10 @@
 </section>
 {% endif %}
 
+{% if site_settings.social_section_enabled %}
+{% include 'components/social_feed.html' %}
+{% endif %}
+
 <section class="liquid-section px-4 py-10 sm:px-6 md:py-14 lg:px-8">
     <div class="scroll-reveal liquid-panel mx-auto max-w-7xl overflow-hidden rounded-[2.25rem]"
         data-scroll-reveal>

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'apps.contact.apps.ContactConfig',
     'apps.news.apps.NewsConfig',
     'apps.media_library.apps.MediaLibraryConfig',
+    'apps.social.apps.SocialConfig',
 ]
 
 MIDDLEWARE = [
@@ -103,6 +104,13 @@ SITE_ID = 1
 KOMUNIKI_PUBLIC_URL = env('KOMUNIKI_PUBLIC_URL', default='https://komuniki.com.br')
 KELLY_BLOG_PUBLIC_URL = env('KELLY_BLOG_PUBLIC_URL', default='https://kellyfarias.com.br/news')
 
+# Redes sociais — credenciais opcionais do app TikTok, usadas só para renovar o
+# token de acesso (refresh). Vazias por padrão; preenchidas por variável de ambiente
+# quando houver app oficial. Nunca versionar segredos. O Instagram renova o token de
+# longa duração apenas com o próprio token, sem segredo de app.
+TIKTOK_CLIENT_KEY = env('TIKTOK_CLIENT_KEY', default='')
+TIKTOK_CLIENT_SECRET = env('TIKTOK_CLIENT_SECRET', default='')
+
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -111,9 +119,12 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'pt-br'
+# Apenas pt-br na lista: com LocaleMiddleware ativo, qualquer idioma extra aqui
+# faria o admin (Django core + Unfold) seguir o Accept-Language do navegador,
+# misturando inglês e português. Restringir os idiomas suportados força o
+# fallback para LANGUAGE_CODE (pt-br) em qualquer navegador.
 LANGUAGES = [
     ('pt-br', 'Português (BR)'),
-    ('en', 'English'),
 ]
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
@@ -269,6 +280,18 @@ UNFOLD = {
                         'icon': 'auto_awesome',
                         'link': reverse_lazy('admin:school_schoolfeature_changelist'),
                         'permission': lambda request: request.user.has_perm('school.view_schoolfeature'),
+                    },
+                    {
+                        'title': 'Contas de Redes Sociais',
+                        'icon': 'share',
+                        'link': reverse_lazy('admin:social_socialaccount_changelist'),
+                        'permission': lambda request: request.user.has_perm('social.view_socialaccount'),
+                    },
+                    {
+                        'title': 'Posts de Redes Sociais',
+                        'icon': 'dynamic_feed',
+                        'link': reverse_lazy('admin:social_socialpost_changelist'),
+                        'permission': lambda request: request.user.has_perm('social.view_socialpost'),
                     },
                     {
                         'title': 'Mensagens',

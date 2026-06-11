@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual do Portal Escolar — Komuniki</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8f9fa; color: #1a1a1a; line-height: 1.6; }
+  .hero { background: #0f3d1a; color: #fff; padding: 2.5rem 1.5rem; }
+  .hero-inner { max-width: 900px; margin: 0 auto; }
+  .hero .back { font-size: .85rem; color: rgba(255,255,255,.65); text-decoration: none; display: inline-block; margin-bottom: .75rem; }
+  .hero .back:hover { color: #fff; }
+  .hero h1 { font-size: 1.8rem; font-weight: 600; }
+  .hero p { opacity: .8; margin-top: .4rem; max-width: 600px; }
+  .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+  nav.toc { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 2.5rem; }
+  nav.toc h2 { font-size: .9rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .75rem; }
+  nav.toc ol { padding-left: 1.2rem; }
+  nav.toc li { margin: .35rem 0; }
+  nav.toc a { color: #1152d4; font-size: .9rem; text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  .section { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; }
+  .section-num { display: inline-block; width: 28px; height: 28px; background: #0f3d1a; color: #fff; border-radius: 50%; font-size: .8rem; font-weight: 700; line-height: 28px; text-align: center; margin-right: .6rem; flex-shrink: 0; }
+  .section h2 { display: flex; align-items: center; font-size: 1.15rem; font-weight: 600; color: #0f1b2d; margin-bottom: 1.25rem; padding-bottom: .75rem; border-bottom: 1px solid #f1f5f9; }
+  h3 { font-size: .95rem; font-weight: 600; color: #0f1b2d; margin: 1.25rem 0 .5rem; }
+  p { color: #444; font-size: .95rem; margin-bottom: .9rem; }
+  ol, ul { padding-left: 1.4rem; margin-bottom: .9rem; }
+  li { color: #444; font-size: .95rem; margin: .35rem 0; }
+  code { background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: .875rem; color: #374151; }
+  .data-table { width: 100%; border-collapse: collapse; margin: 1rem 0; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; }
+  .data-table th { background: #f8fafc; text-align: left; padding: .6rem 1rem; font-size: .8rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid #e2e8f0; }
+  .data-table td { padding: .65rem 1rem; border-bottom: 1px solid #f8fafc; font-size: .88rem; color: #374151; vertical-align: top; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .note { background: #f0fdf4; border-left: 4px solid #22c55e; padding: .9rem 1.1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: .88rem; color: #15803d; }
+  .warn { background: #fffbeb; border-left: 4px solid #f59e0b; padding: .9rem 1.1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: .88rem; color: #92400e; }
+  .step { display: flex; gap: .75rem; align-items: flex-start; margin: .6rem 0; }
+  .step-num { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; background: #1152d4; color: #fff; border-radius: 50%; font-size: .75rem; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .step p { margin: 0; }
+  footer { text-align: center; padding: 2rem; color: #aaa; font-size: .85rem; }
+  a { color: #1152d4; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <a href="index.html" class="back">&larr; Índice de documentação</a>
+    <h1>Manual do Portal Escolar</h1>
+    <p>Komuniki &mdash; Como gerenciar a home, páginas, redes sociais, vagas e contatos</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <nav class="toc">
+    <h2>Neste manual</h2>
+    <ol>
+      <li><a href="#s1">Textos da página inicial (Home da Escola)</a></li>
+      <li><a href="#s2">Blocos de diferenciais (cards da home)</a></li>
+      <li><a href="#s3">Páginas institucionais</a></li>
+      <li><a href="#s4">Equipe e depoimentos</a></li>
+      <li><a href="#s5">Redes sociais</a></li>
+      <li><a href="#s6">Mensagens de contato</a></li>
+      <li><a href="#s7">Configurações gerais do site</a></li>
+      <li><a href="#s8">Vagas de emprego</a></li>
+    </ol>
+  </nav>
+
+  <!-- SECTION 1 -->
+  <div class="section" id="s1">
+    <h2><span class="section-num">1</span>Textos da página inicial (Home da Escola)</h2>
+    <p>A home da Komuniki é configurada por um registro único chamado <strong>Configuração da Home Escolar</strong>. Cada seção da página tem um bloco de campos correspondente.</p>
+
+    <h3>Como editar</h3>
+    <div class="step"><span class="step-num">1</span><p>Na barra lateral, clique em <strong>Komuniki → Home Komuniki</strong>.</p></div>
+    <div class="step"><span class="step-num">2</span><p>Clique no único registro existente para abrir o formulário.</p></div>
+    <div class="step"><span class="step-num">3</span><p>Edite os campos desejados e clique em <strong>Salvar</strong>.</p></div>
+
+    <h3>Campos disponíveis</h3>
+    <p>Os campos terminados em <strong>(EN)</strong> são opcionais &mdash; se vazios, o sistema usa o texto em português.</p>
+    <table class="data-table">
+      <thead><tr><th>Seção na home</th><th>Campos no admin</th></tr></thead>
+      <tbody>
+        <tr><td>Topo (hero)</td><td><code>Selo do hero</code>, <code>Título do hero</code>, <code>Subtítulo do hero</code></td></tr>
+        <tr><td>Bloco visual</td><td><code>Chamada visual</code>, <code>Título do bloco visual</code>, <code>Título do bloco de comunidade</code>, <code>Texto do bloco de comunidade</code></td></tr>
+        <tr><td>Proposta pedagógica</td><td><code>Chamada da proposta</code>, <code>Título da proposta</code>, <code>Descrição da proposta</code></td></tr>
+        <tr><td>Vida escolar</td><td><code>Chamada de vida escolar</code>, <code>Título de vida escolar</code>, <code>Descrição de vida escolar</code></td></tr>
+        <tr><td>Equipe</td><td><code>Chamada da equipe</code>, <code>Título da equipe</code>, <code>Descrição da equipe</code></td></tr>
+        <tr><td>Depoimentos</td><td><code>Chamada de depoimentos</code>, <code>Título de depoimentos</code>, <code>Descrição de depoimentos</code></td></tr>
+        <tr><td>Trabalhe conosco</td><td><code>Título de trabalhe conosco</code>, <code>Descrição de trabalhe conosco</code></td></tr>
+        <tr><td>Contato</td><td><code>Título de contato</code>, <code>Descrição de contato</code></td></tr>
+        <tr><td>SEO</td><td><code>Título SEO</code>, <code>Descrição SEO</code>, <code>Palavras-chave SEO</code></td></tr>
+      </tbody>
+    </table>
+    <div class="note">Se não existir nenhum registro de configuração, a home exibe textos padrão definidos no código. Criar um registro no admin sobrescreve esses textos.</div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section" id="s2">
+    <h2><span class="section-num">2</span>Blocos de diferenciais (cards da home)</h2>
+    <p>Os "blocos de diferenciais" são cards exibidos em três seções da home: <strong>Barra de confiança</strong>, <strong>Proposta pedagógica</strong> e <strong>Vida escolar</strong>.</p>
+
+    <h3>Adicionar um bloco</h3>
+    <div class="step"><span class="step-num">1</span><p>Na barra lateral, clique em <strong>Komuniki → Blocos da Home</strong>.</p></div>
+    <div class="step"><span class="step-num">2</span><p>Clique em <strong>Adicionar Bloco da Home</strong>.</p></div>
+    <div class="step"><span class="step-num">3</span><p>Preencha os campos:</p></div>
+
+    <table class="data-table">
+      <thead><tr><th>Campo</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td><code>Local de exibição</code></td><td>Escolha: Barra de confiança, Proposta pedagógica ou Vida escolar</td></tr>
+        <tr><td><code>Título</code></td><td>Nome do diferencial (obrigatório)</td></tr>
+        <tr><td><code>Título (EN)</code></td><td>Versão em inglês opcional</td></tr>
+        <tr><td><code>Descrição</code></td><td>Texto explicativo do card (obrigatório)</td></tr>
+        <tr><td><code>Descrição (EN)</code></td><td>Versão em inglês opcional</td></tr>
+        <tr><td><code>Tom visual</code></td><td>Verde institucional, Âmbar, Slate ou Branco — controla a cor do card</td></tr>
+        <tr><td><code>Ativo</code></td><td>Marque para exibir; desmarque para ocultar sem excluir</td></tr>
+        <tr><td><code>Ordem</code></td><td>Número inteiro; blocos são exibidos em ordem crescente</td></tr>
+      </tbody>
+    </table>
+
+    <div class="step"><span class="step-num">4</span><p>Clique em <strong>Salvar</strong>.</p></div>
+    <div class="note">Se não houver nenhum bloco ativo para uma seção, a home exibe um conjunto padrão definido no código.</div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section" id="s3">
+    <h2><span class="section-num">3</span>Páginas institucionais</h2>
+    <p>Use páginas para conteúdo longo e estático, como "Sobre Nós", "Regimento Escolar", "Infraestrutura".</p>
+
+    <h3>Criar uma página</h3>
+    <div class="step"><span class="step-num">1</span><p>Na barra lateral, clique em <strong>Komuniki → Página Cursos</strong>.</p></div>
+    <div class="step"><span class="step-num">2</span><p>Clique em <strong>Adicionar Página</strong>.</p></div>
+    <div class="step"><span class="step-num">3</span><p>Preencha os campos abaixo e clique em <strong>Salvar</strong>.</p></div>
+
+    <table class="data-table">
+      <thead><tr><th>Campo</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td><code>Título</code></td><td>Nome visível no site</td></tr>
+        <tr><td><code>URL amigável (slug)</code></td><td>Parte final do endereço. Ex.: <code>sobre-nos</code> → <code>komuniki.com.br/sobre-nos/</code>. Use letras minúsculas, números e hífens.</td></tr>
+        <tr><td><code>Conteúdo</code></td><td>Editor de texto rico. Aceita negrito, itálico, listas, links e títulos h2–h6.</td></tr>
+        <tr><td><code>Imagem destacada</code></td><td>Imagem opcional exibida no topo da página</td></tr>
+        <tr><td><code>Publicado</code></td><td>Marque para que a página apareça no site</td></tr>
+        <tr><td><code>Ordem</code></td><td>Número inteiro para ordenar múltiplas páginas</td></tr>
+        <tr><td><code>Título SEO / Descrição SEO</code></td><td>Como a página aparece no Google (até 70 e 160 caracteres respectivamente)</td></tr>
+      </tbody>
+    </table>
+    <div class="warn">O slug deve ser único. Dois títulos diferentes não podem ter o mesmo slug.</div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section" id="s4">
+    <h2><span class="section-num">4</span>Equipe e depoimentos</h2>
+
+    <h3>Membros da equipe</h3>
+    <p>Visível em <strong>Recursos guardados → Equipe</strong> na barra lateral (somente para Super Administradores).</p>
+    <ol>
+      <li>Clique em <strong>Adicionar Membro da Equipe</strong>.</li>
+      <li>Preencha: <code>Nome</code>, <code>Cargo ou função</code>, <code>Foto</code> (opcional), <code>Biografia</code> (opcional), <code>E-mail</code> (opcional), <code>Ativo</code> e <code>Ordem</code>.</li>
+      <li>Salve.</li>
+    </ol>
+
+    <h3>Depoimentos</h3>
+    <p>Visível em <strong>Recursos guardados → Depoimentos</strong> na barra lateral.</p>
+    <ol>
+      <li>Clique em <strong>Adicionar Depoimento</strong>.</li>
+      <li>Preencha: <code>Nome</code>, <code>Relação com a escola</code> (ex.: "Mãe de aluno"), <code>Depoimento</code>, <code>Foto</code> (opcional).</li>
+      <li>Marque <code>Destacado</code> para que o depoimento apareça na home. Somente os 3 primeiros destaques são exibidos.</li>
+      <li>Salve.</li>
+    </ol>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="section" id="s5">
+    <h2><span class="section-num">5</span>Redes sociais</h2>
+
+    <h3>5.1 Configurar links públicos</h3>
+    <ol>
+      <li>Na barra lateral, clique em <strong>Sistema → Configurações do Site</strong>.</li>
+      <li>Clique no registro do site.</li>
+      <li>Preencha <code>Facebook</code>, <code>Instagram</code>, <code>TikTok</code> e <code>YouTube</code> com URLs completas.</li>
+      <li>Em <strong>Seção de redes na home — textos</strong>, ajuste título e subtítulo.</li>
+      <li>Salve.</li>
+    </ol>
+
+    <h3>5.2 Ligar/desligar a seção da home</h3>
+    <ol>
+      <li>Na barra lateral, clique em <strong>Komuniki → Posts de Redes Sociais</strong>.</li>
+      <li>No topo da lista, use os interruptores <strong>Exibir seção de redes na home</strong>, <strong>Exibir Instagram</strong> e <strong>Exibir TikTok</strong>.</li>
+      <li>Clique em <strong>Salvar exibição</strong>.</li>
+    </ol>
+
+    <h3>5.3 Cadastrar uma conta</h3>
+    <ol>
+      <li>Clique em <strong>Komuniki → Contas de Redes Sociais → Adicionar</strong>.</li>
+      <li>Escolha Instagram ou TikTok.</li>
+      <li>Preencha nome de exibição, usuário público e link do perfil.</li>
+      <li>Marque <strong>Ativa</strong> e salve.</li>
+    </ol>
+    <div class="note">Credenciais são opcionais e só são necessárias para sincronização automática via APIs oficiais.</div>
+
+    <h3>5.4 Adicionar posts manualmente</h3>
+    <ol>
+      <li>Clique em <strong>Komuniki → Posts de Redes Sociais → Adicionar Post</strong>.</li>
+      <li>Escolha a conta, cole o link público, preencha legenda, tipo de mídia, data e miniatura.</li>
+      <li>Mantenha <strong>Visível no site</strong> marcado e salve.</li>
+    </ol>
+    <div class="note">Posts manuais aparecem mesmo sem credenciais de API. A sincronização automática é complementar.</div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section" id="s6">
+    <h2><span class="section-num">6</span>Mensagens de contato</h2>
+    <p>Visitantes podem enviar mensagens via o formulário de contato da escola.</p>
+    <ol>
+      <li>Na barra lateral, clique em <strong>Komuniki → Mensagens</strong>.</li>
+      <li>Clique em uma mensagem para ler o conteúdo completo.</li>
+      <li>Atualize o <code>Status</code>: <strong>Nova</strong> → <strong>Lida</strong> → <strong>Respondida</strong> → <strong>Arquivada</strong>.</li>
+      <li>Salve.</li>
+    </ol>
+    <div class="note">O sistema não envia respostas automáticas. O atendimento ao solicitante é feito externamente (e-mail, telefone etc.).</div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section" id="s7">
+    <h2><span class="section-num">7</span>Configurações gerais do site</h2>
+    <p>Acesse em <strong>Sistema → Configurações do Site</strong>.</p>
+    <table class="data-table">
+      <thead><tr><th>Campo</th><th>Para que serve</th></tr></thead>
+      <tbody>
+        <tr><td><code>Tagline</code></td><td>Slogan exibido no rodapé</td></tr>
+        <tr><td><code>Logo</code></td><td>Logotipo do site</td></tr>
+        <tr><td><code>Favicon</code></td><td>Ícone na aba do navegador</td></tr>
+        <tr><td><code>E-mail principal</code></td><td>E-mail de contato exibido no rodapé</td></tr>
+        <tr><td><code>Telefone</code></td><td>Telefone exibido no rodapé</td></tr>
+        <tr><td><code>Endereço</code></td><td>Endereço físico</td></tr>
+        <tr><td><code>E-mail remetente da Newsletter</code></td><td>De qual e-mail as newsletters do Blog da Kelly saem</td></tr>
+        <tr><td><code>Nome remetente da Newsletter</code></td><td>Nome exibido como remetente (ex.: "Blog da Kelly")</td></tr>
+        <tr><td><code>Google Analytics</code></td><td>Código GA4 (ex.: G-XXXXXXXX)</td></tr>
+        <tr><td><code>Redes sociais</code></td><td>Links públicos, textos da seção e feed de posts recentes</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section" id="s8">
+    <h2><span class="section-num">8</span>Vagas de emprego</h2>
+    <p>O módulo de vagas está em <strong>Recursos guardados</strong> na barra lateral (visível apenas para Super Administradores).</p>
+
+    <h3>Criar um departamento</h3>
+    <ol>
+      <li>Clique em <strong>Departamentos → Adicionar</strong>.</li>
+      <li>Preencha <code>Nome</code> e <code>URL amigável</code>.</li>
+      <li>Salve.</li>
+    </ol>
+
+    <h3>Criar uma vaga</h3>
+    <ol>
+      <li>Clique em <strong>Vagas → Adicionar</strong>.</li>
+      <li>Preencha: <code>Departamento</code>, <code>Título</code>, <code>URL amigável</code>, <code>Descrição</code>, <code>Requisitos</code>, <code>Tipo de contratação</code> (Tempo integral / Meio período / Contrato / Estágio), <code>Local</code> e <code>Faixa salarial</code> (opcionais), <code>Status</code> (Rascunho / Aberta / Fechada) e <code>Prazo final</code> (opcional).</li>
+      <li>Salve.</li>
+    </ol>
+
+    <h3>Ver candidaturas</h3>
+    <ol>
+      <li>Clique em <strong>Candidaturas</strong>.</li>
+      <li>Atualize o status conforme o processo: <strong>Recebida → Em Análise → Pré-selecionada → Entrevista → Aceita / Rejeitada</strong>.</li>
+      <li>Adicione <code>Notas internas</code> (não visíveis ao candidato).</li>
+    </ol>
+    <div class="note">Currículos ficam protegidos e só podem ser baixados por administradores autenticados no painel.</div>
+  </div>
+
+</div>
+
+<footer>news_portal &mdash; Manual do Portal Escolar (Komuniki)</footer>
+</body>
+</html>

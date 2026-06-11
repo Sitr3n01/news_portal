@@ -13,7 +13,7 @@ news_portal é um sistema multi-portal construído em Django 5.1+. Ele serve doi
 | Escola | `/` | Site institucional da escola |
 | Notícias | `/news/` | Portal de notícias com newsletter |
 
-Ambos compartilham o mesmo banco de dados, admin, e sistema de usuários — mas são isolados logicamente via **Django Sites Framework** (`django.contrib.sites`). Cada portal tem seu próprio `Site` com `SITE_ID` diferente.
+Ambos compartilham o mesmo banco de dados, admin, sistema de usuários **e `SITE_ID=1`**. A separação entre portais é por **roteamento de path**: `/news/*` serve o portal de notícias, `/` (catch-all) serve a escola. O `django.contrib.sites` está instalado e `CurrentSiteManager` (`on_site`) é usado nos models públicos como proteção arquitetural, mas o isolamento multi-site real está **dormante** — preparado para escalar para múltiplos domínios no futuro, não ativo hoje.
 
 ---
 
@@ -392,7 +392,7 @@ Decisão arquitetural permanente para consistência. O codebase inteiro usa FBVs
 Centralização intencional. A lista de tags/atributos permitidos precisa ser consistente em todo o projeto. Se precisar ajustar, muda em um lugar só.
 
 **Por que `on_site` e não `objects` nas views?**
-`CurrentSiteManager` filtra automaticamente pelo `SITE_ID` atual. Usar `objects` retornaria dados de todos os sites — grave em produção multi-site.
+`CurrentSiteManager` filtra automaticamente pelo `SITE_ID` atual. Hoje há só um site (`SITE_ID=1`), então o filtro não exclui nada na prática — mas usar `on_site` é a camada de proteção que garante que, quando um segundo site for adicionado, nenhuma view pública vaze dados entre sites.
 
 **Como adicionar uma nova categoria de navbar no portal de notícias?**
 As categorias são carregadas dinamicamente por `news_nav_context` em `apps/common/context_processors.py`. Basta criar uma categoria parent no admin — ela aparece automaticamente.

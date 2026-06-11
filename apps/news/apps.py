@@ -7,4 +7,4 @@ class NewsConfig(AppConfig):
     verbose_name = 'Notícias'
 
     def ready(self):
-        import apps.news.signals  # noqa: F401 — registra sinal de auto-envio de newsletter
+        import apps.news.signals  # noqa: F401 — registra sinal que marca newsletter pendente

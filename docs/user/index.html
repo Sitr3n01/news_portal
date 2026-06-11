@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia de Uso — Komuniki & Blog da Kelly</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8f9fa; color: #1a1a1a; line-height: 1.6; }
+  .container { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+  .hero { background: #0f1b2d; color: #fff; padding: 3rem 1.5rem; text-align: center; }
+  .hero h1 { font-size: 2rem; font-weight: 600; margin-bottom: .75rem; }
+  .hero p { font-size: 1.1rem; opacity: .8; max-width: 600px; margin: 0 auto; }
+  h2 { font-size: 1.3rem; font-weight: 600; margin: 2.5rem 0 1rem; color: #0f1b2d; }
+  p { margin-bottom: 1rem; color: #444; }
+  .portals { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin: 2rem 0; }
+  .portal-card { background: #fff; border-radius: 12px; padding: 1.5rem; border: 1px solid #e2e8f0; }
+  .portal-card .badge { display: inline-block; font-size: .75rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-bottom: .75rem; }
+  .portal-card.escola .badge { background: #e8f5e9; color: #2e7d32; }
+  .portal-card.noticias .badge { background: #e3f2fd; color: #1565c0; }
+  .portal-card h3 { margin: 0 0 .5rem; font-size: 1.1rem; color: #0f1b2d; }
+  .portal-card p { font-size: .9rem; color: #666; margin: 0 0 1rem; }
+  .portal-card .url { font-size: .8rem; background: #f4f4f4; padding: 4px 10px; border-radius: 6px; color: #555; font-family: monospace; display: inline-block; margin-bottom: 1rem; }
+  .btn { display: inline-block; padding: .6rem 1.25rem; border-radius: 8px; font-size: .9rem; font-weight: 500; text-decoration: none; }
+  .btn-primary { background: #1152d4; color: #fff; }
+  .roles-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; }
+  .roles-table th { background: #f1f5f9; text-align: left; padding: .75rem 1rem; font-size: .85rem; color: #475569; font-weight: 600; }
+  .roles-table td { padding: .75rem 1rem; border-top: 1px solid #f1f5f9; font-size: .9rem; color: #374151; vertical-align: top; }
+  .role-pill { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: .8rem; font-weight: 600; }
+  .role-super { background: #fce7f3; color: #9d174d; }
+  .role-escola { background: #e8f5e9; color: #2e7d32; }
+  .role-noticias { background: #e3f2fd; color: #1565c0; }
+  .tip-box { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 1rem 1.25rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0; }
+  .tip-box strong { color: #92400e; }
+  .tip-box p { color: #78350f; margin: 0; font-size: .9rem; }
+  footer { text-align: center; padding: 2rem; color: #aaa; font-size: .85rem; }
+  a { color: #1152d4; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Guia de Uso do Sistema</h1>
+  <p>Komuniki &amp; Blog da Kelly &mdash; painel de controle centralizado para dois portais</p>
+</div>
+
+<div class="container">
+
+  <h2>Os dois portais</h2>
+  <div class="portals">
+    <div class="portal-card escola">
+      <span class="badge">Portal Escolar</span>
+      <h3>Komuniki</h3>
+      <p>Site institucional da escola: home, cursos, redes sociais, vagas de emprego e formulário de contato.</p>
+      <div class="url">komuniki.com.br</div><br>
+      <a href="manual_escola.html" class="btn btn-primary">Ver manual da escola &rarr;</a>
+    </div>
+    <div class="portal-card noticias">
+      <span class="badge">Portal de Notícias</span>
+      <h3>Blog da Kelly</h3>
+      <p>Portal de notícias completo: artigos, categorias, tags, newsletter e comentários.</p>
+      <div class="url">kellyfarias.com.br/news/</div><br>
+      <a href="manual_noticias.html" class="btn btn-primary">Ver manual de notícias &rarr;</a>
+    </div>
+  </div>
+
+  <h2>Como acessar o painel</h2>
+  <p>Acesse <strong>seudominio.com.br/admin/</strong> com seu usuário e senha. A tela inicial exibe um painel de métricas resumidas. A barra lateral esquerda contém todos os menus organizados por contexto.</p>
+
+  <h2>Quem pode fazer o quê</h2>
+  <p>O sistema usa <strong>cargos</strong> para controlar o que cada pessoa pode ver e editar:</p>
+
+  <table class="roles-table">
+    <thead>
+      <tr>
+        <th>Cargo</th>
+        <th>Acesso permitido</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="role-pill role-super">Super Administrador</span></td>
+        <td>Tudo no sistema, incluindo usuários, configurações, vagas e relatórios completos</td>
+      </tr>
+      <tr>
+        <td><span class="role-pill role-escola">Administrador Komuniki</span></td>
+        <td>Home da escola, páginas, diferenciais, depoimentos, mensagens de contato, biblioteca de mídia</td>
+      </tr>
+      <tr>
+        <td><span class="role-pill role-noticias">Editor de Notícias</span></td>
+        <td>Artigos, categorias, tags, comentários, inscritos na newsletter, biblioteca de mídia</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="tip-box">
+    <strong>Regra de ouro:</strong>
+    <p>Toda alteração feita no painel fica visível no site público <strong>imediatamente</strong> após clicar em <strong>Salvar</strong>. Não existe botão de "publicar servidor".</p>
+  </div>
+
+  <h2>Links rápidos</h2>
+  <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: .5rem;">
+    <li><a href="manual_escola.html">&#8594; Manual completo do Portal Escolar (Komuniki)</a></li>
+    <li><a href="manual_noticias.html">&#8594; Manual completo do Portal de Notícias (Blog da Kelly)</a></li>
+  </ul>
+
+</div>
+
+<footer>news_portal &mdash; Documentação de usuário</footer>
+</body>
+</html>

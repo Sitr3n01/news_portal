@@ -1,5 +1,5 @@
 Django>=5.1,<6.0
-psycopg[binary]>=3.1
+psycopg[binary]>=3.3.4
 # Pinado: templates/admin/nav_sidebar.html copia o markup interno do Unfold
 # (drawer + backdrop mobile). A partir de 0.88 o Unfold reescreveu a sidebar
 # (sidebarOpen + largura dinâmica) — incompatível com o override, faz a sidebar

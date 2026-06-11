@@ -33,6 +33,7 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 | `apps.contact` | Formulários de contato e inquiries |
 | `apps.news` | Artigos, categorias, tags, RSS, newsletter |
 | `apps.media_library` | Biblioteca de mídia compartilhada |
+| `apps.social` | Contas e posts de redes sociais (Instagram/TikTok) + sincronização |
 
 ---
 
@@ -231,6 +232,27 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 - `python -m pytest` → 36 testes passando.
 - Browser local validado em desktop, 768px e 390px para dashboard, guias e formulário de artigo.
 
+### Fase 13: Integração de Redes Sociais (Instagram + TikTok) ✅
+> App `apps.social`: seção curta na home com botões oficiais e os últimos posts como
+> cards próprios (dados do banco, sem embed/scraping). Gestão manual no admin como
+> fallback e estrutura pronta para as APIs oficiais via management command + cron.
+
+| # | Tarefa | Status |
+|---|--------|--------|
+| 13.1 | Models `SocialAccount`/`SocialPost` (constraints, índices, thumbnail otimizada) + signals | ✅ Concluído |
+| 13.2 | Campos da seção em `SiteExtension` (`tiktok_url`, `social_section_*`) + migration | ✅ Concluído |
+| 13.3 | Admin Unfold com tokens password-like e ações de visibilidade/ativação | ✅ Concluído |
+| 13.4 | Seção na home (`social_feed`/`social_post_card`) + view com fallback seguro | ✅ Concluído |
+| 13.5 | Services Instagram/TikTok (timeout, erros tratados, token ausente) + `httpx` | ✅ Concluído |
+| 13.6 | Command `sync_social_posts` (upsert, preserva visibilidade, resiliente) | ✅ Concluído |
+| 13.7 | Testes (modelos, normalização, dry-run sem token, home) + `docs/development/REDES_SOCIAIS.md` | ✅ Concluído |
+
+#### Validação da Fase 13
+- `python manage.py check` → 0 erros (apenas warnings conhecidos do `django-axes`).
+- `python -m pytest apps/social` → 16 testes passando.
+- `python manage.py sync_social_posts --dry-run` → roda sem credenciais, com erro amigável.
+- Renovação automática de token implementada (Instagram ≤7d, TikTok ≤1h); falta só conectar as credenciais oficiais (ver REDES_SOCIAIS_CREDENCIAIS.md).
+
 ---
 
 ## Decisões Arquiteturais
@@ -315,7 +337,7 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 - **Tarefa ativa:** Nenhuma — guias administrativos, perfis e ModelAdmins operacionais concluídos e verificados
 - **Próximo:** Fase 10 (hardening produção)
 - **Bloqueios:** Nenhum para Fase 9.1. Warnings conhecidos do `django-axes` permanecem como dívida técnica separada.
-- **Última atualização:** 2026-06-05
+- **Última atualização:** 2026-06-10 — Fase 13 (redes sociais) concluída
 
 ### Resumo do estado por área:
 | Área | Estado | Nota |
@@ -323,5 +345,6 @@ Os portais são **independentes em dados** mas gerenciados pelo mesmo admin. Ún
 | **Portal de Notícias** | 🟢 Funcional + Seguro + Responsivo validado | Bugs corrigidos (8.4), mobile concluído (8.5), refinamento desktop/ultrawide, Turnstile e redes sociais de rodapé segregadas por portal em 2026-06-05 |
 | **Dashboard Admin** | 🟢 Funcional + Seguro + UX operacional completa | Dashboard com guias por área, telas orientadas a tarefa, perfis administrativos e biblioteca de mídia em PT-BR |
 | **Site da Escola** | 🟢 Funcional + CMS administrável | Home, cards, páginas, equipe, depoimentos, departamentos e vagas integrados ao admin e isolados por site |
+| **Redes Sociais** | 🟢 Funcional (manual) + pronto para APIs | App `apps.social`: seção na home, admin de contas/posts, command `sync_social_posts` e services Instagram/TikTok sem scraping. Sincronização automática aguarda credenciais oficiais |
 | **Infraestrutura** | 🟢 Hardened | nginx com CSP/headers/rate-limit, Docker non-root, expose vs ports |
 | **Segurança** | 🟢 Auditada 2x | 20+ proteções ativas. Nenhum `\|safe` em templates. Bleach centralizado |

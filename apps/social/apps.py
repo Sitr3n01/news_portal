@@ -1,10 +1,10 @@
 from django.apps import AppConfig
 
 
-class CommonConfig(AppConfig):
+class SocialConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'apps.common'
-    verbose_name = 'Configurações do Site'
+    name = 'apps.social'
+    verbose_name = 'Redes Sociais'
 
     def ready(self):
         from . import signals  # noqa: F401

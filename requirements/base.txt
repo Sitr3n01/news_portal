@@ -4,7 +4,7 @@ psycopg[binary]>=3.1
 # (drawer + backdrop mobile). A partir de 0.88 o Unfold reescreveu a sidebar
 # (sidebarOpen + largura dinâmica) — incompatível com o override, faz a sidebar
 # sobrepor o conteúdo. Ao atualizar, re-sincronizar o override antes de subir o pin.
-django-unfold==0.87.0
+django-unfold==0.97.0
 django-htmx>=1.17
 Pillow>=10.0
 django-imagekit>=5.0

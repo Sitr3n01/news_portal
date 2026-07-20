@@ -11,6 +11,8 @@ from django.template.loader import render_to_string
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
+from apps.common.turnstile import get_client_ip
+
 from .forms import NewsletterSubscriptionForm
 from .models import Article, ArticleBookmark, ArticleLike, Category, Comment, NewsletterSubscription, Tag
 from .utils import get_sidebar_context
@@ -361,7 +363,7 @@ def toggle_like(request, article_id):
     like, created = ArticleLike.objects.get_or_create(
         article=article,
         user=request.user,
-        defaults={'ip_address': request.META.get('REMOTE_ADDR')},
+        defaults={'ip_address': get_client_ip(request)},
     )
     if not created:
         like.delete()

@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import environ
+from django.core.exceptions import ImproperlyConfigured
 from django.urls import reverse_lazy
 
 # Build paths
@@ -97,6 +98,13 @@ DATABASES = {
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
+# Sem isto, o Django cai no default '/accounts/profile/' — rota inexistente aqui
+# (o único path 'profile/' é update_profile, POST-only). Qualquer login sem
+# ?next= (ex.: acesso direto a /accounts/login/) caía em 405 logo após a senha
+# correta. 'news:list' segue o mesmo destino já usado após cadastro/exclusão de
+# conta em apps/accounts/views.py.
+LOGIN_REDIRECT_URL = 'news:list'
+
 SITE_ID = 1
 
 # Public portal URLs used by cross-domain navigation. The same Django app serves
@@ -168,23 +176,48 @@ UNFOLD = {
     'SHOW_HISTORY': True,
     'SHOW_VIEW_ON_SITE': True,
     'STYLES': [
+        # Google Fonts (mesma origin já liberada no CSP para IBM Plex/Manrope/etc.)
+        lambda request: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap',
         lambda request: '/static/admin/css/overrides.css',
         lambda request: '/static/admin/css/dashboard.css',
         lambda request: '/static/admin/css/admin_ux.css',
+        # Re-tema Material 3 — carregado por último para vencer a cascata dos
+        # tokens acima (redefine as vars --kb-* e polimento de componentes).
+        lambda request: '/static/admin/css/m3_theme.css',
     ],
     'COLORS': {
+        # Rampa neutra M3 do shell: alinha o chrome do unfold (body, cards,
+        # bordas — bg-base-*/border-base-*) aos papéis de superfície do tema
+        # escuro em static/admin/css/m3_theme.css (900 = surface #111318,
+        # 800 = surface-container #1D2024), unificando shell e blocos kb-.
+        # A rampa `font` fica de fora de propósito: os defaults do unfold
+        # apontam para var(--color-base-N) e herdam estes cinzas sozinhos.
+        'base': {
+            '50': '249 249 255',
+            '100': '240 240 247',
+            '200': '226 226 233',
+            '300': '196 198 208',
+            '400': '142 144 153',
+            '500': '96 99 107',
+            '600': '68 71 79',
+            '700': '46 50 58',
+            '800': '29 32 36',
+            '900': '17 19 24',
+            '950': '12 14 19',
+        },
+        # Rampa tonal Material 3 do seed #1152d4 (600 mantém a cor-marca).
         'primary': {
-            '50': '239 246 255',
-            '100': '219 234 254',
-            '200': '191 219 254',
-            '300': '147 197 253',
-            '400': '96 165 250',
-            '500': '59 130 246',
+            '50': '237 240 255',
+            '100': '217 226 255',
+            '200': '176 198 255',
+            '300': '140 176 250',
+            '400': '109 149 232',
+            '500': '83 121 199',
             '600': '17 82 212',   # #1152d4 — cor primária do projeto
-            '700': '29 78 216',
-            '800': '30 64 175',
-            '900': '30 58 138',
-            '950': '23 37 84',
+            '700': '29 72 144',
+            '800': '0 48 99',
+            '900': '0 27 63',
+            '950': '0 16 40',
         },
     },
     'SIDEBAR': {
@@ -192,9 +225,15 @@ UNFOLD = {
         'show_all_applications': False,
         'navigation': [
             {
-                'title': 'Guias de Operação',
+                'title': 'Início',
                 'separator': False,
                 'items': [
+                    {
+                        'title': 'Painel',
+                        'icon': 'dashboard',
+                        'link': reverse_lazy('admin:index'),
+                        'active': lambda request: request.path == '/admin/',
+                    },
                     {
                         'title': 'Guia Komuniki',
                         'icon': 'school',
@@ -242,7 +281,7 @@ UNFOLD = {
                 ],
             },
             {
-                'title': 'Visualizar Portais',
+                'title': 'Ver os sites',
                 'separator': False,
                 'items': [
                     {
@@ -264,22 +303,28 @@ UNFOLD = {
                 'separator': True,
                 'items': [
                     {
-                        'title': 'Página Cursos',
-                        'icon': 'article',
-                        'link': reverse_lazy('admin:school_page_changelist'),
-                        'permission': lambda request: request.user.has_perm('school.view_page'),
-                    },
-                    {
                         'title': 'Home Komuniki',
                         'icon': 'home',
                         'link': reverse_lazy('admin:school_schoolhomeconfig_changelist'),
                         'permission': lambda request: request.user.has_perm('school.view_schoolhomeconfig'),
                     },
                     {
+                        'title': 'Página Cursos',
+                        'icon': 'article',
+                        'link': reverse_lazy('admin:school_page_changelist'),
+                        'permission': lambda request: request.user.has_perm('school.view_page'),
+                    },
+                    {
                         'title': 'Blocos da Home',
                         'icon': 'auto_awesome',
                         'link': reverse_lazy('admin:school_schoolfeature_changelist'),
                         'permission': lambda request: request.user.has_perm('school.view_schoolfeature'),
+                    },
+                    {
+                        'title': 'Mensagens',
+                        'icon': 'contact_mail',
+                        'link': reverse_lazy('admin:contact_contactinquiry_changelist'),
+                        'permission': lambda request: request.user.has_perm('contact.view_contactinquiry'),
                     },
                     {
                         'title': 'Contas de Redes Sociais',
@@ -292,12 +337,6 @@ UNFOLD = {
                         'icon': 'dynamic_feed',
                         'link': reverse_lazy('admin:social_socialpost_changelist'),
                         'permission': lambda request: request.user.has_perm('social.view_socialpost'),
-                    },
-                    {
-                        'title': 'Mensagens',
-                        'icon': 'contact_mail',
-                        'link': reverse_lazy('admin:contact_contactinquiry_changelist'),
-                        'permission': lambda request: request.user.has_perm('contact.view_contactinquiry'),
                     },
                 ],
             },
@@ -344,7 +383,37 @@ UNFOLD = {
                 ],
             },
             {
-                'title': 'Recursos guardados',
+                'title': 'Sistema',
+                'separator': True,
+                'items': [
+                    {
+                        'title': 'Usuários',
+                        'icon': 'manage_accounts',
+                        'link': reverse_lazy('admin:accounts_customuser_changelist'),
+                        'permission': lambda request: _admin_has_any(request, 'accounts.view_customuser'),
+                    },
+                    {
+                        'title': 'Grupos e Permissões',
+                        'icon': 'badge',
+                        'link': reverse_lazy('admin:auth_group_changelist'),
+                        'permission': lambda request: _admin_has_any(request, 'auth.view_group'),
+                    },
+                    {
+                        'title': 'Configurações do Site',
+                        'icon': 'settings',
+                        'link': reverse_lazy('admin:common_siteextension_changelist'),
+                        'permission': lambda request: _admin_has_any(request, 'common.view_siteextension'),
+                    },
+                    {
+                        'title': 'Biblioteca de Mídia',
+                        'icon': 'perm_media',
+                        'link': reverse_lazy('admin:media_library_mediafile_changelist'),
+                        'permission': lambda request: _admin_has_any(request, 'media_library.view_mediafile'),
+                    },
+                ],
+            },
+            {
+                'title': 'Arquivados',
                 'separator': True,
                 'items': [
                     {
@@ -391,36 +460,6 @@ UNFOLD = {
                     },
                 ],
             },
-            {
-                'title': 'Sistema',
-                'separator': True,
-                'items': [
-                    {
-                        'title': 'Usuários',
-                        'icon': 'manage_accounts',
-                        'link': reverse_lazy('admin:accounts_customuser_changelist'),
-                        'permission': lambda request: _admin_has_any(request, 'accounts.view_customuser'),
-                    },
-                    {
-                        'title': 'Grupos e Permissões',
-                        'icon': 'badge',
-                        'link': reverse_lazy('admin:auth_group_changelist'),
-                        'permission': lambda request: _admin_has_any(request, 'auth.view_group'),
-                    },
-                    {
-                        'title': 'Configurações do Site',
-                        'icon': 'settings',
-                        'link': reverse_lazy('admin:common_siteextension_changelist'),
-                        'permission': lambda request: _admin_has_any(request, 'common.view_siteextension'),
-                    },
-                    {
-                        'title': 'Biblioteca de Mídia',
-                        'icon': 'perm_media',
-                        'link': reverse_lazy('admin:media_library_mediafile_changelist'),
-                        'permission': lambda request: _admin_has_any(request, 'media_library.view_mediafile'),
-                    },
-                ],
-            },
         ],
     },
     'DASHBOARD_CALLBACK': 'apps.common.dashboard.dashboard_callback',
@@ -429,6 +468,38 @@ UNFOLD = {
 # ── Upload Limits ──────────────────────────────────────────────────────────
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760   # 10 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760   # 10 MB
+
+# ── Cache ──────────────────────────────────────────────────────────────────
+# LocMem por padrão (sem dependência nova de infraestrutura). Se REDIS_URL for
+# definida no .env, passa a usar Redis — necessário para caches/rate-limits
+# serem compartilhados entre múltiplos workers do Gunicorn em produção. Subir
+# o serviço Redis é um passo de infraestrutura futuro, não decidido aqui.
+REDIS_URL = env('REDIS_URL', default='')
+if REDIS_URL:
+    # Fail-fast no boot: o RedisCache do Django exige o cliente `redis`, que não
+    # está nos requirements de propósito (sem dependência de Redis sem decisão
+    # explícita). Sem esta checagem, definir REDIS_URL sem o pacote instalado
+    # derrubaria a aplicação com 500 por request em vez de falhar no healthcheck.
+    try:
+        import redis  # noqa: F401 — só valida a presença do cliente
+    except ImportError as exc:
+        raise ImproperlyConfigured(
+            "REDIS_URL definido, mas o pacote 'redis' não está instalado — "
+            'instale redis>=5 ou remova REDIS_URL do ambiente.'
+        ) from exc
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': REDIS_URL,
+        },
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'TIMEOUT': 300,
+        },
+    }
 
 # ── Email ──────────────────────────────────────────────────────────────────
 # Em produção, configurar via .env:

@@ -57,7 +57,7 @@ def register_view(request):
         return redirect('news:list')
 
     if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST, request=request)
         if form.is_valid():
             user = form.save()
 
@@ -81,7 +81,7 @@ def register_view(request):
         initial = {}
         if email := request.GET.get('email'):
             initial['email'] = email
-        form = CustomUserCreationForm(initial=initial)
+        form = CustomUserCreationForm(initial=initial, request=request)
 
     return render(request, 'accounts/register.html', {'form': form})
 

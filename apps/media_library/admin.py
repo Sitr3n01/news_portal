@@ -24,7 +24,19 @@ from .models import MediaFile, MediaFolder
 _DOCUMENT_EXTS = {'.pdf', '.doc', '.docx', '.odt', '.txt', '.rtf', '.xls', '.xlsx', '.csv', '.ppt', '.pptx'}
 _VIDEO_EXTS = {'.mp4', '.mov', '.avi', '.webm', '.mkv'}
 _AUDIO_EXTS = {'.mp3', '.wav', '.ogg', '.m4a', '.flac', '.aac'}
-_OTHER_IMAGE_EXTS = {'.gif', '.bmp', '.svg'}  # imagens exibíveis, mas fora do pipeline de otimização
+# Imagens exibíveis, mas fora do pipeline de otimização. SVG fica de fora de
+# propósito: é um formato baseado em texto que pode embutir conteúdo ativo, e
+# arquivos legados com essa extensão passam a cair em OTHER (não são mais
+# tratados como imagem).
+_OTHER_IMAGE_EXTS = {'.gif', '.bmp'}
+
+# Allowlist final de upload da biblioteca — qualquer extensão fora daqui é
+# rejeitada no formulário. Deliberadamente sem .svg/.html/.htm e afins: a
+# biblioteca serve os arquivos enviados a partir do próprio domínio do
+# projeto, então formatos que podem carregar conteúdo ativo ficam de fora.
+ALLOWED_MEDIA_EXTENSIONS = ALLOWED_IMAGE_EXTENSIONS | _OTHER_IMAGE_EXTS | _DOCUMENT_EXTS | _VIDEO_EXTS | _AUDIO_EXTS
+
+MAX_MEDIA_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
 
 _TYPE_ICONS = {
     MediaFile.FileType.IMAGE: 'image',
@@ -96,9 +108,20 @@ class MediaFileForm(forms.ModelForm):
 
     def clean_file(self):
         uploaded = self.cleaned_data.get('file')
-        # Valida como imagem só quando a extensão é de imagem do pipeline; PDFs,
-        # vídeos e afins passam livremente — a biblioteca aceita qualquer arquivo.
-        if uploaded and Path(uploaded.name).suffix.lower() in ALLOWED_IMAGE_EXTENSIONS:
+        if not uploaded:
+            return uploaded
+
+        ext = Path(uploaded.name).suffix.lower()
+        if ext not in ALLOWED_MEDIA_EXTENSIONS:
+            raise forms.ValidationError('Tipo de arquivo não permitido. Envie imagens, documentos, vídeos ou áudios.')
+
+        size = getattr(uploaded, 'size', None)
+        if size is not None and size > MAX_MEDIA_UPLOAD_BYTES:
+            raise forms.ValidationError('Arquivo muito grande. O tamanho máximo permitido é 10 MB.')
+
+        # Valida como imagem só quando a extensão é de imagem do pipeline; os
+        # demais tipos já passaram pela allowlist acima.
+        if ext in ALLOWED_IMAGE_EXTENSIONS:
             validate_uploaded_image(uploaded)
         return uploaded
 
@@ -177,7 +200,11 @@ class MediaFileAdmin(AdminUXMixin, ModelAdmin):
     fieldsets = [
         ('Arquivo', {
             'fields': ('title', 'file', 'thumbnail_large', 'alt_text'),
-            'description': 'Envie a imagem ou documento e dê um título fácil de buscar. Imagens são otimizadas automaticamente.',
+            'description': (
+                'Envie imagens (JPG, PNG, WebP, GIF, BMP), documentos, vídeos ou áudios — até 10 MB — e dê um '
+                'título fácil de buscar. Arquivos SVG e HTML não são aceitos por segurança. Imagens são '
+                'otimizadas automaticamente.'
+            ),
         }),
         ('Organização', {
             'fields': ('folder',),

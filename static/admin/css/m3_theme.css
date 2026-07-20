@@ -1,0 +1,412 @@
+/* news_portal — Admin re-tema Material 3 (dark), seed #1152D4
+ *
+ * Carregado por último em UNFOLD['STYLES'] (config/settings/base.py) para
+ * vencer a cascata dos tokens definidos em dashboard.css/admin_ux.css. Todo o
+ * design system kb- consome var(--kb-*): a maior parte do re-tema acontece
+ * apenas remapeando esses tokens para os papéis de cor M3 abaixo. O restante
+ * deste arquivo é polimento pontual de componentes (botões, chips, ícones,
+ * elevação de hover, foco) e limpeza de cores hexadecimais que sobraram do
+ * tema antigo.
+ *
+ * Escopo: só aparência (cor, raio, tipografia, sombra, estado). Nada aqui
+ * altera position/z-index/width/display do shell do django-unfold.
+ */
+
+/* ── 1. Tokens Material 3 (scheme dark, seed #1152D4) ───────────────────── */
+:root {
+    --md-primary: #B0C6FF;
+    --md-on-primary: #003063;
+    --md-primary-container: #1D4890;
+    --md-on-primary-container: #D9E2FF;
+    --md-secondary: #BEC6DC;
+    --md-on-secondary: #283141;
+    --md-secondary-container: #3E4759;
+    --md-on-secondary-container: #DAE2F9;
+    --md-surface: #111318;
+    --md-surface-container-low: #191C20;
+    --md-surface-container: #1D2024;
+    --md-surface-container-high: #272A2F;
+    --md-surface-container-highest: #32353A;
+    --md-on-surface: #E2E2E9;
+    --md-on-surface-variant: #C4C6D0;
+    --md-outline: #8E9099;
+    --md-outline-variant: #44474F;
+    --md-error: #FFB4AB;
+    --md-on-error: #690005;
+    --md-error-container: #93000A;
+    --md-success: #86D8A7;
+    --md-warning: #F0BE58;
+
+    /* Shape scale M3 */
+    --md-shape-sm: 12px;     /* componentes médios (cards de métrica) */
+    --md-shape-md: 16px;     /* cards grandes */
+    --md-shape-lg: 28px;     /* containers hero/header */
+    --md-shape-full: 9999px; /* pills, botões, chips */
+
+    /* Remapeamento do design system kb- para os papéis M3 — a maior parte do
+       re-tema acontece só por causa deste bloco, já que dashboard.css e
+       admin_ux.css consomem var(--kb-*) em todo lugar. */
+    --kb-surface: var(--md-surface);
+    /* Alinhados à rampa `base` do shell em UNFOLD['COLORS'] (base-800/base-700):
+       cards kb e chrome do unfold ficam no MESMO sistema de superfícies. */
+    --kb-surface-container: #1D2024;
+    --kb-surface-container-high: #2E323A;
+    --kb-outline: #4A4E58;
+    --kb-text: var(--md-on-surface);
+    --kb-text-muted: var(--md-on-surface-variant);
+    --kb-primary: var(--md-primary);
+    --kb-primary-soft: rgba(176, 198, 255, 0.14);
+    --kb-success: var(--md-success);
+    --kb-success-soft: rgba(134, 216, 167, 0.14);
+    --kb-warning: var(--md-warning);
+    --kb-warning-soft: rgba(240, 190, 88, 0.14);
+    --kb-danger: var(--md-error);
+    --kb-danger-soft: rgba(255, 180, 171, 0.14);
+    --kb-neutral-soft: rgba(196, 198, 208, 0.10);
+    --kb-radius-sm: var(--md-shape-sm);
+    --kb-radius-md: var(--md-shape-md);
+    --kb-radius-lg: var(--md-shape-lg);
+}
+
+/* ── 2. Tipografia M3 (Roboto, com fallback para a pilha atual) ─────────── */
+.kb-dashboard,
+.kb-guide,
+.kb-model-guide,
+.kb-form-next-steps {
+    font-family: 'Roboto', 'Inter', system-ui, sans-serif;
+}
+
+/* Headline-small (24px/32, 500) */
+.kb-dashboard h1,
+.kb-guide h1 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 500;
+}
+
+/* Title-medium (16px/24, 500) */
+.kb-section h2,
+.kb-card-title,
+.kb-guide h2,
+.kb-model-guide h2,
+.kb-form-next-steps h2 {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 500;
+}
+
+/* Label-small (11px/16, 500, +0.5px tracking) — mantém uppercase já herdado */
+.kb-eyebrow {
+    color: var(--md-primary);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    line-height: 1rem;
+    letter-spacing: 0.5px;
+}
+
+/* Valores de métrica: números em escala display M3 (peso regular, não black) */
+.kb-metric-value {
+    font-size: 2.5rem;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+    line-height: 1;
+}
+
+.kb-portal-metric-value {
+    font-size: 1.8rem;
+    font-weight: 400;
+}
+
+.kb-guide-metric strong {
+    font-size: 2.1rem;
+    font-weight: 400;
+}
+
+.kb-system-metric strong {
+    font-weight: 400;
+}
+
+/* Label-large (14px/20, 500) para botões reais */
+.kb-button,
+.kb-button-primary {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+}
+
+/* Label-medium (12px/16, 500) para links/ações secundárias e chips */
+.kb-action-link,
+.kb-small-action,
+.kb-text-link,
+.kb-chip {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 500;
+}
+
+/* ── 3. Botões M3 ────────────────────────────────────────────────────────── */
+
+/* Tonal button. Variantes qualificadas por container: mesmo motivo do botão
+   primário abaixo — `<container> a { color: inherit; }` (0,1,1) venceria a cor
+   base (0,1,0) nos botões-âncora. Este bloco precisa vir ANTES do bloco do
+   primário: com especificidade igual (0,2,1), a ordem no arquivo garante que
+   `.kb-button-primary` continue vencendo em elementos com as duas classes. */
+.kb-dashboard a.kb-button,
+.kb-guide a.kb-button,
+.kb-model-guide a.kb-button,
+.kb-form-next-steps a.kb-button,
+.kb-button {
+    min-height: 2.75rem;
+    padding: 0.7rem 1.4rem;
+    background: var(--md-secondary-container);
+    border: none;
+    border-radius: var(--md-shape-full);
+    color: var(--md-on-secondary-container);
+}
+
+.kb-dashboard a.kb-button:hover,
+.kb-guide a.kb-button:hover,
+.kb-model-guide a.kb-button:hover,
+.kb-form-next-steps a.kb-button:hover,
+.kb-button:hover {
+    background: color-mix(in srgb, var(--md-on-secondary-container) 8%, var(--md-secondary-container));
+    border-color: transparent;
+    color: var(--md-on-secondary-container);
+}
+
+/* Filled button (primary) — texto escuro sobre primary claro do dark scheme.
+   As variantes qualificadas por container existem porque dashboard.css e
+   admin_ux.css declaram `<container> a { color: inherit; }` com especificidade
+   (0,1,1), que venceria `.kb-button-primary` sozinho (0,1,0) nos botões
+   renderizados como <a> — deixando o texto claro herdado (on-surface) sobre o
+   fundo primary claro, ilegível. Elevar a especificidade aqui evita editar os
+   arquivos originais. */
+.kb-dashboard a.kb-button-primary,
+.kb-guide a.kb-button-primary,
+.kb-model-guide a.kb-button-primary,
+.kb-form-next-steps a.kb-button-primary,
+.kb-button-primary {
+    background: var(--md-primary);
+    border-color: var(--md-primary);
+    color: var(--md-on-primary);
+}
+
+.kb-dashboard a.kb-button-primary:hover,
+.kb-guide a.kb-button-primary:hover,
+.kb-model-guide a.kb-button-primary:hover,
+.kb-form-next-steps a.kb-button-primary:hover,
+.kb-button-primary:hover {
+    background: color-mix(in srgb, var(--md-on-primary) 8%, var(--md-primary));
+    color: var(--md-on-primary);
+}
+
+/* ── 4. Assist chips M3 (kb-small-action, kb-chip) ───────────────────────── */
+/* Variantes qualificadas por container: vencem o `<container> a { color:
+   inherit; }` (0,1,1) que anularia a cor base dos chips-âncora. */
+.kb-dashboard a.kb-small-action,
+.kb-guide a.kb-small-action,
+.kb-model-guide a.kb-small-action,
+.kb-form-next-steps a.kb-small-action,
+.kb-dashboard a.kb-chip,
+.kb-guide a.kb-chip,
+.kb-model-guide a.kb-chip,
+.kb-form-next-steps a.kb-chip,
+.kb-small-action,
+.kb-chip {
+    background: transparent;
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--md-shape-full);
+    color: var(--md-on-surface-variant);
+}
+
+.kb-dashboard a.kb-small-action:hover,
+.kb-guide a.kb-small-action:hover,
+.kb-model-guide a.kb-small-action:hover,
+.kb-form-next-steps a.kb-small-action:hover,
+.kb-dashboard a.kb-chip:hover,
+.kb-guide a.kb-chip:hover,
+.kb-model-guide a.kb-chip:hover,
+.kb-form-next-steps a.kb-chip:hover,
+.kb-small-action:hover,
+.kb-chip:hover {
+    background: color-mix(in srgb, var(--md-on-surface-variant) 8%, transparent);
+    border-color: var(--md-outline);
+    color: var(--md-on-surface-variant);
+}
+
+.kb-chip .material-symbols-outlined {
+    color: var(--md-primary);
+}
+
+/* Ação secundária genérica (linha com ícone) — hover discreto, sem herdar o
+   azul antigo do tema anterior */
+.kb-action-link:hover {
+    border-color: var(--md-outline-variant);
+    color: var(--md-text, var(--md-on-surface));
+}
+
+.kb-action-link .material-symbols-outlined {
+    color: var(--md-primary);
+}
+
+.kb-action-link-primary {
+    background: var(--kb-primary-soft);
+    border-color: var(--md-primary);
+}
+
+/* ── 5. Ícones circulares e status pill ──────────────────────────────────── */
+.kb-icon,
+.kb-guide-hero-icon,
+.kb-model-guide-icon {
+    color: var(--kb-tone-color, var(--md-primary));
+}
+
+.kb-status-pill {
+    border-color: var(--md-outline-variant);
+}
+
+/* ── 6. Elevação de hover M3 (cards clicáveis) ───────────────────────────── */
+/* Usa o token kb elevado (não o --md de referência) para o hover clarear de
+   fato acima do fundo de repouso dos cards (#1D2024 → #2E323A). */
+.kb-card-clickable:hover {
+    background: var(--kb-surface-container-high);
+    border-color: var(--md-outline);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    transform: translateY(-1px);
+}
+
+/* ── 7. Foco visível consistente em todos os interativos kb- ─────────────── */
+.kb-card-clickable:focus-visible,
+.kb-button:focus-visible,
+.kb-button-primary:focus-visible,
+.kb-action-link:focus-visible,
+.kb-text-link:focus-visible,
+.kb-small-action:focus-visible,
+.kb-chip:focus-visible,
+.kb-guide-entry-card:focus-visible,
+.kb-portal-metric:focus-visible,
+.kb-readiness-item > a:focus-visible,
+.kb-mini-list a:focus-visible {
+    outline: 3px solid var(--md-primary);
+    outline-offset: 2px;
+}
+
+/* ── 8. Links de texto e itens de atividade ──────────────────────────────── */
+/* Variantes qualificadas por container: vencem o `<container> a { color:
+   inherit; }` (0,1,1) que anularia a cor primária dos links de texto. */
+.kb-dashboard a.kb-text-link,
+.kb-guide a.kb-text-link,
+.kb-model-guide a.kb-text-link,
+.kb-form-next-steps a.kb-text-link,
+.kb-text-link {
+    color: var(--md-primary);
+}
+
+.kb-dashboard a.kb-text-link:hover,
+.kb-guide a.kb-text-link:hover,
+.kb-model-guide a.kb-text-link:hover,
+.kb-form-next-steps a.kb-text-link:hover,
+.kb-text-link:hover {
+    color: var(--md-primary);
+    opacity: 0.85;
+}
+
+.kb-activity-title .material-symbols-outlined,
+.kb-recent-card-header .material-symbols-outlined {
+    color: var(--md-primary);
+}
+
+.kb-activity-name:hover {
+    color: var(--md-primary);
+}
+
+.kb-activity-status {
+    color: var(--md-on-surface-variant);
+}
+
+/* ── 9. Tons (cards de métrica/sistema) ──────────────────────────────────── */
+.kb-tone-primary {
+    --kb-tone-color: var(--md-primary);
+    --kb-tone-soft: var(--kb-primary-soft);
+}
+
+/* ── 10. Ícones "vazio"/neutros que sobraram com hex fixo do tema antigo ─── */
+.kb-empty-state .material-symbols-outlined,
+.kb-admin-empty-hint .material-symbols-outlined {
+    color: var(--md-on-surface-variant);
+}
+
+/* ── 11. Shell do unfold — polimento mínimo e seguro ─────────────────────── */
+/* Só raio e cor dos links da sidebar. Nada de position/z-index/width/display:
+   o restante do shell (largura, grid, offsets) é do Unfold e não é tocado. */
+#nav-sidebar a {
+    border-radius: var(--md-shape-full);
+}
+
+/* State layer M3 no hover dos itens do menu (só cor de fundo — não estiliza o
+   item ativo: as classes internas tailwind do Unfold são frágeis entre versões). */
+#nav-sidebar a:hover {
+    background-color: color-mix(in srgb, var(--md-primary) 10%, transparent);
+}
+
+/* ── 12. Passe expressivo contido — hero, status tonais e ícones ─────────── */
+
+/* Hero do dashboard e dos guias: superfície chapada com borda primária sutil
+   (sem gradiente). Título herda on-surface; eyebrow segue primary (regra base). */
+.kb-dashboard-header,
+.kb-guide-hero {
+    background: var(--kb-surface-container);
+    border-color: color-mix(in srgb, var(--md-primary) 20%, transparent);
+}
+
+/* Fundo tonal SÓ em componentes de status (Atenção agora, Saúde do sistema e
+   pills). Portal e guia ficam neutros — o tom aparece no número/ícone, como
+   antes. Este bloco precisa vir DEPOIS de `.kb-card-clickable:hover` (seção 6):
+   com especificidade empatada (0,2,0), a ordem mantém o fundo tonal no hover. */
+:is(.kb-metric-card, .kb-system-metric, .kb-status-pill):is(.kb-tone-primary, .kb-tone-success, .kb-tone-warning, .kb-tone-danger) {
+    background: color-mix(in srgb, var(--kb-tone-color) 10%, var(--kb-surface-container));
+    border-color: color-mix(in srgb, var(--kb-tone-color) 30%, transparent);
+}
+
+/* Hover do card de status clicável: aprofunda o tom em vez de trocar para o
+   cinza padrão (que apagaria o tinte no hover). */
+.kb-metric-card.kb-card-clickable:is(.kb-tone-primary, .kb-tone-success, .kb-tone-warning, .kb-tone-danger):hover {
+    background: color-mix(in srgb, var(--kb-tone-color) 15%, var(--kb-surface-container-high));
+}
+
+/* Containers de ícone maiores com tint sutil (círculo preservado). */
+.kb-icon {
+    width: 2.9rem;
+    height: 2.9rem;
+    background: color-mix(in srgb, var(--kb-tone-color, var(--md-primary)) 15%, var(--md-surface-container));
+}
+
+/* ── 13. Unificação do shell — tipografia e polimentos pontuais ──────────── */
+
+/* Roboto no admin inteiro (shell unfold + blocos kb) — só tipografia. */
+body {
+    font-family: 'Roboto', 'Inter', system-ui, sans-serif;
+}
+
+/* Select de ações da changelist: o unfold aplica a utility `!bg-white/20`
+   (declaração !important dentro de @layer utilities). Para vencer um
+   !important em camada, esta regra vive numa camada própria declarada ANTES
+   das camadas do unfold (este arquivo é parseado antes do styles.css dele;
+   entre declarações !important, a camada anterior vence). Só cores. */
+@layer m3_fixes {
+    #changelist-actions select[name="action"],
+    .actions select[name="action"] {
+        background-color: var(--md-surface-container-high) !important;
+        border-color: var(--md-outline-variant) !important;
+        color: var(--md-on-surface) !important;
+    }
+}
+
+/* Navegação sutilmente separada do conteúdo (surface-container-low). */
+#nav-sidebar {
+    background-color: #191C20;
+}
+
+/* Hover de linha da tabela de resultados: NÃO estilizado aqui de propósito —
+   o unfold 0.87 já tem hover nativo (`.data-row:hover` em @layer utilities);
+   sobrepor um segundo fundo criaria tints imprevisíveis. */

@@ -120,6 +120,12 @@ class Article(TimeStampedModel, SEOModel):
         ordering = ['-published_at']
         verbose_name = 'Artigo'
         verbose_name_plural = 'Artigos'
+        indexes = [
+            # Cobre a query mais comum do front (Article.on_site.filter(status=...).order_by('-published_at')).
+            models.Index(fields=['site', 'status', '-published_at'], name='news_art_site_status_pub'),
+            # Cobre o filtro "aguardando newsletter" (status=published, newsletter_sent_at__isnull=True) do admin/dashboard.
+            models.Index(fields=['status', 'newsletter_sent_at'], name='news_art_status_newsletter'),
+        ]
 
     def __str__(self):
         return self.title

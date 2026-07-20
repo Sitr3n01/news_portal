@@ -1,6 +1,8 @@
-{# Bloco de embed (YouTube/Instagram/TikTok) com facade clique-para-carregar.
-   O iframe só é injetado no clique (performance + privacidade: sem cookies de
-   terceiros antes da interação). Os domínios estão liberados no CSP frame-src. #}
+{% comment %}
+Bloco de embed (YouTube/Instagram/TikTok) com facade clique-para-carregar.
+O iframe só é injetado no clique (performance + privacidade: sem cookies de
+terceiros antes da interação). Os domínios estão liberados no CSP frame-src.
+{% endcomment %}
 {% with e=block.embed %}
 {% if e %}
 <figure class="article-block-embed embed-{{ e.provider }}" x-data="{ loaded: false }">

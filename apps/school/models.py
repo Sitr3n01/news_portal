@@ -1,6 +1,7 @@
 from django.contrib.sites.managers import CurrentSiteManager
 from django.contrib.sites.models import Site
 from django.db import models
+from django.urls import reverse
 
 from apps.common.models import SEOModel, TimeStampedModel
 
@@ -27,6 +28,9 @@ class Page(TimeStampedModel, SEOModel):
 
     def __str__(self):
         return f'{self.title} ({self.site.name})'
+
+    def get_absolute_url(self):
+        return reverse('school:page_detail', kwargs={'slug': self.slug})
 
     def save(self, *args, **kwargs):
         from apps.common.sanitization import sanitize_content

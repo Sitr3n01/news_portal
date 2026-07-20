@@ -1,4 +1,6 @@
 {% load sanitize %}
-{# Saída direta (sem wrapper) para que <p>/<h2> fiquem como filhos diretos de
-   .article-body — preserva o drop-cap do primeiro parágrafo. Já sanitizado. #}
+{% comment %}
+Saída direta (sem wrapper) para que <p>/<h2> fiquem como filhos diretos de
+.article-body — preserva o drop-cap do primeiro parágrafo. Já sanitizado.
+{% endcomment %}
 {{ block.rich_text|sanitize_html }}

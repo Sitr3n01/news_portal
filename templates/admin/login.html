@@ -41,6 +41,13 @@
 
     <form action="{{ app_path }}" method="post" id="login-form">
         {% csrf_token %}
+        {% comment %}
+        Sem este campo, um acesso direto a /admin/login/ (sem ?next= na URL)
+        cai no fallback de LOGIN_REDIRECT_URL em vez do painel — o Unfold
+        0.87.0 renderiza este form sem o hidden "next" que o próprio
+        AdminSite.login() já disponibiliza no contexto para este fim.
+        {% endcomment %}
+        <input type="hidden" name="next" value="{{ next }}">
 
         {% include "unfold/helpers/field.html" with field=form.username %}
 

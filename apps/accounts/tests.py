@@ -124,3 +124,26 @@ def test_dashboard_settings_tab_renders_photo_card(client, reader):
     content = response.content.decode()
     assert 'Foto de Perfil' in content
     assert 'enctype="multipart/form-data"' in content
+
+
+# ── Redirect pós-login (LOGIN_REDIRECT_URL) ──────────────────────────────────
+# Sem LOGIN_REDIRECT_URL configurado, o Django cai no default '/accounts/profile/',
+# rota inexistente aqui (o único path 'profile/' é update_profile, POST-only) —
+# um login sem ?next= (ex.: acesso direto a /accounts/login/) caía em 405.
+
+@pytest.mark.django_db
+def test_login_without_next_redirects_to_news_list(client, django_user_model):
+    django_user_model.objects.create_user(username='u1', password='senha-forte-123')
+
+    response = client.post(reverse('accounts:login'), {'username': 'u1', 'password': 'senha-forte-123'})
+
+    assert response.status_code == 302
+    assert response.url == reverse('news:list')
+
+
+@pytest.mark.django_db
+def test_already_authenticated_visiting_login_redirects_to_news_list(client, reader):
+    response = client.get(reverse('accounts:login'))
+
+    assert response.status_code == 302
+    assert response.url == reverse('news:list')

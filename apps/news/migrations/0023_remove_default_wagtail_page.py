@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('news', '0022_newshomeconfig'),
-        ('wagtailcore', '0098_userprofile'),
+        ('wagtailcore', '0097_baselogentry_uuid_action_timestamp_indexes'),
     ]
 
     operations = [

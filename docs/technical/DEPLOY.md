@@ -208,27 +208,51 @@ sudo /usr/local/sbin/kellysys-deploy
 > sobrevive de qualquer forma (o campo `content` é a rede de segurança), mas
 > imagem e embed não voltam.
 >
-> Com o código novo já buildado e **antes de deixar o `migrate` rodar**:
+> **O `migrate` precisa rodar em DUAS etapas**, e a ordem não é opcional. Os dois
+> comandos de ponte leem `Article` e criam `cms_media.Image`, então dependem do
+> schema novo (`news.0015`–`0020` e `cms_media.0001`) já existir. Mas a `0021`, que
+> apaga a tabela, vem no mesmo `migrate`. Daí a parada no meio: `migrate news 0020`
+> aplica tudo de que os comandos precisam e **para antes** da `0021` — verificado no
+> grafo de migrations, ela não entra nesse plano.
+>
+> Com o código novo já buildado:
 >
 > ```bash
-> # 1. Capas dos artigos -> cms_media.Image  (dry-run primeiro, sem --apply)
+> # ETAPA 1 — schema novo, SEM apagar a tabela de blocos ainda.
+> docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py migrate news 0020 --noinput
+> ```
+>
+> ```bash
+> # 2. Capas dos artigos -> cms_media.Image  (dry-run primeiro, sem --apply)
 > docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py migrate_featured_images
+> ```
+>
+> ```bash
 > docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py migrate_featured_images --apply
+> ```
 >
-> # 2. Imagens usadas nos blocos de conteúdo -> cms_media.Image
+> ```bash
+> # 3. Imagens usadas nos blocos de conteúdo -> cms_media.Image (dry-run primeiro)
 > docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py migrate_block_media
+> ```
+>
+> ```bash
 > docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py migrate_block_media --apply
+> ```
 >
-> # 3. Portão: prevê exatamente o que o migrate fará. Somente leitura.
+> ```bash
+> # 4. Portão: prevê exatamente o que a 0021 fará. Somente leitura.
 > docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py audit_article_blocks --detalhado
+> ```
 >
-> # 4. Só agora:
+> ```bash
+> # ETAPA 2 — só depois do portão aprovar: converte os blocos e apaga a tabela.
 > docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py migrate --noinput
 > ```
 >
-> Os passos 1 e 2 são **idempotentes** (o que já foi convertido é ignorado) e sem
+> Os passos 2 e 3 são **idempotentes** (o que já foi convertido é ignorado) e sem
 > `--apply` **não gravam nada, nem no banco nem no disco** — pode repetir à
-> vontade. O passo 3 é o que decide se pode seguir:
+> vontade. O passo 4 é o que decide se pode seguir:
 >
 > - **"Cobertura de 100%"** → siga para o passo 4.
 > - **"NÃO RODE O MIGRATE"** → há blocos que se perderiam. Volte ao passo 2 e
@@ -237,8 +261,11 @@ sudo /usr/local/sbin/kellysys-deploy
 > - **"N bloco(s) serão rebaixados"** → nenhum texto se perde, mas aquelas
 >   imagens/embeds viram parágrafo de legenda. Decisão sua se é aceitável.
 >
-> Tenha o backup do PostgreSQL em mão antes do passo 4 — o deploy aprovado já cria
-> um em `/opt/kelly_sys/backups/`, mas neste release vale conferir que existe.
+> Antes de qualquer coisa, tenha **dois** backups em mão: o dump do PostgreSQL e uma
+> cópia do diretório `media/`. O dump sozinho não recupera nada se os arquivos de
+> imagem se perderem — a `cms_media.Image` aponta para arquivo em disco. O deploy
+> aprovado já cria o dump em `/opt/kelly_sys/backups/`, mas neste release confira à
+> mão que ele existe e não está vazio.
 
 1. Abra/mergeie mudança em `master`.
 2. Rode o workflow manual **Deploy Production** em `master`.

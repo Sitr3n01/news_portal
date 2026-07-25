@@ -42,6 +42,21 @@ INSTALLED_APPS = [
     'wagtail.images',
     'wagtail.search',
     'wagtail.sites',
+    # OBRIGATÓRIO, ainda que os usuários sejam gerenciados no /admin/ do Django.
+    # `wagtail.users` é onde vive o modelo UserProfile (preferências de tema,
+    # densidade e notificação de cada conta), e wagtail.admin o usa em
+    # admin/mail.py, admin/forms/account.py e nas templatetags — ou seja, no
+    # caminho dos e-mails de workflow e da tela de conta.
+    # Sem o app na lista, o Django não acha `wagtail.users` no registro e resolve
+    # o app_label subindo o pacote até `wagtail` (label `wagtailcore`): o modelo
+    # passa a se chamar wagtailcore.UserProfile e esperar a tabela
+    # `wagtailcore_userprofile`, que NENHUMA migration do wagtailcore cria. O
+    # resultado é tabela inexistente em runtime.
+    # As telas de Usuários/Grupos que este app acrescenta ao /cms/ são protegidas
+    # pelas permissões `wagtailusers`, que nenhum grupo de cargo recebe
+    # (ver apps/accounts/admin_roles.GENERAL_ADMIN_APP_LABELS), então só
+    # superusuário as enxerga.
+    'wagtail.users',
     'wagtail.contrib.table_block',
 
     # Third-party

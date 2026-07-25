@@ -15,6 +15,10 @@ django-axes>=6.0
 bleach[css]>=6.0
 django-csp>=4.0
 httpx>=0.27
-wagtail>=7.4,<7.5
+# Piso em 7.4.2 (e não 7.4): as migrations de apps/news e apps/cms_media dependem
+# de `wagtailcore.0097_baselogentry_uuid_action_timestamp_indexes`, o último nó do
+# grafo nesta série. Uma 7.4.x anterior sem esse nó faz o `migrate` morrer antes da
+# primeira migration. Ver o guard em apps/common/tests.py.
+wagtail>=7.4.2,<7.5
 django-modelcluster>=6.4
 django-taggit>=6.1

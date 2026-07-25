@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
         ('cms_media', '0001_initial'),
         ('news', '0019_backfill_content_from_body'),
         ('sites', '0002_alter_domain_unique'),
-        ('wagtailcore', '0098_userprofile'),
+        ('wagtailcore', '0097_baselogentry_uuid_action_timestamp_indexes'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

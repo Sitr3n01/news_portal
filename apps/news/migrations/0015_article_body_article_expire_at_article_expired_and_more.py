@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('news', '0014_content_to_blocks'),
-        ('wagtailcore', '0098_userprofile'),
+        ('wagtailcore', '0097_baselogentry_uuid_action_timestamp_indexes'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

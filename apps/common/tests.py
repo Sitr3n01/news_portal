@@ -362,3 +362,63 @@ def test_admin_news_guide_retired():
     """O guia editorial foi aposentado — a rota não existe mais."""
     with pytest.raises(NoReverseMatch):
         reverse('admin_news_guide')
+
+
+# ── Integridade do grafo de migrations ─────────────────────────────────────
+
+
+def test_migration_graph_loads_without_missing_dependencies():
+    """Toda dependência declarada por uma migration existe de fato.
+
+    Este teste nasceu de um deploy que quase foi: quatro migrations de `news`
+    declaravam depender de `wagtailcore.0098_userprofile`, que NÃO existe no
+    Wagtail 7.4.2. O arquivo estava presente na máquina de desenvolvimento
+    apenas como resquício de outra versão instalada antes — órfão, fora do
+    RECORD da distribuição. Localmente tudo passava; em qualquer instalação
+    limpa (CI, produção) o `migrate` morria antes de aplicar a primeira
+    migration, com 267 erros de coleta e nenhuma pista do motivo.
+
+    Construir o grafo é o que dá a mensagem direta: aponta a migration e a
+    dependência que falta.
+    """
+    from django.db.migrations.exceptions import NodeNotFoundError
+    from django.db.migrations.loader import MigrationLoader
+
+    try:
+        loader = MigrationLoader(None, ignore_no_migrations=True)
+        loader.graph.validate_consistency()
+    except NodeNotFoundError as exc:
+        pytest.fail(
+            f'Migration com dependência inexistente: {exc}\n'
+            'Se a dependência é de um app de terceiro (wagtailcore, taggit...), '
+            'confira se a versão fixada em requirements/base.txt realmente traz '
+            'aquela migration — e se o seu venv não tem arquivo órfão de outra versão.'
+        )
+
+
+def test_project_migrations_reference_existing_wagtail_nodes():
+    """As dependências de wagtailcore usadas pelo projeto existem no Wagtail instalado.
+
+    Complementa o teste acima com uma mensagem específica: em vez de "nó
+    ausente", diz qual migration do projeto aponta para onde e o que o Wagtail
+    instalado realmente oferece.
+    """
+    from django.db.migrations.loader import MigrationLoader
+
+    loader = MigrationLoader(None, ignore_no_migrations=True)
+    nos_wagtailcore = {nome for app, nome in loader.disk_migrations if app == 'wagtailcore'}
+    assert nos_wagtailcore, 'Nenhuma migration de wagtailcore encontrada — Wagtail instalado?'
+
+    apps_do_projeto = {'news', 'cms_media', 'common', 'accounts', 'school', 'social'}
+    faltando = []
+    for (app, nome), migration in loader.disk_migrations.items():
+        if app not in apps_do_projeto:
+            continue
+        for dep_app, dep_nome in migration.dependencies:
+            if dep_app == 'wagtailcore' and dep_nome not in nos_wagtailcore:
+                faltando.append(f'{app}.{nome} -> wagtailcore.{dep_nome}')
+
+    assert not faltando, (
+        'Migrations do projeto dependem de nós de wagtailcore que não existem na '
+        f'versão instalada: {faltando}. Maior nó disponível: {max(nos_wagtailcore)}'
+    )

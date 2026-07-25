@@ -86,7 +86,12 @@ def _remove_default_workflow(apps, schema_editor):
 
     article_ct = ContentType.objects.filter(app_label='news', model='article').first()
     if article_ct:
-        WorkflowContentType.objects.filter(content_type=article_ct).delete()
+        # Filtrar por `content_type_id`, não pela instância: no sentido reverso o
+        # ContentType histórico devolvido por apps.get_model não é a mesma classe
+        # que o campo espera, e passar a instância levanta
+        # ValueError: Cannot query "ContentType object (N)": Must be "ContentType"
+        # instance. Comparar a chave contorna a checagem de tipo.
+        WorkflowContentType.objects.filter(content_type_id=article_ct.pk).delete()
 
     WorkflowTask.objects.filter(workflow__name='Moderação Editorial').delete()
     Task.objects.filter(name='Aprovação Editorial').delete()
@@ -97,7 +102,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('news', '0016_alter_article_body'),
-        ('wagtailcore', '0098_userprofile'),
+        ('wagtailcore', '0097_baselogentry_uuid_action_timestamp_indexes'),
     ]
 
     operations = [

@@ -1,13 +1,15 @@
-{# Bloco de embed (YouTube/Instagram/TikTok) com facade clique-para-carregar.
-   O iframe só é injetado no clique (performance + privacidade: sem cookies de
-   terceiros antes da interação). Os domínios estão liberados no CSP frame-src. #}
-{% with e=block.embed %}
+{% comment %}
+Bloco de embed (StreamField) — facade clique-para-carregar.
+Usa o mesmo padrão dos blocos ArticleBlock: resolve_embed() preenche
+embed_data no contexto via EmbedBlock.get_context().
+{% endcomment %}
+{% with e=embed_data %}
 {% if e %}
 <figure class="article-block-embed embed-{{ e.provider }}" x-data="{ loaded: false }">
     <div class="embed-frame" style="aspect-ratio: {{ e.aspect }};">
         <template x-if="!loaded">
             <button type="button" @click="loaded = true" class="embed-facade group"
-                    :aria-label="t('Carregar vídeo do {{ e.provider_label }}', 'Load {{ e.provider_label }} video')">
+                    :aria-label="'Carregar vídeo do {{ e.provider_label }}'">
                 {% if e.thumbnail_url %}
                 <img src="{{ e.thumbnail_url }}" alt="" loading="lazy" class="embed-thumb">
                 {% else %}
@@ -27,8 +29,8 @@
                     referrerpolicy="strict-origin-when-cross-origin" class="embed-iframe"></iframe>
         </template>
     </div>
-    {% if block.caption %}
-    <figcaption>{{ block.caption }}</figcaption>
+    {% if value.legenda %}
+    <figcaption>{{ value.legenda }}</figcaption>
     {% endif %}
 </figure>
 {% endif %}

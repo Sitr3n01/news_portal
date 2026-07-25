@@ -1,8 +1,6 @@
 from django import forms
-from django.contrib import admin, messages
+from django.contrib import admin
 from django.contrib.sites.models import Site
-from django.shortcuts import redirect
-from django.urls import path
 from django.utils.html import format_html
 from django.utils.text import Truncator
 from unfold.admin import ModelAdmin
@@ -174,40 +172,14 @@ class SocialPostAdmin(AdminUXMixin, ModelAdmin):
         updated = queryset.update(is_visible=False)
         self.message_user(request, f'{updated} post(s) ocultado(s) da home.')
 
-    # ── Toggles de exibição da seção (no topo da lista de posts) ──────────────
+    # ── Resumo somente leitura da seção (no topo da lista de posts) ────────────
     def _current_feed_settings(self):
-        """SiteExtension do site atual — guarda os toggles da seção da home."""
+        """SiteExtension do site atual — alimenta o resumo somente leitura."""
         from apps.common.models import SiteExtension
         ext, _ = SiteExtension.objects.get_or_create(site=Site.objects.get_current())
         return ext
-
-    def get_urls(self):
-        urls = super().get_urls()
-        custom = [
-            path(
-                'exibicao-na-home/',
-                self.admin_site.admin_view(self.toggle_feed_view),
-                name='social_socialpost_toggle_feed',
-            ),
-        ]
-        return custom + urls
 
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
         extra_context['feed_settings'] = self._current_feed_settings()
         return super().changelist_view(request, extra_context=extra_context)
-
-    def toggle_feed_view(self, request):
-        redirect_url = redirect('admin:social_socialpost_changelist')
-        if request.method != 'POST':
-            return redirect_url
-        if not request.user.has_perm('common.change_siteextension'):
-            messages.error(request, 'Você não tem permissão para alterar a exibição da seção.')
-            return redirect_url
-        ext = self._current_feed_settings()
-        ext.social_section_enabled = 'enabled' in request.POST
-        ext.social_show_instagram = 'show_instagram' in request.POST
-        ext.social_show_tiktok = 'show_tiktok' in request.POST
-        ext.save(update_fields=['social_section_enabled', 'social_show_instagram', 'social_show_tiktok'])
-        messages.success(request, 'Exibição da seção de redes na home atualizada.')
-        return redirect_url

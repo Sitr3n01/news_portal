@@ -1,0 +1,264 @@
+/**
+ * Painel "Redação" — dashboard customizado do Wagtail (/cms/).
+ *
+ * Carregado globalmente via hook `insert_global_admin_css`
+ * (apps/news/wagtail_hooks.py), então todo seletor aqui é escopado pelas
+ * classes exclusivas com prefixo "redacao-" usadas nos templates de
+ * templates/news/wagtail/, para não vazar estilo para o resto do admin.
+ *
+ * Cores/bordas/sombras usam exclusivamente as custom properties nativas
+ * do Wagtail (--w-color-*, ver .venv/.../wagtailadmin/css/core.css), o que
+ * faz o tema escuro do admin funcionar automaticamente sem media query
+ * própria. Nenhuma cor hex/rgb/hsl literal é usada neste arquivo.
+ */
+
+/* ---------------------------------------------------------------------
+   Cabeçalho da redação (redacao_header_panel.html)
+   --------------------------------------------------------------------- */
+
+.redacao-header-intro {
+    margin-bottom: 1rem;
+    padding: 0 1.25rem;
+}
+
+.redacao-greeting {
+    color: var(--w-color-text-label);
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 0 0 .25rem;
+}
+
+.redacao-header-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 1.5rem;
+    margin-bottom: 1.25rem;
+    padding: 0 1.25rem;
+}
+
+.redacao-portal-link {
+    align-items: center;
+    color: var(--w-color-text-link-default);
+    display: inline-flex;
+    gap: .3rem;
+    text-decoration: none;
+}
+
+.redacao-portal-link:hover,
+.redacao-portal-link:focus {
+    color: var(--w-color-text-link-hover);
+    text-decoration: underline;
+}
+
+.redacao-portal-link .icon {
+    height: .85em;
+    width: .85em;
+}
+
+/* Divisor full-bleed (a borda acompanha o padding do próprio elemento,
+   então cobre toda a largura do conteúdo do painel). Último elemento do
+   painel: padding-bottom (não margin) garante espaço antes da borda do
+   card mesmo se margens não colapsarem como esperado. */
+.redacao-quick-links {
+    border-top: 1px solid var(--w-color-border-furniture);
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 1rem 1.25rem 1.25rem;
+}
+
+.redacao-quick-links a {
+    color: var(--w-color-text-link-default);
+    text-decoration: none;
+}
+
+.redacao-quick-links a:hover,
+.redacao-quick-links a:focus {
+    color: var(--w-color-text-link-hover);
+    text-decoration: underline;
+}
+
+/* ---------------------------------------------------------------------
+   Cartões de status (status_cards_panel.html)
+   --------------------------------------------------------------------- */
+
+.redacao-status-cards {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    padding: 0 1.25rem 1.25rem;
+}
+
+.redacao-status-card {
+    background-color: var(--w-color-surface-page);
+    border: 1px solid var(--w-color-border-furniture);
+    border-radius: 5px;
+    color: var(--w-color-text-label);
+    display: flex;
+    flex-direction: column;
+    gap: .375rem;
+    padding: 1.25rem 1rem;
+    text-decoration: none;
+    transition: background-color .1s ease, border-color .1s ease;
+}
+
+.redacao-status-card:hover,
+.redacao-status-card:focus {
+    background-color: var(--w-color-surface-button-hover);
+    border-color: var(--w-color-border-interactive-more-contrast);
+    text-decoration: none;
+}
+
+.redacao-status-card__icon {
+    color: var(--w-color-icon-secondary);
+    height: 1.5rem;
+    width: 1.5rem;
+}
+
+.redacao-status-card__count {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.redacao-status-card__label {
+    color: var(--w-color-text-meta);
+    font-size: .95rem;
+}
+
+/* ---------------------------------------------------------------------
+   Continue trabalhando (continue_working_panel.html)
+   --------------------------------------------------------------------- */
+
+.redacao-continue-card {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    padding: 0 1.25rem 1.25rem;
+}
+
+.redacao-continue-card__thumb {
+    align-items: center;
+    background-color: var(--w-color-surface-field);
+    border: 1px solid var(--w-color-border-furniture);
+    border-radius: 5px;
+    box-sizing: border-box;
+    display: flex;
+    flex-shrink: 0;
+    height: 5rem;
+    justify-content: center;
+    overflow: hidden;
+    width: 5rem;
+}
+
+.redacao-continue-card__thumb img {
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+}
+
+.redacao-continue-card__thumb .icon {
+    color: var(--w-color-icon-secondary);
+    height: 2rem;
+    width: 2rem;
+}
+
+.redacao-continue-card__info {
+    flex: 1 1 16rem;
+    min-width: 0;
+}
+
+.redacao-continue-card__title {
+    color: var(--w-color-text-label);
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0 0 .25rem;
+    overflow-wrap: anywhere;
+}
+
+.redacao-continue-card__meta {
+    align-items: center;
+    display: flex;
+    gap: .35rem;
+    margin: 0 0 .75rem;
+}
+
+.redacao-continue-card__meta .icon {
+    color: var(--w-color-icon-secondary);
+    flex-shrink: 0;
+    height: 1em;
+    width: 1em;
+}
+
+/* ---------------------------------------------------------------------
+   Notícias recentes (recent_articles_panel.html)
+   --------------------------------------------------------------------- */
+
+.redacao-panel-header-link {
+    margin: 0;
+    padding: 0 1.25rem 1rem;
+}
+
+/* Estado vazio ("Nenhuma notícia recente."): único <p> sem classe própria
+   no template, sempre logo após .redacao-panel-header-link — selecionado
+   via irmão adjacente para manter o mesmo respiro horizontal do painel. */
+.redacao-panel-header-link + p {
+    color: var(--w-color-text-meta);
+    padding: 0 1.25rem 1.25rem;
+}
+
+.redacao-recent-articles {
+    width: 100%;
+}
+
+.redacao-recent-articles td {
+    padding-block: .6rem;
+}
+
+.redacao-recent-articles__thumb {
+    padding-inline-start: 1.25rem;
+    width: 2.75rem;
+}
+
+.redacao-recent-articles__thumb-img {
+    border: 1px solid var(--w-color-border-furniture);
+    border-radius: 4px;
+    box-sizing: border-box;
+    display: block;
+    height: 2.5rem;
+    object-fit: cover;
+    width: 2.5rem;
+}
+
+.redacao-recent-articles th:last-child,
+.redacao-recent-articles td:last-child {
+    padding-inline-end: 1.25rem;
+}
+
+.redacao-recent-articles tbody tr:hover {
+    background-color: var(--w-color-surface-button-hover);
+}
+
+.redacao-status-tag {
+    align-items: center;
+    background-color: var(--w-color-surface-status-label);
+    border: 1px solid var(--w-color-text-status-label);
+    border-radius: 1.5rem;
+    color: var(--w-color-text-status-label);
+    display: inline-flex;
+    font-size: .85em;
+    font-weight: 500;
+    gap: .3rem;
+    padding: .15rem .6rem;
+    white-space: nowrap;
+}
+
+.redacao-status-tag .icon {
+    flex-shrink: 0;
+    height: .85em;
+    width: .85em;
+}

@@ -1,0 +1,24 @@
+<article class="flex flex-col gap-4 group cursor-pointer">
+    <a href="{% url 'news:article_detail' article.slug %}" class="block">
+        <div class="w-full aspect-[3/2] overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 mb-2">
+            {% if article.has_cover_image %}
+            <div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                style="background-image: url('{{ article.cover_image_url }}');">
+            </div>
+            {% else %}
+            <div class="w-full h-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl text-slate-400">image</span>
+            </div>
+            {% endif %}
+        </div>
+        {% if article.category %}
+        <span class="font-ui text-xs font-bold text-primary tracking-widest uppercase">{{ article.category.name }}</span>
+        {% endif %}
+        <h3 class="text-2xl font-bold leading-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors">
+            {{ article.title }}
+        </h3>
+        <p class="text-base text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3">
+            {{ article.excerpt|default:article.content|striptags|truncatewords:20 }}
+        </p>
+    </a>
+</article>

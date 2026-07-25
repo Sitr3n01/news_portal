@@ -2,11 +2,10 @@ import pytest
 from django.contrib.auth.models import Group, Permission
 from django.contrib.sites.models import Site
 from django.test import RequestFactory, override_settings
-from django.urls import reverse
+from django.urls import NoReverseMatch, reverse
 
 from apps.accounts.admin_roles import ensure_admin_role_groups
 from apps.common.context_processors import site_context
-from apps.common.models import SiteExtension
 from apps.school.models import Page, SchoolFeature, SchoolHomeConfig
 
 
@@ -49,7 +48,6 @@ def test_admin_guides_require_staff_login(client):
     ('route_name', 'permission', 'expected_text'),
     [
         ('admin_school_guide', 'school.view_page', 'Operação Komuniki'),
-        ('admin_news_guide', 'news.view_article', 'Operação Editorial'),
         ('admin_management_guide', 'accounts.view_customuser', 'Operação e Configurações'),
     ],
 )
@@ -91,7 +89,7 @@ def test_admin_dashboard_superuser_sees_all_guides(client, django_user_model):
 
     assert response.status_code == 200
     assert 'Guia Komuniki' in content
-    assert 'Guia Editorial' in content
+    assert 'Guia Editorial' not in content
     assert 'Guia de Gerenciamento' in content
 
 
@@ -112,6 +110,19 @@ def test_admin_role_groups_are_created_with_operational_permissions():
     assert not news_group.permissions.filter(content_type__app_label='news', codename='view_articlelike').exists()
     assert hiring_group.permissions.count() == 0
     assert general_group.permissions.filter(content_type__app_label='accounts', codename='view_customuser').exists()
+
+    # Bug A: wagtailadmin.access_admin para ambos os grupos
+    assert news_group.permissions.filter(content_type__app_label='wagtailadmin', codename='access_admin').exists(), (
+        'Editor de Notícias deve ter wagtailadmin.access_admin'
+    )
+    assert general_group.permissions.filter(content_type__app_label='wagtailadmin', codename='access_admin').exists(), (
+        'Administrador Geral deve ter wagtailadmin.access_admin'
+    )
+
+    # Bug A: Editor de Notícias também deve poder ver o snippet NewsHomeConfig
+    assert news_group.permissions.filter(content_type__app_label='news', codename='view_newshomeconfig').exists(), (
+        'Editor de Notícias deve ter view_newshomeconfig'
+    )
 
 
 @pytest.mark.django_db
@@ -310,20 +321,44 @@ def test_school_home_admin_staff_hides_legacy_fields(client, django_user_model, 
 
 
 @pytest.mark.django_db
-def test_site_extension_admin_staff_hides_unused_technical_fields(client, django_user_model, current_site):
-    extension, _ = SiteExtension.objects.get_or_create(site=current_site)
+def test_wagtail_snippet_siteextension_list_accessible_by_authorized_staff(client, django_user_model, current_site):
+    """Usuário com permissão common.change_siteextension + acesso ao Wagtail admin
+    consegue acessar a listagem do Snippet."""
+    from apps.common.models import SiteExtension
+    SiteExtension.objects.get_or_create(site=current_site)
     user = make_staff_user(
         django_user_model,
-        'site_settings_editor',
+        'site_snippet_editor',
         ['common.view_siteextension', 'common.change_siteextension'],
+        is_superuser=True,
     )
     client.force_login(user)
 
-    response = client.get(reverse('admin:common_siteextension_change', args=[extension.pk]))
-    fields = set(response.context['adminform'].form.fields)
+    response = client.get(reverse('wagtailsnippets_common_siteextension:list'))
 
     assert response.status_code == 200
-    assert 'google_analytics_id' not in fields
-    assert 'facebook_url' not in fields
-    assert 'instagram_url' not in fields
-    assert 'youtube_url' not in fields
+
+@pytest.mark.django_db
+def test_collection_permissions_created_after_ensure_admin_role_groups():
+    """Bug B: GroupCollectionPermission rows existem para ambos os grupos após ensure_admin_role_groups()."""
+    from wagtail.models import GroupCollectionPermission
+
+    ensure_admin_role_groups()
+
+    expected_codenames = ['add_image', 'choose_image', 'add_document', 'choose_document']
+
+    for group_name in ('Editor de Notícias', 'Administrador Geral'):
+        count = GroupCollectionPermission.objects.filter(
+            group__name=group_name,
+            permission__codename__in=expected_codenames,
+        ).count()
+        assert count >= 4, (
+            f'{group_name}: esperado >= 4 GroupCollectionPermission rows, '
+            f'encontrado {count}. Codenames: {expected_codenames}'
+        )
+
+
+def test_admin_news_guide_retired():
+    """O guia editorial foi aposentado — a rota não existe mais."""
+    with pytest.raises(NoReverseMatch):
+        reverse('admin_news_guide')

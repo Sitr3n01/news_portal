@@ -445,27 +445,7 @@ def test_home_hides_instagram_button_and_cards_when_show_instagram_off(client, c
 
 
 @pytest.mark.django_db
-def test_toggle_feed_view_updates_site_settings(client, current_site, django_user_model):
-    admin = django_user_model.objects.create_superuser(
-        username='admintoggle', email='admintoggle@example.com', password='pw-12345!',
-    )
-    client.force_login(admin)
-    ext, _ = SiteExtension.objects.update_or_create(
-        site=current_site,
-        defaults={'social_section_enabled': True, 'social_show_instagram': True, 'social_show_tiktok': True},
-    )
-
-    # Envia só "enabled" e "show_instagram" marcados: TikTok deve desligar.
-    client.post(reverse('admin:social_socialpost_toggle_feed'), {'enabled': 'on', 'show_instagram': 'on'})
-
-    ext.refresh_from_db()
-    assert ext.social_section_enabled is True
-    assert ext.social_show_instagram is True
-    assert ext.social_show_tiktok is False
-
-
-@pytest.mark.django_db
-def test_socialpost_changelist_renders_feed_toggles(client, current_site, django_user_model):
+def test_socialpost_changelist_renders_readonly_feed_summary(client, current_site, django_user_model):
     admin = django_user_model.objects.create_superuser(
         username='adminlist', email='adminlist@example.com', password='pw-12345!',
     )
@@ -475,9 +455,11 @@ def test_socialpost_changelist_renders_feed_toggles(client, current_site, django
     content = client.get(reverse('admin:social_socialpost_changelist')).content.decode()
 
     assert 'Exibição na home' in content
-    assert 'name="enabled"' in content
-    assert 'name="show_instagram"' in content
-    assert 'name="show_tiktok"' in content
+    assert 'Editar no CMS' in content
+    # A tela é somente leitura — sem formulário editável para os toggles.
+    assert 'name="enabled"' not in content
+    assert 'name="show_instagram"' not in content
+    assert 'name="show_tiktok"' not in content
 
 
 @pytest.mark.django_db

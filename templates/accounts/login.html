@@ -57,11 +57,16 @@
             </button>
         </form>
 
-        <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
+        <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-center space-y-2">
             <p class="text-sm font-ui text-slate-500">
                 <span x-text="t('Não tem uma conta?', 'Don\'t have an account?')">Não tem uma conta?</span>
                 <a href="{% url 'accounts:register' %}" class="font-bold text-primary hover:underline ml-1"
                     x-text="t('Criar conta', 'Sign up')">Criar conta</a>
+            </p>
+            <p class="text-sm font-ui text-slate-500">
+                <span x-text="t('É da equipe?', 'On the team?')">É da equipe?</span>
+                <a href="{% url 'panel:login' %}" class="font-bold text-primary hover:underline ml-1"
+                    x-text="t('Publicar ou administrar', 'Publish or administer')">Publicar ou administrar</a>
             </p>
         </div>
     </div>

@@ -197,7 +197,7 @@
         });
     " class="flex flex-col min-h-screen">
 
-        {% include 'components/navbar_news.html' %}
+        {% block navbar %}{% include 'components/navbar_news.html' %}{% endblock %}
 
         <!-- Flash Messages -->
         {% if messages %}
@@ -216,7 +216,7 @@
         {% block content %}
         {% endblock %}
 
-        {% include 'components/footer_news.html' %}
+        {% block footer %}{% include 'components/footer_news.html' %}{% endblock %}
     </div>
 
     {% include 'components/turnstile_script.html' %}

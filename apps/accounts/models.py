@@ -20,9 +20,17 @@ def avatar_upload_path(instance, filename):
 
 class CustomUser(AbstractUser):
     class Role(models.TextChoices):
+        # READER é o default e NÃO tem grupo em admin_roles.ROLE_TO_GROUP:
+        # quem se cadastra sozinho no portal não pode nascer com cargo de
+        # redação. Antes o default era NEWS_EDITOR, cujo grupo carrega
+        # `wagtailadmin.access_admin` — inerte só porque a sincronização de
+        # grupo não roda no cadastro público, mas pronto para virar escalada de
+        # privilégio no dia em que alguém a automatizasse.
+        READER = 'reader', 'Leitor'
         SUPER_ADMIN = 'super_admin', 'Super Administrador'
         SCHOOL_ADMIN = 'school_admin', 'Administrador Komuniki'
         NEWS_EDITOR = 'news_editor', 'Editor de Notícias'
+        REPORTER = 'reporter', 'Repórter'
         HIRING_MANAGER = 'hiring_manager', 'Contratações (guardado)'
 
     email = models.EmailField(
@@ -31,8 +39,9 @@ class CustomUser(AbstractUser):
     )
     role = models.CharField(
         'Cargo', max_length=20,
-        choices=Role.choices, default=Role.NEWS_EDITOR,
-        help_text='Define as permissões e acesso do usuário no sistema.',
+        choices=Role.choices, default=Role.READER,
+        help_text='Define as permissões e acesso do usuário no sistema. '
+                  '"Leitor" é apenas o portal público, sem acesso administrativo.',
     )
     avatar = ProcessedImageField(
         verbose_name='Foto de perfil',

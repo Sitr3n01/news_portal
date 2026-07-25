@@ -1,3 +1,6 @@
+import hashlib
+
+from axes.helpers import get_client_ip_address
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
@@ -11,8 +14,23 @@ from django.views.decorators.http import require_POST
 
 from .forms import CustomUserCreationForm, ProfileForm
 
+# Janela e teto do rate limit de recuperação de senha.
+RESET_THROTTLE_WINDOW = 900  # 15 minutos
+RESET_IP_LIMIT = 10          # pedidos por IP dentro da janela
+
+
+def _hash_key(*parts):
+    """Deriva uma chave de cache opaca e de tamanho fixo a partir de dados sensíveis."""
+    return hashlib.sha256('|'.join(parts).encode()).hexdigest()
+
 
 class CustomLoginView(LoginView):
+    """Login do portal público (leitores: comentar, curtir, salvar).
+
+    O acesso da equipe aos painéis fica em ``panel:login`` (/entrar/), que
+    apresenta a escolha entre Publicação de matérias e Administração do sistema.
+    """
+
     template_name = 'accounts/login.html'
     redirect_authenticated_user = True
 
@@ -21,19 +39,39 @@ class CustomPasswordResetView(PasswordResetView):
     template_name = 'accounts/password_reset/password_reset_form.html'
     success_url = reverse_lazy('accounts:password_reset_done')
     email_template_name = 'accounts/password_reset/password_reset_email.html'
+    subject_template_name = 'accounts/password_reset/password_reset_subject.txt'
 
     def form_valid(self, form):
-        # 1. Protection contra Mailbombing (Rate Limiting)
-        ip = self.request.META.get('HTTP_X_FORWARDED_FOR', self.request.META.get('REMOTE_ADDR', ''))
-        ip = ip.split(',')[0].strip() if ip else 'unknown_ip'
-        email = form.cleaned_data.get('email', '')
+        # 1. Proteção contra mailbombing (rate limiting), em dois níveis.
+        #
+        # O IP vem do helper do axes, que respeita AXES_IPWARE_PROXY_COUNT e
+        # AXES_IPWARE_META_PRECEDENCE_ORDER (base.py) — não dá para confiar num
+        # parse manual de X-Forwarded-For, que é forjável quando a contagem de
+        # proxies não é levada em conta.
+        ip = get_client_ip_address(self.request) or 'unknown_ip'
+        email = (form.cleaned_data.get('email') or '').strip().lower()
 
-        cache_key = f'pwd_reset_limit_{ip}_{email}'
-        if cache.get(cache_key):
-            # Silently drops the email dispatch to prevent inbox DoS, but returns success to avoid tipping off attacker
+        # Balde por (IP, e-mail): impede repetir o pedido para o mesmo destino.
+        # A chave é um hash porque a chave crua carregava e-mail e IP em texto
+        # puro para dentro do backend de cache (que hoje é uma tabela no banco).
+        # Normalizar o e-mail evita que A@x.com e a@x.com virem baldes distintos.
+        pair_key = f'pwd_reset:pair:{_hash_key(ip, email)}'
+        # Balde só por IP: sem ele, uma única origem podia disparar e-mails para
+        # infinitos endereços distintos, já que cada par tinha o próprio balde.
+        ip_key = f'pwd_reset:ip:{_hash_key(ip)}'
+
+        if cache.get(pair_key) or cache.get_or_set(ip_key, 0, RESET_THROTTLE_WINDOW) >= RESET_IP_LIMIT:
+            # Descarta o envio em silêncio para não transformar o formulário em
+            # arma de DoS de caixa de entrada, mas devolve sucesso para não
+            # revelar ao atacante que houve bloqueio.
             return HttpResponseRedirect(self.get_success_url())
 
-        cache.set(cache_key, True, timeout=900)  # Blocks repeat requests for 15 minutes
+        cache.set(pair_key, True, timeout=RESET_THROTTLE_WINDOW)
+        try:
+            cache.incr(ip_key)
+        except ValueError:
+            # A chave expirou entre o get_or_set e o incr — recria o balde.
+            cache.set(ip_key, 1, timeout=RESET_THROTTLE_WINDOW)
 
         # 2. Protection contra Host Header Poisoning
         site = get_current_site(self.request)

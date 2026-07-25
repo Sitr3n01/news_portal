@@ -94,7 +94,9 @@ class CustomUserAdmin(AdminUXMixin, ModelAdmin, UserAdmin):
         ('Perfil', {
             'fields': ('role',),
             'description': 'O cargo define o grupo de permissões atribuído automaticamente ao salvar '
-                          '(ex.: "Editor de Notícias"). Ajuste depois em Permissões se precisar de algo específico.',
+                          '(ex.: "Editor de Notícias"). Use "Leitor" para quem só acessa o portal público. '
+                          'Para liberar a Administração do sistema, marque também "Acesso administrativo" '
+                          'na aba Permissões. Ajuste depois em Permissões se precisar de algo específico.',
         }),
     )
 

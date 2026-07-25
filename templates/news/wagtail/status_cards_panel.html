@@ -1,0 +1,14 @@
+{% load i18n wagtailadmin_tags %}
+{% if visible %}
+    {% panel id="redacao-status-cards" heading="Status das notícias" icon="check" classname="w-panel--dashboard" %}
+        <div class="redacao-status-cards">
+            {% for card in cards %}
+                <a href="{{ card.url }}" class="redacao-status-card" aria-label="{{ card.count }} {{ card.label }}, ver lista">
+                    {% icon name=card.icon wrapped=1 classname="redacao-status-card__icon" %}
+                    <span class="redacao-status-card__count">{{ card.count }}</span>
+                    <span class="redacao-status-card__label">{{ card.label }}</span>
+                </a>
+            {% endfor %}
+        </div>
+    {% endpanel %}
+{% endif %}

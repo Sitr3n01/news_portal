@@ -10,7 +10,7 @@ de origem arbitrária — só os domínios já liberados no CSP (frame-src).
 
 Política de thumbnail: o YouTube tem thumbnail determinística (i.ytimg.com), então
 usamos direto. Instagram e TikTok não expõem thumbnail pública sem token/scraping,
-então o facade usa um placeholder de marca (ver templates/news/partials/blocks/).
+então o facade usa um placeholder de marca (ver templates/news/blocks/).
 """
 import re
 from dataclasses import dataclass

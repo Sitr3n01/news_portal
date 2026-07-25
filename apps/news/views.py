@@ -11,8 +11,10 @@ from django.template.loader import render_to_string
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
+from apps.common.social_section import get_social_section_posts
+
 from .forms import NewsletterSubscriptionForm
-from .models import Article, ArticleBookmark, ArticleLike, Category, Comment, NewsletterSubscription, Tag
+from .models import Article, ArticleBookmark, ArticleLike, Category, Comment, NewsHomeConfig, NewsletterSubscription, Tag
 from .utils import get_sidebar_context
 
 
@@ -26,36 +28,88 @@ def safe_referer_redirect(request, default_url):
 User = get_user_model()
 
 
+def _resolve_home_highlights(site, articles):
+    """Resolve featured article and secondary highlights from NewsHomeConfig.
+
+    Returns (featured, secondary_highlights, home_config).
+    Falls back to automatic behavior when no config or is_active=False.
+    """
+    # hero_override é lido logo abaixo e a capa dele é renderizada no hero, então
+    # as duas relações entram no select_related para não custarem query extra.
+    home_config = (
+        NewsHomeConfig.on_site
+        .filter(site=site, is_active=True)
+        .select_related('hero_override', 'hero_override__featured_image_wagtail')
+        .first()
+    )
+
+    # ── Resolve featured (hero) ───────────────────────────────────────────
+    featured = None
+    if home_config and home_config.hero_override:
+        override = home_config.hero_override
+        if (
+            override.status == Article.Status.PUBLISHED
+            and override.site_id == site.pk
+        ):
+            featured = override
+
+    if not featured:
+        # Fallback automático
+        featured = articles.filter(is_featured=True).first() or articles.first()
+
+    # ── Resolve secondary highlights ──────────────────────────────────────
+    secondary_highlights = []
+    if home_config:
+        for block in home_config.secondary_highlights:
+            article = block.value
+            if (
+                isinstance(article, Article)
+                and article.status == Article.Status.PUBLISHED
+                and article.site_id == site.pk
+                and article.pk != (featured.pk if featured else None)
+            ):
+                secondary_highlights.append(article)
+
+    return featured, secondary_highlights, home_config
+
+
 def article_list(request):
     """Homepage do portal de noticias com artigo destaque + grid paginado."""
+    site = get_current_site(request)
     articles = (
         Article.on_site
         .filter(status=Article.Status.PUBLISHED)
-        .select_related('category', 'author')
+        .select_related('category', 'author', 'featured_image_wagtail')
         .prefetch_related('tags')
     )
     categories = Category.objects.all()
 
-    # Featured: prioriza is_featured=True, senao o mais recente
-    featured = articles.filter(is_featured=True).first() or articles.first()
+    featured, secondary_highlights, home_config = _resolve_home_highlights(site, articles)
 
-    # Grid: demais artigos (excluindo featured)
-    grid_articles = articles.exclude(pk=featured.pk) if featured else articles
+    # Grid: excluir featured e todos os destaques secundários
+    exclude_pks = [featured.pk] if featured else []
+    exclude_pks += [a.pk for a in secondary_highlights]
+    grid_articles = articles.exclude(pk__in=exclude_pks)
+
     paginator = Paginator(grid_articles, 12)
     page_obj = paginator.get_page(request.GET.get('page'))
 
-    return render(request, 'news/article_list.html', {
+    context = {
         'featured': featured,
+        'secondary_highlights': secondary_highlights,
+        'home_config': home_config,
         'page_obj': page_obj,
         'categories': categories,
+        'social_posts': get_social_section_posts(site),
         **get_sidebar_context(request),
-    })
+    }
+    return render(request, 'news/article_list.html', context)
 
 
 def article_detail(request, slug):
     """Detalhe do artigo com artigos relacionados, comentarios e likes."""
     article = get_object_or_404(
-        Article.on_site.select_related('category', 'author').prefetch_related('tags', 'blocks', 'blocks__media'),
+        Article.on_site.select_related('category', 'author', 'featured_image_wagtail').prefetch_related('tags'),
         slug=slug,
         status=Article.Status.PUBLISHED,
     )
@@ -75,7 +129,7 @@ def article_detail(request, slug):
             Article.on_site
             .filter(status=Article.Status.PUBLISHED, category=article.category)
             .exclude(pk=article.pk)
-            .select_related('category', 'author')
+            .select_related('category', 'author', 'featured_image_wagtail')
             .order_by('-published_at')[:3]
         )
 
@@ -107,7 +161,7 @@ def category_detail(request, slug):
     articles = (
         Article.on_site
         .filter(category=category, status=Article.Status.PUBLISHED)
-        .select_related('category', 'author')
+        .select_related('category', 'author', 'featured_image_wagtail')
         .prefetch_related('tags')
     )
     paginator = Paginator(articles, 12)
@@ -126,7 +180,7 @@ def tag_detail(request, slug):
     articles = (
         Article.on_site
         .filter(tags=tag, status=Article.Status.PUBLISHED)
-        .select_related('category', 'author')
+        .select_related('category', 'author', 'featured_image_wagtail')
         .prefetch_related('tags')
     )
     paginator = Paginator(articles, 12)
@@ -145,7 +199,7 @@ def author_detail(request, username):
     articles = (
         Article.on_site
         .filter(author=author, status=Article.Status.PUBLISHED)
-        .select_related('category')
+        .select_related('category', 'featured_image_wagtail')
         .prefetch_related('tags')
     )
     if not articles.exists():
@@ -179,7 +233,7 @@ def article_search(request):
                 status=Article.Status.PUBLISHED,
             )
             .distinct()
-            .select_related('category', 'author')
+            .select_related('category', 'author', 'featured_image_wagtail')
         )
 
     paginator = Paginator(articles, 12)
@@ -206,7 +260,7 @@ def article_archive(request, year, month=None):
             status=Article.Status.PUBLISHED,
             published_at__year=year,
         )
-        .select_related('category', 'author')
+        .select_related('category', 'author', 'featured_image_wagtail')
     )
     if month:
         articles = articles.filter(published_at__month=month)
@@ -227,17 +281,18 @@ def article_list_page(request):
     if not request.htmx:
         return redirect('news:list')
 
-    try:
-        exclude_pk = int(request.GET.get('exclude', 0)) or None
-    except (ValueError, TypeError):
-        exclude_pk = None
+    site = get_current_site(request)
     articles = (
         Article.on_site
         .filter(status=Article.Status.PUBLISHED)
-        .select_related('category', 'author')
+        .select_related('category', 'author', 'featured_image_wagtail')
     )
-    if exclude_pk:
-        articles = articles.exclude(pk=exclude_pk)
+
+    # Resolve destaques atuais para excluí-los da paginação HTMX
+    featured, secondary_highlights, _home_config = _resolve_home_highlights(site, articles)
+    exclude_pks = [featured.pk] if featured else []
+    exclude_pks += [a.pk for a in secondary_highlights]
+    articles = articles.exclude(pk__in=exclude_pks)
 
     paginator = Paginator(articles, 12)
     page_obj = paginator.get_page(request.GET.get('page', 1))
@@ -302,13 +357,13 @@ def user_dashboard(request):
     saved_articles = (
         Article.objects
         .filter(bookmarks__user=user)
-        .select_related('category', 'author')
+        .select_related('category', 'author', 'featured_image_wagtail')
         .order_by('-bookmarks__created_at')
     )
     liked_articles = (
         Article.objects
         .filter(likes__user=user)
-        .select_related('category', 'author')
+        .select_related('category', 'author', 'featured_image_wagtail')
         .order_by('-likes__created_at')
     )
     user_comments = user.comments.select_related('article').order_by('-created_at')

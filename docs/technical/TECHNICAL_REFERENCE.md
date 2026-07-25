@@ -118,9 +118,19 @@ O arquivo de settings é selecionado via `DJANGO_SETTINGS_MODULE` environment va
 ```python
 # Autenticação
 AUTH_USER_MODEL = 'accounts.CustomUser'
-LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = 'accounts:login'            # leitores do portal
+LOGIN_REDIRECT_URL = 'news:list'
+LOGOUT_REDIRECT_URL = 'news:list'
+
+# Login unificado dos painéis (ver "Acesso administrativo unificado")
+WAGTAILADMIN_LOGIN_URL = 'panel:login'          # /entrar/
+WAGTAIL_PASSWORD_RESET_ENABLED = False          # fluxo único em accounts
+AXES_LOCKOUT_TEMPLATE = 'auth/lockout.html'
+UNIFIED_LOGIN_ENABLED = True                    # kill switch por env
+
+# Cache compartilhado — o rate limit depende dele valer entre workers
+CACHES = {'default': {'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+                      'LOCATION': 'django_cache'}}
 
 # Sites framework
 SITE_ID = 1
@@ -347,15 +357,52 @@ Herda de `AbstractUser`. Campos adicionais:
 ##### `CustomLoginView`
 
 Estende `django.contrib.auth.views.LoginView`. Template: `accounts/login.html`.
+É o login dos **leitores do portal** (comentar, curtir, salvar). A equipe entra
+pelos painéis em `panel:login` — ver "Acesso administrativo unificado".
 
 O `AxesMiddleware` intercepta automaticamente após 5 falhas — a view não precisa de lógica de lockout.
 
 ##### `CustomPasswordResetView`
 
-Estende `PasswordResetView`. Proteções adicionais:
+Estende `PasswordResetView`. Fluxo **único** da plataforma: atende leitores e
+equipe, e é o único emissor de token (o do Wagtail está desligado). Proteções:
 
-1. **Rate limiting:** `cache.get(f"pwd_reset_{ip}_{email}")` — bloqueia novo pedido por 15 minutos.
+1. **Rate limiting em dois níveis:** balde por `(IP, e-mail)` e balde só por IP
+   (`RESET_IP_LIMIT` pedidos / 15 min). As chaves são hash SHA-256 — o e-mail não
+   vai em texto puro para o backend de cache. Sem o balde por IP, uma origem
+   podia disparar e-mails para infinitos endereços distintos.
 2. **Host header poisoning:** `domain_override=Site.objects.get_current().domain` — usa domínio do banco, não o header `Host` da request (que pode ser forjado).
+3. **Anti-enumeração:** resposta idêntica para e-mail existente, inexistente e
+   bloqueado por rate limit.
+
+Depende de `CACHES` apontar para um backend **compartilhado** entre processos.
+Com o LocMemCache padrão do Django o limite vira `janela × nº de workers`.
+
+#### Acesso administrativo unificado
+
+`/entrar/` é a porta única de Publicação de matérias (Wagtail, `/cms/`) e
+Administração do sistema (Django admin, `/admin/`). Uma conta, uma sessão.
+
+| Módulo | Papel |
+|---|---|
+| `apps/accounts/panels.py` | **Fonte única** de quais áreas o usuário alcança |
+| `apps/accounts/panel_views.py` | Login, escolha de área, acesso negado, logout |
+| `apps/accounts/panel_forms.py` | `PanelLoginForm` — o campo `panel` é conselho, não autorização |
+| `apps/accounts/urls_panel.py` | `/entrar/`, `/sair/`, `/painel/`, `/sem-acesso/` |
+
+Portões (idênticos ao que os frameworks aplicam):
+`can_access_admin` = `is_active and is_staff`;
+`can_access_cms` = `has_perm('wagtailadmin.access_admin')`.
+
+`/admin/login/`, `/admin/logout/`, `/cms/login/`, `/cms/logout/` e os dois
+`password_reset/` são interceptados por rotas declaradas **antes** dos includes
+correspondentes em `config/urls.py` — a ordem é load-bearing. As sombras de
+`/cms/` ficam **sem `name=`**: `wagtail.admin.urls` não define `app_name`, então
+reusar `wagtailadmin_login` sequestraria o `reverse()` interno do Wagtail.
+
+Eventos de segurança vão para o logger `apps.security` (stdout):
+`AUTH_LOGIN_OK`, `AUTH_LOGOUT`, `AUTH_LOGIN_FAIL`, `AUTH_PANEL_DENIED`.
+Nunca senha, token, chave de sessão ou link de recuperação.
 
 ##### `register_view`
 

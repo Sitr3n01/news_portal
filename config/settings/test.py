@@ -15,3 +15,12 @@ PASSWORD_HASHERS = [
 ]
 
 EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+
+# LocMem nos testes: rápido, isolado por processo e sem depender da tabela de
+# cache. O conftest da raiz limpa entre testes.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'tests',
+    }
+}

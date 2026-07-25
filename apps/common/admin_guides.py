@@ -6,7 +6,6 @@ from django.shortcuts import render
 
 from apps.common.admin_nav import (
     MANAGEMENT_PERMISSIONS,
-    NEWS_PERMISSIONS,
     SCHOOL_PERMISSIONS,
 )
 from apps.common.admin_nav import admin_url as _admin_url
@@ -236,148 +235,6 @@ def school_guide(request):
     return _guide_response(request, guide)
 
 
-def news_guide(request):
-    from apps.news.models import Article, Category, Comment, NewsletterDelivery, NewsletterSubscription, Tag
-
-    user = request.user
-    has_access = _can_any(user, NEWS_PERMISSIONS)
-    published_articles = Article.objects.filter(status=Article.Status.PUBLISHED).count()
-    draft_articles = Article.objects.filter(status=Article.Status.DRAFT).count()
-    pending_newsletter_articles = Article.objects.filter(status=Article.Status.PUBLISHED, newsletter_sent_at__isnull=True).count()
-    categories = Category.objects.count()
-    tags = Tag.objects.count()
-    pending_comments = Comment.objects.filter(is_active=False).count()
-    active_subscribers = NewsletterSubscription.objects.filter(is_active=True).count()
-    failed_deliveries = NewsletterDelivery.objects.filter(status=NewsletterDelivery.Status.FAILED).count()
-    pending_deliveries = NewsletterDelivery.objects.filter(status=NewsletterDelivery.Status.PENDING).count()
-
-    recent_articles = [
-        {
-            'title': article.title,
-            'meta': article.get_status_display(),
-            'url': _admin_url('admin:news_article_change', args=[article.pk]),
-            'status': article.updated_at,
-        }
-        for article in Article.objects.select_related('category').order_by('-updated_at')[:5]
-    ] if _can(user, 'news.view_article') else []
-
-    guide = {
-        'area': 'news',
-        'has_access': has_access,
-        'eyebrow': 'Blog da Kelly',
-        'title': 'Operação Editorial',
-        'subtitle': 'Conduza o ciclo editorial completo: criar, organizar, publicar, enviar newsletter e moderar a comunidade.',
-        'icon': 'newspaper',
-        'primary_actions': _visible([
-            _action(user, 'Novo artigo', 'edit_square', 'admin:news_article_add', 'news.add_article', kind='primary'),
-            _public_action('Ver portal de notícias', 'open_in_new', '/news/'),
-            _action(user, 'Comentários pendentes', 'rate_review', 'admin:news_comment_changelist', 'news.view_comment', query={'is_active__exact': '0'}),
-        ]),
-        'metrics': [
-            _metric('Publicados', published_articles, 'check_circle', 'primary', 'Artigos visíveis'),
-            _metric('Rascunhos', draft_articles, 'edit_note', 'warning' if draft_articles else 'neutral', 'Conteúdo em preparo'),
-            _metric('Assinantes ativos', active_subscribers, 'group', 'primary', 'Newsletter'),
-            _metric(
-                'Pendências',
-                pending_comments + failed_deliveries + pending_deliveries + pending_newsletter_articles,
-                'priority_high',
-                'warning' if pending_comments or failed_deliveries or pending_deliveries or pending_newsletter_articles else 'neutral',
-                'Moderação e newsletter',
-            ),
-        ],
-        'workflows': [
-            _workflow(
-                'Criar rascunho',
-                'edit_square',
-                'Escreva o artigo, adicione resumo e mantenha como rascunho até estar pronto.',
-                'Rascunhos ativos' if draft_articles else 'Sem rascunhos',
-                'warning' if draft_articles else 'neutral',
-                [
-                    _action(user, 'Novo artigo', 'edit_square', 'admin:news_article_add', 'news.add_article', kind='primary'),
-                    _action(user, 'Ver rascunhos', 'edit_note', 'admin:news_article_changelist', 'news.view_article', query={'status__exact': Article.Status.DRAFT}),
-                ],
-            ),
-            _workflow(
-                'Organizar editoria',
-                'category',
-                'Categorias e tags ajudam leitores a navegar e melhoram a busca interna.',
-                'Organizado' if categories and tags else 'Completar taxonomia',
-                'success' if categories and tags else 'warning',
-                [
-                    _action(user, 'Categorias', 'category', 'admin:news_category_changelist', 'news.view_category', kind='primary'),
-                    _action(user, 'Tags', 'label', 'admin:news_tag_changelist', 'news.view_tag'),
-                ],
-            ),
-            _workflow(
-                'Publicar e distribuir',
-                'mark_email_read',
-                'Depois de publicar, acompanhe artigos aguardando newsletter e entregas com falha.',
-                'Revisar envio' if failed_deliveries or pending_newsletter_articles else 'Tudo enviado',
-                'danger' if failed_deliveries else ('warning' if pending_newsletter_articles else 'success'),
-                [
-                    _action(user, 'Aguardando newsletter', 'outbox', 'admin:news_article_changelist', 'news.view_article', query={'newsletter': 'pending'}, kind='primary'),
-                    _action(user, 'Entregas com falha', 'error', 'admin:news_newsletterdelivery_changelist', 'news.view_newsletterdelivery', query={'status__exact': NewsletterDelivery.Status.FAILED}),
-                    _action(user, 'Assinantes', 'mail', 'admin:news_newslettersubscription_changelist', 'news.view_newslettersubscription'),
-                ],
-            ),
-            _workflow(
-                'Moderar comunidade',
-                'forum',
-                'Revise comentários ocultos ou pendentes para manter a conversa saudável.',
-                'Requer moderação' if pending_comments else 'Tudo em dia',
-                'warning' if pending_comments else 'success',
-                [
-                    _action(user, 'Comentários pendentes', 'rate_review', 'admin:news_comment_changelist', 'news.view_comment', query={'is_active__exact': '0'}, kind='primary'),
-                    _action(user, 'Todos os comentários', 'chat', 'admin:news_comment_changelist', 'news.view_comment'),
-                ],
-            ),
-        ],
-        'readiness': [
-            _check(
-                'Ao menos uma categoria',
-                categories > 0,
-                'Categorias estruturam o portal.',
-                _admin_url('admin:news_category_changelist') if _can(user, 'news.view_category') else '',
-            ),
-            _check(
-                'Artigos publicados',
-                published_articles > 0,
-                'Publique conteúdo para alimentar a home de notícias.',
-                _admin_url('admin:news_article_changelist', {'status__exact': Article.Status.PUBLISHED}) if _can(user, 'news.view_article') else '',
-            ),
-            _check(
-                'Sem comentários pendentes',
-                pending_comments == 0,
-                'Comentários pendentes precisam de revisão.',
-                _admin_url('admin:news_comment_changelist', {'is_active__exact': '0'}) if _can(user, 'news.view_comment') else '',
-            ),
-            _check(
-                'Newsletter sem falhas',
-                failed_deliveries == 0,
-                'Falhas indicam problema de envio ou destinatário.',
-                _admin_url('admin:news_newsletterdelivery_changelist', {'status__exact': NewsletterDelivery.Status.FAILED}) if _can(user, 'news.view_newsletterdelivery') else '',
-            ),
-        ],
-        'resources': _visible([
-            _resource_group('Produção editorial', 'Criação, organização e publicação de conteúdo.', [
-                _action(user, 'Artigos', 'newspaper', 'admin:news_article_changelist', 'news.view_article'),
-                _action(user, 'Categorias', 'category', 'admin:news_category_changelist', 'news.view_category'),
-                _action(user, 'Tags', 'label', 'admin:news_tag_changelist', 'news.view_tag'),
-            ]),
-            _resource_group('Comunidade e newsletter', 'Relacionamento com leitores, comentários e entregas.', [
-                _action(user, 'Comentários', 'chat', 'admin:news_comment_changelist', 'news.view_comment'),
-                _action(user, 'Assinantes', 'mail', 'admin:news_newslettersubscription_changelist', 'news.view_newslettersubscription'),
-                _action(user, 'Entregas', 'mark_email_read', 'admin:news_newsletterdelivery_changelist', 'news.view_newsletterdelivery'),
-            ]),
-        ]),
-        'recent_cards': _visible([
-            _recent_card('Artigos recentes', 'newspaper', 'Nenhum artigo recente', recent_articles) if _can(user, 'news.view_article') else None,
-        ]),
-        'empty_message': 'Você ainda não tem permissões para operar o Blog da Kelly.',
-    }
-    return _guide_response(request, guide)
-
-
 def management_guide(request):
     from apps.common.models import SiteExtension
     from apps.media_library.models import MediaFile, MediaFolder
@@ -407,7 +264,7 @@ def management_guide(request):
         'icon': 'admin_panel_settings',
         'primary_actions': _visible([
             _action(user, 'Usuários', 'manage_accounts', 'admin:accounts_customuser_changelist', 'accounts.view_customuser', kind='primary'),
-            _action(user, 'Configurações dos sites', 'settings', 'admin:common_siteextension_changelist', 'common.view_siteextension'),
+            _action(user, 'Configurações dos sites', 'settings', 'wagtailsnippets_common_siteextension:list', 'common.view_siteextension'),
             _action(user, 'Biblioteca de mídia', 'perm_media', 'admin:media_library_mediafile_changelist', 'media_library.view_mediafile'),
         ]),
         'metrics': [
@@ -435,7 +292,7 @@ def management_guide(request):
                 'Completar dados' if configured_sites < sites else 'Configurado',
                 'warning' if configured_sites < sites else 'success',
                 [
-                    _action(user, 'Configurações dos sites', 'settings', 'admin:common_siteextension_changelist', 'common.view_siteextension', kind='primary'),
+                    _action(user, 'Configurações dos sites', 'settings', 'wagtailsnippets_common_siteextension:list', 'common.view_siteextension', kind='primary'),
                 ],
             ),
             _workflow(
@@ -445,7 +302,7 @@ def management_guide(request):
                 'Atenção' if not email_ready or failed_deliveries else 'Tudo saudável',
                 'danger' if failed_deliveries else ('warning' if not email_ready else 'success'),
                 [
-                    _action(user, 'Configurar remetentes', 'settings_account_box', 'admin:common_siteextension_changelist', 'common.view_siteextension', kind='primary'),
+                    _action(user, 'Configurar remetentes', 'settings_account_box', 'wagtailsnippets_common_siteextension:list', 'common.view_siteextension', kind='primary'),
                     _action(
                         user, 'Falhas de newsletter', 'error',
                         'admin:news_newsletterdelivery_changelist', 'news.view_newsletterdelivery',
@@ -472,13 +329,13 @@ def management_guide(request):
                 'Contatos dos sites configurados',
                 configured_sites >= sites and sites > 0,
                 'Preencha e-mail, telefone e identidade pública.',
-                _admin_url('admin:common_siteextension_changelist') if _can(user, 'common.view_siteextension') else '',
+                _admin_url('wagtailsnippets_common_siteextension:list') if _can(user, 'common.view_siteextension') else '',
             ),
             _check(
                 'Remetente da newsletter configurado',
                 sender_sites > 0,
                 'Cada site precisa de remetente amigável para envios.',
-                _admin_url('admin:common_siteextension_changelist') if _can(user, 'common.view_siteextension') else '',
+                _admin_url('wagtailsnippets_common_siteextension:list') if _can(user, 'common.view_siteextension') else '',
             ),
             _check('Servidor de e-mail pronto', email_status['smtp_configured'], 'Configuração SMTP completa libera envios reais.', ''),
         ],
@@ -488,7 +345,7 @@ def management_guide(request):
                 _action(user, 'Grupos de permissões', 'badge', 'admin:auth_group_changelist', 'auth.view_group'),
             ]),
             _resource_group('Sites e configuração', 'Identidade e remetentes dos portais.', [
-                _action(user, 'Configurações dos sites', 'settings', 'admin:common_siteextension_changelist', 'common.view_siteextension'),
+                _action(user, 'Configurações dos sites', 'settings', 'wagtailsnippets_common_siteextension:list', 'common.view_siteextension'),
             ]),
             _resource_group('Mídia compartilhada', 'Arquivos reutilizáveis em páginas e artigos.', [
                 _action(user, 'Arquivos', 'perm_media', 'admin:media_library_mediafile_changelist', 'media_library.view_mediafile'),

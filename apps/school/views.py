@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, redirect, render
 
-from apps.social.models import Platform, SocialPost
+from apps.common.social_section import get_social_section_posts
 
 from .models import Page, SchoolFeature, SchoolHomeConfig, Testimonial
 
@@ -267,26 +267,7 @@ def home(request):
     trust_features = _features_for_site(site, SchoolFeature.Placement.TRUST, TRUST_FEATURES_FALLBACK)
     testimonials = Testimonial.on_site.filter(site=site, is_featured=True)[:3]
 
-    # Seção de redes sociais: só consulta posts quando a seção está habilitada,
-    # respeitando os toggles por rede (Instagram/TikTok) definidos no admin.
-    site_ext = getattr(site, 'extension', None)
-    social_posts = []
-    if site_ext and site_ext.social_section_enabled:
-        allowed_platforms = []
-        if site_ext.social_show_instagram:
-            allowed_platforms.append(Platform.INSTAGRAM)
-        if site_ext.social_show_tiktok:
-            allowed_platforms.append(Platform.TIKTOK)
-        if allowed_platforms:
-            social_posts = list(
-                SocialPost.objects
-                .select_related('account')
-                .filter(
-                    account__site=site, account__is_active=True, is_visible=True,
-                    platform__in=allowed_platforms,
-                )
-                .order_by('-published_at')[:6]
-            )
+    social_posts = get_social_section_posts(site)
 
     return render(request, 'school/home.html', {
         'home_config': home_config,

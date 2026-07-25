@@ -30,6 +30,35 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.sitemaps',
 
+    # Wagtail CMS (7.4.x LTS) — must come after Django contrib apps,
+    # before other third-party and project apps.
+    # django-taggit provides the Tag model used by Wagtail's images/documents;
+    # it must be installed before any Wagtail app that uses TaggableManager.
+    'taggit',
+    'wagtail',
+    'wagtail.admin',
+    'wagtail.documents',
+    'wagtail.snippets',
+    'wagtail.images',
+    'wagtail.search',
+    'wagtail.sites',
+    # OBRIGATÓRIO, ainda que os usuários sejam gerenciados no /admin/ do Django.
+    # `wagtail.users` é onde vive o modelo UserProfile (preferências de tema,
+    # densidade e notificação de cada conta), e wagtail.admin o usa em
+    # admin/mail.py, admin/forms/account.py e nas templatetags — ou seja, no
+    # caminho dos e-mails de workflow e da tela de conta.
+    # Sem o app na lista, o Django não acha `wagtail.users` no registro e resolve
+    # o app_label subindo o pacote até `wagtail` (label `wagtailcore`): o modelo
+    # passa a se chamar wagtailcore.UserProfile e esperar a tabela
+    # `wagtailcore_userprofile`, que NENHUMA migration do wagtailcore cria. O
+    # resultado é tabela inexistente em runtime.
+    # As telas de Usuários/Grupos que este app acrescenta ao /cms/ são protegidas
+    # pelas permissões `wagtailusers`, que nenhum grupo de cargo recebe
+    # (ver apps/accounts/admin_roles.GENERAL_ADMIN_APP_LABELS), então só
+    # superusuário as enxerga.
+    'wagtail.users',
+    'wagtail.contrib.table_block',
+
     # Third-party
     'django_htmx',
     'imagekit',
@@ -43,6 +72,7 @@ INSTALLED_APPS = [
     'apps.contact.apps.ContactConfig',
     'apps.news.apps.NewsConfig',
     'apps.media_library.apps.MediaLibraryConfig',
+    'apps.cms_media.apps.CmsMediaConfig',
     'apps.social.apps.SocialConfig',
 ]
 
@@ -111,6 +141,9 @@ KELLY_BLOG_PUBLIC_URL = env('KELLY_BLOG_PUBLIC_URL', default='https://kellyfaria
 TIKTOK_CLIENT_KEY = env('TIKTOK_CLIENT_KEY', default='')
 TIKTOK_CLIENT_SECRET = env('TIKTOK_CLIENT_SECRET', default='')
 
+# Token de recuperação de senha expira em 1 hora (padrão do Django: 24h).
+PASSWORD_RESET_TIMEOUT = 3600
+
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -146,6 +179,31 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ── Wagtail 7.4.x LTS Configuration ────────────────────────────────────────
+# WAGTAILADMIN_BASE_URL monta URLs absolutas (links de preview, e-mails de
+# notificação) — precisa ser o domínio real em produção, não localhost.
+# Mesmo padrão de KOMUNIKI_PUBLIC_URL/KELLY_BLOG_PUBLIC_URL logo abaixo.
+WAGTAIL_SITE_NAME = 'Portal de Notícias'
+WAGTAILADMIN_BASE_URL = env('WAGTAILADMIN_BASE_URL', default='http://localhost:8000')
+
+# Custom image/document models (Fase 2) — required BEFORE the first migration
+# of cms_media, otherwise Wagtail creates the stock models instead.
+WAGTAILIMAGES_IMAGE_MODEL = 'cms_media.Image'
+WAGTAILDOCS_DOCUMENT_MODEL = 'cms_media.Document'
+
+# Manda o require_admin_access e o botão de sair do Wagtail para o login
+# unificado (ver wagtail/admin/auth.py e wagtail/admin/views/account.py). É o
+# gancho oficial — nada de editar código do Wagtail.
+WAGTAILADMIN_LOGIN_URL = 'panel:login'
+
+# Desliga o fluxo de recuperação de senha PRÓPRIO do Wagtail. Ele é um segundo
+# emissor de tokens, sem o domain_override contra host header poisoning e sem
+# rate limit — os dois presentes em apps.accounts.views.CustomPasswordResetView,
+# que passa a ser o único caminho.
+WAGTAIL_PASSWORD_RESET_ENABLED = False
+
+
 
 # ── Django Unfold Admin Configuration ──────────────────────────────────────
 def _admin_has_any(request, *permissions):
@@ -208,21 +266,6 @@ UNFOLD = {
                             'contact.view_contactinquiry',
                         ),
                         'active': lambda request: request.path.startswith('/admin/guias/escola/'),
-                    },
-                    {
-                        'title': 'Guia Editorial',
-                        'icon': 'newspaper',
-                        'link': reverse_lazy('admin_news_guide'),
-                        'permission': lambda request: _admin_has_any(
-                            request,
-                            'news.view_article',
-                            'news.view_category',
-                            'news.view_tag',
-                            'news.view_comment',
-                            'news.view_newslettersubscription',
-                            'news.view_newsletterdelivery',
-                        ),
-                        'active': lambda request: request.path.startswith('/admin/guias/noticias/'),
                     },
                     {
                         'title': 'Guia de Gerenciamento',
@@ -308,19 +351,19 @@ UNFOLD = {
                     {
                         'title': 'Artigos',
                         'icon': 'newspaper',
-                        'link': reverse_lazy('admin:news_article_changelist'),
+                        'link': reverse_lazy('wagtailsnippets_news_article:list'),
                         'permission': lambda request: request.user.has_perm('news.view_article'),
                     },
                     {
                         'title': 'Categorias',
                         'icon': 'category',
-                        'link': reverse_lazy('admin:news_category_changelist'),
+                        'link': reverse_lazy('wagtailsnippets_news_category:list'),
                         'permission': lambda request: request.user.has_perm('news.view_category'),
                     },
                     {
                         'title': 'Tags',
                         'icon': 'label',
-                        'link': reverse_lazy('admin:news_tag_changelist'),
+                        'link': reverse_lazy('wagtailsnippets_news_tag:list'),
                         'permission': lambda request: request.user.has_perm('news.view_tag'),
                     },
                     {
@@ -410,7 +453,7 @@ UNFOLD = {
                     {
                         'title': 'Configurações do Site',
                         'icon': 'settings',
-                        'link': reverse_lazy('admin:common_siteextension_changelist'),
+                        'link': reverse_lazy('wagtailsnippets_common_siteextension:list'),
                         'permission': lambda request: _admin_has_any(request, 'common.view_siteextension'),
                     },
                     {
@@ -446,12 +489,52 @@ EMAIL_PORT = env.int('EMAIL_PORT', default=587)
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
+# Mutuamente exclusivo com EMAIL_USE_TLS: o Django levanta ValueError no envio
+# se os dois forem True. TLS/587 é o padrão; SSL/465 é para provedores legados.
+EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=False)
+# Sem timeout, um servidor SMTP travado pendura o worker gunicorn
+# indefinidamente a cada pedido de recuperação de senha.
+EMAIL_TIMEOUT = env.int('EMAIL_TIMEOUT', default=10)
+SERVER_EMAIL = env('SERVER_EMAIL', default=DEFAULT_FROM_EMAIL)
 
 # Cloudflare Turnstile anti-bot verification.
 # In DEBUG/local, apps.common.turnstile falls back to Cloudflare's official test keys.
 CLOUDFLARE_TURNSTILE_SITE_KEY = env('CLOUDFLARE_TURNSTILE_SITE_KEY', default='')
 CLOUDFLARE_TURNSTILE_SECRET_KEY = env('CLOUDFLARE_TURNSTILE_SECRET_KEY', default='')
 CLOUDFLARE_TURNSTILE_VERIFY_TIMEOUT = env.float('CLOUDFLARE_TURNSTILE_VERIFY_TIMEOUT', default=5.0)
+
+# ── Cache ──────────────────────────────────────────────────────────────────
+# DatabaseCache (e não LocMemCache) porque o cache é usado para rate limiting:
+# o LocMem é por processo, então com N workers gunicorn o limite efetivo vira
+# N× o pretendido. A tabela é criada pela migration apps/common/0009.
+# Sem Redis por decisão de projeto (docs/ai/development_rules.md §4).
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'django_cache',
+        'TIMEOUT': 300,
+        'KEY_PREFIX': 'kb',
+        'OPTIONS': {'MAX_ENTRIES': 5000, 'CULL_FREQUENCY': 3},
+    },
+}
+
+# ── Autenticação / login unificado ─────────────────────────────────────────
+# A equipe entra pelos painéis em `panel:login` (/entrar/); leitores do portal
+# usam `accounts:login`. LOGIN_URL aponta para o do leitor porque é ele que o
+# @login_required das views públicas precisa alcançar — o Wagtail é redirecionado
+# por WAGTAILADMIN_LOGIN_URL e o Django admin pela rota-sombra em config/urls.py.
+LOGIN_URL = 'accounts:login'
+# Antes indefinido: o default do Django ('/accounts/profile/') resolve neste
+# projeto para uma view @require_POST, devolvendo 405 a quem entrasse sem `next`.
+LOGIN_REDIRECT_URL = 'news:list'
+LOGOUT_REDIRECT_URL = 'news:list'
+
+# Tela amigável em PT-BR quando o axes bloqueia por tentativas repetidas.
+AXES_LOCKOUT_TEMPLATE = 'auth/lockout.html'
+
+# Interruptor de emergência: com False, /admin/login/ e /cms/login/ voltam às
+# telas nativas sem precisar de deploy de código (ver config/urls.py).
+UNIFIED_LOGIN_ENABLED = env.bool('UNIFIED_LOGIN_ENABLED', default=True)
 
 # ── Authentication Backends (axes brute-force protection) ──────────────────
 AUTHENTICATION_BACKENDS = [
@@ -471,7 +554,10 @@ AXES_IPWARE_META_PRECEDENCE_ORDER = [
 ]
 
 # ── Content Security Policy (django-csp) — defense-in-depth ────────────────
-# Espelha a política CSP do nginx.conf para proteção mesmo sem reverse proxy.
+# Espelha a política CSP do docker/nginx/nginx.conf para proteção mesmo sem
+# reverse proxy. As duas TÊM de andar juntas: o nginx usa `add_header ... always`,
+# então quando os dois mandam CSP o navegador aplica a INTERSEÇÃO das políticas —
+# relaxar só um lado não tem efeito nenhum em produção.
 # Alpine.js, HTMX e Tailwind CDN requerem unsafe-inline/unsafe-eval e hosts CDN
 # explicitamente permitidos para que o frontend publico renderize sob CSP.
 from csp.constants import NONE, SELF, UNSAFE_EVAL, UNSAFE_INLINE  # noqa: E402
@@ -504,8 +590,16 @@ CONTENT_SECURITY_POLICY = {
         'base-uri': [SELF],
         'form-action': [SELF],
         'object-src': [NONE],
-        # Anti-clickjacking moderno — complementa X-Frame-Options: DENY (legado).
-        'frame-ancestors': [NONE],
+        # Anti-clickjacking moderno. SELF, e não NONE, porque o painel de preview
+        # do Wagtail renderiza a própria página dentro de um <iframe> de mesma
+        # origem (wagtailadmin/shared/side_panels/preview.html). Com NONE o
+        # preview fica em branco: o Wagtail força X-Frame-Options: SAMEORIGIN nas
+        # views de preview (xframe_options_sameorigin_override), mas pela spec do
+        # CSP `frame-ancestors` PREVALECE sobre X-Frame-Options — então NONE
+        # anulava o override e nenhum navegador desenhava o iframe.
+        # SELF continua barrando clickjacking de qualquer outra origem, que é o
+        # ataque que esta diretiva existe para impedir.
+        'frame-ancestors': [SELF],
     },
 }
 

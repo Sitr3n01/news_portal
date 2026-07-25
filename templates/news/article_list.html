@@ -1,6 +1,14 @@
 {% extends 'base_news.html' %}
 
-{% block title %}{{ news_portal_name }}{% endblock %}
+{% block title %}{{ home_config.meta_title|default:news_portal_name }}{% endblock %}
+
+{% block meta_description %}{{ home_config.meta_description|default:'Conteúdos, notícias e bastidores da Komuniki com Kelly Farias.' }}{% endblock %}
+
+{% block og_title %}{{ home_config.meta_title|default:news_portal_name }}{% endblock %}
+{% block og_description %}{{ home_config.meta_description|default:'Conteúdos, notícias e bastidores da Komuniki com Kelly Farias.' }}{% endblock %}
+
+{% block twitter_title %}{{ home_config.meta_title|default:news_portal_name }}{% endblock %}
+{% block twitter_description %}{{ home_config.meta_description|default:'Conteúdos, notícias e bastidores da Komuniki com Kelly Farias.' }}{% endblock %}
 
 {% block content %}
 <main class="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 w-full grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,24rem)] gap-10 lg:gap-14 xl:gap-16">
@@ -12,9 +20,9 @@
             <a href="{% url 'news:article_detail' featured.slug %}" class="block">
                 <div class="w-full aspect-[4/3] overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 relative sm:aspect-[2/1]">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10"></div>
-                    {% if featured.featured_image %}
+                    {% if featured.has_cover_image %}
                     <div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                        style="background-image: url('{{ featured.featured_image.url }}');">
+                        style="background-image: url('{{ featured.cover_image_url }}');">
                     </div>
                     {% else %}
                     <div class="w-full h-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
@@ -58,37 +66,25 @@
         </article>
         {% endif %}
 
+        <!-- Secondary Highlights -->
+        {% if secondary_highlights %}
+        <div class="border-t border-gray-100 dark:border-gray-800 pt-10 sm:pt-12">
+            <h2 class="font-display text-2xl font-bold text-slate-900 dark:text-white mb-6">Destaques</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 sm:gap-y-12">
+                {% for article in secondary_highlights %}
+                {% include 'news/partials/article_teaser.html' with article=article %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Secondary Grid (First 2 items from page_obj) -->
         {% if page_obj.paginator.count > 0 %}
         <div id="articles-grid-view">
             <div id="articles-grid"
                 class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 sm:gap-y-12 border-t border-gray-100 dark:border-gray-800 pt-10 sm:pt-12">
                 {% for article in page_obj|slice:":2" %}
-                <article class="flex flex-col gap-4 group cursor-pointer">
-                    <a href="{% url 'news:article_detail' article.slug %}" class="block">
-                        <div class="w-full aspect-[3/2] overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 mb-2">
-                            {% if article.featured_image %}
-                            <div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                                style="background-image: url('{{ article.featured_image.url }}');">
-                            </div>
-                            {% else %}
-                            <div class="w-full h-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-4xl text-slate-400">image</span>
-                            </div>
-                            {% endif %}
-                        </div>
-                        {% if article.category %}
-                        <span class="font-ui text-xs font-bold text-primary tracking-widest uppercase">{{ article.category.name }}</span>
-                        {% endif %}
-                        <h3
-                            class="text-2xl font-bold leading-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors">
-                            {{ article.title }}
-                        </h3>
-                        <p class="text-base text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3">
-                            {{ article.excerpt|default:article.content|striptags|truncatewords:20 }}
-                        </p>
-                    </a>
-                </article>
+                {% include 'news/partials/article_teaser.html' with article=article %}
                 {% endfor %}
             </div>
 
@@ -98,35 +94,7 @@
             <div class="border-t border-gray-100 dark:border-gray-800 pt-12">
                 <div class="flex flex-col gap-8">
                     {% for article in page_obj|slice:"2:" %}
-                    <article class="flex flex-col md:flex-row gap-5 md:gap-6 items-start group cursor-pointer">
-                        <div class="flex-1">
-                            <a href="{% url 'news:article_detail' article.slug %}">
-                                <h3
-                                    class="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-primary transition-colors">
-                                    {{ article.title }}
-                                </h3>
-                                <p class="text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
-                                    {{ article.excerpt|default:article.content|striptags|truncatewords:30 }}
-                                </p>
-                                <div class="mt-3 flex flex-wrap items-center gap-2">
-                                    {% if article.author %}
-                                    <span class="font-ui text-xs font-medium text-slate-500"><span x-text="t('Por', 'By')">By</span> {{ article.author.get_full_name|default:article.author.username }}</span>
-                                    <span class="text-slate-300">•</span>
-                                    {% endif %}
-                                    <span class="font-ui text-xs text-slate-400">{{ article.reading_time }} <span
-                                            x-text="t('min de leitura', 'min read')">min read</span></span>
-                                </div>
-                            </a>
-                        </div>
-                        {% if article.featured_image %}
-                        <a href="{% url 'news:article_detail' article.slug %}"
-                            class="w-full md:w-48 aspect-video rounded bg-gray-100 dark:bg-gray-800 overflow-hidden block">
-                            <div class="w-full h-full bg-cover bg-center grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all"
-                                style="background-image: url('{{ article.featured_image.url }}');">
-                            </div>
-                        </a>
-                        {% endif %}
-                    </article>
+                    {% include 'news/partials/article_row.html' with article=article %}
                     {% empty %}
                     {% if page_obj.paginator.count <= 2 %} <!-- No more articles to show in list view -->
                         {% else %}
@@ -139,7 +107,7 @@
                 {% if page_obj.has_next %}
                 <div class="col-span-full text-center mt-8" id="load-more-container">
                     <button
-                        hx-get="{% url 'news:article_list_page' %}?page={{ page_obj.next_page_number }}{% if featured %}&exclude={{ featured.pk }}{% endif %}"
+                        hx-get="{% url 'news:article_list_page' %}?page={{ page_obj.next_page_number }}"
                         hx-target="#load-more-container" hx-swap="outerHTML"
                         class="bg-white dark:bg-slate-900 border-2 border-primary text-primary px-8 py-3 rounded-full font-bold hover:bg-primary hover:text-white transition-colors"
                         x-text="t('Carregar mais artigos', 'Load more articles')">
@@ -168,4 +136,8 @@
         {% include 'news/partials/sidebar.html' %}
     </aside>
 </main>
+
+{% if site_settings.social_section_enabled %}
+  {% include 'components/social_feed.html' %}
+{% endif %}
 {% endblock %}

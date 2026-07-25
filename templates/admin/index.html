@@ -123,43 +123,6 @@
             {% endif %}
         </article>
 
-        <article class="kb-card kb-portal-card">
-            <div class="kb-card-header">
-                <div>
-                    <p class="kb-eyebrow">Editorial</p>
-                    <h2 class="kb-card-title">Blog da Kelly</h2>
-                    <p class="kb-card-subtitle">Publicação editorial, comentários e newsletter</p>
-                </div>
-            </div>
-
-            <div class="kb-portal-metrics">
-                {% for metric in news_metrics %}
-                    <a href="{{ metric.url }}" class="kb-portal-metric kb-card-clickable kb-tone-{{ metric.tone }}">
-                        <span class="kb-portal-metric-value">{{ metric.value }}</span>
-                        <span class="kb-portal-metric-copy">
-                            <span>{{ metric.title }}</span>
-                            <small>{{ metric.hint }}</small>
-                        </span>
-                    </a>
-                {% empty %}
-                    <div class="kb-empty-state">
-                        <span class="material-symbols-outlined" aria-hidden="true">lock</span>
-                        <span>Sem métricas editoriais disponíveis.</span>
-                    </div>
-                {% endfor %}
-            </div>
-
-            {% if news_links %}
-                <div class="kb-link-grid" aria-label="Atalhos do Blog da Kelly">
-                    {% for link in news_links %}
-                        <a href="{{ link.url }}" class="kb-action-link">
-                            <span class="material-symbols-outlined" aria-hidden="true">{{ link.icon }}</span>
-                            <span>{{ link.title }}</span>
-                        </a>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </article>
     </section>
 
     <section class="kb-section" aria-labelledby="kb-activity-title">

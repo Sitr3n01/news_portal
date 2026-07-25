@@ -25,7 +25,7 @@
         <div class="min-w-0">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {% for article in page_obj %}
-                {% include 'news/partials/article_card.html' %}
+                {% include 'news/partials/article_teaser.html' %}
                 {% empty %}
                 <div class="col-span-full py-24 text-center">
                     <div class="inline-block p-6 rounded-full bg-gray-50 dark:bg-slate-800 mb-4">

@@ -33,12 +33,30 @@ def backfill_content(apps, schema_editor):
     from apps.common.sanitization import sanitize_content
 
     updated = 0
-    for article in Article.objects.exclude(body__exact='').exclude(body__isnull=True).iterator():
+    for article in Article.objects.iterator():
         raw = _extract_content_from_body_blocks(article.body)
-        if raw:
-            raw = sanitize_content(raw)
-        if raw != article.content:
-            Article.objects.filter(pk=article.pk).update(content=raw)
+        if not raw:
+            # NUNCA sobrescrever `content` com vazio. Esta guarda foi acrescentada
+            # depois de a versão original desta migration apagar o `content` de
+            # todos os artigos legados em produção.
+            #
+            # O filtro que existia aqui era
+            # `.exclude(body__exact='').exclude(body__isnull=True)`, na suposição
+            # de que artigo sem body ficaria de fora. Não fica: quando a `0015`
+            # adicionou a coluna `body` (JSON, null=True, sem default), o Django
+            # gravou `json.dumps(None)` nas linhas existentes — ou seja, o valor
+            # JSON `null`, que NÃO é SQL NULL. `body IS NULL` dá falso, o artigo
+            # entra no laço, a extração devolve '' e o `content` era zerado.
+            #
+            # Armadilha geral, não específica desta migration: ao adicionar coluna
+            # JSON/StreamField anulável, as linhas antigas recebem JSON `null` e
+            # `__isnull=True` não as encontra. Teste a veracidade do valor
+            # (`if not campo`), não `__isnull`.
+            continue
+
+        content = sanitize_content(raw)
+        if content != article.content:
+            Article.objects.filter(pk=article.pk).update(content=content)
             updated += 1
 
     # This is informational only; Django doesn't show stdout in migrations.

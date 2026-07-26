@@ -1,0 +1,24 @@
+{% autoescape off %}CONFIRME SEU E-MAIL
+{{ news_portal_name }}
+========================================================================
+
+Olá!
+
+Recebemos um cadastro com este endereço no {{ news_portal_name }}.
+Para confirmar que foi você, use o código abaixo na tela de
+confirmação:
+
+------------------------------------------------------------
+
+    {{ code }}
+
+------------------------------------------------------------
+
+Este código expira em {{ expires_in_minutes }} minutos.
+
+Se você não criou uma conta no {{ news_portal_name }}, pode
+ignorar esta mensagem com segurança.
+
+------------------------------------------------------------------------
+© {{ current_year }} {{ news_portal_name }}. Todos os direitos reservados.
+{% endautoescape %}

@@ -536,6 +536,24 @@ AXES_LOCKOUT_TEMPLATE = 'auth/lockout.html'
 # telas nativas sem precisar de deploy de código (ver config/urls.py).
 UNIFIED_LOGIN_ENABLED = env.bool('UNIFIED_LOGIN_ENABLED', default=True)
 
+# ── Login com Google (OpenID Connect) ──────────────────────────────────────
+# Alternativa ao login por senha, NUNCA um caminho de autorização: o Google só
+# diz QUEM é a pessoa; o que ela alcança continua vindo de apps/accounts/panels.py
+# e das permissões no banco. Ver apps/accounts/oauth_google.py.
+#
+# Crie a credencial em console.cloud.google.com -> "ID do cliente OAuth" ->
+# tipo "Aplicativo da Web", e registre lá o MESMO redirect URI de baixo.
+GOOGLE_OAUTH_CLIENT_ID = env('GOOGLE_OAUTH_CLIENT_ID', default='')
+GOOGLE_OAUTH_CLIENT_SECRET = env('GOOGLE_OAUTH_CLIENT_SECRET', default='')
+# Fixado por variável de ambiente em vez de montado com request.build_absolute_uri():
+# atrás do nginx o Host é influenciável, e um redirect_uri derivado dele poderia
+# ser apontado para outro domínio. O Google também exige correspondência exata
+# com o que está registrado no console.
+GOOGLE_OAUTH_REDIRECT_URI = env('GOOGLE_OAUTH_REDIRECT_URI', default='')
+# Sem credencial, o botão nem aparece e as rotas devolvem 404 — assim CI, testes
+# e qualquer instalação sem Google seguem funcionando sem configuração nenhuma.
+GOOGLE_OAUTH_ENABLED = bool(GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET)
+
 # ── Authentication Backends (axes brute-force protection) ──────────────────
 AUTHENTICATION_BACKENDS = [
     'axes.backends.AxesStandaloneBackend',
@@ -552,6 +570,14 @@ AXES_IPWARE_META_PRECEDENCE_ORDER = [
     'HTTP_X_FORWARDED_FOR',
     'REMOTE_ADDR',
 ]
+
+# ── Códigos de verificação ──────────────────────────────────────────────────
+# Confirmação de e-mail e recuperação de senha por código (apps.accounts.
+# verification) compartilham as duas configurações abaixo. TTL curto e teto de
+# tentativas baixo são a defesa real de um segredo de 6 dígitos — não um KDF
+# lento (ver o comentário de _hash_code em apps/accounts/verification.py).
+VERIFICATION_CODE_TTL = env.int('VERIFICATION_CODE_TTL', default=600)  # 10 minutos
+VERIFICATION_CODE_MAX_ATTEMPTS = env.int('VERIFICATION_CODE_MAX_ATTEMPTS', default=5)
 
 # ── Content Security Policy (django-csp) — defense-in-depth ────────────────
 # Espelha a política CSP do docker/nginx/nginx.conf para proteção mesmo sem
@@ -641,6 +667,11 @@ LOGGING = {
             'propagate': False,
         },
         'apps': {
+            'handlers': ['console'],
+            'level': LOG_LEVEL,
+            'propagate': False,
+        },
+        'apps.email': {
             'handlers': ['console'],
             'level': LOG_LEVEL,
             'propagate': False,

@@ -14,9 +14,20 @@ services:
       - ../.env
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.development
+      # Aponta o Django para o Mailpit do compose em vez do console backend:
+      # sem isto, base.py cai no default de console e nenhum e-mail sai do
+      # container, mesmo com o serviço mailpit rodando ao lado.
+      - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+      - EMAIL_HOST=mailpit
+      - EMAIL_PORT=1025
+      - EMAIL_USE_TLS=False
+      - EMAIL_USE_SSL=False
+      - DEFAULT_FROM_EMAIL=Blog da Kelly <nao-responda@localhost>
     depends_on:
       db:
         condition: service_healthy
+      mailpit:
+        condition: service_started
 
   db:
     image: postgres:16-alpine
@@ -34,6 +45,7 @@ services:
       timeout: 5s
       retries: 5
 
+  # UI de inspeção dos e-mails capturados (nada sai para a internet): http://localhost:8025
   mailpit:
     image: axllent/mailpit
     ports:

@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
+from apps.accounts.decorators import email_verified_required
 from apps.common.social_section import get_social_section_posts
 
 from .forms import NewsletterSubscriptionForm
@@ -385,6 +386,11 @@ def user_dashboard(request):
 
 @require_POST
 @login_required
+# email_verified_required por último de propósito: o gate lê
+# request.user.email_verified, então só faz sentido rodar depois que
+# login_required já garantiu que existe um usuário autenticado ali. A mesma
+# ordem se repete em toggle_like e add_comment abaixo, pelo mesmo motivo.
+@email_verified_required
 def toggle_bookmark(request, article_id):
     """Toggle de bookmark de artigo para o usuario autenticado."""
     article = get_object_or_404(Article, id=article_id)
@@ -410,6 +416,7 @@ def toggle_bookmark(request, article_id):
 
 @require_POST
 @login_required
+@email_verified_required
 def toggle_like(request, article_id):
     """Toggle de like em artigo (por usuario autenticado)."""
     article = get_object_or_404(Article, id=article_id)
@@ -435,6 +442,7 @@ def toggle_like(request, article_id):
 
 @require_POST
 @login_required
+@email_verified_required
 def add_comment(request, article_id):
     """Adiciona comentario em um artigo (usuario autenticado)."""
     article = get_object_or_404(Article, id=article_id, status=Article.Status.PUBLISHED)

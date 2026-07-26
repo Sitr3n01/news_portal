@@ -100,6 +100,13 @@ find "${BACKUP_DIR}" -type f -name 'postgres-*.sql.gz' -mtime +30 -delete
 log "Building web image"
 compose build web
 
+# Antes de migrar: falhar aqui custa um deploy abortado; falhar depois custa um
+# site no ar com EMAIL_BACKEND de console, descartando toda recuperação de senha
+# em silêncio (accounts.E001, ver apps/accounts/checks.py). --fail-level ERROR
+# deixa os Warnings passarem — só os Errors barram.
+log "Validating deployment configuration"
+compose run --rm web python manage.py check --deploy --fail-level ERROR
+
 log "Running migrations"
 compose run --rm web python manage.py migrate --noinput
 

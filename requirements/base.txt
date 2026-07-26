@@ -19,6 +19,11 @@ httpx>=0.27
 # de `wagtailcore.0097_baselogentry_uuid_action_timestamp_indexes`, o último nó do
 # grafo nesta série. Uma 7.4.x anterior sem esse nó faz o `migrate` morrer antes da
 # primeira migration. Ver o guard em apps/common/tests.py.
+# Validação do ID token do Google (assinatura contra o JWKS, iss/aud/exp) no
+# login com Google — apps/accounts/oauth_google.py. Só isso: o fluxo OAuth em
+# si é próprio, com httpx, para não trazer os models/views/templates de login
+# de uma biblioteca de social login e colidir com o login unificado.
+google-auth>=2.28
 wagtail>=7.4.2,<7.5
 django-modelcluster>=6.4
 django-taggit>=6.1

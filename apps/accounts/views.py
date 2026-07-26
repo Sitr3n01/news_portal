@@ -1,27 +1,24 @@
-import hashlib
-
-from axes.helpers import get_client_ip_address
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import LoginView, PasswordResetView
+from django.contrib.auth.views import LoginView
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.cache import cache
-from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
+from .emails import send_verification_code_email
 from .forms import CustomUserCreationForm, ProfileForm
+from .models import VerificationCode
+from .verification import issue_code
 
-# Janela e teto do rate limit de recuperação de senha.
-RESET_THROTTLE_WINDOW = 900  # 15 minutos
-RESET_IP_LIMIT = 10          # pedidos por IP dentro da janela
-
-
-def _hash_key(*parts):
-    """Deriva uma chave de cache opaca e de tamanho fixo a partir de dados sensíveis."""
-    return hashlib.sha256('|'.join(parts).encode()).hexdigest()
+# A recuperação de senha mudou de link para código e vive em code_views.py.
+# `CustomPasswordResetView` foi removida junto com os baldes de rate limit que
+# só ela usava: o rate limit equivalente agora é `verification.throttle`, e
+# manter aqui uma view que ainda enviaria link por e-mail, ao lado do fluxo
+# novo, seria fonte garantida de confusão. A proteção contra host header
+# poisoning que ela tinha (`domain_override`) deixou de ser necessária pelo
+# motivo mais direto possível: o e-mail de código não carrega URL nenhuma.
 
 
 class CustomLoginView(LoginView):
@@ -35,67 +32,12 @@ class CustomLoginView(LoginView):
     redirect_authenticated_user = True
 
 
-class CustomPasswordResetView(PasswordResetView):
-    template_name = 'accounts/password_reset/password_reset_form.html'
-    success_url = reverse_lazy('accounts:password_reset_done')
-    email_template_name = 'accounts/password_reset/password_reset_email.html'
-    subject_template_name = 'accounts/password_reset/password_reset_subject.txt'
-
-    def form_valid(self, form):
-        # 1. Proteção contra mailbombing (rate limiting), em dois níveis.
-        #
-        # O IP vem do helper do axes, que respeita AXES_IPWARE_PROXY_COUNT e
-        # AXES_IPWARE_META_PRECEDENCE_ORDER (base.py) — não dá para confiar num
-        # parse manual de X-Forwarded-For, que é forjável quando a contagem de
-        # proxies não é levada em conta.
-        ip = get_client_ip_address(self.request) or 'unknown_ip'
-        email = (form.cleaned_data.get('email') or '').strip().lower()
-
-        # Balde por (IP, e-mail): impede repetir o pedido para o mesmo destino.
-        # A chave é um hash porque a chave crua carregava e-mail e IP em texto
-        # puro para dentro do backend de cache (que hoje é uma tabela no banco).
-        # Normalizar o e-mail evita que A@x.com e a@x.com virem baldes distintos.
-        pair_key = f'pwd_reset:pair:{_hash_key(ip, email)}'
-        # Balde só por IP: sem ele, uma única origem podia disparar e-mails para
-        # infinitos endereços distintos, já que cada par tinha o próprio balde.
-        ip_key = f'pwd_reset:ip:{_hash_key(ip)}'
-
-        if cache.get(pair_key) or cache.get_or_set(ip_key, 0, RESET_THROTTLE_WINDOW) >= RESET_IP_LIMIT:
-            # Descarta o envio em silêncio para não transformar o formulário em
-            # arma de DoS de caixa de entrada, mas devolve sucesso para não
-            # revelar ao atacante que houve bloqueio.
-            return HttpResponseRedirect(self.get_success_url())
-
-        cache.set(pair_key, True, timeout=RESET_THROTTLE_WINDOW)
-        try:
-            cache.incr(ip_key)
-        except ValueError:
-            # A chave expirou entre o get_or_set e o incr — recria o balde.
-            cache.set(ip_key, 1, timeout=RESET_THROTTLE_WINDOW)
-
-        # 2. Protection contra Host Header Poisoning
-        site = get_current_site(self.request)
-        opts = {
-            'use_https': self.request.is_secure(),
-            'token_generator': self.token_generator,
-            'from_email': self.from_email,
-            'email_template_name': self.email_template_name,
-            'subject_template_name': self.subject_template_name,
-            'request': self.request,
-            'html_email_template_name': self.html_email_template_name,
-            'extra_email_context': self.extra_email_context,
-            'domain_override': site.domain,  # Forces DB Domain definition, ignoring HTTP spoofing headers
-        }
-        form.save(**opts)
-        return HttpResponseRedirect(self.get_success_url())
-
-
 def register_view(request):
     if request.user.is_authenticated:
         return redirect('news:list')
 
     if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST, request=request)
         if form.is_valid():
             user = form.save()
 
@@ -109,17 +51,30 @@ def register_view(request):
                     defaults={'is_active': True},
                 )
 
+            # Confirmação de e-mail (Fase 3, bloqueio suave): emite e envia o
+            # código ANTES do login, para a tela pós-cadastro já ter algo a
+            # confirmar. Se issue_code recusar (rate limit — improvável para
+            # quem acabou de nascer, mas a função é genérica e compartilhada)
+            # ou o envio falhar (SMTP fora do ar), o cadastro NÃO é abortado:
+            # a conta já existe e a pessoa já vai entrar; a tela de
+            # confirmação (accounts:verify_email) sempre oferece "Reenviar
+            # código" para tentar de novo depois.
+            code = issue_code(user, VerificationCode.Purpose.EMAIL_VERIFICATION, request=request)
+            if code is not None:
+                send_verification_code_email(user, code, request=request)
+
             # backend explícito: o projeto tem múltiplos AUTHENTICATION_BACKENDS
             # (axes + ModelBackend, em base.py), então login() não consegue inferir o
             # backend de um usuário recém-criado (não veio de authenticate()). Sem
             # isto, login() levanta ValueError e o cadastro retorna HTTP 500.
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            return redirect('news:list')
+            messages.success(request, 'Conta criada! Confirme seu e-mail com o código que enviamos.')
+            return redirect('accounts:verify_email')
     else:
         initial = {}
         if email := request.GET.get('email'):
             initial['email'] = email
-        form = CustomUserCreationForm(initial=initial)
+        form = CustomUserCreationForm(initial=initial, request=request)
 
     return render(request, 'accounts/register.html', {'form': form})
 

@@ -61,7 +61,7 @@ class GoogleOAuthError(Exception):
 
 
 def is_enabled():
-    return bool(settings.GOOGLE_OAUTH_ENABLED)
+    return bool(settings.GOOGLE_OAUTH_ENABLED and settings.GOOGLE_OAUTH_REDIRECT_URI)
 
 
 def _redirect_uri():

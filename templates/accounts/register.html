@@ -10,6 +10,8 @@
         <p class="text-center text-slate-500 font-ui text-sm mb-8"
             x-text="t('Participe da conversa.', 'Join the conversation.')">Participe da nossa comunidade.</p>
 
+        {% include 'accounts/partials/_google_button.html' with google_button_label='Criar conta com Google' google_button_label_en='Sign up with Google' %}
+
         <form method="post" action="{% url 'accounts:register' %}" class="space-y-5">
             {% csrf_token %}
             {% if form.non_field_errors %}

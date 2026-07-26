@@ -552,7 +552,7 @@ GOOGLE_OAUTH_CLIENT_SECRET = env('GOOGLE_OAUTH_CLIENT_SECRET', default='')
 GOOGLE_OAUTH_REDIRECT_URI = env('GOOGLE_OAUTH_REDIRECT_URI', default='')
 # Sem credencial, o botão nem aparece e as rotas devolvem 404 — assim CI, testes
 # e qualquer instalação sem Google seguem funcionando sem configuração nenhuma.
-GOOGLE_OAUTH_ENABLED = bool(GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET)
+GOOGLE_OAUTH_ENABLED = bool(GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET and GOOGLE_OAUTH_REDIRECT_URI)
 
 # ── Authentication Backends (axes brute-force protection) ──────────────────
 AUTHENTICATION_BACKENDS = [

@@ -1,6 +1,6 @@
 {% comment %}
-Botão "Entrar com Google", compartilhado pelas duas portas de login
-(templates/accounts/login.html e templates/auth/login.html).
+Botão Google compartilhado pelas duas portas de login
+(templates/accounts/login.html e templates/auth/login.html) e pelo cadastro.
 
 `google_oauth_enabled` vem do context processor site_context: sem credencial
 configurada as rotas devolvem 404, então o botão simplesmente não existe.
@@ -14,6 +14,8 @@ A marca do Google é SVG inline, e não arquivo estático: a CSP do projeto
 passa por essa diretiva — evita ter de afrouxar a política por um ícone.
 {% endcomment %}
 {% if google_oauth_enabled %}
+{% firstof google_button_label "Entrar com Google" as button_label %}
+{% firstof google_button_label_en "Sign in with Google" as button_label_en %}
 <div class="mt-6">
     <div class="relative flex items-center justify-center mb-6">
         <div class="absolute inset-0 flex items-center" aria-hidden="true">
@@ -35,7 +37,7 @@ passa por essa diretiva — evita ter de afrouxar a política por um ícone.
             <path fill="#EA4335"
                 d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z" />
         </svg>
-        <span x-text="t('Entrar com Google', 'Sign in with Google')">Entrar com Google</span>
+        <span x-text="t('{{ button_label|escapejs }}', '{{ button_label_en|escapejs }}')">{{ button_label }}</span>
     </a>
 </div>
 {% endif %}

@@ -19,6 +19,7 @@ import secrets
 from axes.handlers.proxy import AxesProxyHandler
 from django.contrib import messages
 from django.contrib.auth import login
+from django.db import IntegrityError, transaction
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.utils import timezone
@@ -106,31 +107,53 @@ def resolve_google_user(claims):
 
     user = CustomUser.objects.filter(email__iexact=claims['email']).first()
     if user is not None:
+        linked_identity = GoogleIdentity.objects.filter(user=user).first()
+        if linked_identity is not None:
+            security_log.warning('AUTH_OAUTH_IDENTITY_CONFLICT user_id=%s', user.pk)
+            raise oauth_google.GoogleOAuthError(
+                'identity_conflict',
+                'Esta conta já está vinculada a outra conta Google. Use o login com senha ou fale com o suporte.',
+            )
+
         # Vínculo criado, permissões INTOCADAS — nem role, nem groups, nem
         # is_staff aparecem nesta escrita.
-        GoogleIdentity.objects.create(user=user, google_sub=claims['sub'], email=claims['email'])
+        try:
+            GoogleIdentity.objects.create(user=user, google_sub=claims['sub'], email=claims['email'])
+        except IntegrityError as exc:
+            security_log.warning('AUTH_OAUTH_IDENTITY_CONFLICT user_id=%s', user.pk)
+            raise oauth_google.GoogleOAuthError(
+                'identity_conflict',
+                'Esta conta já está vinculada a outra conta Google. Use o login com senha ou fale com o suporte.',
+            ) from exc
         return user, False
 
-    user = CustomUser.objects.create(
-        username=_unique_username(claims['email']),
-        email=claims['email'],
-        first_name=claims['given_name'][:150],
-        last_name=claims['family_name'][:150],
-        role=CustomUser.Role.READER,
-        is_staff=False,
-        is_superuser=False,
-        # O Google já confirmou este endereço (verify_id_token exigiu isso),
-        # então pedir de novo um código por e-mail seria atrito sem ganho.
-        email_verified=True,
-        email_verified_at=timezone.now(),
-    )
-    # Senha inutilizável, não uma senha aleatória: assim `check_password`
-    # recusa qualquer entrada e a pessoa é levada ao fluxo de "esqueci minha
-    # senha" se quiser criar uma senha local depois.
-    user.set_unusable_password()
-    user.save(update_fields=['password'])
-
-    GoogleIdentity.objects.create(user=user, google_sub=claims['sub'], email=claims['email'])
+    try:
+        with transaction.atomic():
+            user = CustomUser.objects.create(
+                username=_unique_username(claims['email']),
+                email=claims['email'],
+                first_name=claims['given_name'][:150],
+                last_name=claims['family_name'][:150],
+                role=CustomUser.Role.READER,
+                is_staff=False,
+                is_superuser=False,
+                # O Google já confirmou este endereço (verify_id_token exigiu isso),
+                # então pedir de novo um código por e-mail seria atrito sem ganho.
+                email_verified=True,
+                email_verified_at=timezone.now(),
+            )
+            # Senha inutilizável, não uma senha aleatória: assim `check_password`
+            # recusa qualquer entrada e a pessoa é levada ao fluxo de "esqueci minha
+            # senha" se quiser criar uma senha local depois.
+            user.set_unusable_password()
+            user.save(update_fields=['password'])
+            GoogleIdentity.objects.create(user=user, google_sub=claims['sub'], email=claims['email'])
+    except IntegrityError as exc:
+        security_log.warning('AUTH_OAUTH_IDENTITY_CREATE_CONFLICT')
+        raise oauth_google.GoogleOAuthError(
+            'identity_conflict',
+            'Não foi possível vincular sua conta Google agora. Tente novamente.',
+        ) from exc
     return user, True
 
 
@@ -199,7 +222,10 @@ def google_callback(request):
     except oauth_google.GoogleOAuthError as exc:
         return _fail(request, exc.mensagem)
 
-    user, criado = resolve_google_user(claims)
+    try:
+        user, criado = resolve_google_user(claims)
+    except oauth_google.GoogleOAuthError as exc:
+        return _fail(request, exc.mensagem)
 
     # is_active=False é "conta desativada pelo administrador" — recusar ANTES
     # do login(), nunca depois. Entrar e só então descobrir a recusa deixaria

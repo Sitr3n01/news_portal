@@ -42,6 +42,8 @@ class AdminRoleGroupAdmin(AdminUXMixin, ModelAdmin, DjangoGroupAdmin):
 
 @admin.register(CustomUser)
 class CustomUserAdmin(AdminUXMixin, ModelAdmin, UserAdmin):
+    STAFF_ADMIN_ROLES = {CustomUser.Role.SCHOOL_ADMIN, CustomUser.Role.SUPER_ADMIN}
+
     list_display = ['username', 'email', 'get_role_display', 'is_active', 'is_staff', 'date_joined']
     list_filter = ['role', 'is_active', 'is_staff', 'email_verified', 'date_joined']
     list_filter_submit = True
@@ -76,16 +78,16 @@ class CustomUserAdmin(AdminUXMixin, ModelAdmin, UserAdmin):
         {'label': 'Todos os usuários', 'icon': 'manage_accounts', 'url': reverse_lazy('admin:accounts_customuser_changelist')},
     ]
     fieldsets = (
-        (None, {'fields': ('username', 'password'), 'classes': ('tab',)}),
-        ('Informações Pessoais', {
-            'fields': ('first_name', 'last_name', 'email', 'email_verified', 'email_verified_at'),
+        ('Identificação', {
+            'fields': ('username', 'password', 'first_name', 'last_name', 'email', 'email_verified', 'email_verified_at'),
             'classes': ('tab',),
         }),
-        ('Permissões', {
-            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
+        ('Cargo e permissões', {
+            'fields': ('role', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
             'classes': ('tab',),
+            'description': 'Administrador Komuniki e Administrador Geral liberam automaticamente o acesso administrativo ao salvar. Superusuário continua sendo uma escolha separada.',
         }),
-        ('Perfil', {'fields': ('role', 'avatar', 'bio'), 'classes': ('tab',)}),
+        ('Perfil', {'fields': ('avatar', 'bio'), 'classes': ('tab',)}),
         ('Datas Importantes', {'fields': ('last_login', 'date_joined'), 'classes': ('collapse',)}),
     )
     add_fieldsets = (
@@ -98,8 +100,8 @@ class CustomUserAdmin(AdminUXMixin, ModelAdmin, UserAdmin):
             'fields': ('role',),
             'description': 'O cargo define o grupo de permissões atribuído automaticamente ao salvar '
                           '(ex.: "Editor de Notícias"). Use "Leitor" para quem só acessa o portal público. '
-                          'Para liberar a Administração do sistema, marque também "Acesso administrativo" '
-                          'na aba Permissões. Ajuste depois em Permissões se precisar de algo específico.',
+                          'Administrador Komuniki e Administrador Geral também liberam a Administração do sistema. '
+                          'Superusuário continua sendo uma permissão separada, ajustada depois em Permissões.',
         }),
     )
 
@@ -112,6 +114,11 @@ class CustomUserAdmin(AdminUXMixin, ModelAdmin, UserAdmin):
         extra_context = extra_context or {}
         extra_context['kb_password_fix'] = True
         return super().changeform_view(request, object_id, form_url, extra_context)
+
+    def save_model(self, request, obj, form, change):
+        if obj.role in self.STAFF_ADMIN_ROLES:
+            obj.is_staff = True
+        super().save_model(request, obj, form, change)
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)

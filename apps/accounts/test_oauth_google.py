@@ -61,20 +61,30 @@ def test_routes_are_404_without_credentials(client, settings):
     assert client.get(reverse('accounts:google_callback')).status_code == 404
 
 
+def test_redirect_uri_is_required_to_enable_google_oauth(settings):
+    settings.GOOGLE_OAUTH_ENABLED = True
+    settings.GOOGLE_OAUTH_REDIRECT_URI = ''
+
+    assert oauth_google.is_enabled() is False
+
+
 @pytest.mark.django_db
 def test_button_is_hidden_without_credentials(client, settings):
     settings.GOOGLE_OAUTH_ENABLED = False
 
     conteudo = client.get(reverse('accounts:login')).content.decode()
+    cadastro = client.get(reverse('accounts:register')).content.decode()
 
     assert 'Entrar com Google' not in conteudo
+    assert 'Criar conta com Google' not in cadastro
 
 
 @pytest.mark.django_db
-def test_button_shows_on_both_login_screens(client, oauth_ligado):
-    """As duas portas — leitor e equipe — oferecem o Google."""
+def test_button_shows_on_login_and_register_screens(client, oauth_ligado):
+    """As duas portas de login e o cadastro oferecem o Google."""
     assert 'Entrar com Google' in client.get(reverse('accounts:login')).content.decode()
     assert 'Entrar com Google' in client.get(reverse('panel:login')).content.decode()
+    assert 'Criar conta com Google' in client.get(reverse('accounts:register')).content.decode()
 
 
 # ── Criação de usuário ──────────────────────────────────────────────────────
@@ -228,6 +238,23 @@ def test_different_sub_same_email_does_not_hijack(client, monkeypatch, oauth_lig
     # A senha local continua valendo: ganhar o Google não tira o outro método.
     dono.refresh_from_db()
     assert dono.check_password(SENHA) is True
+
+
+@pytest.mark.django_db
+def test_same_email_with_existing_google_link_is_refused(client, monkeypatch, oauth_ligado, django_user_model, current_site):
+    """Uma conta local já vinculada a um Google não aceita outro `sub` por e-mail."""
+    dono = django_user_model.objects.create_user(
+        username='vinculado', email='vinculado@example.com', password=SENHA,
+    )
+    GoogleIdentity.objects.create(user=dono, google_sub='sub-original', email=dono.email)
+
+    response = entrar_com_google(client, monkeypatch, claims(dono.email, sub='sub-diferente'))
+
+    assert response.status_code == 302
+    assert response.url == reverse('accounts:login')
+    assert '_auth_user_id' not in client.session
+    assert GoogleIdentity.objects.count() == 1
+    assert GoogleIdentity.objects.get().google_sub == 'sub-original'
 
 
 # ── Recusas ─────────────────────────────────────────────────────────────────

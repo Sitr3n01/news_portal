@@ -9,6 +9,8 @@ Portal institucional da Komuniki e portal de notícias Blog da Kelly, servidos p
 
 ![Home da Komuniki](docs/images/komuniki-home.png)
 
+![Home do Blog da Kelly, com artigo em destaque e lista de mais lidas](docs/images/blog-da-kelly-home.png)
+
 ![Painel administrativo em Django Unfold](docs/images/admin-unfold.png)
 
 ---
@@ -46,6 +48,8 @@ O projeto serve dois portais públicos e um painel administrativo a partir do me
 | Admin | Django Unfold |
 | Estáticos | WhiteNoise em dev, Nginx em produção |
 | Deploy | Docker Compose, Nginx, Let's Encrypt, GitHub Actions com tag aprovada |
+
+![Artigo publicado, renderizado a partir dos blocos do StreamField](docs/images/artigo-streamfield.png)
 
 ---
 

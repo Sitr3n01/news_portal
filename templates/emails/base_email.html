@@ -1,0 +1,204 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="pt-BR">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- color-scheme/supported-color-schemes: sinaliza para Apple Mail, iOS Mail e
+         Outlook.com que este e-mail TEM uma variante escura própria (o @media
+         abaixo), em vez de deixar o cliente "inverter" sozinho as cores claras
+         (o que estragaria o azul da marca e o bloco de código). -->
+    <meta name="color-scheme" content="light dark" />
+    <meta name="supported-color-schemes" content="light dark" />
+    <title>{% block title %}{{ news_portal_name }}{% endblock %}</title>
+    <!--[if mso]>
+    <style type="text/css">
+        body, table, td, p, a { font-family: Arial, Helvetica, sans-serif !important; }
+        h1, h2 { font-family: Georgia, 'Times New Roman', serif !important; }
+    </style>
+    <![endif]-->
+    <style>
+        /* Este <style> só existe para as duas coisas que estilo INLINE não
+           consegue fazer: media query de largura de tela e de esquema de cor.
+           Todo o resto (cor, fonte, espaçamento) do corpo do e-mail vai inline
+           em cada elemento, porque Gmail (webmail e app) remove blocos <style>
+           inteiros em vários contextos de renderização — só o que está no
+           atributo style="" de cada tag é garantia de chegar ao leitor. */
+        @media screen and (max-width: 600px) {
+            .email-container { width: 100% !important; }
+            .email-pad { padding-left: 24px !important; padding-right: 24px !important; }
+            .email-heading { font-size: 24px !important; }
+        }
+
+        /* Dark mode é progressive enhancement, não requisito: Outlook desktop
+           ignora media query por completo (fica no tema claro inline, que já
+           é o design "oficial"), e o Gmail webmail é inconsistente. Apple
+           Mail/iOS Mail e Outlook.com honram isto. O azul da marca (#1152d4)
+           é mantido IGUAL no escuro de propósito — é um dos valores já
+           auditados da identidade visual, não um token que este arquivo deva
+           reinventar, e o contraste dele sobre fundo escuro já é adequado. */
+        @media (prefers-color-scheme: dark) {
+            .email-bg-outer { background-color: #111827 !important; }
+            .email-bg-container { background-color: #1c2230 !important; }
+            .email-border-container { border-color: #333d4d !important; }
+            .email-divider { border-color: #333d4d !important; }
+            .email-text-heading { color: #f3f4f6 !important; }
+            .email-text-body { color: #cbd5e1 !important; }
+            .email-text-secondary { color: #a1a8b5 !important; }
+            .email-text-subfooter { color: #7c8595 !important; }
+            .email-code-bg { background-color: #232a38 !important; }
+            .email-code-border { border-color: #3a4356 !important; }
+        }
+    </style>
+</head>
+
+<body style="margin:0;padding:0;background-color:#f9fafb;-webkit-font-smoothing:antialiased;" class="email-bg-outer">
+
+    <!-- Preheader: texto que Gmail/Outlook mostram na LISTAGEM da caixa de
+         entrada, ao lado do assunto — sem isto, eles pescam as primeiras
+         palavras visíveis do corpo (que aqui seria "Blog da Kelly" do
+         cabeçalho, sem nenhum contexto útil). display:none + mso-hide:all
+         escondem no cliente de e-mail (mso-hide cobre o Outlook, que ignora
+         display:none em alguns modos). Depois do texto real do bloco
+         `preheader`, repetimos uma sequência de caracteres invisíveis
+         (combining grapheme joiner + ZWNJ + espaço fixo) só para PREENCHER o
+         restante da janela de prévia (~100-140 caracteres nos clientes mais
+         comuns) — sem esse preenchimento, o cliente continuaria lendo o
+         início do corpo visível logo depois do preheader curto, vazando texto
+         (ex.: o wordmark) na prévia. -->
+    <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">
+        {% block preheader %}{% endblock %}
+        &#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;
+    </div>
+
+    <!--[if mso]>
+    <table role="presentation" align="center" width="600" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+    <td>
+    <![endif]-->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f9fafb;" class="email-bg-outer">
+        <tr>
+            <td align="center" style="padding:40px 16px;">
+
+                <!-- Container: width="600" (atributo HTML) + max-width:600px;width:100%
+                     inline é o padrão híbrido do newsletter existente — o atributo é
+                     lido por clientes raros que ignoram CSS, o inline governa todo
+                     o resto. Fora do Outlook (coberto pelo wrapper MSO acima), isto
+                     já basta para ficar fluido em telas estreitas. -->
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="email-container email-bg-container email-border-container" style="max-width:600px;width:100%;background-color:#ffffff;border:1px solid #e5e7eb;">
+
+                    <!-- Cabeçalho: logo se existir (SiteExtension.logo está vazio hoje,
+                         mas o caminho fica pronto), wordmark em texto como padrão —
+                         a marca É o texto "Blog da Kelly", não depende de imagem. -->
+                    <tr>
+                        <td align="center" class="email-pad email-bg-container email-border-container" style="padding:40px 40px 30px;text-align:center;border-bottom:1px solid #e5e7eb;background-color:#ffffff;">
+                            {% if site_settings and site_settings.logo %}
+                            <img src="{{ base_url }}{{ site_settings.logo.url }}" alt="{{ news_portal_name }}" style="max-height:44px;display:block;margin:0 auto;border:0;outline:none;text-decoration:none;" />
+                            {% else %}
+                            <span style="font-family:'Newsreader', Georgia, 'Times New Roman', serif;font-size:26px;font-weight:800;letter-spacing:-0.02em;color:#1a1a1a;" class="email-text-heading">{{ news_portal_name }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    <!-- Título específico do e-mail (ex.: "Confirme seu e-mail"). -->
+                    <tr>
+                        <td class="email-pad email-bg-container" style="padding:40px 40px 8px;background-color:#ffffff;">
+                            {% block heading %}{% endblock %}
+                        </td>
+                    </tr>
+
+                    <!-- Texto de introdução, em linguagem simples para quem não é técnico. -->
+                    <tr>
+                        <td class="email-pad email-bg-container" style="padding:0 40px 32px;background-color:#ffffff;">
+                            {% block intro %}{% endblock %}
+                        </td>
+                    </tr>
+
+                    <!-- Bloco do código: o destaque principal da mensagem. Tem um
+                         default aqui (ambos os e-mails de código usam sem sobrescrever),
+                         mas fica em block para um e-mail futuro poder trocar por outra
+                         coisa (ex.: um resumo) sem herdar um código que não existe. -->
+                    <tr>
+                        <td class="email-pad email-bg-container" style="padding:0 40px 40px;background-color:#ffffff;">
+                            {% block code_block %}
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="center">
+                                        <table role="presentation" cellpadding="0" cellspacing="0" border="0" class="email-code-bg email-code-border" style="background-color:#f1f5f9;border:1px solid #e5e7eb;border-radius:12px;">
+                                            <tr>
+                                                <td align="center" style="padding:24px 16px;text-align:center;">
+                                                    <!-- letter-spacing:12px acrescenta espaço DEPOIS de cada
+                                                         caractere, inclusive o último — isso empurra o "peso"
+                                                         visual do bloco para a direita e desalinha o centro
+                                                         óptico dentro da caixa. text-indent:12px (mesma medida
+                                                         do letter-spacing) compensa deslocando o texto de volta
+                                                         para a esquerda, recentralizando-o de fato. -->
+                                                    <p style="margin:0;text-indent:12px;font-family:'Courier New',Courier,monospace;font-size:40px;font-weight:700;letter-spacing:12px;color:#1152d4;line-height:1.2;">{{ code }}</p>
+                                                    <p class="email-text-secondary" style="margin:12px 0 0;font-size:14px;color:#6b7280;font-family:'Inter', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;">Este código expira em {{ expires_in_minutes }} minutos.</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            {% endblock %}
+                        </td>
+                    </tr>
+
+                    <!-- Espaço para conteúdo extra opcional (padding vertical zero por
+                         default: um e-mail que não sobrescreve este block não deve
+                         ganhar um respiro em branco à toa entre o código e o rodapé). -->
+                    <tr>
+                        <td class="email-pad email-bg-container" style="padding:0 40px;background-color:#ffffff;">
+                            {% block body_extra %}{% endblock %}
+                        </td>
+                    </tr>
+
+                    <!-- Padrão de botão de CTA, documentado aqui para uso futuro (ex.:
+                         um e-mail de boas-vindas com link "Ver meu perfil"), via
+                         body_extra ou heading override:
+
+                         <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                             <tr>
+                                 <td style="background-color:#1152d4;border-radius:8px;">
+                                     <a href="{{ algum_url }}" style="display:inline-block;padding:14px 28px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;font-family:'Inter', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;">Texto do botão</a>
+                                 </td>
+                             </tr>
+                         </table>
+
+                         Os e-mails de verification_code e password_reset_code
+                         DELIBERADAMENTE não usam este padrão: o fluxo é confirmar
+                         posse da caixa de entrada DIGITANDO o código na tela onde o
+                         usuário já está, não clicando em nada. Um link de ação aqui
+                         não teria destino nenhum a cumprir (o código não é um token
+                         de URL) e só criaria uma superfície a mais para phishing —
+                         acostumar o usuário a clicar em links de e-mails de segurança
+                         é exatamente o hábito que queremos evitar reforçar. -->
+
+                    <!-- Divisor -->
+                    <tr>
+                        <td style="padding:0;border-top:1px solid #e5e7eb;" class="email-divider"></td>
+                    </tr>
+
+                    <!-- Rodapé: aviso de segurança específico do fluxo + copyright. -->
+                    <tr>
+                        <td align="center" class="email-pad email-bg-container" style="padding:32px 40px;text-align:center;background-color:#ffffff;">
+                            {% block footer_note %}{% endblock %}
+                            <p class="email-text-subfooter" style="margin:16px 0 0;font-size:12px;color:#9ca3af;font-family:'Inter', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;">&copy; {{ current_year }} {{ news_portal_name }}. Todos os direitos reservados.</p>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+    <!--[if mso]>
+    </td>
+    </tr>
+    </table>
+    <![endif]-->
+
+</body>
+
+</html>

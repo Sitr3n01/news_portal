@@ -1,5 +1,6 @@
 {% extends 'base_news.html' %}
 {% load sanitize %}
+{% load wagtailcore_tags %}
 
 {% block title %}{{ article.meta_title|default:article.title }} - {{ news_portal_name }}{% endblock %}
 {% block meta_description %}{{ article.meta_description|default:article.excerpt }}{% endblock %}
@@ -11,8 +12,8 @@
 <meta property="og:title" content="{{ article.meta_title|default:article.title }}">
 <meta property="og:description" content="{{ article.meta_description|default:article.excerpt }}">
 <meta property="og:url" content="{{ request.build_absolute_uri }}">
-{% if article.featured_image %}
-<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ article.featured_image.url }}">
+{% if article.has_cover_image %}
+<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ article.cover_image_url }}">
 {% endif %}
 <meta property="article:published_time" content="{{ article.published_at|date:'c' }}">
 {% if article.category %}
@@ -28,8 +29,8 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ article.meta_title|default:article.title }}">
 <meta name="twitter:description" content="{{ article.meta_description|default:article.excerpt }}">
-{% if article.featured_image %}
-<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{{ article.featured_image.url }}">
+{% if article.has_cover_image %}
+<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{{ article.cover_image_url }}">
 {% endif %}
 {% endblock %}
 
@@ -43,14 +44,18 @@
   "description": "{{ article.excerpt|escapejs }}",
   "datePublished": "{{ article.published_at|date:'c' }}",
   "dateModified": "{{ article.updated_at|date:'c' }}",
-  {% if article.featured_image %}"image": "{{ request.scheme }}://{{ request.get_host }}{{ article.featured_image.url }}",{% endif %}
+  {% if article.has_cover_image %}"image": "{{ request.scheme }}://{{ request.get_host }}{{ article.cover_image_url }}",{% endif %}
   {% if article.author %}"author": {
     "@type": "Person",
     "name": "{{ article.author.get_full_name|default:article.author.username|escapejs }}"
   },{% endif %}
   "publisher": {
     "@type": "Organization",
-    "name": "{{ news_portal_name|escapejs }}"
+    "name": "{{ news_portal_name|escapejs }}"{% if site_settings.logo %},
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ request.scheme }}://{{ request.get_host }}{{ site_settings.logo.url }}"
+    }{% endif %}
   },
   "mainEntityOfPage": {
     "@type": "WebPage",
@@ -253,9 +258,9 @@
         </div>
 
         <!-- Featured Image -->
-        {% if article.featured_image %}
+        {% if article.has_cover_image %}
         <div class="mb-12 sm:mb-16 w-full overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-900 shadow-sm">
-            <img src="{{ article.featured_image.url }}" alt="{{ article.title }}"
+            <img src="{{ article.cover_image_url }}" alt="{{ article.title }}"
                 class="aspect-[4/3] sm:aspect-[21/9] w-full object-cover">
             {% if article.featured_image_caption %}
             <div class="mt-3 px-4 text-center">
@@ -301,7 +306,11 @@
 
             <!-- Article Body (structured content blocks) -->
             <div class="article-body font-display">
-                {% for block in article.blocks.all %}{% include block.partial_template %}{% empty %}{{ article.content|sanitize_html }}{% endfor %}
+                {% if article.body %}
+                    {% include_block article.body %}
+                {% elif article.content %}
+                    {{ article.content|sanitize_html }}
+                {% endif %}
             </div>
 
             <!-- Article Footer -->
@@ -406,31 +415,7 @@
                 x-text="t('Leia a Seguir', 'Read Next')">Read Next</h3>
             <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {% for article in related_articles %}
-                <a class="group flex flex-col gap-3" href="{% url 'news:article_detail' article.slug %}">
-                    <div class="overflow-hidden rounded-lg bg-slate-200 h-48 w-full">
-                        {% if article.featured_image %}
-                        <img src="{{ article.featured_image.url }}" alt="{{ article.title }}"
-                            class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
-                        {% else %}
-                        <div class="h-full w-full bg-slate-200 flex items-center justify-center text-slate-400">
-                            <span class="material-symbols-outlined text-4xl">image</span>
-                        </div>
-                        {% endif %}
-                    </div>
-                    <div class="flex flex-col gap-1">
-                        {% if article.category %}
-                        <span class="text-xs font-bold uppercase text-primary font-ui">{{ article.category.name }}</span>
-                        {% endif %}
-                        <h4
-                            class="text-lg font-bold leading-tight text-slate-900 group-hover:text-primary dark:text-slate-100 transition-colors font-display">
-                            {{ article.title }}
-                        </h4>
-                        <p class="text-sm text-slate-500 dark:text-slate-400 font-ui"><span
-                                x-text="t('Por', 'By')">By</span> {{ article.author.get_full_name|default:article.author.username }} • {{ article.reading_time }}
-                            <span x-text="t('min de leitura', 'min read')">min read</span>
-                        </p>
-                    </div>
-                </a>
+                {% include 'news/partials/article_teaser.html' with article=article %}
                 {% endfor %}
             </div>
         </div>

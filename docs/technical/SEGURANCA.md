@@ -15,10 +15,20 @@
 | CSRF | Middleware CSRF + `{% csrf_token %}` | Middleware + formulários |
 | SQL Injection | ORM parametrizado (sem SQL cru) | Toda a camada de dados |
 | Força bruta no login | `django-axes` (5 tentativas → 30 min de bloqueio) | `AxesMiddleware` |
-| Mailbomb no reset de senha | Rate limit por IP+e-mail (15 min) | `CustomPasswordResetView` |
-| Host header poisoning | Domínio forçado pelo banco no reset | `CustomPasswordResetView` |
-| Token de reset longo | Expiração reduzida para 1 hora | `PASSWORD_RESET_TIMEOUT` |
-| Enumeração de usuários | Mensagens genéricas em cadastro/reset/candidatura | Views e forms |
+| Mailbomb no reset de senha | Turnstile + rate limit por IP e por identidade (15 min) | `apps/accounts/code_views.py` + `verification.py` |
+| Host header poisoning no reset | Não se aplica: o e-mail de código não carrega URL nenhuma | `templates/emails/` |
+| Código de verificação longo demais | TTL de 10 min, uso único, teto de 5 tentativas | `apps/accounts/verification.py` |
+| Força bruta em código de 6 dígitos | Teto por código + rate limit de validação por IP | `apps/accounts/verification.py` |
+| Código vazado no banco | Só HMAC-SHA256 com `SECRET_KEY` como pepper; texto puro nunca é persistido | `apps/accounts/verification.py` |
+| Login-CSRF no OAuth | `state` na sessão do servidor, conferido com `compare_digest` | `apps/accounts/oauth_views.py` |
+| Replay de ID token | `nonce` conferido à mão + fluxo de uso único (`session.pop`) | `apps/accounts/oauth_google.py` |
+| Código de autorização interceptado | PKCE S256 (`code_verifier` nunca sai do servidor) | `apps/accounts/oauth_google.py` |
+| Redirect URI forjado pelo Host | `GOOGLE_OAUTH_REDIRECT_URI` fixado por variável de ambiente | `config/settings/base.py` |
+| Escalada por login social | O Google só autentica; cargo/grupo/`is_staff` vêm do banco e nunca são escritos no fluxo | `apps/accounts/oauth_views.py` |
+| Sequestro por e-mail no OAuth | Casamento por e-mail exige `email_verified` do Google; identidade chaveada pelo `sub` imutável | `apps/accounts/oauth_google.py` |
+| Conta duplicada por capitalização | E-mail normalizado na gravação + busca `__iexact` | `apps/accounts/forms.py` + migration `0009` |
+| Enumeração de usuários | Mensagens e redirecionamentos idênticos em cadastro/reset/candidatura | Views e forms |
+| E-mail sumindo em silêncio | System check `accounts.E001` barra backend fake fora de DEBUG, no deploy | `apps/accounts/checks.py` |
 | Clickjacking | `X-Frame-Options: DENY` | Middleware + nginx |
 | Upload malicioso | Extensão + MIME + **magic bytes** (5 MB) | `hiring/forms.py` |
 | Vazamento de currículo | Nome UUID + download autenticado via `X-Accel-Redirect` | `hiring` + nginx |
@@ -63,21 +73,45 @@ Em `base.py`:
 
 O `AxesMiddleware` intercepta o login; as views de autenticação não precisam de lógica própria de bloqueio. (Para desbloquear manualmente: `python manage.py axes_reset_username --username ...`.)
 
-### Recuperação de senha — `CustomPasswordResetView`
-Em [`apps/accounts/views.py`](../../apps/accounts/views.py), três camadas:
+### Códigos de verificação — `apps/accounts/verification.py`
+Uma camada só atende **confirmação de e-mail** e **recuperação de senha** (`VerificationCode.Purpose`), para as duas não divergirem sobre prazo, teto ou rate limit:
 
-1. **Rate limit anti-mailbomb:** chave de cache `pwd_reset_limit_{ip}_{email}` bloqueia novos pedidos por **15 minutos**. Se já houver pedido recente, o sistema **finge sucesso** e descarta o envio — não dá pista ao atacante.
-2. **Anti host-header poisoning:** o link do e-mail usa `domain_override = site.domain` (domínio do banco), **ignorando** o header `Host` da request, que é forjável.
-3. **Token de curta duração:** `PASSWORD_RESET_TIMEOUT = 3600` (1 hora, contra 24h padrão do Django) reduz a janela de ataque.
+1. **Geração:** `secrets.choice` (CSPRNG), 6 dígitos.
+2. **Armazenamento:** só o HMAC-SHA256 (`salted_hmac`, com `SECRET_KEY` como *pepper* fora do banco, e `key_salt` incluindo propósito e id do usuário). O texto puro existe apenas no retorno de `issue_code` e no corpo do e-mail.
+3. **Prazo e uso:** `VERIFICATION_CODE_TTL` (10 min), uso único (`used_at`), teto de `VERIFICATION_CODE_MAX_ATTEMPTS` (5) por código — estourou, o código é queimado.
+4. **Reemissão invalida a anterior:** só o último código vale, para não haver dois segredos válidos ao mesmo tempo.
+5. **Rate limit:** 3 emissões por (usuário, propósito), 10 por IP e 20 validações por IP, em janela de 15 minutos, com chaves hasheadas no `DatabaseCache`.
+6. **Comparação:** `secrets.compare_digest` sobre os hashes — nunca `==`.
+
+### Recuperação de senha — `apps/accounts/code_views.py`
+Fluxo por **código**, não por link: informar e-mail → receber código → digitar → definir senha nova.
+
+- **Anti-enumeração:** exista ou não a conta, a resposta, a mensagem e o próximo passo são idênticos. Conta com `is_active=False` também não recebe código, sem que isso apareça na tela.
+- **Anti-mailbomb:** Turnstile no formulário + rate limit por IP no nível da view (o balde de `issue_code` só conta quando a conta existe).
+- **Estado na sessão do servidor**, com estágio (`code` → `password`) e prazo próprio de 15 min: pular direto para a tela de senha nova não abre.
+- **Reenvio lê o e-mail da SESSÃO**, nunca do corpo do POST — senão seria um disparador de e-mail para endereço arbitrário.
+- **Ao concluir:** todos os códigos pendentes são invalidados, o e-mail passa a confirmado (posse da caixa comprovada) e as demais sessões caem sozinhas, porque trocar a senha muda `get_session_auth_hash()`.
+- As rotas antigas `password_reset_confirm`/`password_reset_complete` seguem roteadas apenas para que links já enviados não caiam em 404; nada mais gera esses links.
+
+### Login com Google — `apps/accounts/oauth_google.py` e `oauth_views.py`
+Authorization Code + PKCE, implementação própria (sem `allauth`/`social-auth`, que colidiriam com o login unificado).
+
+- **`state`** na sessão do servidor, conferido com `compare_digest` — defesa de login-CSRF. Fluxo de uso único (`session.pop`).
+- **`nonce`** conferido explicitamente: `google-auth` valida assinatura, `iss`, `aud` e `exp`, mas **não** o nonce.
+- **PKCE S256:** o `code_verifier` nunca chega ao navegador.
+- **`redirect_uri`** vem de variável de ambiente, nunca de `build_absolute_uri()` (Host é influenciável atrás do proxy).
+- **`email_verified` do Google é obrigatório** para casar por e-mail; a identidade é chaveada pelo `sub` (imutável), nunca pelo endereço.
+- **Autenticação ≠ autorização:** nenhum caminho do fluxo escreve `role`, `groups`, `is_staff` ou `is_superuser`, e `sync_user_role_group` não é chamada. Conta nova nasce `reader`, sem grupo, sem staff, com senha inutilizável. O destino sai de `panels.post_login_target`, a mesma função do login por senha.
+- Conta desativada é recusada **antes** do `login()`; conta em cooloff do `axes` também, para o Google não ser porta lateral do bloqueio.
 
 ### Anti-enumeração de usuários
 A política é **nunca revelar** se um e-mail/usuário existe:
 - **Cadastro** ([`apps/accounts/forms.py`](../../apps/accounts/forms.py)): e-mail duplicado retorna mensagem genérica — *"Não foi possível criar a conta. Verifique os dados e tente novamente."*
-- **Reset de senha:** mesmo comportamento visível independentemente de o e-mail existir.
+- **Reset de senha:** resposta, mensagem e próxima tela idênticas, exista ou não a conta.
 - **Candidatura duplicada** (`hiring`): mesma mensagem de sucesso, sem revelar que aquele e-mail já se candidatou.
 
 ### E-mail como identidade
-`CustomUser.email` é `unique=True` **no banco** — constraint real, não só validação de formulário.
+`CustomUser.email` é `unique=True` **no banco** — constraint real, não só validação de formulário. A comparação é **case-insensitive** na aplicação: o cadastro grava em minúsculas e as buscas de identidade usam `__iexact`. Antes disso, `Fulano@x.com` e `FULANO@X.COM` viravam duas contas para a mesma caixa (corrigido na migration `0009`; `manage.py find_duplicate_emails` relata colisões remanescentes, sem nunca fundir contas por conta própria).
 
 ### Sessão
 - `SESSION_COOKIE_HTTPONLY = True` e `SESSION_COOKIE_SECURE = True` (produção);

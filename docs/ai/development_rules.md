@@ -12,6 +12,16 @@ O sistema está em produção. Aplique mudanças pequenas, verificáveis e alinh
 ## 2. Views e Rotas
 
 - O padrão do projeto é Function-Based View. Não introduza Class-Based Views.
+- Exceção única: subclassar `django.contrib.auth.views.*` (LoginView, PasswordReset*View)
+  é permitido. Essas views já são CBV por natureza, e reimplementá-las à mão —
+  handshake de token na sessão, integração com os backends de autenticação —
+  seria regressão de segurança, não ganho de estilo. Ver `apps/accounts/views.py`
+  e `apps/accounts/panel_views.py`.
+- Acesso administrativo: `apps/accounts/panels.py` é a ÚNICA fonte de verdade
+  sobre quais áreas um usuário alcança. Não espalhe checagens de `is_staff` ou
+  de permissão pelas views; use `can_access_admin`/`can_access_cms`/
+  `available_panels`. Os testes desses portões precisam continuar idênticos ao
+  que Django e Wagtail aplicam na porta, senão o login promete o que a área nega.
 - Use `@require_GET`, `@require_POST` ou validação explícita de método quando aplicável.
 - Views públicas devem usar `get_object_or_404()` e respostas controladas, não `Model.objects.get()` exposto a erro 500.
 - A rota raiz da escola é catch-all; novas rotas específicas precisam vir antes de `path('', include('apps.school.urls', ...))`.

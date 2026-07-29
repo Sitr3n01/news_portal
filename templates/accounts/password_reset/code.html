@@ -1,0 +1,56 @@
+{% extends 'base_news.html' %}
+
+{% block title %}Digite o código - {{ news_portal_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-[480px] mx-auto px-6 xl:px-0 py-24 font-display">
+    <div class="p-8 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-sm">
+        <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-2 text-center"
+            x-text="t('Digite o código', 'Enter the code')">Digite o código</h1>
+        <p class="text-center text-slate-500 font-ui text-sm mb-8">
+            <span x-text="t('Se existir uma conta, enviamos um código para', 'If an account exists, we sent a code to')">Se
+                existir uma conta, enviamos um código para</span>
+            <strong class="text-slate-700 dark:text-slate-300">{{ masked_email }}</strong>.
+        </p>
+
+        {% if form.non_field_errors %}
+        <div class="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-ui text-sm mb-4"
+            role="alert">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'accounts:password_reset_code' %}" class="space-y-5">
+            {% csrf_token %}
+            <div>
+                <label for="{{ form.code.id_for_label }}"
+                    class="block text-sm font-bold text-slate-700 dark:text-slate-300 font-ui mb-2"
+                    x-text="t('Código', 'Code')">Código</label>
+                <input type="text" name="{{ form.code.name }}" id="{{ form.code.id_for_label }}" required
+                    inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 -]*" autofocus
+                    value="{{ form.code.value|default:'' }}"
+                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent px-4 py-3 text-slate-900 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary font-ui transition-all text-center text-2xl tracking-[0.5em] font-mono"
+                    placeholder="000000">
+                {% if form.code.errors %}
+                <p class="mt-1 text-sm text-red-500 font-ui">{{ form.code.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <button type="submit"
+                class="w-full py-3.5 px-4 bg-primary text-white font-bold rounded-xl font-ui shadow-sm hover:bg-primary/90 hover:shadow-primary/30 transition-all flex justify-center items-center">
+                <span x-text="t('Continuar', 'Continue')">Continuar</span>
+            </button>
+        </form>
+
+        <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
+            <p class="text-sm font-ui text-slate-500 mb-2"
+                x-text="t('Não recebeu o código?', 'Didn\'t get the code?')">Não recebeu o código?</p>
+            <form method="post" action="{% url 'accounts:password_reset_resend' %}">
+                {% csrf_token %}
+                <button type="submit" class="text-sm font-ui text-primary hover:underline"
+                    x-text="t('Reenviar código', 'Resend code')">Reenviar código</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -100,10 +100,34 @@ docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python
 docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py set_site_domain
 ```
 
+> A tabela do cache (`django_cache`) é criada pela migration `common.0009`, junto
+> com o `migrate` acima — não há passo manual. Se precisar recriá-la à mão, o
+> comando é `python manage.py createcachetable` (idempotente). Sem essa tabela,
+> a recuperação de senha falha: o rate limit depende do cache.
+
+> **E-mail é obrigatório em produção.** Sem SMTP configurado, o "Esqueci minha
+> senha" não entrega nada e a equipe fica sem como recuperar acesso. Confira o
+> bloco de e-mail em `.env.prod.example`, em especial `EMAIL_TIMEOUT` (sem ele um
+> servidor SMTP travado pendura um worker) e que `EMAIL_USE_TLS` e
+> `EMAIL_USE_SSL` não estejam ambos como `True` — são mutuamente exclusivos.
+
 Configure no admin:
 
-- **Sistema → Sites**: domínio público correto.
+- **Sistema → Sites**: domínio público correto. O link dos e-mails de recuperação
+  de senha sai daqui, não do header `Host` da requisição.
 - **Sistema → Configurações dos sites**: identidade, contato, remetente de newsletter, analytics e links sociais.
+- **Sistema → Usuários**: confira o **Cargo** de cada conta. Para liberar a
+  Administração do sistema, marque também **Acesso administrativo** (`is_staff`)
+  — o cargo sozinho não abre essa área.
+
+### Acesso da equipe
+
+Depois do deploy, a equipe entra por **`/entrar/`** — porta única de Publicação
+de matérias e Administração do sistema. `/admin/login/` e `/cms/login/`
+redirecionam para lá, preservando o destino original.
+
+Para voltar às telas de login nativas sem deploy de código, defina
+`UNIFIED_LOGIN_ENABLED=False` no `.env` e reinicie o `web`.
 
 ---
 
@@ -168,6 +192,81 @@ sudo /usr/local/sbin/kellysys-deploy
 
 ## 6. Fluxo Normal de Deploy
 
+> ### ⚠️ ANTES do primeiro deploy do CMS Wagtail: migração única de conteúdo
+>
+> **Só para o deploy que estreia o Wagtail. Depois dele, ignore esta caixa.**
+>
+> O deploy automatizado roda `migrate` sozinho (ver a lista logo abaixo). Neste
+> release, o `migrate` inclui a migration `news.0021`, que **apaga a tabela
+> `news_articleblock` de forma irreversível** depois de converter o conteúdo dela
+> para o novo campo `Article.body`. A conversão só consegue montar os blocos de
+> imagem se as `cms_media.Image` correspondentes já existirem — e é isso que os
+> dois comandos abaixo fazem.
+>
+> **Rodar o deploy sem estes passos faz toda imagem e todo vídeo/post embutido
+> nas matérias existentes virar apenas a legenda em texto.** O texto das matérias
+> sobrevive de qualquer forma (o campo `content` é a rede de segurança), mas
+> imagem e embed não voltam.
+>
+> **O `migrate` precisa rodar em DUAS etapas**, e a ordem não é opcional. Os dois
+> comandos de ponte leem `Article` e criam `cms_media.Image`, então dependem do
+> schema novo (`news.0015`–`0020` e `cms_media.0001`) já existir. Mas a `0021`, que
+> apaga a tabela, vem no mesmo `migrate`. Daí a parada no meio: `migrate news 0020`
+> aplica tudo de que os comandos precisam e **para antes** da `0021` — verificado no
+> grafo de migrations, ela não entra nesse plano.
+>
+> Com o código novo já buildado:
+>
+> ```bash
+> # ETAPA 1 — schema novo, SEM apagar a tabela de blocos ainda.
+> docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py migrate news 0020 --noinput
+> ```
+>
+> ```bash
+> # 2. Capas dos artigos -> cms_media.Image  (dry-run primeiro, sem --apply)
+> docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py migrate_featured_images
+> ```
+>
+> ```bash
+> docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py migrate_featured_images --apply
+> ```
+>
+> ```bash
+> # 3. Imagens usadas nos blocos de conteúdo -> cms_media.Image (dry-run primeiro)
+> docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py migrate_block_media
+> ```
+>
+> ```bash
+> docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py migrate_block_media --apply
+> ```
+>
+> ```bash
+> # 4. Portão: prevê exatamente o que a 0021 fará. Somente leitura.
+> docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py audit_article_blocks --detalhado
+> ```
+>
+> ```bash
+> # ETAPA 2 — só depois do portão aprovar: converte os blocos e apaga a tabela.
+> docker compose -p kellysys -f docker/docker-compose.prod.yml run --rm web python manage.py migrate --noinput
+> ```
+>
+> Os passos 2 e 3 são **idempotentes** (o que já foi convertido é ignorado) e sem
+> `--apply` **não gravam nada, nem no banco nem no disco** — pode repetir à
+> vontade. O passo 4 é o que decide se pode seguir:
+>
+> - **"Cobertura de 100%"** → siga para o passo 4.
+> - **"NÃO RODE O MIGRATE"** → há blocos que se perderiam. Volte ao passo 2 e
+>   resolva os erros que ele reportou (o caso comum é arquivo referenciado no
+>   banco mas ausente do disco).
+> - **"N bloco(s) serão rebaixados"** → nenhum texto se perde, mas aquelas
+>   imagens/embeds viram parágrafo de legenda. Decisão sua se é aceitável.
+>
+> Antes de qualquer coisa, tenha **dois** backups em mão: o dump do PostgreSQL e uma
+> cópia do diretório `media/`. O dump sozinho não recupera nada se os arquivos de
+> imagem se perderem — a `cms_media.Image` aponta para arquivo em disco. O deploy
+> aprovado já cria o dump em `/opt/kelly_sys/backups/`, mas neste release confira à
+> mão que ele existe e não está vazio.
+
 1. Abra/mergeie mudança em `master`.
 2. Rode o workflow manual **Deploy Production** em `master`.
 3. Aguarde lint, `collectstatic` e testes.
@@ -195,6 +294,12 @@ Newsletter pendente:
 
 ```cron
 */5 * * * * docker compose -p kellysys -f /opt/kelly_sys/docker/docker-compose.prod.yml exec -T web python manage.py send_pending_newsletters --batch-size 100
+```
+
+Publicação agendada (Wagtail — artigos com go_live_at):
+
+```cron
+*/5 * * * * docker compose -p kellysys -f /opt/kelly_sys/docker/docker-compose.prod.yml exec -T web python manage.py publish_scheduled
 ```
 
 Manutenção diária preferencial:

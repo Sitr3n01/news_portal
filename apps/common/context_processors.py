@@ -19,6 +19,10 @@ def site_context(request):
         'komuniki_public_url': _with_trailing_slash(settings.KOMUNIKI_PUBLIC_URL),
         'kelly_blog_public_url': _with_trailing_slash(settings.KELLY_BLOG_PUBLIC_URL),
         'turnstile_site_key': get_turnstile_site_key(),
+        # Sem credencial do Google configurada, o botão "Entrar com Google" nem
+        # é renderizado — as rotas devolvem 404 nesse caso, e um botão que leva
+        # a 404 é pior do que botão nenhum.
+        'google_oauth_enabled': settings.GOOGLE_OAUTH_ENABLED,
     }
     try:
         context['site_settings'] = current_site.extension

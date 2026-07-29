@@ -1,7 +1,7 @@
 {% if page_obj %}
 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
   {% for article in page_obj %}
-  {% include 'news/partials/article_card.html' %}
+  {% include 'news/partials/article_teaser.html' %}
   {% endfor %}
 </div>
 {% include 'news/partials/pagination.html' %}

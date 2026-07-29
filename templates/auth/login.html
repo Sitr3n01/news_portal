@@ -1,0 +1,89 @@
+{% extends 'auth/base_auth.html' %}
+
+{% block title %}Acessar a plataforma - {{ news_portal_name }}{% endblock %}
+
+{% block auth_content %}
+<div class="p-8 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-sm font-display">
+    <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-2 text-center"
+        x-text="t('Acessar a plataforma', 'Access the platform')">Acessar a plataforma</h1>
+    <p class="text-center text-slate-500 font-ui text-sm mb-8"
+        x-text="t('Use a mesma conta para publicar matérias e para administrar o sistema.', 'Use the same account to publish stories and to administer the system.')">
+        Use a mesma conta para publicar matérias e para administrar o sistema.</p>
+
+    <form method="post" action="{% url 'panel:login' %}" class="space-y-5">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-ui text-sm mb-4"
+            role="alert">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        {% comment %}
+        `next` vem do contexto do LoginView, já validado contra host e esquema.
+        Nunca colocar um valor padrão aqui: um next fixo atropelaria toda a
+        cadeia de precedência de panels.post_login_target.
+        {% endcomment %}
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+        <div>
+            <label for="{{ form.username.id_for_label }}"
+                class="block text-sm font-bold text-slate-700 dark:text-slate-300 font-ui mb-2"
+                x-text="t('Usuário', 'Username')">Usuário</label>
+            {% comment %}
+            value= preserva o usuário digitado quando a senha erra: sem isto a
+            pessoa redigita as duas coisas a cada tentativa.
+            {% endcomment %}
+            <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" required autofocus
+                value="{{ form.username.value|default:'' }}" autocomplete="username"
+                class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent px-4 py-3 text-slate-900 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary font-ui transition-all"
+                placeholder="Usuário" x-bind:placeholder="t('Usuário', 'Username')">
+            {% if form.username.errors %}
+            <p class="mt-1 text-sm text-red-500 font-ui">{{ form.username.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="{{ form.password.id_for_label }}"
+                class="block text-sm font-bold text-slate-700 dark:text-slate-300 font-ui mb-2"
+                x-text="t('Senha', 'Password')">Senha</label>
+            <input type="password" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}" required
+                autocomplete="current-password"
+                class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent px-4 py-3 text-slate-900 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary font-ui transition-all"
+                placeholder="Senha" x-bind:placeholder="t('Senha', 'Password')">
+            {% if form.password.errors %}
+            <p class="mt-1 text-sm text-red-500 font-ui">{{ form.password.errors.0 }}</p>
+            {% endif %}
+            <div class="mt-2 text-right">
+                <a href="{% url 'accounts:password_reset' %}" class="text-sm font-ui text-primary hover:underline"
+                    tabindex="-1" x-text="t('Esqueci minha senha', 'Forgot my password')">Esqueci minha senha</a>
+            </div>
+        </div>
+
+        {% include 'auth/partials/_panel_choice.html' %}
+
+        <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="{{ form.remember.name }}" id="{{ form.remember.id_for_label }}"
+                class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary">
+            <span class="text-sm text-slate-500 font-ui"
+                x-text="t('Continuar conectado neste computador', 'Stay signed in on this computer')">Continuar conectado neste computador</span>
+        </label>
+
+        <button type="submit"
+            class="w-full py-3.5 px-4 bg-primary text-white font-bold rounded-xl font-ui shadow-sm hover:bg-primary/90 hover:shadow-primary/30 transition-all flex justify-center items-center">
+            <span x-text="t('Entrar', 'Log in')">Entrar</span>
+        </button>
+    </form>
+
+    {% include 'accounts/partials/_google_button.html' %}
+
+    <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
+        <p class="text-sm font-ui text-slate-500">
+            <span x-text="t('Só quer ler e comentar?', 'Just want to read and comment?')">Só quer ler e comentar?</span>
+            <a href="{% url 'accounts:login' %}" class="font-bold text-primary hover:underline ml-1"
+                x-text="t('Entrar no portal', 'Go to the portal')">Entrar no portal</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

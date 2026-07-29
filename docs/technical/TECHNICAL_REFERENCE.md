@@ -118,9 +118,19 @@ O arquivo de settings é selecionado via `DJANGO_SETTINGS_MODULE` environment va
 ```python
 # Autenticação
 AUTH_USER_MODEL = 'accounts.CustomUser'
-LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = 'accounts:login'            # leitores do portal
+LOGIN_REDIRECT_URL = 'news:list'
+LOGOUT_REDIRECT_URL = 'news:list'
+
+# Login unificado dos painéis (ver "Acesso administrativo unificado")
+WAGTAILADMIN_LOGIN_URL = 'panel:login'          # /entrar/
+WAGTAIL_PASSWORD_RESET_ENABLED = False          # fluxo único em accounts
+AXES_LOCKOUT_TEMPLATE = 'auth/lockout.html'
+UNIFIED_LOGIN_ENABLED = True                    # kill switch por env
+
+# Cache compartilhado — o rate limit depende dele valer entre workers
+CACHES = {'default': {'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+                      'LOCATION': 'django_cache'}}
 
 # Sites framework
 SITE_ID = 1
@@ -347,15 +357,78 @@ Herda de `AbstractUser`. Campos adicionais:
 ##### `CustomLoginView`
 
 Estende `django.contrib.auth.views.LoginView`. Template: `accounts/login.html`.
+É o login dos **leitores do portal** (comentar, curtir, salvar). A equipe entra
+pelos painéis em `panel:login` — ver "Acesso administrativo unificado".
 
 O `AxesMiddleware` intercepta automaticamente após 5 falhas — a view não precisa de lógica de lockout.
 
-##### `CustomPasswordResetView`
+##### Recuperação de senha por código — `apps/accounts/code_views.py`
 
-Estende `PasswordResetView`. Proteções adicionais:
+Fluxo **único** da plataforma (leitores e equipe), agora por **código de 6
+dígitos** em vez de link. `CustomPasswordResetView` foi removida; o Wagtail
+continua desligado (`WAGTAIL_PASSWORD_RESET_ENABLED = False`).
 
-1. **Rate limiting:** `cache.get(f"pwd_reset_{ip}_{email}")` — bloqueia novo pedido por 15 minutos.
-2. **Host header poisoning:** `domain_override=Site.objects.get_current().domain` — usa domínio do banco, não o header `Host` da request (que pode ser forjado).
+`password_reset_request` → `password_reset_code` → `password_reset_new`, com o
+estágio guardado na sessão do servidor e prazo próprio de 15 min. Proteções:
+
+1. **Turnstile** no formulário de solicitação + **rate limit por IP** no nível
+   da view — o balde de `issue_code` só conta quando a conta existe, então sem
+   este outro um atacante martelaria endereços inexistentes de graça.
+2. **Anti-enumeração:** resposta, mensagem e próxima tela idênticas para e-mail
+   existente, inexistente, desativado ou bloqueado por rate limit.
+3. **Estágio obrigatório:** pular direto para a tela de senha nova não abre;
+   quem cai na URL errada volta ao passo correto, sem perder o código já
+   recebido.
+4. **Ao concluir:** códigos pendentes invalidados, e-mail marcado como
+   confirmado, e as demais sessões caem sozinhas (a troca de senha muda
+   `get_session_auth_hash()`).
+
+As rotas `password_reset_confirm`/`password_reset_complete` seguem roteadas
+apenas para que links antigos não caiam em 404 — nada mais os gera.
+
+Depende de `CACHES` apontar para um backend **compartilhado** entre processos.
+Com o LocMemCache padrão do Django o limite vira `janela × nº de workers`.
+
+##### Login com Google — `apps/accounts/oauth_google.py` / `oauth_views.py`
+
+Authorization Code + PKCE, implementação própria com `httpx` + `google-auth`
+(sem `allauth`/`social-auth`, que trariam views e templates de login colidindo
+com o login unificado). Rotas: `accounts:google_start` e
+`accounts:google_callback`; ambas devolvem **404** sem credencial configurada,
+e o botão só é renderizado quando `GOOGLE_OAUTH_ENABLED`.
+
+**O Google autentica; o banco autoriza.** `resolve_google_user` procura, nesta
+ordem: pelo `sub` (imutável) → pelo e-mail, e só porque `email_verified` foi
+exigido → cria conta nova no piso (`reader`, sem grupo, sem `is_staff`, senha
+inutilizável). Nenhum caminho escreve `role`/`groups`/`is_staff`, e
+`sync_user_role_group` não é chamada. O destino sai de
+`panels.post_login_target` — a mesma função do login por senha.
+
+#### Acesso administrativo unificado
+
+`/entrar/` é a porta única de Publicação de matérias (Wagtail, `/cms/`) e
+Administração do sistema (Django admin, `/admin/`). Uma conta, uma sessão.
+
+| Módulo | Papel |
+|---|---|
+| `apps/accounts/panels.py` | **Fonte única** de quais áreas o usuário alcança |
+| `apps/accounts/panel_views.py` | Login, escolha de área, acesso negado, logout |
+| `apps/accounts/panel_forms.py` | `PanelLoginForm` — o campo `panel` é conselho, não autorização |
+| `apps/accounts/urls_panel.py` | `/entrar/`, `/sair/`, `/painel/`, `/sem-acesso/` |
+
+Portões (idênticos ao que os frameworks aplicam):
+`can_access_admin` = `is_active and is_staff`;
+`can_access_cms` = `has_perm('wagtailadmin.access_admin')`.
+
+`/admin/login/`, `/admin/logout/`, `/cms/login/`, `/cms/logout/` e os dois
+`password_reset/` são interceptados por rotas declaradas **antes** dos includes
+correspondentes em `config/urls.py` — a ordem é load-bearing. As sombras de
+`/cms/` ficam **sem `name=`**: `wagtail.admin.urls` não define `app_name`, então
+reusar `wagtailadmin_login` sequestraria o `reverse()` interno do Wagtail.
+
+Eventos de segurança vão para o logger `apps.security` (stdout):
+`AUTH_LOGIN_OK`, `AUTH_LOGOUT`, `AUTH_LOGIN_FAIL`, `AUTH_PANEL_DENIED`.
+Nunca senha, token, chave de sessão ou link de recuperação.
 
 ##### `register_view`
 
@@ -1036,8 +1109,14 @@ Para análise de queries lentas: `EXPLAIN ANALYZE` no PostgreSQL ou `django-debu
 | CSRF | `CsrfViewMiddleware` + `{% csrf_token %}` | Middleware + templates |
 | SQL Injection | Django ORM parametrizado | ORM (não usa raw SQL) |
 | Brute-force login | `django-axes` (5 tentativas, 30min lockout) | `AxesMiddleware` |
-| Password reset mailbomb | Rate limiting por IP+email (15min) | `CustomPasswordResetView` |
-| Host header poisoning | `domain_override` no reset de senha | `CustomPasswordResetView` |
+| Password reset mailbomb | Turnstile + rate limit por IP e identidade (15min) | `apps/accounts/code_views.py` + `verification.py` |
+| Host header poisoning no reset | Não se aplica: e-mail de código não carrega URL | `templates/emails/` |
+| Brute-force de código de 6 dígitos | TTL 10min + uso único + teto de 5 tentativas | `apps/accounts/verification.py` |
+| Código vazado em dump do banco | Só HMAC-SHA256 com `SECRET_KEY` como pepper | `apps/accounts/verification.py` |
+| Login-CSRF / replay no OAuth | `state` + `nonce` + PKCE + fluxo de uso único | `apps/accounts/oauth_*.py` |
+| Escalada de privilégio via Google | Fluxo nunca escreve role/groups/is_staff | `apps/accounts/oauth_views.py` |
+| Conta duplicada por capitalização | E-mail em minúsculas + busca `__iexact` | `apps/accounts/forms.py` + migration `0009` |
+| E-mail sumindo em silêncio | System check `accounts.E001` no deploy | `apps/accounts/checks.py` |
 | Clickjacking | `XFrameOptionsMiddleware` (DENY) + nginx | Middleware + nginx |
 | User enumeration | Mensagens genéricas em auth, registro, vagas | Views |
 | Session hijacking | HTTPONLY + SECURE cookies (prod) | `production.py` |
@@ -1053,8 +1132,8 @@ Para análise de queries lentas: `EXPLAIN ANALYZE` no PostgreSQL ou `django-debu
 **Nunca revelar** se email/username existe. Exemplos aplicados:
 
 ```python
-# Em CustomPasswordResetView — mesmo comportamento se email existe ou não
-# Django padrão já faz isso
+# Em password_reset_request — mesma resposta, mensagem e próxima tela,
+# exista ou não a conta (e mesmo quando o rate limit descarta o envio)
 
 # Em register_view — mensagem de email duplicado
 "Este endereço de email já está em uso."  # Genérico — não confirma existência

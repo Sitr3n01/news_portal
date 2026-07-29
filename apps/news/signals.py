@@ -1,11 +1,34 @@
 import logging
 
-from django.db.models.signals import post_delete, post_save
+from django.db.models.signals import post_save
 from django.dispatch import receiver
+from wagtail.signals import published, unpublished
 
-from .models import Article, ArticleBlock
+from .models import Article
 
 logger = logging.getLogger(__name__)
+
+
+@receiver(published, sender=Article)
+def sync_article_status_on_wagtail_publish(sender, instance, **kwargs):
+    """Publicar via Wagtail (DraftStateMixin) deve refletir no campo `status`,
+    que é o único campo que as queries públicas (views, sitemap, feed,
+    newsletter) realmente usam para decidir visibilidade — `live` do Wagtail
+    é interno ao painel administrativo e não é lido em nenhum lugar do site
+    público."""
+    if instance.status != Article.Status.PUBLISHED:
+        instance.status = Article.Status.PUBLISHED
+        instance.save(update_fields=['status', 'published_at'])
+
+
+@receiver(unpublished, sender=Article)
+def sync_article_status_on_wagtail_unpublish(sender, instance, **kwargs):
+    """Despublicar via Wagtail deve tirar o artigo do site público — mapeado
+    para Status.ARCHIVED ('removido do site'), não DRAFT, porque despublicar
+    remove algo que estava ao vivo, não reverte para rascunho em elaboração."""
+    if instance.status == Article.Status.PUBLISHED:
+        instance.status = Article.Status.ARCHIVED
+        instance.save(update_fields=['status'])
 
 
 @receiver(post_save, sender=Article)
@@ -25,18 +48,3 @@ def mark_newsletter_pending_on_publish(sender, instance, **kwargs):
         instance.pk,
         instance.title,
     )
-
-
-@receiver(
-    [post_save, post_delete],
-    sender=ArticleBlock,
-    dispatch_uid='news.rebuild_article_content_cache',
-)
-def rebuild_article_content_cache(sender, instance, **kwargs):
-    """Mantém o cache Article.content sincronizado quando blocos mudam.
-
-    O artigo pode já não existir num cascade-delete; nesse caso, ignora.
-    """
-    article = Article.objects.filter(pk=instance.article_id).first()
-    if article is not None:
-        article.rebuild_content_cache()

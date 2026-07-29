@@ -197,7 +197,7 @@
         });
     " class="flex flex-col min-h-screen">
 
-        {% include 'components/navbar_news.html' %}
+        {% block navbar %}{% include 'components/navbar_news.html' %}{% endblock %}
 
         <!-- Flash Messages -->
         {% if messages %}
@@ -213,10 +213,31 @@
         </div>
         {% endif %}
 
+        <!-- Bloqueio suave: aviso para quem ainda não confirmou o e-mail (Fase 3).
+             is_staff também fica isento aqui pelo mesmo motivo do decorator
+             email_verified_required (apps/accounts/decorators.py): equipe não
+             passa pelo fluxo de código, e não pode ver um aviso que não se
+             aplica a ela. -->
+        {% if user.is_authenticated and not user.email_verified and not user.is_staff %}
+        <div x-data="{ show: true }" x-show="show"
+            class="w-full bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 font-ui text-sm">
+            <div class="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-4">
+                <p class="flex-1">
+                    <span x-text="t('Confirme seu e-mail para comentar, curtir e salvar artigos.', 'Confirm your e-mail to comment, like and save articles.')">Confirme
+                        seu e-mail para comentar, curtir e salvar artigos.</span>
+                    <a href="{% url 'accounts:verify_email' %}" class="font-bold underline hover:no-underline ml-1"
+                        x-text="t('Confirmar agora', 'Confirm now')">Confirmar agora</a>
+                </p>
+                <button @click="show = false" class="opacity-70 hover:opacity-100 flex-shrink-0"
+                    aria-label="Fechar">&times;</button>
+            </div>
+        </div>
+        {% endif %}
+
         {% block content %}
         {% endblock %}
 
-        {% include 'components/footer_news.html' %}
+        {% block footer %}{% include 'components/footer_news.html' %}{% endblock %}
     </div>
 
     {% include 'components/turnstile_script.html' %}

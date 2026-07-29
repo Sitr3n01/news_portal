@@ -1,0 +1,22 @@
+{% load i18n wagtailadmin_tags %}
+{% if visible %}
+    {% panel id="continue-working" heading="Continue trabalhando" icon="edit" classname="w-panel--dashboard" %}
+        <div class="redacao-continue-card">
+            <div class="redacao-continue-card__thumb">
+                {% if article.cover_image_url %}
+                    <img src="{{ article.cover_image_url }}" alt="">
+                {% else %}
+                    {% icon name="doc-empty" %}
+                {% endif %}
+            </div>
+            <div class="redacao-continue-card__info">
+                <h3 class="redacao-continue-card__title">{{ article.title }}</h3>
+                <p class="redacao-continue-card__meta w-meta-text">
+                    {% icon name="draft" %}
+                    Rascunho · editado {% human_readable_date article.latest_revision.created_at %}
+                </p>
+                <a href="{{ edit_url }}" class="button bicolor button--icon">{% icon name="edit" wrapped=1 %}Continuar edição</a>
+            </div>
+        </div>
+    {% endpanel %}
+{% endif %}

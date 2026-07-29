@@ -1,0 +1,25 @@
+{% extends "emails/base_email.html" %}
+{% comment %}
+E-mail de confirmação de cadastro (VerificationCode.Purpose.EMAIL_VERIFICATION).
+Só sobrescreve título, preheader, heading, intro e footer_note — o bloco do
+código (code_block) usa o default de base_email.html sem alteração, porque
+este e-mail não tem nada de diferente para mostrar ali.
+{% endcomment %}
+
+{% block title %}Confirme seu e-mail — {{ news_portal_name }}{% endblock %}
+
+{% block preheader %}Use o código abaixo para confirmar seu e-mail no {{ news_portal_name }}.{% endblock %}
+
+{% block heading %}
+<h1 class="email-heading email-text-heading" style="margin:0;font-size:28px;font-weight:800;color:#1a1a1a;letter-spacing:-0.02em;line-height:1.25;font-family:'Newsreader', Georgia, 'Times New Roman', serif;">Confirme seu e-mail</h1>
+{% endblock %}
+
+{% block intro %}
+<p class="email-text-body" style="margin:0;font-size:16px;color:#4b5563;line-height:1.6;font-family:'Inter', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;">
+    Recebemos um cadastro com este endereço no {{ news_portal_name }}. Para confirmar que foi você, digite o código abaixo na tela de confirmação.
+</p>
+{% endblock %}
+
+{% block footer_note %}
+<p class="email-text-secondary" style="margin:0;font-size:14px;color:#6b7280;line-height:1.5;font-family:'Inter', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;">Se você não criou uma conta no {{ news_portal_name }}, pode ignorar esta mensagem com segurança.</p>
+{% endblock %}

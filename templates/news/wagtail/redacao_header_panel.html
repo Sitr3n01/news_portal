@@ -1,0 +1,24 @@
+{% load i18n wagtailadmin_tags %}
+{% if visible %}
+    {% panel id="redacao-header" heading="Painel da Redação" icon="newspaper" classname="w-panel--dashboard redacao-header-panel" %}
+        <div class="redacao-header-intro">
+            <p class="redacao-greeting">Olá, {{ display_name }}.</p>
+            <p class="w-meta-text">Acompanhe e gerencie o conteúdo do portal.</p>
+        </div>
+
+        <div class="redacao-header-actions">
+            {% if can_add_article %}
+                <a href="{{ add_url }}" class="button bicolor button--icon">{% icon name="plus" wrapped=1 %}Criar nova notícia</a>
+            {% endif %}
+            <a href="{{ public_site_url }}" target="_blank" rel="noreferrer" class="redacao-portal-link">Ver portal {% icon name="link-external" %}</a>
+        </div>
+
+        {% if can_view_categories or can_view_tags or can_view_home_config %}
+            <ul class="redacao-quick-links">
+                {% if can_view_categories %}<li><a href="{{ category_url }}">Categorias</a></li>{% endif %}
+                {% if can_view_tags %}<li><a href="{{ tag_url }}">Tags</a></li>{% endif %}
+                {% if can_view_home_config %}<li><a href="{{ home_config_url }}">Home do portal</a></li>{% endif %}
+            </ul>
+        {% endif %}
+    {% endpanel %}
+{% endif %}

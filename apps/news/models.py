@@ -1,3 +1,4 @@
+import logging
 import re
 
 from django.conf import settings
@@ -5,9 +6,22 @@ from django.contrib.sites.managers import CurrentSiteManager
 from django.contrib.sites.models import Site
 from django.db import models
 from django.urls import reverse
+from django.utils.functional import cached_property
 from imagekit.models import ProcessedImageField
 from imagekit.processors import ResizeToFit, Transpose
+from modelcluster.fields import ParentalManyToManyField
+from modelcluster.models import ClusterableModel
 from pilkit.processors import MakeOpaque
+from wagtail.fields import StreamField
+from wagtail.images import get_image_model_string
+from wagtail.models import (
+    DraftStateMixin,
+    LockableMixin,
+    PreviewableMixin,
+    RevisionMixin,
+    WorkflowMixin,
+)
+from wagtail.snippets.blocks import SnippetChooserBlock
 
 from apps.common.models import SEOModel, TimeStampedModel
 from apps.common.validators import (
@@ -16,6 +30,10 @@ from apps.common.validators import (
     ARTICLE_IMAGE_MAX_WIDTH,
     validate_uploaded_image,
 )
+from apps.news.blocks import ArticleStreamBlock
+from apps.news.content_extraction import extract_content_from_body
+
+logger = logging.getLogger(__name__)
 
 
 class Category(TimeStampedModel):
@@ -51,20 +69,27 @@ class Tag(models.Model):
         return self.name
 
 
-class Article(TimeStampedModel, SEOModel):
+class Article(PreviewableMixin, WorkflowMixin, DraftStateMixin, LockableMixin, RevisionMixin, ClusterableModel, TimeStampedModel, SEOModel):
     class Status(models.TextChoices):
         DRAFT = 'draft', 'Rascunho'
         PUBLISHED = 'published', 'Publicado'
         ARCHIVED = 'archived', 'Arquivado'
 
     title = models.CharField('Título', max_length=200)
-    slug = models.SlugField('URL amigável', max_length=200, unique=True, help_text='Gerado automaticamente a partir do título.')
+    slug = models.SlugField('URL amigável', max_length=200, help_text='Gerado automaticamente a partir do título.')
     excerpt = models.TextField('Resumo', blank=True, help_text='Resumo curto do artigo. Aparece nas listagens e compartilhamentos.')
     content = models.TextField(
         'Conteúdo',
         blank=True,
         editable=False,
-        help_text='Texto consolidado dos blocos de conteúdo (gerado automaticamente).',
+        help_text='Texto consolidado gerado automaticamente a partir do corpo (body) do artigo.',
+    )
+    body = StreamField(
+        ArticleStreamBlock(),
+        null=True,
+        blank=True,
+        verbose_name='Conteúdo (blocos)',
+        use_json_field=True,
     )
     featured_image = ProcessedImageField(
         verbose_name='Imagem de capa',
@@ -81,12 +106,21 @@ class Article(TimeStampedModel, SEOModel):
         help_text='Imagem principal que aparece no topo do artigo. É convertida e otimizada automaticamente.',
     )
     featured_image_caption = models.CharField('Legenda da imagem', max_length=255, blank=True, help_text='Texto descritivo exibido abaixo da imagem de capa.')
+    featured_image_wagtail = models.ForeignKey(
+        get_image_model_string(),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        verbose_name='Imagem de capa (Wagtail)',
+        help_text='Nova imagem de capa pelo sistema Wagtail. Use este campo em vez do campo acima para novos artigos — o antigo continua funcionando, mas não aparece mais no painel Wagtail.',
+    )
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, null=True,
         related_name='articles', verbose_name='Categoria',
         help_text='Escolha a categoria principal do artigo.',
     )
-    tags = models.ManyToManyField(
+    tags = ParentalManyToManyField(
         Tag, blank=True, related_name='articles', verbose_name='Tags',
         help_text='Digite para buscar tags existentes.',
     )
@@ -120,6 +154,9 @@ class Article(TimeStampedModel, SEOModel):
         ordering = ['-published_at']
         verbose_name = 'Artigo'
         verbose_name_plural = 'Artigos'
+        constraints = [
+            models.UniqueConstraint(fields=['site', 'slug'], name='unique_article_slug_per_site'),
+        ]
 
     def __str__(self):
         return self.title
@@ -127,10 +164,68 @@ class Article(TimeStampedModel, SEOModel):
     def get_absolute_url(self):
         return reverse('news:article_detail', kwargs={'slug': self.slug})
 
+    def get_preview_template(self, request, mode_name):
+        """Template de preview do Wagtail.
+
+        Reusa o template público existente — a renderização usa `article.body`
+        (StreamField) como única fonte de conteúdo.
+        """
+        return 'news/article_detail.html'
+
+    def get_preview_context(self, request, mode_name):
+        """Contexto de preview espelhando `apps.news.views.article_detail`.
+
+        `PreviewableMixin.get_preview_context()` só fornece `object`/`request` —
+        como o template de preview é o mesmo da página pública, ele também
+        precisa de `article`, `comments`, `related_articles` etc., ou a
+        renderização falha com VariableDoesNotExist.
+        """
+        context = super().get_preview_context(request, mode_name)
+
+        related_articles = Article.objects.none()
+        comments = Comment.objects.none()
+        comment_count = 0
+        like_count = 0
+
+        if self.pk:
+            if self.category_id:
+                related_articles = (
+                    Article.objects.filter(status=Article.Status.PUBLISHED, category_id=self.category_id)
+                    .exclude(pk=self.pk)
+                    .select_related('category', 'author')
+                    .order_by('-published_at')[:3]
+                )
+            comments = self.comments.filter(is_active=True).select_related('user').order_by('created_at')
+            comment_count = comments.count()
+            like_count = self.likes.count()
+
+        context.update({
+            'article': self,
+            'related_articles': related_articles,
+            'is_bookmarked': False,
+            'is_liked': False,
+            'comments': comments,
+            'comment_count': comment_count,
+            'like_count': like_count,
+        })
+        return context
+
+    def _extract_content_from_body(self):
+        """Extrai texto plano/HTML de `self.body` (StreamField) para `content`.
+
+        A lógica em si vive em `apps/news/content_extraction.py` porque a data
+        migration 0024 precisa reconstruir `content` com exatamente as mesmas
+        regras, e migration não importa método de modelo vivo.
+        """
+        return extract_content_from_body(self.body)
+
     def save(self, *args, **kwargs):
         from django.utils import timezone
 
         from apps.common.sanitization import sanitize_content
+
+        if self.body:
+            self.content = self._extract_content_from_body()
 
         if self.content:
             self.content = sanitize_content(self.content)
@@ -139,113 +234,39 @@ class Article(TimeStampedModel, SEOModel):
             self.published_at = timezone.now()
         super().save(*args, **kwargs)
 
-    def rebuild_content_cache(self):
-        """Reconstrói `content` a partir dos blocos (texto + legendas).
-
-        `content` deixou de ser editável: vira a concatenação do texto dos blocos
-        e das legendas, alimentando busca, tempo de leitura e teaser da newsletter.
-        Usa update() para não disparar save()/sinais novamente (evita recursão).
-        """
-        from django.utils.html import escape
-
-        parts = []
-        for block in self.blocks.all():
-            if block.block_type == ArticleBlock.BlockType.RICH_TEXT and block.rich_text:
-                parts.append(block.rich_text)
-            if block.caption:
-                parts.append(f'<p>{escape(block.caption)}</p>')
-        new_content = '\n'.join(parts)
-        if new_content != self.content:
-            type(self).objects.filter(pk=self.pk).update(content=new_content)
-            self.content = new_content
-
     @property
     def reading_time(self):
         """Estimate reading time in minutes (average 200 wpm)."""
-        word_count = len(re.findall(r'\w+', self.content))
+        if self.body:
+            from django.utils.html import strip_tags
+            text = strip_tags(self._extract_content_from_body())
+        else:
+            text = self.content
+        word_count = len(re.findall(r'\w+', text))
         return max(1, round(word_count / 200))
 
+    @cached_property
+    def cover_image_url(self):
+        """URL única para a imagem de capa, priorizando o campo Wagtail com fallback
+        para o campo legado. Nunca levanta exceção em template.
 
-class ArticleBlock(TimeStampedModel):
-    """Bloco de conteúdo do artigo: texto, imagem ou embed de rede social.
-
-    O corpo do artigo é uma sequência ordenada destes blocos. Embeds guardam só a
-    URL/provedor (resolvidos por apps.common.embeds) e são renderizados por
-    templates confiáveis — a plataforma nunca vira HTML do usuário.
-    """
-
-    class BlockType(models.TextChoices):
-        RICH_TEXT = 'rich_text', 'Texto'
-        IMAGE = 'image', 'Imagem'
-        EMBED = 'embed', 'Vídeo / Post'
-
-    article = models.ForeignKey(
-        Article, on_delete=models.CASCADE,
-        related_name='blocks', verbose_name='Artigo',
-    )
-    order = models.PositiveIntegerField('Ordem', default=0, db_index=True)
-    block_type = models.CharField(
-        'Tipo de bloco', max_length=20,
-        choices=BlockType.choices, default=BlockType.RICH_TEXT,
-    )
-    rich_text = models.TextField(
-        'Texto', blank=True,
-        help_text='Parágrafos, subtítulos, listas e links do artigo.',
-    )
-    media = models.ForeignKey(
-        'media_library.MediaFile', on_delete=models.SET_NULL,
-        null=True, blank=True, related_name='article_blocks',
-        verbose_name='Imagem',
-        help_text='Selecione na Biblioteca de Mídia ou envie uma nova (otimizada automaticamente).',
-    )
-    caption = models.CharField(
-        'Legenda', max_length=255, blank=True,
-        help_text='Texto opcional exibido abaixo da imagem ou do vídeo/post.',
-    )
-    embed_url = models.URLField(
-        'Link do vídeo/post', blank=True,
-        help_text='Cole o link do YouTube, Instagram ou TikTok. O embed é gerado automaticamente.',
-    )
-    embed_provider = models.CharField('Plataforma', max_length=20, blank=True, editable=False)
-    embed_id = models.CharField('ID do embed', max_length=255, blank=True, editable=False)
-
-    class Meta:
-        ordering = ['order', 'id']
-        verbose_name = 'Bloco de conteúdo'
-        verbose_name_plural = 'Blocos de conteúdo'
-        indexes = [models.Index(fields=['article', 'order'])]
-
-    def __str__(self):
-        return f'{self.get_block_type_display()} #{self.order}'
+        `cached_property`, e não `property`: os templates de listagem checam
+        `has_cover_image` e em seguida usam `cover_image_url`, e `get_rendition()`
+        é uma consulta ao banco (mais o processamento da imagem na primeira vez).
+        Como `property` isso rodava duas vezes por artigo em cada grid.
+        """
+        if self.featured_image_wagtail_id:
+            try:
+                return self.featured_image_wagtail.get_rendition('max-1600x1600').url
+            except Exception:
+                logger.warning('Falha ao gerar rendition para article #%s', self.pk, exc_info=True)
+        if self.featured_image:
+            return self.featured_image.url
+        return ''
 
     @property
-    def partial_template(self):
-        return f'news/partials/blocks/{self.block_type}.html'
-
-    @property
-    def embed(self):
-        """EmbedData (provider, embed_url, thumbnail, aspect) ou None."""
-        if self.block_type != self.BlockType.EMBED or not self.embed_url:
-            return None
-        from apps.common.embeds import resolve_embed
-        return resolve_embed(self.embed_url)
-
-    def save(self, *args, **kwargs):
-        from apps.common.embeds import resolve_embed
-        from apps.common.sanitization import sanitize_content
-
-        if self.block_type == self.BlockType.RICH_TEXT and self.rich_text:
-            self.rich_text = sanitize_content(self.rich_text)
-
-        if self.block_type == self.BlockType.EMBED and self.embed_url:
-            data = resolve_embed(self.embed_url)
-            self.embed_provider = data.provider if data else ''
-            self.embed_id = data.embed_id if data else ''
-        else:
-            self.embed_provider = ''
-            self.embed_id = ''
-
-        super().save(*args, **kwargs)
+    def has_cover_image(self):
+        return bool(self.cover_image_url)
 
 
 class NewsletterSubscription(TimeStampedModel):
@@ -370,3 +391,26 @@ class ArticleBookmark(TimeStampedModel):
 
     def __str__(self):
         return f'{self.user} favoritou {self.article.title}'
+
+
+class NewsHomeConfig(TimeStampedModel, SEOModel):
+    site = models.OneToOneField(Site, on_delete=models.CASCADE, related_name='news_home_config')
+    is_active = models.BooleanField('Ativo', default=True,
+        help_text='Desligado: a home volta ao comportamento automático.')
+    hero_override = models.ForeignKey(Article, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='+', verbose_name='Destaque manual do hero',
+        help_text='Substitui o destaque automático. Deixe vazio para manter o comportamento atual.')
+    secondary_highlights = StreamField(
+        [('artigo', SnippetChooserBlock(Article, label='Artigo'))],
+        blank=True, use_json_field=True, max_num=4, verbose_name='Destaques secundários',
+        help_text='2 a 4 artigos publicados, na ordem desejada. Vazio: a seção não aparece.')
+
+    objects = models.Manager()
+    on_site = CurrentSiteManager()
+
+    class Meta:
+        verbose_name = 'Configuração da Home de Notícias'
+        verbose_name_plural = 'Configurações da Home de Notícias'
+
+    def __str__(self):
+        return f'Home de notícias - {self.site.name}'

@@ -41,6 +41,7 @@ O projeto serve dois portais públicos e um painel administrativo a partir do me
 |--------|------------|
 | Backend | Python 3.12+ / Django 5.1+ |
 | Banco | PostgreSQL 16 em produção |
+| CMS editorial | Wagtail 7.4 — corpo dos artigos em StreamField, rascunho/revisão/preview e biblioteca de imagens |
 | Frontend | Django Templates + HTMX + Alpine.js |
 | Admin | Django Unfold |
 | Estáticos | WhiteNoise em dev, Nginx em produção |
@@ -58,6 +59,7 @@ apps/
   hiring/        Vagas, departamentos e candidaturas
   contact/       Formulário de contato
   news/          Artigos em blocos, categorias, tags, newsletter, RSS, comentários
+  cms_media/     Modelos de imagem e documento do Wagtail, com crédito e ponte para a mídia legada
   media_library/ Biblioteca de mídia compartilhada
   social/        Contas e posts de Instagram/TikTok, com sync opcional por API
 

@@ -1,0 +1,56 @@
+{% extends 'base_news.html' %}
+{% comment %}
+Base das telas de acesso administrativo.
+
+Herda de base_news.html para reaproveitar o sistema visual inteiro — Tailwind
+vendorizado com a paleta do projeto, fontes, script anti-FOUC, Alpine e o helper
+bilíngue t(pt, en) — sem duplicar uma linha do <head>.
+
+Troca a navbar e o rodapé públicos por um cabeçalho enxuto: quem vem entrar num
+painel não precisa de menu de categorias nem de "Criar conta".
+{% endcomment %}
+
+{% block meta_description %}Acesso da equipe ao {{ news_portal_name }}.{% endblock %}
+
+{% block og_tags %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block twitter_tags %}{% endblock %}
+
+{% block navbar %}
+<header class="border-b border-slate-100 dark:border-slate-800">
+    <div class="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
+        <a href="{% url 'news:list' %}" class="flex items-center gap-2 group">
+            {% if site_settings and site_settings.logo %}
+            <img src="{{ site_settings.logo.url }}" alt="{{ news_portal_name }}" class="h-8 w-auto">
+            {% else %}
+            <span class="font-display text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                {{ news_portal_name }}
+            </span>
+            {% endif %}
+        </a>
+
+        <button type="button" @click="theme = theme === 'dark' ? 'light' : 'dark'"
+            class="p-2 rounded-lg text-slate-500 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            x-bind:aria-label="t('Alternar tema', 'Toggle theme')" aria-label="Alternar tema">
+            <span class="material-symbols-outlined text-xl" x-text="theme === 'dark' ? 'light_mode' : 'dark_mode'">dark_mode</span>
+        </button>
+    </div>
+</header>
+{% endblock %}
+
+{% block content %}
+<main class="flex-1 flex items-center justify-center px-6 py-16">
+    <div class="w-full {% block shell_width %}max-w-[480px]{% endblock %}">
+        {% block auth_content %}{% endblock %}
+    </div>
+</main>
+{% endblock %}
+
+{% block footer %}
+<footer class="border-t border-slate-100 dark:border-slate-800">
+    <div class="max-w-5xl mx-auto px-6 py-6 text-center">
+        <p class="text-xs font-ui text-slate-400">
+            &copy; {% now "Y" %} {{ news_portal_name }}
+        </p>
+    </div>
+</footer>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% comment %}
+Cards de destino, como grupo de rádio acessível.
+
+Usado no login (escolha antes de entrar) e na tela de troca de área. O contexto
+precisa trazer `panel_cards`; quando existir `field`, os inputs são renderizados
+ligados ao formulário.
+
+Lembrete: esta escolha é só uma preferência. Quem decide o acesso é
+apps/accounts/panels.py, no servidor.
+{% endcomment %}
+<fieldset class="space-y-3">
+    <legend class="block text-sm font-bold text-slate-700 dark:text-slate-300 font-ui mb-1"
+        x-text="t('Entrar em', 'Go to')">Entrar em</legend>
+    <p class="text-xs text-slate-400 font-ui mb-3"
+        x-text="t('Opcional — sem escolher, levamos você para a área certa.', 'Optional — we take you to the right area if you skip this.')">
+        Opcional — sem escolher, levamos você para a área certa.</p>
+
+    {% comment %}
+    Nenhuma opção vem pré-marcada de propósito: uma escolha implícita atropelaria
+    a regra de destino de panels.post_login_target, que sabe mandar quem tem uma
+    área só direto para ela e quem tem as duas para a tela de escolha.
+    {% endcomment %}
+    {% for card in panel_cards %}
+    <label for="panel_{{ card.key }}"
+        class="flex items-start gap-3 p-4 rounded-xl border border-slate-300 dark:border-slate-700 cursor-pointer transition-all hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+        <input type="radio" name="panel" value="{{ card.key }}" id="panel_{{ card.key }}"
+            class="mt-1 h-4 w-4 shrink-0 border-slate-300 text-primary focus:ring-primary">
+        <span class="flex-1">
+            <span class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-xl text-primary" aria-hidden="true">{{ card.icon }}</span>
+                <span class="font-bold text-slate-900 dark:text-white font-ui">{{ card.label }}</span>
+            </span>
+            <span class="block mt-1 text-sm text-slate-500 font-ui">{{ card.description }}</span>
+        </span>
+    </label>
+    {% endfor %}
+</fieldset>

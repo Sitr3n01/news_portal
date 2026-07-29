@@ -1,0 +1,80 @@
+{% load i18n wagtailadmin_tags %}
+{% if visible %}
+    {% panel id="recent-articles" heading="Notícias recentes" icon="newspaper" classname="w-panel--dashboard" %}
+        <p class="redacao-panel-header-link">
+            <a href="{{ list_url }}">Ver todas <span aria-hidden="true">→</span></a>
+        </p>
+
+        {% if articles %}
+            <table class="listing redacao-recent-articles">
+                <col width="5%" />
+                <col />
+                <col width="15%" />
+                <col width="15%" />
+                <col width="15%" />
+                <col width="12%" />
+                <col width="10%" />
+                <thead class="w-sr-only">
+                    <tr>
+                        <th>Capa</th>
+                        <th class="title">Título</th>
+                        <th>Categoria</th>
+                        <th>Status</th>
+                        <th>Autor</th>
+                        <th>Atualizado em</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for article in articles %}
+                        <tr>
+                            <td class="redacao-recent-articles__thumb">
+                                {% if article.cover_image_url %}
+                                    <img src="{{ article.cover_image_url }}" alt="" class="redacao-recent-articles__thumb-img" />
+                                {% endif %}
+                            </td>
+                            <td class="title">
+                                <div class="title-wrapper">
+                                    <a href="{% url 'wagtailsnippets_news_article:edit' article.pk %}">{{ article.title }}</a>
+                                </div>
+                            </td>
+                            <td>
+                                {% if article.category %}
+                                    {{ article.category }}
+                                {% else %}
+                                    <span class="w-meta-text">Sem categoria</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if article.is_in_review %}
+                                    <span class="redacao-status-tag">{% icon name="resubmit" %} Em revisão</span>
+                                {% elif article.status == "published" %}
+                                    <span class="redacao-status-tag">{% icon name="check" %} {{ article.get_status_display }}</span>
+                                {% elif article.status == "archived" %}
+                                    <span class="redacao-status-tag">{% icon name="no-view" %} {{ article.get_status_display }}</span>
+                                {% else %}
+                                    <span class="redacao-status-tag">{% icon name="draft" %} {{ article.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if article.author %}
+                                    {{ article.author }}
+                                {% else %}
+                                    <span class="w-meta-text">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="w-meta-text">{% human_readable_date article.updated_at %}</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'wagtailsnippets_news_article:edit' article.pk %}">Editar</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Nenhuma notícia recente.</p>
+        {% endif %}
+    {% endpanel %}
+{% endif %}

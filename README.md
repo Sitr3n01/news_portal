@@ -7,6 +7,10 @@ Portal institucional da Komuniki e portal de notícias Blog da Kelly, servidos p
 ![PostgreSQL](https://img.shields.io/badge/postgres-16-blue)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
+![Home da Komuniki](docs/images/komuniki-home.png)
+
+![Painel administrativo em Django Unfold](docs/images/admin-unfold.png)
+
 ---
 
 ## Status

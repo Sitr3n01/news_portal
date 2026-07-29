@@ -142,6 +142,8 @@ O CI roda lint, `collectstatic` e testes em pushes/PRs para `main` e `master`. O
 
 O caminho canônico de produção é `/opt/kelly_sys`, com Docker Compose project `kellysys`.
 
+Esse caminho e esse nome de project são anteriores à renomeação do repositório e foram mantidos de propósito: alterá-los exigiria recriar volumes, containers e o checkout do servidor. A divergência em relação a `news_portal` é intencional, não resíduo.
+
 Leia nesta ordem:
 
 1. [docs/technical/go-live-checklist.md](docs/technical/go-live-checklist.md)

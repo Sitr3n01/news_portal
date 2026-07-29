@@ -6,9 +6,9 @@ from django.urls import reverse_lazy
 from unfold.admin import ModelAdmin
 
 from apps.accounts.admin_roles import sync_user_role_group
-from apps.common.admin_mixins import AdminUXMixin
+from apps.common.admin_mixins import AdminUXMixin, SuperuserOnlyAdminMixin
 
-from .models import CustomUser
+from .models import CustomUser, GoogleIdentity, VerificationCode
 
 try:
     admin.site.unregister(Group)
@@ -42,8 +42,10 @@ class AdminRoleGroupAdmin(AdminUXMixin, ModelAdmin, DjangoGroupAdmin):
 
 @admin.register(CustomUser)
 class CustomUserAdmin(AdminUXMixin, ModelAdmin, UserAdmin):
+    STAFF_ADMIN_ROLES = {CustomUser.Role.SCHOOL_ADMIN, CustomUser.Role.SUPER_ADMIN}
+
     list_display = ['username', 'email', 'get_role_display', 'is_active', 'is_staff', 'date_joined']
-    list_filter = ['role', 'is_active', 'is_staff', 'date_joined']
+    list_filter = ['role', 'is_active', 'is_staff', 'email_verified', 'date_joined']
     list_filter_submit = True
     search_fields = ['username', 'email', 'first_name', 'last_name']
     ordering = ['-date_joined']
@@ -76,13 +78,16 @@ class CustomUserAdmin(AdminUXMixin, ModelAdmin, UserAdmin):
         {'label': 'Todos os usuários', 'icon': 'manage_accounts', 'url': reverse_lazy('admin:accounts_customuser_changelist')},
     ]
     fieldsets = (
-        (None, {'fields': ('username', 'password'), 'classes': ('tab',)}),
-        ('Informações Pessoais', {'fields': ('first_name', 'last_name', 'email'), 'classes': ('tab',)}),
-        ('Permissões', {
-            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
+        ('Identificação', {
+            'fields': ('username', 'password', 'first_name', 'last_name', 'email', 'email_verified', 'email_verified_at'),
             'classes': ('tab',),
         }),
-        ('Perfil', {'fields': ('role', 'avatar', 'bio'), 'classes': ('tab',)}),
+        ('Cargo e permissões', {
+            'fields': ('role', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
+            'classes': ('tab',),
+            'description': 'Administrador Komuniki e Administrador Geral liberam automaticamente o acesso administrativo ao salvar. Superusuário continua sendo uma escolha separada.',
+        }),
+        ('Perfil', {'fields': ('avatar', 'bio'), 'classes': ('tab',)}),
         ('Datas Importantes', {'fields': ('last_login', 'date_joined'), 'classes': ('collapse',)}),
     )
     add_fieldsets = (
@@ -94,7 +99,9 @@ class CustomUserAdmin(AdminUXMixin, ModelAdmin, UserAdmin):
         ('Perfil', {
             'fields': ('role',),
             'description': 'O cargo define o grupo de permissões atribuído automaticamente ao salvar '
-                          '(ex.: "Editor de Notícias"). Ajuste depois em Permissões se precisar de algo específico.',
+                          '(ex.: "Editor de Notícias"). Use "Leitor" para quem só acessa o portal público. '
+                          'Administrador Komuniki e Administrador Geral também liberam a Administração do sistema. '
+                          'Superusuário continua sendo uma permissão separada, ajustada depois em Permissões.',
         }),
     )
 
@@ -108,8 +115,86 @@ class CustomUserAdmin(AdminUXMixin, ModelAdmin, UserAdmin):
         extra_context['kb_password_fix'] = True
         return super().changeform_view(request, object_id, form_url, extra_context)
 
+    def save_model(self, request, obj, form, change):
+        if obj.role in self.STAFF_ADMIN_ROLES:
+            obj.is_staff = True
+        super().save_model(request, obj, form, change)
+
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
         # role é fonte da verdade do grupo de cargo: sincroniza (adiciona o atual
         # e revoga grupos de cargos anteriores, evitando privilégio residual).
         sync_user_role_group(form.instance)
+
+
+# Todos os campos de VerificationCode MENOS code_hash. Calculado a partir do
+# _meta (e não escrito à mão) para que, se o modelo ganhar um campo novo no
+# futuro, ele apareça aqui automaticamente — só code_hash precisa continuar
+# excluído explicitamente, em vez de alguém ter de lembrar de atualizar uma
+# lista solta toda vez que o modelo mudar.
+_VERIFICATION_CODE_SAFE_FIELDS = [field.name for field in VerificationCode._meta.fields if field.name != 'code_hash']
+
+
+@admin.register(VerificationCode)
+class VerificationCodeAdmin(SuperuserOnlyAdminMixin, ModelAdmin):
+    """Somente leitura: existe para o superusuário AUDITAR emissões suspeitas
+    (ex.: muitas emissões seguidas para a mesma conta), nunca para operar
+    sobre elas.
+
+    SuperuserOnlyAdminMixin (apps.common.admin_mixins) restringe módulo e
+    visualização a superusuário — nenhum grupo de cargo (admin_roles.py) tem,
+    ou deveria ter, motivo para ver códigos de verificação de outras contas;
+    isto não é uma tela operacional do dia a dia, é uma trilha de auditoria.
+    has_add/has_change abaixo ficam False incondicionalmente, inclusive para
+    superusuário — o mixin sozinho já os amarra a is_superuser, mas aqui o
+    ponto não é QUEM pode mudar a linha, é que NINGUÉM deve: criar ou editar
+    à mão forjaria uma emissão que nunca aconteceu, ou apagaria o rastro de
+    tentativas de uma tentativa de invasão real, o oposto do que uma trilha
+    de auditoria existe para garantir. Delete continua liberado a
+    superusuário (herdado do mixin) para expurgo pontual (LGPD); a faxina de
+    rotina é o management command clear_expired_verification_codes.
+
+    `code_hash` NUNCA aparece — nem aqui embaixo, nem em nenhum outro campo
+    desta classe. Mesmo sendo hash (não o código em texto puro), listar um
+    hash de segredo num changelist normaliza a ideia de que hash é "seguro o
+    bastante para mostrar", e é assim que um code review futuro deixa passar
+    um vazamento pior.
+    """
+
+    list_display = ['user', 'purpose', 'email', 'attempts', 'is_used', 'is_expired', 'created_at']
+    list_filter = ['purpose']
+    search_fields = ['user__username', 'user__email', 'email']
+    fields = _VERIFICATION_CODE_SAFE_FIELDS
+    readonly_fields = _VERIFICATION_CODE_SAFE_FIELDS
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(GoogleIdentity)
+class GoogleIdentityAdmin(SuperuserOnlyAdminMixin, ModelAdmin):
+    """Somente leitura, mesmo raciocínio de VerificationCodeAdmin: existe para
+    o superusuário auditar vínculos (ex.: confirmar qual conta local está
+    ligada a qual `google_sub` num chamado de suporte), nunca para criar ou
+    editar um vínculo à mão — isso pertence ao login social (Fase 2), que
+    grava a linha no momento da primeira autenticação bem-sucedida via
+    Google, não a um formulário de admin.
+
+    `google_sub` não é segredo (é um identificador, não uma credencial —
+    equivalente a mostrar o e-mail de alguém, não a senha), por isso pode
+    aparecer em list_display/search_fields sem o mesmo cuidado de
+    VerificationCode.code_hash.
+    """
+
+    list_display = ['user', 'email', 'google_sub', 'created_at', 'last_login_at']
+    search_fields = ['user__username', 'user__email', 'email', 'google_sub']
+    readonly_fields = [field.name for field in GoogleIdentity._meta.fields]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

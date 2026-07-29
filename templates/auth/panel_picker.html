@@ -1,0 +1,43 @@
+{% extends 'auth/base_auth.html' %}
+
+{% block title %}Escolha uma área - {{ news_portal_name }}{% endblock %}
+
+{% block shell_width %}max-w-2xl{% endblock %}
+
+{% block auth_content %}
+<div class="font-display">
+    <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-2 text-center"
+        x-text="t('Para onde você quer ir?', 'Where do you want to go?')">Para onde você quer ir?</h1>
+    <p class="text-center text-slate-500 font-ui text-sm mb-8">
+        Olá, {{ user.get_short_name|default:user.get_username }}. Você tem acesso às duas áreas —
+        pode alternar entre elas a qualquer momento sem entrar de novo.
+    </p>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+        {% for card in panel_cards %}
+        <a href="{{ card.url }}"
+            class="group flex flex-col p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-sm hover:border-primary hover:shadow-md transition-all">
+            <span
+                class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4">
+                <span class="material-symbols-outlined text-2xl" aria-hidden="true">{{ card.icon }}</span>
+            </span>
+            <span class="font-bold text-lg text-slate-900 dark:text-white font-ui mb-1">{{ card.label }}</span>
+            <span class="text-sm text-slate-500 font-ui flex-1">{{ card.description }}</span>
+            <span class="mt-4 text-sm font-bold text-primary font-ui inline-flex items-center gap-1">
+                <span x-text="t('Entrar', 'Enter')">Entrar</span>
+                <span class="material-symbols-outlined text-base transition-transform group-hover:translate-x-1"
+                    aria-hidden="true">arrow_forward</span>
+            </span>
+        </a>
+        {% endfor %}
+    </div>
+
+    <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
+        <form method="post" action="{% url 'panel:logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="text-sm font-ui text-slate-500 hover:text-primary hover:underline"
+                x-text="t('Sair da plataforma', 'Sign out')">Sair da plataforma</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{# Bloco de imagem inline (StreamField). #}
+{% load wagtailimages_tags %}
+{% if value.imagem %}
+<figure class="article-block-image">
+    {% image value.imagem max-1200x1200 as rendered_image %}
+    <img src="{{ rendered_image.url }}"
+         alt="{{ value.imagem.default_alt_text|default:value.legenda|default:'' }}"
+         loading="lazy">
+    {% if value.legenda %}
+    <figcaption>{{ value.legenda }}</figcaption>
+    {% endif %}
+</figure>
+{% endif %}

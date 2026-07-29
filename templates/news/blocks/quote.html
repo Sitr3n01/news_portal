@@ -1,0 +1,7 @@
+{# Bloco de citação com atribuição opcional. #}
+<blockquote class="article-quote">
+    <p>{{ value.citacao }}</p>
+    {% if value.atribuicao %}
+    <cite>{{ value.atribuicao }}</cite>
+    {% endif %}
+</blockquote>

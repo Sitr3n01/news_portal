@@ -17,6 +17,8 @@ Portal institucional da Komuniki e portal de notícias Blog da Kelly, servidos p
 
 Sistema em produção para um cliente real. O repositório está em fase de manutenção evolutiva: mudanças devem preservar segurança, operação do admin e compatibilidade com o deploy atual.
 
+No ar: [komuniki.com.br](https://komuniki.com.br) · [kellyfarias.com.br/news/](https://kellyfarias.com.br/news/)
+
 ---
 
 ## Visão Geral
@@ -25,8 +27,8 @@ O projeto serve dois portais públicos e um painel administrativo a partir do me
 
 | Superfície | URL/prefixo | Propósito |
 |------------|-------------|-----------|
-| Komuniki | `/` em `komuniki.com.br` | Site institucional da escola |
-| Blog da Kelly | `/news/` em `kellyfarias.com.br` | Portal de notícias com artigos, RSS, comentários e newsletter |
+| Komuniki | `/` em [komuniki.com.br](https://komuniki.com.br) | Site institucional da escola |
+| Blog da Kelly | `/news/` em [kellyfarias.com.br](https://kellyfarias.com.br/news/) | Portal de notícias com artigos, RSS, comentários e newsletter |
 | Admin | `/admin/` | Painel Django Unfold para operação dos dois portais |
 
 **Ponto importante:** hoje os dois portais compartilham `SITE_ID=1`. A separação pública é por roteamento de caminho e configuração de domínio no Nginx, não por dois registros `Site` ativos. O Django Sites Framework e os managers `on_site` existem como proteção arquitetural para um futuro multi-site real.

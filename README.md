@@ -7,11 +7,19 @@ Portal institucional da Komuniki e portal de notícias Blog da Kelly, servidos p
 ![PostgreSQL](https://img.shields.io/badge/postgres-16-blue)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
+![Home da Komuniki](docs/images/komuniki-home.png)
+
+![Home do Blog da Kelly, com artigo em destaque e lista de mais lidas](docs/images/blog-da-kelly-home.png)
+
+![Painel administrativo em Django Unfold](docs/images/admin-unfold.png)
+
 ---
 
 ## Status
 
 Sistema em produção para um cliente real. O repositório está em fase de manutenção evolutiva: mudanças devem preservar segurança, operação do admin e compatibilidade com o deploy atual.
+
+No ar: [komuniki.com.br](https://komuniki.com.br) · [kellyfarias.com.br/news/](https://kellyfarias.com.br/news/)
 
 ---
 
@@ -21,8 +29,8 @@ O projeto serve dois portais públicos e um painel administrativo a partir do me
 
 | Superfície | URL/prefixo | Propósito |
 |------------|-------------|-----------|
-| Komuniki | `/` em `komuniki.com.br` | Site institucional da escola |
-| Blog da Kelly | `/news/` em `kellyfarias.com.br` | Portal de notícias com artigos, RSS, comentários e newsletter |
+| Komuniki | `/` em [komuniki.com.br](https://komuniki.com.br) | Site institucional da escola |
+| Blog da Kelly | `/news/` em [kellyfarias.com.br](https://kellyfarias.com.br/news/) | Portal de notícias com artigos, RSS, comentários e newsletter |
 | Admin | `/admin/` | Painel Django Unfold para operação dos dois portais |
 
 **Ponto importante:** hoje os dois portais compartilham `SITE_ID=1`. A separação pública é por roteamento de caminho e configuração de domínio no Nginx, não por dois registros `Site` ativos. O Django Sites Framework e os managers `on_site` existem como proteção arquitetural para um futuro multi-site real.
@@ -35,10 +43,13 @@ O projeto serve dois portais públicos e um painel administrativo a partir do me
 |--------|------------|
 | Backend | Python 3.12+ / Django 5.1+ |
 | Banco | PostgreSQL 16 em produção |
+| CMS editorial | Wagtail 7.4 — corpo dos artigos em StreamField, rascunho/revisão/preview e biblioteca de imagens |
 | Frontend | Django Templates + HTMX + Alpine.js |
 | Admin | Django Unfold |
 | Estáticos | WhiteNoise em dev, Nginx em produção |
 | Deploy | Docker Compose, Nginx, Let's Encrypt, GitHub Actions com tag aprovada |
+
+![Artigo publicado, renderizado a partir dos blocos do StreamField](docs/images/artigo-streamfield.png)
 
 ---
 
@@ -52,6 +63,7 @@ apps/
   hiring/        Vagas, departamentos e candidaturas
   contact/       Formulário de contato
   news/          Artigos em blocos, categorias, tags, newsletter, RSS, comentários
+  cms_media/     Modelos de imagem e documento do Wagtail, com crédito e ponte para a mídia legada
   media_library/ Biblioteca de mídia compartilhada
   social/        Contas e posts de Instagram/TikTok, com sync opcional por API
 
@@ -124,6 +136,8 @@ ruff check .
 pytest
 ```
 
+436 testes, todos passando: `accounts` (223), `news` (116), `common` (44), `social` (27), `school` (10), `hiring` (7), `media_library` (5) e `contact` (4). Não há `pytest-cov` configurado, então o projeto não publica percentual de cobertura.
+
 O CI roda lint, `collectstatic` e testes em pushes/PRs para `main` e `master`. O deploy de produção é manual, aprovado via environment `production`, e move a tag `production-approved`.
 
 ---
@@ -131,6 +145,8 @@ O CI roda lint, `collectstatic` e testes em pushes/PRs para `main` e `master`. O
 ## Deploy
 
 O caminho canônico de produção é `/opt/kelly_sys`, com Docker Compose project `kellysys`.
+
+Esse caminho e esse nome de project são anteriores à renomeação do repositório e foram mantidos de propósito: alterá-los exigiria recriar volumes, containers e o checkout do servidor. A divergência em relação a `news_portal` é intencional, não resíduo.
 
 Leia nesta ordem:
 
@@ -153,6 +169,10 @@ Leia nesta ordem:
 | Histórico de manutenção | [docs/MAINTENANCE_HISTORY.md](docs/MAINTENANCE_HISTORY.md) |
 
 Mapa completo: [docs/README.md](docs/README.md).
+
+---
+
+> **Nota histórica:** este repositório foi renomeado de `kelly_sys` para `news_portal`. Links antigos continuam funcionando por redirect do GitHub. O caminho de deploy e o Compose project preservam a nomenclatura anterior, como explicado em [Deploy](#deploy).
 
 ---
 

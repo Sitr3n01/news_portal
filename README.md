@@ -168,6 +168,10 @@ Mapa completo: [docs/README.md](docs/README.md).
 
 ---
 
+> **Nota histórica:** este repositório foi renomeado de `kelly_sys` para `news_portal`. Links antigos continuam funcionando por redirect do GitHub. O caminho de deploy e o Compose project preservam a nomenclatura anterior, como explicado em [Deploy](#deploy).
+
+---
+
 ## Licença
 
 Distribuído sob licença MIT. Veja [LICENSE](LICENSE) para detalhes.

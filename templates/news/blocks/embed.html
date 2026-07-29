@@ -1,0 +1,37 @@
+{% comment %}
+Bloco de embed (StreamField) — facade clique-para-carregar.
+Usa o mesmo padrão dos blocos ArticleBlock: resolve_embed() preenche
+embed_data no contexto via EmbedBlock.get_context().
+{% endcomment %}
+{% with e=embed_data %}
+{% if e %}
+<figure class="article-block-embed embed-{{ e.provider }}" x-data="{ loaded: false }">
+    <div class="embed-frame" style="aspect-ratio: {{ e.aspect }};">
+        <template x-if="!loaded">
+            <button type="button" @click="loaded = true" class="embed-facade group"
+                    :aria-label="'Carregar vídeo do {{ e.provider_label }}'">
+                {% if e.thumbnail_url %}
+                <img src="{{ e.thumbnail_url }}" alt="" loading="lazy" class="embed-thumb">
+                {% else %}
+                <span class="embed-thumb embed-placeholder embed-placeholder-{{ e.provider }}"></span>
+                {% endif %}
+                <span class="embed-overlay">
+                    <span class="embed-play">
+                        <span class="material-symbols-outlined">play_arrow</span>
+                    </span>
+                    <span class="embed-label">{{ e.provider_label }}</span>
+                </span>
+            </button>
+        </template>
+        <template x-if="loaded">
+            <iframe src="{{ e.embed_url }}?autoplay=1" loading="lazy" allowfullscreen
+                    allow="autoplay; encrypted-media; picture-in-picture; clipboard-write; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" class="embed-iframe"></iframe>
+        </template>
+    </div>
+    {% if value.legenda %}
+    <figcaption>{{ value.legenda }}</figcaption>
+    {% endif %}
+</figure>
+{% endif %}
+{% endwith %}

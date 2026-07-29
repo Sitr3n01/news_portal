@@ -1,0 +1,17 @@
+{% comment %}
+Bloco de título/subtítulo.
+
+O nível vem de um ChoiceBlock (apps/news/blocks.py::HeadingBlock), que valida no
+save — mas o nome da tag NÃO é interpolado a partir da variável, de propósito. Um
+`<{{ value.nivel }}>` faz a estrutura do HTML depender de dado do banco: basta uma
+migração de dados, uma importação ou um bloco criado fora do formulário para o
+valor sair da lista e a página emitir marcação inválida. Com o if explícito este
+template só consegue produzir h2, h3 ou h4.
+{% endcomment %}
+{% if value.nivel == 'h3' %}
+<h3 class="article-heading">{{ value.texto }}</h3>
+{% elif value.nivel == 'h4' %}
+<h4 class="article-heading">{{ value.texto }}</h4>
+{% else %}
+<h2 class="article-heading">{{ value.texto }}</h2>
+{% endif %}

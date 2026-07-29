@@ -31,8 +31,9 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # garantindo a proteção mesmo se a request chegar sem passar pelo reverse proxy.
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
-# Token de reset de senha expira em 1 hora (padrão Django: 24h)
-PASSWORD_RESET_TIMEOUT = 3600
+# PASSWORD_RESET_TIMEOUT vive em base.py: o prazo do token precisa ser o mesmo
+# em dev, teste e produção, senão o comportamento validado nos testes não é o
+# que roda no ar.
 
 # Renovar sessão a cada request (evita logout de usuário ativo com SESSION_COOKIE_AGE)
 SESSION_SAVE_EVERY_REQUEST = True

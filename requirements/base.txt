@@ -8,10 +8,22 @@ django-unfold==0.87.0
 django-htmx>=1.17
 Pillow>=12.2.0
 django-imagekit>=5.0
-whitenoise>=6.5
+whitenoise>=6.12.0
 django-environ>=0.11
 django-extensions>=3.2
 django-axes>=6.0
 bleach[css]>=6.0
 django-csp>=4.0
 httpx>=0.27
+# Piso em 7.4.2 (e não 7.4): as migrations de apps/news e apps/cms_media dependem
+# de `wagtailcore.0097_baselogentry_uuid_action_timestamp_indexes`, o último nó do
+# grafo nesta série. Uma 7.4.x anterior sem esse nó faz o `migrate` morrer antes da
+# primeira migration. Ver o guard em apps/common/tests.py.
+# Validação do ID token do Google (assinatura contra o JWKS, iss/aud/exp) no
+# login com Google — apps/accounts/oauth_google.py. Só isso: o fluxo OAuth em
+# si é próprio, com httpx, para não trazer os models/views/templates de login
+# de uma biblioteca de social login e colidir com o login unificado.
+google-auth>=2.28
+wagtail>=7.4.2,<7.5
+django-modelcluster>=6.4
+django-taggit>=6.1

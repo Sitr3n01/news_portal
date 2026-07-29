@@ -22,7 +22,7 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         {% for article in page_obj %}
-        {% include 'news/partials/article_card.html' %}
+        {% include 'news/partials/article_teaser.html' %}
         {% empty %}
         <div class="col-span-full text-center py-16 text-gray-500 dark:text-slate-400"
           x-text="t('Nenhum artigo encontrado com esta tag.', 'No articles found with this tag.')">

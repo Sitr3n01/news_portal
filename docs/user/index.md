@@ -7,19 +7,44 @@ Bem-vindo à documentação de uso do sistema. Este painel de controle centraliz
 | **Komuniki** | `komuniki.com.br` | Site institucional da escola: home, cursos, redes sociais, contato |
 | **Blog da Kelly** | `kellyfarias.com.br/news/` | Portal de notícias: artigos, categorias, newsletter, comentários |
 
-## Como acessar o painel
+## Como acessar
 
-Acesse `seudominio.com.br/admin/` com seu usuário e senha. A tela inicial mostra um painel de métricas resumidas. A barra lateral esquerda contém tudo que você precisa.
+Acesse **`seudominio.com.br/entrar/`** com seu usuário e senha. É a única porta
+de entrada — você usa a mesma conta para tudo.
+
+Depois de entrar, o sistema leva você para a área que seu cargo permite. Existem
+duas:
+
+| Área | Para que serve |
+|------|----------------|
+| **Publicação de matérias** | Escrever, revisar e publicar notícias, com imagens e categorias |
+| **Administração do sistema** | Usuários, permissões, páginas da Komuniki, mensagens e configurações |
+
+Se você tem acesso às duas, escolhe na hora de entrar (ou depois, em
+`seudominio.com.br/painel/`). **Não é preciso entrar de novo para trocar de
+área** — é a mesma sessão. E sair de uma área encerra o acesso às duas.
+
+Esqueceu a senha? Use o link **Esqueci minha senha** na tela de acesso: você
+recebe por e-mail um link temporário para cadastrar uma nova.
+
+Se aparecer *"Sua conta não tem permissão para acessar…"*, não é problema de
+senha — é de permissão. Peça a um Super Administrador para revisar seu cargo.
 
 ## Quem pode fazer o quê
 
 O sistema usa **cargos** para controlar o acesso. Cada cargo vê apenas o que é relevante para ele:
 
-| Cargo | Pode |
-|-------|------|
-| **Super Administrador** | Tudo no sistema |
-| **Administrador Komuniki** | Home da escola, páginas, diferenciais, depoimentos, mensagens de contato, biblioteca de mídia |
-| **Editor de Notícias** | Artigos, categorias, tags, moderação de comentários, lista de inscritos na newsletter, biblioteca de mídia |
+| Cargo | Publicação de matérias | Administração do sistema | Pode |
+|-------|:---:|:---:|------|
+| **Super Administrador** | Sim | Sim | Tudo no sistema |
+| **Administrador Komuniki** | Não | Sim | Home da escola, páginas, diferenciais, depoimentos, mensagens de contato, biblioteca de mídia |
+| **Editor de Notícias** | Sim | Não | Artigos, categorias, tags, moderação de comentários, lista de inscritos na newsletter, biblioteca de mídia |
+| **Repórter** | Sim | Não | Escrever e editar matérias — sem publicar nem excluir |
+| **Leitor** | Não | Não | Apenas o portal público: comentar, curtir e salvar matérias |
+
+> Para liberar a **Administração do sistema** não basta o cargo: um Super
+> Administrador precisa marcar também **Acesso administrativo** no cadastro do
+> usuário, em *Sistema → Usuários*.
 
 ## Por onde começar
 

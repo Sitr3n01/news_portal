@@ -132,6 +132,8 @@ ruff check .
 pytest
 ```
 
+436 testes, todos passando: `accounts` (223), `news` (116), `common` (44), `social` (27), `school` (10), `hiring` (7), `media_library` (5) e `contact` (4). Não há `pytest-cov` configurado, então o projeto não publica percentual de cobertura.
+
 O CI roda lint, `collectstatic` e testes em pushes/PRs para `main` e `master`. O deploy de produção é manual, aprovado via environment `production`, e move a tag `production-approved`.
 
 ---

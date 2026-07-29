@@ -8,7 +8,7 @@ django-unfold==0.87.0
 django-htmx>=1.17
 Pillow>=10.0
 django-imagekit>=5.0
-whitenoise>=6.5
+whitenoise>=6.12.0
 django-environ>=0.11
 django-extensions>=3.2
 django-axes>=6.0

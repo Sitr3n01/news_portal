@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR" class="ed-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        try {
+            document.documentElement.classList.toggle('dark', localStorage.getItem('theme') === 'dark');
+            document.documentElement.lang = localStorage.getItem('lang') === 'en' ? 'en' : 'pt-BR';
+        } catch (_) {}
+    </script>
+    <title>{% block title %}{{ site_settings.tagline|default:current_site.name }}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}{{ site_settings.tagline }}{% endblock %}">
+    {% if design_preview %}<meta name="robots" content="noindex,nofollow">{% endif %}
+    {% if site_settings.favicon %}<link rel="icon" href="{{ site_settings.favicon.url }}">{% endif %}
+    <link rel="preload" href="{% static 'fonts/editorial/barlow-condensed-bold.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <script src="{% static 'js/vendor/tailwind.min.js' %}"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: {
+                fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Inter', 'sans-serif'] },
+                maxWidth: { '7xl': '1200px' },
+                colors: { primary: {
+                    50: '#f3f3f3', 100: '#e5e5e5', 200: '#d1ffca', 300: '#c6c6c6',
+                    400: '#979797', 500: '#444444', 600: '#000000', 700: '#000000',
+                    800: '#000000', 900: '#000000'
+                }}
+            }}
+        };
+    </script>
+    <link rel="stylesheet" href="{% static 'css/school-editorial.css' %}?v=5">
+    <script src="{% static 'js/school-editorial.js' %}" defer></script>
+    <script src="{% static 'js/vendor/htmx.min.js' %}" defer></script>
+    <script src="{% static 'js/vendor/alpine.min.js' %}" defer></script>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="ed-school" x-data="schoolEditorial" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <a class="ed-skip" href="#main-content" x-text="t('Ir para o conteúdo', 'Skip to content')">Ir para o conteúdo</a>
+    {% include 'school/editorial/navbar.html' %}
+    <main id="main-content" tabindex="-1" class="{% block editorial_page_class %}{% endblock %}">
+        {% if design_preview_demo %}
+        <div class="ed-demo-notice ed-wrap" role="note">
+            <span class="ed-tag" x-text="t('Demonstração', 'Demonstration')">Demonstração</span>
+            <p x-text="t('Depoimentos e publicações fictícios para avaliação visual. Os envios ficam neste ambiente local.', 'Fictional testimonials and posts for visual review. Submissions stay in this local environment.')">Depoimentos e publicações fictícios para avaliação visual. Os envios ficam neste ambiente local.</p>
+        </div>
+        {% endif %}
+        {% if messages %}
+        <div class="ed-wrap ed-messages" aria-live="polite">
+            {% for message in messages %}
+            <div class="ed-message" role="{% if message.tags == 'error' %}alert{% else %}status{% endif %}" x-data="{ show: true }" x-show="show">
+                <span>{{ message }}</span>
+                <button type="button" @click="show = false" :aria-label="t('Fechar aviso', 'Dismiss message')">×</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+    {% include 'school/editorial/footer.html' %}
+    {% include 'components/turnstile_script.html' %}
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

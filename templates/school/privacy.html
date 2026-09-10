@@ -1,10 +1,12 @@
-{% extends 'base_school.html' %}
+{% extends 'base_school_editorial.html' %}
 
 {% block title %}Política de privacidade - {{ current_site.name }}{% endblock %}
 {% block meta_description %}Informações claras sobre privacidade, uso de dados, segurança e canais de contato de {{ current_site.name }}.{% endblock %}
 
+{% block editorial_page_class %}ed-interior ed-privacy{% endblock %}
+
 {% block content %}
-<section class="liquid-section py-14 md:py-20">
+<section class="ed-section py-14 md:py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="max-w-4xl">
             <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Privacidade', 'Privacy')">Privacidade</p>
@@ -20,10 +22,10 @@
     </div>
 </section>
 
-<section class="liquid-section pb-16 md:pb-24">
+<section class="ed-section pb-16 md:pb-24">
     <div class="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.34fr_0.66fr] lg:px-8">
-        <aside class="space-y-5 lg:sticky lg:top-28 lg:self-start">
-            <div class="liquid-panel rounded-[2rem] p-6">
+        <aside class="space-y-5 lg:self-start">
+            <div class="ed-panel rounded-[2rem] p-6">
                 <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Resumo', 'Summary')">Resumo</p>
                 <ul class="mt-5 space-y-4 text-sm leading-relaxed text-slate-600">
                     <li x-text="t('Usamos dados enviados por você para responder contatos, solicitações e interesses em cursos, mentorias e projetos.', 'We use data you send to answer contact requests and conversations about courses, mentoring and projects.')">
@@ -41,14 +43,14 @@
                 </ul>
             </div>
 
-            <div class="liquid-card rounded-[1.75rem] p-6">
+            <div class="ed-card rounded-[1.75rem] p-6">
                 <h2 class="font-display text-xl font-bold text-slate-950" x-text="t('Contato de privacidade', 'Privacy contact')">Contato de privacidade</h2>
                 <p class="mt-3 text-sm leading-relaxed text-slate-600"
                     x-text="t('Use o formulário de contato ou o e-mail oficial informado no site para dúvidas sobre dados pessoais.', 'Use the contact form or the official email listed on the site for questions about personal data.')">
                     Use o formulário de contato ou o e-mail oficial informado no site para dúvidas sobre dados pessoais.
                 </p>
                 <a href="{% url 'contact:page' %}"
-                    class="jump-lift mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-primary-600 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4"
+                    class="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-primary-600 px-5 py-2.5 text-sm font-bold text-white transition-colors focus:outline-none"
                     x-text="t('Falar com a Komuniki', 'Talk to Komuniki')">
                     Falar com a Komuniki
                 </a>
@@ -56,7 +58,7 @@
         </aside>
 
         <div class="space-y-5">
-            <article class="scroll-reveal liquid-panel rounded-[2rem] p-6 md:p-8" data-scroll-reveal>
+            <article class="ed-panel rounded-[2rem] p-6 md:p-8" >
                 <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Uso do site', 'Use of the site')">Uso do site</p>
                 <h2 class="mt-3 font-display text-3xl font-bold text-slate-950" x-text="t('O que o sistema faz', 'What the system does')">O que o sistema faz</h2>
                 <p class="mt-4 text-lg leading-relaxed text-slate-600"
@@ -65,7 +67,7 @@
                 </p>
             </article>
 
-            <article class="scroll-reveal liquid-panel rounded-[2rem] p-6 md:p-8" data-scroll-reveal>
+            <article class="ed-panel rounded-[2rem] p-6 md:p-8" >
                 <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Coleta voluntária', 'Voluntary collection')">Coleta voluntária</p>
                 <h2 class="mt-3 font-display text-3xl font-bold text-slate-950" x-text="t('Dados enviados por formulários', 'Data sent through forms')">Dados enviados por formulários</h2>
                 <p class="mt-4 text-lg leading-relaxed text-slate-600"
@@ -79,7 +81,7 @@
             </article>
 
             <div class="grid gap-5 md:grid-cols-2">
-                <article class="scroll-reveal liquid-card rounded-[1.75rem] p-6" data-scroll-reveal>
+                <article class="ed-card rounded-[1.75rem] p-6" >
                     <h2 class="font-display text-2xl font-bold text-slate-950" x-text="t('Cookies técnicos', 'Technical cookies')">Cookies técnicos</h2>
                     <p class="mt-4 leading-relaxed text-slate-600"
                         x-text="t('O sistema pode usar cookies e armazenamento local para sessão, segurança, proteção contra CSRF, preferências de tema e idioma, autenticação e estabilidade da navegação.', 'The system may use cookies and local storage for sessions, security, CSRF protection, theme and language preferences, authentication and browsing stability.')">
@@ -87,7 +89,7 @@
                     </p>
                 </article>
 
-                <article class="scroll-reveal liquid-card rounded-[1.75rem] p-6" data-scroll-reveal>
+                <article class="ed-card rounded-[1.75rem] p-6" >
                     <h2 class="font-display text-2xl font-bold text-slate-950" x-text="t('Segurança e anti-spam', 'Security and anti-spam')">Segurança e anti-spam</h2>
                     <p class="mt-4 leading-relaxed text-slate-600"
                         x-text="t('Podemos usar mecanismos como proteção anti-bot, registros de tentativa de acesso e validações de formulário para reduzir abuso, spam e uso automatizado indevido.', 'We may use mechanisms such as anti-bot protection, access-attempt records and form validation to reduce abuse, spam and improper automated use.')">
@@ -96,7 +98,7 @@
                 </article>
             </div>
 
-            <article class="scroll-reveal liquid-panel rounded-[2rem] p-6 md:p-8" data-scroll-reveal>
+            <article class="ed-panel rounded-[2rem] p-6 md:p-8" >
                 <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Operação do serviço', 'Service operation')">Operação do serviço</p>
                 <h2 class="mt-3 font-display text-3xl font-bold text-slate-950" x-text="t('Registros técnicos e compartilhamento', 'Technical logs and sharing')">Registros técnicos e compartilhamento</h2>
                 <p class="mt-4 text-lg leading-relaxed text-slate-600"
@@ -109,7 +111,7 @@
                 </p>
             </article>
 
-            <article class="scroll-reveal liquid-panel rounded-[2rem] p-6 md:p-8" data-scroll-reveal>
+            <article class="ed-panel rounded-[2rem] p-6 md:p-8" >
                 <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Controle do usuário', 'User control')">Controle do usuário</p>
                 <h2 class="mt-3 font-display text-3xl font-bold text-slate-950" x-text="t('Retenção, correção e remoção', 'Retention, correction and deletion')">Retenção, correção e remoção</h2>
                 <p class="mt-4 text-lg leading-relaxed text-slate-600"
@@ -122,9 +124,9 @@
                 </p>
             </article>
 
-            <div class="scroll-reveal rounded-[1.75rem] border border-primary-700/15 bg-primary-50/70 p-6 text-sm leading-relaxed text-slate-600 dark:border-white/10 dark:bg-white/5" data-scroll-reveal>
+            <div class="rounded-[1.75rem] border border-primary-700/15 bg-primary-50/70 p-6 text-sm leading-relaxed text-slate-600" >
                 <p>
-                    <span class="font-bold text-slate-900 dark:text-slate-100" x-text="t('Última atualização:', 'Last updated:')">Última atualização:</span>
+                    <span class="font-bold text-slate-900" x-text="t('Última atualização:', 'Last updated:')">Última atualização:</span>
                     {% now "d/m/Y" %}.
                     <span x-text="t('Esta página pode ser atualizada para refletir mudanças no site, nos canais de atendimento ou nas práticas de segurança.', 'This page may be updated to reflect changes to the site, support channels or security practices.')">
                         Esta página pode ser atualizada para refletir mudanças no site, nos canais de atendimento ou nas práticas de segurança.

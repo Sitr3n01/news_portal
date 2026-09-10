@@ -183,10 +183,4 @@
  .ed-school .ed-hero h1,.ed-school .ed-interior>.ed-section:first-child h1{font-size:48px}
  .ed-root[lang="en"] .ed-school .ed-hero h1,.ed-root[lang="en"] .ed-school .ed-interior>.ed-section:first-child h1{font-size:clamp(38px,13.5vw,48px)}
 }
-/* Small hover feedback only; layout, touch input and reduced motion stay stable. */
-@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
- .ed-school :is(.ed-button,.ed-icon-button,.ed-card,.ed-scroll-cue,.ed-brand,.ed-hero-art img){transition:transform 180ms ease-out;transform-origin:center}
- .ed-school :is(.ed-button,.ed-icon-button,.ed-scroll-cue,.ed-brand):not(:disabled):not([aria-disabled="true"]):hover{transform:scale(1.02)}
- .ed-school :is(.ed-card,.ed-hero-art img):hover{transform:scale(1.01)}
-}
 @media(prefers-reduced-motion:reduce){.ed-root{scroll-behavior:auto}.ed-school *{transition:none!important;animation:none!important}}

@@ -148,6 +148,8 @@ O banco de referência local não contém depoimentos nem posts. Mantém `contat
 
 ## Hover e auditoria ampliada — 9 de setembro de 2026
 
+**Registro histórico:** o hover descrito abaixo foi preservado no checkpoint `ef03939`. A rodada seguinte acrescenta o sistema de movimento solicitado, documentado em [Movimento editorial e rollback](komuniki-editorial-motion.md), com testes próprios e um commit separado.
+
 O CSS exclusivo da escola agora aplica somente uma ampliação discreta ao passar o mouse: `scale(1.02)` em botões, controles, marca e seta; `scale(1.01)` nos cartões e na imagem do hero. A transição usa `transform 180ms ease-out`. Não há animação de entrada ou movimento contínuo. As regras só entram com `hover: hover`, `pointer: fine` e `prefers-reduced-motion: no-preference`; campos e painéis do formulário ficam estáveis. A versão do CSS no template é `v=5`.
 
 A inspeção em 280 px identificou palavras quebradas no título. Abaixo de 360 px, a marca e os títulos receberam tamanhos menores, preservando a composição nas demais larguras.

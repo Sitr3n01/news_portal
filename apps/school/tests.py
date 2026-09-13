@@ -173,7 +173,8 @@ def test_school_homepage_renders_particle_stage_with_local_three(client, current
     content = response.content.decode()
     assert response.status_code == 200
     # O hero é o palco WebGL; a ilustração estática saiu da Home
-    assert 'data-particles' in content
+    assert 'data-particles-scene' in content
+    assert 'class="ed-particles" data-particles' in content
     assert 'particles/rca44-geometry.glb' in content
     assert 'particles/land-mask-640x320.bin' in content
     assert 'images/komuniki-editorial-hero.png' not in content

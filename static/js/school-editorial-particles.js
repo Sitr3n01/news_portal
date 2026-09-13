@@ -1,7 +1,8 @@
 // Hero da Home da Komuniki: uma nuvem de triângulos que se remonta em microfone,
 // Terra e nuvem dispersa, em loop automático. Toda a animação mora no vertex shader:
 // a CPU copia quatro buffers quando a forma troca e, fora isso, só escreve uniforms.
-// Parâmetros e validação: docs/technical/komuniki-particles.md.
+// A nuvem é desenhada em duas camadas transparentes que cobrem o hero inteiro, uma atrás
+// e outra na frente do texto. Parâmetros e validação: docs/technical/komuniki-particles.md.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
@@ -16,33 +17,40 @@ export const CONFIG = {
     oceanKeep:   0.15,   // densidade do oceano vs continente
     dwellSolid:  3.4,    // segundos parado nas formas sólidas
     dwellLoose:  1.6,    // segundos parado no disperso
+    looseRadius: 6.2,    // raio da nuvem dispersa; maior avança por baixo e por cima do título
 };
 
 const SHAPE_NAMES = ['microfone', 'terra', 'disperso'];
 const MIC_RADIUS = 2.9;
 const EARTH_RADIUS = 2.62;
-const LOOSE_RADIUS = 3.6;
 // ~0,0016 rad por quadro a 60 Hz, medido em segundos para não acelerar em telas de 120/144 Hz.
 const ROTATION_PER_SECOND = 0.0016 * 60;
 // prefers-reduced-motion: sem ciclo nem rotação, e a deriva anda a um quarto da velocidade.
 const REDUCED_MOTION_TIME_SCALE = 0.25;
 // Um quadro lento, ou a volta de uma aba em segundo plano, não faz a animação saltar.
 const MAX_FRAME_DELTA = 0.05;
+// As camadas cobrem o hero inteiro e cada uma tem antialias: acima deste total de pixels
+// de buffer por camada, o pixel ratio cede para poupar memória de GPU.
+const MAX_LAYER_PIXELS = 2600000;
 
 // O branco tem peso baixo de propósito: com blending aditivo ele satura a cena inteira rápido.
+// `ink` é a mesma partícula no tema claro, como tinta: tons médios que aparecem tanto sobre o
+// fundo claro quanto sobre as letras pretas do título; o branco azulado vira o azul da Komuniki.
 const PALETTE = [
-    { rgb: [1.00, 0.70, 0.18], weight: 34 }, // âmbar
-    { rgb: [0.50, 0.31, 0.99], weight: 24 }, // violeta
-    { rgb: [0.15, 0.88, 0.74], weight: 17 }, // turquesa
-    { rgb: [0.94, 0.38, 0.99], weight: 13 }, // magenta
-    { rgb: [0.84, 0.88, 1.00], weight: 12 }, // branco azulado
+    { rgb: [1.00, 0.70, 0.18], ink: '#d97706', weight: 34 }, // âmbar
+    { rgb: [0.50, 0.31, 0.99], ink: '#7c3aed', weight: 24 }, // violeta
+    { rgb: [0.15, 0.88, 0.74], ink: '#0d9488', weight: 17 }, // turquesa
+    { rgb: [0.94, 0.38, 0.99], ink: '#c026d3', weight: 13 }, // magenta
+    { rgb: [0.84, 0.88, 1.00], ink: '#0b3a75', weight: 12 }, // branco azulado
 ];
 
 const VERTEX_SHADER = /* glsl */ `
 // ---------- vertex ----------
 attribute vec3 aFrom, aTo, aNormFrom, aNormTo, aColor, aBary;
+attribute vec3 aColorInk;
 attribute float aSeed, aScale;
 uniform float uProgress, uTime, uSpread, uDrift, uAlphaFrom, uAlphaTo, uOcclusion;
+uniform float uLayer, uInk;
 varying vec3 vColor, vBary;
 varying float vGlow, vAlpha;
 
@@ -68,6 +76,14 @@ void main() {
 
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
 
+  // CAMADAS. A nuvem é desenhada em dois canvases, um atrás e outro na frente
+  // do texto do hero. Cada partícula pertence ao lado do plano que passa pelo
+  // centro da forma; perto dele as duas camadas se cruzam suavemente, então
+  // nada pisca quando a rotação leva a partícula de um lado para o outro.
+  float centerZ = (modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0)).z;
+  float front   = smoothstep(-0.35, 0.35, mv.z - centerZ);
+  float layer   = mix(1.0 - front, front, uLayer);
+
   // OCLUSÃO POR NORMAL. Blending aditivo não tem teste de profundidade,
   // então o verso e o interior do modelo somam por cima da frente e a
   // silhueta vira um borrão branco. Neste microfone são 38% da área.
@@ -87,11 +103,14 @@ void main() {
   mv.xy += vec2(position.x * c - position.y * s,
                 position.x * s + position.y * c) * aScale * (0.70 + arc * 1.30);
 
-  vColor = aColor;
+  // TEMA. No escuro a luz soma e brilha mais no meio do voo; no claro a
+  // partícula é tinta sobre o papel, na cor de tinta da paleta e sem brilho extra.
+  vColor = mix(aColor, aColorInk, uInk);
   vBary  = aBary;
-  vGlow  = 0.62 + arc * 0.85;
-  vAlpha = mix(uAlphaFrom, uAlphaTo, t) * (1.0 - arc * 0.35) * vis;
-  gl_Position = projectionMatrix * mv;
+  vGlow  = mix(0.62 + arc * 0.85, 1.0, uInk);
+  vAlpha = mix(uAlphaFrom, uAlphaTo, t) * (1.0 - arc * 0.35) * vis * layer;
+  // Fora desta camada o triângulo vai para fora do recorte e nem é rasterizado.
+  gl_Position = layer < 0.002 ? vec4(2.0, 2.0, 2.0, 1.0) : projectionMatrix * mv;
 }
 `;
 
@@ -321,13 +340,13 @@ function buildEarth(mask, count, oceanKeep) {
 }
 
 // Volume uniforme numa esfera. Normais zeradas: o shader não aplica oclusão.
-function buildScattered(count) {
+function buildScattered(count, looseRadius) {
     const positions = new Float32Array(count * 3);
     const normals = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
         const theta = Math.acos(2 * Math.random() - 1);
         const phi = Math.random() * Math.PI * 2;
-        const radius = LOOSE_RADIUS * Math.cbrt(Math.random());
+        const radius = looseRadius * Math.cbrt(Math.random());
         positions[i * 3] = radius * Math.sin(theta) * Math.cos(phi);
         positions[i * 3 + 1] = radius * Math.sin(theta) * Math.sin(phi);
         positions[i * 3 + 2] = radius * Math.cos(theta);
@@ -363,18 +382,18 @@ function createShape({ positions, normals }, hasNormals, dwell, alphaTarget) {
     return { positions, normals, dwell, alpha: autoAlpha(positions, hasNormals, alphaTarget) };
 }
 
-function pickColor(totalWeight) {
+function pickPaletteEntry(totalWeight) {
     let pick = Math.random() * totalWeight;
     for (const entry of PALETTE) {
         pick -= entry.weight;
         if (pick <= 0) {
-            return entry.rgb;
+            return entry;
         }
     }
-    return PALETTE[0].rgb;
+    return PALETTE[0];
 }
 
-// Um triângulo desenhado N vezes: uma única chamada de draw para a nuvem inteira.
+// Um triângulo desenhado N vezes: uma única chamada de draw por camada para a nuvem inteira.
 function buildCloudGeometry(shape, count, config) {
     const geometry = new THREE.InstancedBufferGeometry();
     geometry.instanceCount = count;
@@ -392,22 +411,30 @@ function buildCloudGeometry(shape, count, config) {
     }
 
     const colors = new Float32Array(count * 3);
+    const inkColors = new Float32Array(count * 3);
     const seeds = new Float32Array(count);
     const scales = new Float32Array(count);
     const totalWeight = PALETTE.reduce((total, entry) => total + entry.weight, 0);
+    // A tinta vem em sRGB; o shader trabalha em linear e converte na saída.
+    const inks = new Map(PALETTE.map((entry) => [entry, new THREE.Color(entry.ink).toArray()]));
     for (let i = 0; i < count; i++) {
-        colors.set(pickColor(totalWeight), i * 3);
+        const entry = pickPaletteEntry(totalWeight);
+        colors.set(entry.rgb, i * 3);
+        inkColors.set(inks.get(entry), i * 3);
         seeds[i] = Math.random();
         // O expoente 4.5 concentra quase tudo nos triângulos pequenos e deixa poucos grandes.
         scales[i] = config.triMin + Math.pow(Math.random(), 4.5) * config.triVar;
     }
     geometry.setAttribute('aColor', new THREE.InstancedBufferAttribute(colors, 3));
+    geometry.setAttribute('aColorInk', new THREE.InstancedBufferAttribute(inkColors, 3));
     geometry.setAttribute('aSeed', new THREE.InstancedBufferAttribute(seeds, 1));
     geometry.setAttribute('aScale', new THREE.InstancedBufferAttribute(scales, 1));
     return { geometry, morph };
 }
 
-export async function mountParticles(container, { modelUrl, maskUrl, config: overrides = {} } = {}) {
+const roundCssPixels = (value) => Math.round(value * 100) / 100;
+
+export async function mountParticles(container, { modelUrl, maskUrl, config: overrides = {}, layerHost } = {}) {
     const config = { ...CONFIG, ...overrides };
     const count = config.count;
     const [model, mask] = await Promise.all([loadModelGeometry(modelUrl), loadLandMask(maskUrl)]);
@@ -415,7 +442,7 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
     const shapes = [
         createShape(sampleSurface(normalizeGeometry(model, MIC_RADIUS), count), true, config.dwellSolid, config.alphaTarget),
         createShape(buildEarth(mask, count, config.oceanKeep), true, config.dwellSolid, config.alphaTarget),
-        createShape(buildScattered(count), false, config.dwellLoose, config.alphaTarget),
+        createShape(buildScattered(count, config.looseRadius), false, config.dwellLoose, config.alphaTarget),
     ];
     model.dispose();
 
@@ -429,6 +456,8 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
             uAlphaFrom: { value: shapes[0].alpha },
             uAlphaTo: { value: shapes[0].alpha },
             uOcclusion: { value: 1 },
+            uLayer: { value: 0 },
+            uInk: { value: 0 },
         },
         vertexShader: VERTEX_SHADER,
         fragmentShader: FRAGMENT_SHADER,
@@ -445,18 +474,53 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
     camera.position.z = 10.5;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setClearColor(0x000000, 1);
-    container.append(renderer.domElement);
-    const resize = () => {
-        const width = Math.max(1, container.clientWidth);
-        const height = Math.max(1, container.clientHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.setSize(width, height, false);
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
+    // Duas camadas transparentes com a mesma cena: a de trás passa sob o texto do hero e a
+    // da frente sobre ele. Cada camada é um canvas, então há uma chamada de draw por camada.
+    const host = layerHost ?? container.closest('[data-particles-scene]') ?? container;
+    const layers = ['back', 'front'].map((name) => {
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, depth: false, stencil: false });
+        renderer.setClearColor(0x000000, 0);
+        renderer.domElement.className = `ed-particles-canvas ed-particles-${name}`;
+        renderer.domElement.setAttribute('aria-hidden', 'true');
+        return renderer;
+    });
+    const [back, front] = layers;
+    host.prepend(back.domElement);
+    host.append(front.domElement);
+
+    // A câmera enquadra o slot do figure, como o palco original; os canvases só mostram mais
+    // do mesmo plano ao redor. A forma fica no mesmo lugar e tamanho, e nada bate numa borda.
+    let layoutKey = '';
+    const syncLayout = () => {
+        const frame = back.domElement.getBoundingClientRect();
+        const slot = container.getBoundingClientRect();
+        const width = roundCssPixels(Math.max(1, frame.width));
+        const height = roundCssPixels(Math.max(1, frame.height));
+        const slotWidth = roundCssPixels(Math.max(1, slot.width));
+        const slotHeight = roundCssPixels(Math.max(1, slot.height));
+        const offsetX = roundCssPixels(frame.left - slot.left);
+        const offsetY = roundCssPixels(frame.top - slot.top);
+        const ratio = Math.min(window.devicePixelRatio, 2, Math.sqrt(MAX_LAYER_PIXELS / (width * height)));
+        const key = `${width}|${height}|${slotWidth}|${slotHeight}|${offsetX}|${offsetY}|${ratio}`;
+        if (key === layoutKey) {
+            return;
+        }
+        layoutKey = key;
+        for (const renderer of layers) {
+            renderer.setPixelRatio(ratio);
+            renderer.setSize(width, height, false);
+        }
+        camera.aspect = slotWidth / slotHeight;
+        camera.setViewOffset(slotWidth, slotHeight, offsetX, offsetY, width, height);
     };
-    resize();
+
+    // A luz soma sobre o preto do tema escuro. Sobre o fundo claro ela estouraria para branco,
+    // então ali a partícula vira tinta que cobre o que está embaixo.
+    const syncTheme = () => {
+        const ink = !document.documentElement.classList.contains('dark');
+        uniforms.uInk.value = ink ? 1 : 0;
+        material.blending = ink ? THREE.NormalBlending : THREE.AdditiveBlending;
+    };
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const timer = new THREE.Timer();
@@ -470,7 +534,7 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
     let frameId = 0;
 
     // Trocar de forma = quatro cópias de buffer e needsUpdate. Depois disso a CPU não
-    // toca em nenhum buffer: o loop só escreve uProgress, uTime e a rotação.
+    // toca em nenhum buffer: o loop só escreve uniforms e a rotação.
     const setMorph = (from, to) => {
         morph.aFrom.array.set(shapes[from].positions);
         morph.aTo.array.set(shapes[to].positions);
@@ -523,8 +587,12 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
                 }
             }
         }
+        syncLayout();
         uniforms.uTime.value = time;
-        renderer.render(scene, camera);
+        uniforms.uLayer.value = 0;
+        back.render(scene, camera);
+        uniforms.uLayer.value = 1;
+        front.render(scene, camera);
         frames++;
     };
 
@@ -539,7 +607,7 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
         frameId = 0;
     };
 
-    // É fundo de página: nada renderiza enquanto o palco está fora da viewport.
+    // É fundo de página: nada renderiza enquanto o hero está fora da viewport.
     const intersectionObserver = new IntersectionObserver((entries) => {
         if (entries[entries.length - 1].isIntersecting) {
             start();
@@ -547,31 +615,29 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
             stop();
         }
     });
-    const resizeObserver = new ResizeObserver(() => {
-        resize();
-        if (frameId !== 0) {
-            renderer.render(scene, camera);
-        }
-    });
+    const themeObserver = new MutationObserver(syncTheme);
+    syncTheme();
     applyMotionPreference();
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     reducedMotion.addEventListener('change', applyMotionPreference);
-    resizeObserver.observe(container);
-    intersectionObserver.observe(container);
+    intersectionObserver.observe(host);
 
     const dispose = () => {
         stop();
         intersectionObserver.disconnect();
-        resizeObserver.disconnect();
+        themeObserver.disconnect();
         reducedMotion.removeEventListener('change', applyMotionPreference);
         timer.dispose();
         geometry.dispose();
         material.dispose();
-        renderer.dispose();
-        renderer.domElement.remove();
+        for (const renderer of layers) {
+            renderer.dispose();
+            renderer.domElement.remove();
+        }
     };
 
     return {
-        renderer,
+        renderers: layers,
         dispose,
         get state() {
             return {
@@ -582,6 +648,8 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
                 frames,
                 running: frameId !== 0,
                 reducedMotion: reducedMotion.matches,
+                theme: uniforms.uInk.value === 1 ? 'claro' : 'escuro',
+                drawCalls: layers.reduce((total, renderer) => total + renderer.info.render.calls, 0),
                 count,
             };
         },

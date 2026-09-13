@@ -62,8 +62,9 @@
 .ed-mobile-menu{position:absolute;top:calc(100% + 8px);left:0;right:0;max-height:calc(100svh - 132px);overflow-y:auto;display:grid;gap:8px;padding:24px;border-radius:24px;background:var(--ed-card)}
 .ed-mobile-menu>a{padding:12px;font-size:16px}
 .ed-language{font:400 12px "IBM Plex Mono",monospace}
-/* Home: oversized editorial opening beside the WebGL particle stage. */
-.ed-hero{padding:40px 0 24px}
+/* Home: oversized editorial opening; the particle layers run under and over the copy. */
+.ed-hero{position:relative;isolation:isolate;padding:40px 0 24px}
+.ed-hero>.ed-wrap{position:relative;z-index:1}
 .ed-hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:8px;align-items:center}
 .ed-hero-copy{position:relative;z-index:1;padding:24px 0}
 .ed-school .ed-hero h1{font-size:clamp(48px,8.8vw,130px);margin:24px 0;max-width:640px}
@@ -71,9 +72,11 @@
 .ed-school .ed-hero p{max-width:520px;font-size:16px;line-height:1.5}
 .ed-hero-actions{display:flex;flex-wrap:wrap;gap:16px;margin-top:32px}
 .ed-hero-art{margin:0;min-width:0;align-self:stretch;display:grid;align-content:center;gap:16px}
-/* Additive light needs a black ground, so the particle stage stays black in both themes. */
-.ed-particles{position:relative;width:100%;aspect-ratio:1;overflow:hidden;border-radius:32px;background:#000}
-.ed-particles canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
+/* The slot keeps the shape in place; both canvases span the hero and fade out at its top and bottom. */
+.ed-particles{position:relative;width:100%;aspect-ratio:1}
+.ed-particles-canvas{position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:none;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 72px,#000 calc(100% - 140px),transparent);mask-image:linear-gradient(to bottom,transparent,#000 72px,#000 calc(100% - 140px),transparent)}
+.ed-particles-back{z-index:0}
+.ed-particles-front{z-index:2}
 .ed-hero-art figcaption{display:flex;justify-content:space-between;gap:16px;color:var(--ed-muted);font:12px/1.6 "IBM Plex Mono",monospace}
 .ed-hero-bottom{margin-top:24px;padding-top:24px;border-top:1px solid var(--ed-line);display:flex;align-items:center;justify-content:space-between;gap:24px}
 .ed-school .ed-scroll-cue{display:grid;place-items:center;width:48px;height:48px;border:1px solid var(--ed-ink);border-radius:50%;color:var(--ed-ink)}
@@ -172,7 +175,7 @@
  .ed-hero{padding-top:16px}.ed-hero-grid{display:flex;flex-direction:column;gap:0;align-items:stretch}
  .ed-hero-copy{padding-top:16px}.ed-school .ed-hero h1{font-size:clamp(64px,16vw,104px);max-width:650px}
  .ed-root[lang="en"] .ed-school .ed-hero h1{font-size:clamp(48px,14vw,96px)}
- .ed-hero-art{max-width:480px;width:100%;margin:auto}.ed-particles{aspect-ratio:1.15;border-radius:24px}
+ .ed-hero-art{max-width:480px;width:100%;margin:auto}.ed-particles{aspect-ratio:1.15}
  .ed-hero-art figcaption{font-size:10px}.ed-hero-bottom{margin-top:24px}
  .ed-award-grid{grid-template-columns:1fr;border-radius:32px;padding:28px;gap:40px}
  .ed-award-grid>div:last-child{order:-1}.ed-school .ed-section{padding-block:32px}

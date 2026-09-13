@@ -1,12 +1,12 @@
 # Continuidade da Komuniki
 
-Estado de 13/09/2026. Trabalhar em `C:\Users\Sitr3n\Documents\Github\news_portal-komuniki-design`, branch **`codex/komuniki-editorial-test`**. A partir de `026249c` (tag `codex/komuniki-static-blue`), a troca dos detalhes menta por azul claro e o hero de partículas foram versionados juntos no commit `feat(school): replace hero illustration with WebGL particle stage`. Não houve push, merge ou publicação.
+Estado de 13/09/2026. Trabalhar em `C:\Users\Sitr3n\Documents\Github\news_portal-komuniki-design`, branch **`codex/komuniki-editorial-test`**. A partir de `026249c` (tag `codex/komuniki-static-blue`), a troca dos detalhes menta por azul claro e o hero de partículas foram versionados juntos no commit `8983664` (`feat(school): replace hero illustration with WebGL particle stage`). Os refinamentos do hero, com camadas e tema claro sem bloco, vieram no commit seguinte (`feat(school): layer the hero particles over the copy and drop the black stage`). Não houve push, merge ou publicação.
 
 ## Decisões atuais do usuário
 
-- **Nenhum movimento**, inclusive hover, transições e rolagem suave, **com uma exceção aprovada em 13/09/2026: o palco de partículas do hero da Home.** Com `prefers-reduced-motion: reduce` ele fica parado. Preservar a regra no resto do site.
+- **Nenhum movimento**, inclusive hover, transições e rolagem suave, **com uma exceção aprovada em 13/09/2026: as partículas do hero da Home.** Com `prefers-reduced-motion: reduce` elas ficam paradas. Preservar a regra no resto do site.
 - Azul oficial `#0b3a75` nos destaques escuros; azul claro **`#b8d8ff`** substitui todos os antigos detalhes menta `#d1ffca` da base editorial. Etiquetas, seleção de texto, foco do link de salto, hover instantâneo, mensagens e grupos de cursos usam o token `--ed-blue-light`. A cor `primary.200` da configuração Tailwind também foi atualizada.
-- **Hero de partículas** no lugar da ilustração estática: nuvem WebGL que alterna microfone, Terra e nuvem dispersa, num palco preto nos dois temas. Arquivos, parâmetros e validação em [Hero de partículas](komuniki-particles.md). O PNG `komuniki-editorial-hero.png` saiu da Home e fica só como mídia de demonstração do `prepare.py`. A foto da Kelly permanece intacta.
+- **Hero de partículas** no lugar da ilustração estática: nuvem WebGL que alterna microfone, Terra e nuvem dispersa em duas camadas transparentes, uma sob e outra sobre o título, sem palco nem bloco. No tema escuro a luz é aditiva; no claro, as partículas são tinta. Arquivos, parâmetros e validação em [Hero de partículas](komuniki-particles.md). O PNG `komuniki-editorial-hero.png` saiu da Home e fica só como mídia de demonstração do `prepare.py`. A foto da Kelly permanece intacta.
 - Manter os dados oficiais aplicados em `8d7c349`: contatos reais, três diferenciais na Home, seis cursos, sem seção social fictícia e sem cartão Jovem Comunicador na Home. A menção em Sobre permanece.
 
 ## Prévia e dados

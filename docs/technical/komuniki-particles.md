@@ -11,6 +11,8 @@ O hero da Home é uma nuvem WebGL de 16.000 triângulos (9.000 em telas abaixo d
 - **Mesmo enquadramento.** A câmera continua enquadrando o espaço do `figure` (`.ed-particles`) com `setViewOffset`, e os canvases só mostram mais do mesmo plano ao redor. Microfone e Terra ficam no mesmo lugar e tamanho da primeira versão. O topo (72 px) e a base (140 px) do hero somem em degradê, então nada termina num corte reto.
 - **Tema claro como tinta.** No escuro vale a luz aditiva calibrada sobre preto. No claro, luz somada estouraria para branco sobre o `#e5e5e5`, então as partículas usam blending normal e uma paleta de tinta com os mesmos matizes em tons médios, visíveis tanto no fundo quanto sobre as letras pretas; o branco azulado vira o azul `#0b3a75` da Komuniki. O tema acompanha a classe `dark` do `<html>` sem recarregar.
 - **Nuvem dispersa maior.** `looseRadius` passou de 3,6 para 6,2 para a nuvem chegar ao título, e aos botões no celular. Microfone e Terra não mudaram.
+- **Explosão maior do microfone para a Terra.** Essa passagem usa `burstSpread` (3,2) no lugar de `spread` (1,35), então as partículas se espalham pela tela como na passagem Terra → nuvem. As outras duas passagens continuam com `spread`.
+- **Arrastar para girar.** Mouse ou toque sobre o espaço da forma gira a nuvem, com inclinação limitada a ±0,6 rad. Ao soltar, a inércia se dissolve na rotação automática e a inclinação volta sozinha para a vista de frente. No toque só o gesto horizontal gira, e o vertical continua rolando a página. Com movimento reduzido o arraste funciona, sem inércia nem rotação automática.
 - **Memória de GPU sob controle.** Cada camada tem antialias e cobre o hero inteiro, então o pixel ratio cede quando o buffer passaria de 2,6 milhões de pixels por camada. Buffers de profundidade e stencil não são criados.
 - **three r186 oficial, sem minificação.** A r186 não publica build minificado, nem no npm nem na tag do GitHub, e o projeto não tem bundler. São ~2,3 MB crus e ~455 KB com gzip.
 - **WebGLRenderer.** O shader é GLSL de `ShaderMaterial`; o `WebGPURenderer` exigiria reescrevê-lo em TSL.
@@ -45,6 +47,7 @@ Os valores ficam no objeto `CONFIG`, no topo de `static/js/school-editorial-part
 |---|---|---|
 | `count` | 16000 (9000 abaixo de 720 px) | Quantidade de triângulos. Menos deixa as formas mais ralas e alivia GPUs fracas; o alfa automático compensa o brilho. É lido uma vez, no carregamento. |
 | `spread` | 1.35 | Quanto a nuvem se abre no meio da transição. 0 faz as partículas viajarem em linha reta; valores maiores levam mais triângulos para cima e para baixo do título. |
+| `burstSpread` | 3.2 | Explosão só da passagem microfone → Terra. Maior espalha mais as partículas pela tela; com o mesmo valor de `spread`, ela volta a ficar compacta. |
 | `drift` | 0.030 | Amplitude da respiração. Em repouso vale 22% disso e no meio do voo, 100%. 0 congela as posições; o giro próprio dos triângulos e a rotação continuam. |
 | `speed` | 0.42 | Progresso da transição por segundo: cada troca leva 1 / 0,42 ≈ 2,4 s. Maior encurta a transição. |
 | `alphaTarget` | 7 | Brilho global. Maior deixa tudo mais intenso e faz o microfone saturar mais cedo. |
@@ -55,7 +58,7 @@ Os valores ficam no objeto `CONFIG`, no topo de `static/js/school-editorial-part
 | `dwellLoose` | 1.6 | Segundos parado na nuvem dispersa. |
 | `looseRadius` | 6.2 | Raio da nuvem dispersa. Maior avança mais por baixo e por cima do título; com 3,6, o valor original, a nuvem não chegava ao texto. |
 
-Fora do `CONFIG`, no mesmo arquivo, ficam os raios do microfone (2,9) e da Terra (2,62), a rotação (0,096 rad/s), a paleta com as cores de luz e de tinta, a câmera (FOV 45, `z = 10.5`) e o teto de pixels por camada. A largura da transição entre camadas (0,35) está no shader, e as alturas do degradê (72 e 140 px), no CSS. O shader segue a especificação, inclusive nos comentários, com dois acréscimos comentados: camadas e tema.
+Fora do `CONFIG`, no mesmo arquivo, ficam os raios do microfone (2,9) e da Terra (2,62), a rotação (0,096 rad/s), a paleta com as cores de luz e de tinta, a câmera (FOV 45, `z = 10.5`), o teto de pixels por camada e a resposta do arraste (radianos por pixel, inclinação máxima, amortecimento da inércia e retorno da inclinação). A largura da transição entre camadas (0,35) está no shader, e as alturas do degradê (72 e 140 px), no CSS. O shader segue a especificação, inclusive nos comentários, com dois acréscimos comentados: camadas e tema.
 
 ## Validação
 
@@ -77,6 +80,8 @@ Feita em 13/09/2026 na prévia `design_preview` (porta 8013), com o Edge headles
 Também verificado:
 
 - **Troca de tema** sem recarregar: claro → escuro → claro.
+- **Arraste:** com o mouse, 200 px na horizontal giraram 1,2 rad e 80 px na vertical inclinaram 0,48 rad. Depois de soltar, a forma continuou girando e a inclinação voltou para 0,08 rad em 1,5 s. Um deslize de toque de 150 px girou 0,9 rad.
+- **Explosão microfone → Terra:** com `burstSpread` 3,2 as partículas ocupam a área da nuvem dispersa (`.preview/evidence/round3/r3-burst-terra.png`).
 - **Liberação:** o evento `htmx:beforeCleanupElement` removeu os dois canvases e zerou geometrias e programas.
 - **Estáticos de produção:** o `collectstatic` com `CompressedManifestStaticFilesStorage` passou. O import map não mudou desde a primeira versão, quando todos os módulos carregaram pela URL com hash sob a CSP.
 - **Testes:** 467 testes do pytest (com as variáveis `SECRET_KEY` e `DB_*` que o CI define) e Ruff passaram.

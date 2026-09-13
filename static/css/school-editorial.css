@@ -25,7 +25,7 @@
 .ed-school .text-slate-700,.ed-school .text-slate-600,.ed-school .text-slate-500{color:var(--ed-muted)}
 .ed-school .ed-wrap{width:min(100% - 48px,1200px);margin-inline:auto}
 .ed-school .ed-section{padding-top:40px;padding-bottom:40px}
-.ed-school .ed-section>div{max-width:1200px}
+.ed-school .ed-section>div{max-width:1200px;margin-inline:auto}
 .ed-school .ed-section p[class*="uppercase"],.ed-school .ed-mono{font-family:"IBM Plex Mono",monospace;font-weight:400;font-size:12px;letter-spacing:-.03em;line-height:1.6}
 .ed-school .ed-card,.ed-school .ed-panel{background:var(--ed-card);border:0;border-radius:32px;box-shadow:none;overflow:hidden}
 .ed-school .ed-card{padding:24px}
@@ -47,8 +47,8 @@
 .ed-school .ed-skip{position:fixed;z-index:100;top:8px;left:8px;padding:12px 20px;background:var(--ed-blue-light);color:#000;transform:translateY(-180%)}
 .ed-school .ed-skip:focus{transform:translateY(0)}
 /* The only persistent layer is the navigation capsule. */
-.ed-nav{position:fixed;inset:0 0 auto;z-index:50;height:128px;display:flex;align-items:center;background:var(--ed-canvas)}
-.ed-nav-pill{position:relative;display:flex;align-items:center;justify-content:space-between;gap:24px;width:min(100% - 48px,1200px);min-height:80px;margin:auto;padding:12px 16px 12px 28px;border-radius:48px;background:var(--ed-card)}
+.ed-nav{position:fixed;inset:0 0 auto;z-index:50;height:128px;display:flex;align-items:center;background:transparent;pointer-events:none}
+.ed-nav-pill{position:relative;pointer-events:auto;display:flex;align-items:center;justify-content:space-between;gap:24px;width:min(100% - 48px,1200px);min-height:80px;margin:auto;padding:12px 16px 12px 28px;border-radius:48px;background:var(--ed-card)}
 .ed-school .ed-brand{display:inline-flex;align-items:center;min-width:0;color:var(--ed-ink);font-size:27px;font-weight:600;letter-spacing:-.06em;text-decoration:none}
 .ed-brand img{max-height:44px;max-width:150px;object-fit:contain}
 .ed-nav-right,.ed-nav-links,.ed-nav-controls{display:flex;align-items:center}
@@ -73,7 +73,8 @@
 .ed-hero-actions{display:flex;flex-wrap:wrap;gap:16px;margin-top:32px}
 .ed-hero-art{margin:0;min-width:0;align-self:stretch;display:grid;align-content:center;gap:16px}
 /* The slot keeps the shape in place; both canvases span the hero and fade out at its top and bottom. */
-.ed-particles{position:relative;width:100%;aspect-ratio:1}
+.ed-particles{position:relative;width:100%;aspect-ratio:1;cursor:grab;touch-action:pan-y;-webkit-user-select:none;user-select:none}
+.ed-particles.is-dragging{cursor:grabbing}
 .ed-particles-canvas{position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:none;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 72px,#000 calc(100% - 140px),transparent);mask-image:linear-gradient(to bottom,transparent,#000 72px,#000 calc(100% - 140px),transparent)}
 .ed-particles-back{z-index:0}
 .ed-particles-front{z-index:2}
@@ -115,6 +116,10 @@
 .ed-root.dark .ed-school .ed-final-panel>div>div:last-child{background:#f3f3f3;color:#000}
 .ed-root.dark .ed-school .ed-final-panel>div>div:last-child p{color:#444}
 .ed-root.dark .ed-school .ed-final-panel .ed-button-white{background:#000;color:#fff}
+/* Both halves are flex columns, so their buttons share a baseline whatever the copy length. */
+.ed-school .ed-final-panel>div>div{display:flex;flex-direction:column;align-items:flex-start}
+.ed-school .ed-final-panel>div>div>p:last-of-type{margin-bottom:28px}
+.ed-school .ed-final-panel>div>div>.ed-button{margin-top:auto}
 /* Interior pages share the same typesetting and surfaces, not the old glass CSS. */
 .ed-school .ed-interior>.ed-section:first-child{padding-top:64px;padding-bottom:64px}
 .ed-school .ed-interior>.ed-section:first-child h1{max-width:950px}

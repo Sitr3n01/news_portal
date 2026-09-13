@@ -9,6 +9,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 export const CONFIG = {
     count:       window.innerWidth < 720 ? 9000 : 16000,
     spread:      1.35,   // explosão no meio da transição
+    burstSpread: 3.2,    // explosão do microfone para a Terra; espalha pela tela como a nuvem
     drift:       0.030,  // respiração; 0 congela a forma
     speed:       0.42,   // progresso por segundo
     alphaTarget: 7,      // brilho global
@@ -29,6 +30,13 @@ const ROTATION_PER_SECOND = 0.0016 * 60;
 const REDUCED_MOTION_TIME_SCALE = 0.25;
 // Um quadro lento, ou a volta de uma aba em segundo plano, não faz a animação saltar.
 const MAX_FRAME_DELTA = 0.05;
+// Arrastar com mouse ou toque gira a forma. Ao soltar, a inércia se dissolve na rotação
+// automática e a inclinação volta aos poucos para a vista de frente.
+const DRAG_RADIANS_PER_PIXEL = 0.006;
+const MAX_TILT = 0.6;
+const MAX_SPIN = 6;
+const SPIN_DAMPING = 2.2;
+const TILT_RETURN = 1.2;
 // As camadas cobrem o hero inteiro e cada uma tem antialias: acima deste total de pixels
 // de buffer por camada, o pixel ratio cede para poupar memória de GPU.
 const MAX_LAYER_PIXELS = 2600000;
@@ -532,6 +540,8 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
     let time = 0;
     let frames = 0;
     let frameId = 0;
+    let drag = null;
+    let spin = 0;
 
     // Trocar de forma = quatro cópias de buffer e needsUpdate. Depois disso a CPU não
     // toca em nenhum buffer: o loop só escreve uniforms e a rotação.
@@ -545,6 +555,8 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
         }
         uniforms.uAlphaFrom.value = shapes[from].alpha;
         uniforms.uAlphaTo.value = shapes[to].alpha;
+        // Só a saída do microfone espalha mais; Terra → nuvem e nuvem → microfone usam o spread normal.
+        uniforms.uSpread.value = from === 0 && to === 1 ? config.burstSpread : config.spread;
     };
 
     const applyMotionPreference = () => {
@@ -555,7 +567,7 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
             target = 0;
             morphing = false;
             uniforms.uProgress.value = 1;
-            cloud.rotation.y = 0;
+            cloud.rotation.set(0, 0, 0);
         }
         dwellLeft = shapes[current].dwell;
     };
@@ -568,7 +580,6 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
             time += delta * REDUCED_MOTION_TIME_SCALE;
         } else {
             time += delta;
-            cloud.rotation.y += ROTATION_PER_SECOND * delta;
             if (morphing) {
                 uniforms.uProgress.value = Math.min(1, uniforms.uProgress.value + delta * config.speed);
                 if (uniforms.uProgress.value === 1) {
@@ -587,6 +598,14 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
                 }
             }
         }
+        if (!drag) {
+            // A rotação automática continua; a inércia do arraste se dissolve nela.
+            cloud.rotation.y += ((reducedMotion.matches ? 0 : ROTATION_PER_SECOND) + spin) * delta;
+            spin *= Math.exp(-delta * SPIN_DAMPING);
+            if (!reducedMotion.matches) {
+                cloud.rotation.x *= Math.exp(-delta * TILT_RETURN);
+            }
+        }
         syncLayout();
         uniforms.uTime.value = time;
         uniforms.uLayer.value = 0;
@@ -594,6 +613,40 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
         uniforms.uLayer.value = 1;
         front.render(scene, camera);
         frames++;
+    };
+
+    // Arraste sobre o espaço da forma. No toque só o gesto horizontal gira: o vertical continua rolando a página.
+    const onPointerDown = (event) => {
+        if (event.button !== 0) {
+            return;
+        }
+        drag = { id: event.pointerId, x: event.clientX, y: event.clientY, time: event.timeStamp };
+        spin = 0;
+        container.setPointerCapture(event.pointerId);
+        container.classList.add('is-dragging');
+    };
+    const onPointerMove = (event) => {
+        if (!drag || event.pointerId !== drag.id) {
+            return;
+        }
+        const dx = event.clientX - drag.x;
+        const dy = event.clientY - drag.y;
+        const seconds = Math.max((event.timeStamp - drag.time) / 1000, 1 / 240);
+        cloud.rotation.y += dx * DRAG_RADIANS_PER_PIXEL;
+        cloud.rotation.x = THREE.MathUtils.clamp(cloud.rotation.x + dy * DRAG_RADIANS_PER_PIXEL, -MAX_TILT, MAX_TILT);
+        spin = THREE.MathUtils.clamp((dx * DRAG_RADIANS_PER_PIXEL) / seconds, -MAX_SPIN, MAX_SPIN);
+        drag = { id: drag.id, x: event.clientX, y: event.clientY, time: event.timeStamp };
+    };
+    const onPointerUp = (event) => {
+        if (!drag || event.pointerId !== drag.id) {
+            return;
+        }
+        // Parar antes de soltar, ou movimento reduzido, zera a inércia.
+        if (event.timeStamp - drag.time > 80 || reducedMotion.matches) {
+            spin = 0;
+        }
+        drag = null;
+        container.classList.remove('is-dragging');
     };
 
     const start = () => {
@@ -621,11 +674,20 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
     themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     reducedMotion.addEventListener('change', applyMotionPreference);
     intersectionObserver.observe(host);
+    container.addEventListener('pointerdown', onPointerDown);
+    container.addEventListener('pointermove', onPointerMove);
+    container.addEventListener('pointerup', onPointerUp);
+    container.addEventListener('pointercancel', onPointerUp);
 
     const dispose = () => {
         stop();
         intersectionObserver.disconnect();
         themeObserver.disconnect();
+        container.removeEventListener('pointerdown', onPointerDown);
+        container.removeEventListener('pointermove', onPointerMove);
+        container.removeEventListener('pointerup', onPointerUp);
+        container.removeEventListener('pointercancel', onPointerUp);
+        container.classList.remove('is-dragging');
         reducedMotion.removeEventListener('change', applyMotionPreference);
         timer.dispose();
         geometry.dispose();
@@ -649,6 +711,7 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
                 running: frameId !== 0,
                 reducedMotion: reducedMotion.matches,
                 theme: uniforms.uInk.value === 1 ? 'claro' : 'escuro',
+                rotation: [cloud.rotation.x, cloud.rotation.y],
                 drawCalls: layers.reduce((total, renderer) => total + renderer.info.render.calls, 0),
                 count,
             };

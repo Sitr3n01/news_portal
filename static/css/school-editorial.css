@@ -49,6 +49,13 @@
 /* The only persistent layer is the navigation capsule. */
 .ed-nav{position:fixed;inset:0 0 auto;z-index:50;height:128px;display:flex;align-items:center;background:transparent;pointer-events:none}
 .ed-nav-pill{position:relative;pointer-events:auto;display:flex;align-items:center;justify-content:space-between;gap:24px;width:min(100% - 48px,1200px);min-height:80px;margin:auto;padding:12px 16px 12px 28px;border-radius:48px;background:var(--ed-card)}
+/* Progressive blur behind the capsule: four backdrop layers, stronger toward the top, over a soft canvas veil. */
+.ed-nav-blur{position:absolute;inset:0 0 auto;height:calc(100% + 16px);z-index:-1;pointer-events:none;background:linear-gradient(to bottom,color-mix(in srgb,var(--ed-canvas) 64%,transparent),color-mix(in srgb,var(--ed-canvas) 28%,transparent) 55%,transparent)}
+.ed-nav-blur>span{position:absolute;inset:0}
+.ed-nav-blur>span:nth-child(1){-webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px);-webkit-mask-image:linear-gradient(to top,transparent 0,#000 20%,#000 40%,transparent 60%);mask-image:linear-gradient(to top,transparent 0,#000 20%,#000 40%,transparent 60%)}
+.ed-nav-blur>span:nth-child(2){-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);-webkit-mask-image:linear-gradient(to top,transparent 20%,#000 40%,#000 60%,transparent 80%);mask-image:linear-gradient(to top,transparent 20%,#000 40%,#000 60%,transparent 80%)}
+.ed-nav-blur>span:nth-child(3){-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);-webkit-mask-image:linear-gradient(to top,transparent 40%,#000 60%,#000 80%,transparent);mask-image:linear-gradient(to top,transparent 40%,#000 60%,#000 80%,transparent)}
+.ed-nav-blur>span:nth-child(4){-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask-image:linear-gradient(to top,transparent 60%,#000 80%);mask-image:linear-gradient(to top,transparent 60%,#000 80%)}
 .ed-school .ed-brand{display:inline-flex;align-items:center;min-width:0;color:var(--ed-ink);font-size:27px;font-weight:600;letter-spacing:-.06em;text-decoration:none}
 .ed-brand img{max-height:44px;max-width:150px;object-fit:contain}
 .ed-nav-right,.ed-nav-links,.ed-nav-controls{display:flex;align-items:center}

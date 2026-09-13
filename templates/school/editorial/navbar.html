@@ -1,5 +1,6 @@
 <nav class="ed-nav" aria-label="Principal" x-data="{ mobileMenuOpen: false }"
     @keydown.escape.window="if (mobileMenuOpen) { mobileMenuOpen = false; $refs.menuToggle.focus(); }">
+    <div class="ed-nav-blur" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
     <div class="ed-nav-pill">
         <a href="{% url 'school:home' %}" class="ed-brand">
             {% if site_settings and site_settings.logo %}

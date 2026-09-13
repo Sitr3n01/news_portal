@@ -2,6 +2,8 @@
 
 Implementado em 9 de setembro de 2026 na worktree `news_portal-komuniki-design`, branch `codex/komuniki-editorial-test`. A aprovação visual anterior foi preservada no commit **`ef03939`** antes desta alteração. Os bancos, mídias locais, exportações e evidências continuam fora do Git, em `.preview/`. Nenhuma publicação foi realizada.
 
+**Revisão de 12/09/2026:** as animações foram preservadas durante a aplicação do [conteúdo oficial](komuniki-official-content.md). Essa rodada corrigiu a comparação `pt`/`pt-BR` nos roteiros de navegador e executou uma nova matriz de 80 verificações de página. Os resultados anteriores abaixo são históricos e não substituem a execução corrigida.
+
 ## Regras e implementação
 
 | Elemento | Comportamento |

@@ -16,7 +16,7 @@ export const VIEWPORTS = [
 export async function preferences(tab, dark, language) {
   const state = await tab.playwright.evaluate(() => ({
     dark: document.documentElement.classList.contains('dark'),
-    language: document.documentElement.lang,
+    language: document.documentElement.lang.split('-')[0],
   }));
   if (state.dark !== dark) {
     await tab.playwright.locator('.ed-nav-controls button[aria-pressed]').click();
@@ -37,7 +37,7 @@ async function pageState(tab, viewport, dark, language, label) {
       scrollWidth: doc.scrollWidth,
       clientHeight: doc.clientHeight,
       dark: doc.classList.contains('dark'),
-      language: doc.lang,
+      language: doc.lang.split('-')[0],
       title: h1?.textContent.trim(),
       fontsLoaded: document.fonts.check('700 48px "Barlow Condensed"'),
       horizontalOverflow: doc.scrollWidth > doc.clientWidth + 1,

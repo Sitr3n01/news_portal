@@ -4,12 +4,12 @@ Implementado e validado localmente em 08/09/2026. Em 09/09/2026, após a aprova�
 
 ## Abrir a revisão
 
-**Preparação para produção:** o design foi aprovado. A atualização com informações reais permanece pendente de acesso à fonte de produção. A cópia local abaixo ainda contém os dados de exemplo descritos neste documento; ela não deve ser tratada como conteúdo atualizado e validado para publicação.
+**Atualização de 12/09/2026:** o conteúdo das cinco páginas públicas oficiais foi conferido no navegador e aplicado à porta 8012. Contatos reais, três diferenciais e retirada da seção social de teste estão documentados em [Conteúdo oficial e rollback](komuniki-official-content.md). Os relatos de dados de exemplo e bloqueio de certificado abaixo são históricos. O design segue aprovado; esta entrega permanece local, sem publicação.
 
 | Versão | Endereço | Dados |
 |---|---|---|
 | Referência local redesenhada | http://127.0.0.1:8011/ | Cópia anterior do banco local, preservada |
-| Versão principal com conteúdo local | http://127.0.0.1:8012/ | Nova cópia independente do projeto antigo, sem os depoimentos/posts sintéticos e sem aviso de demonstração |
+| Versão principal com conteúdo oficial | http://127.0.0.1:8012/ | Cópia independente atualizada com o conteúdo público consultado em 12/09/2026; sem seção social de teste ou cartão Jovem Comunicador na Home |
 
 As cinco rotas são `/`, `/sobre/`, `/cursos/`, `/contact/` e `/privacidade/`, disponíveis nas duas portas. Os links de Notícias, Instagram e YouTube conservam os destinos existentes no projeto local. A demonstração sintética e seu CMS com título longo ficam arquivados; podem ser reabertos com `-ReviewSource demo`, conforme abaixo.
 
@@ -68,6 +68,8 @@ Para rever os antigos cenários fictícios sem alterar os dados importados:
 ```
 
 ## Conteúdo local aplicado — 09/09/2026
+
+Registro histórico da importação inicial. Os contatos e a apresentação da Home na porta 8012 foram atualizados posteriormente, conforme [Conteúdo oficial](komuniki-official-content.md).
 
 A fonte autorizada é `news_portal/db.sqlite3` e a pasta `news_portal/media`, junto dos templates e conteúdos definidos no código do projeto antigo. A importação leu a origem sem alterá-la e criou `.preview/local.sqlite3` e `.preview/local-media`. O design, o hero 3D, a foto da Kelly, as fontes e as animações aprovadas foram mantidos.
 
@@ -187,6 +189,8 @@ Uma aba de auditoria encerrou a renderização durante a sequência longa em 344
 Os dois endereços e os comandos de iniciar/encerrar no início deste documento continuam válidos. Tudo permanece na worktree experimental, sem publicação.
 
 ## Fonte atual de produção — pendência e exportação
+
+**Histórico:** a consulta pública voltou a funcionar em 12/09/2026 e permitiu concluir a atualização dos dados visíveis, sem acesso administrativo. O exportador abaixo continua disponível para uma eventual leitura autorizada de registros internos, que não foi necessária nesta rodada.
 
 Na nova solicitação de informações reais para produção, o acesso a `https://komuniki.com.br/` voltou a falhar com `ERR_CERT_DATE_INVALID`. Não foi encontrada configuração de alias SSH em `~/.ssh/config`; o repositório documenta `/opt/kelly_sys`, o projeto Compose `kellysys` e o serviço `web`, mas não fornece um endpoint administrativo utilizável nesta sessão. Nenhum aviso de segurança foi contornado, nenhuma credencial foi copiada e nada foi publicado.
 

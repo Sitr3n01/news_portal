@@ -26,7 +26,7 @@ export async function runCase(tab, viewportControl, viewport, dark, lang, output
             };
         });
         state.passed = state.ready && !state.overflow && !state.overlap && !state.clipped && !state.revealTransforms
-            && state.heading === '1' && state.theme === dark && state.lang === lang
+            && state.heading === '1' && state.theme === dark && state.lang === (lang === 'pt' ? 'pt-BR' : lang)
             && state.menu === (viewport.width < 1024) && Math.abs(state.width - viewport.width) <= 20;
         report.pages.push({ path, ...state });
     }

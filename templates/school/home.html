@@ -35,8 +35,10 @@
                 </div>
             </div>
             <figure class="ed-hero-art">
-                <img src="{% static 'images/komuniki-editorial-hero.png' %}?v=2" width="1024" height="1024"
-                    alt="" fetchpriority="high" decoding="async">
+                <div class="ed-particles" data-particles aria-hidden="true"
+                    data-model-url="{% static 'particles/rca44-geometry.glb' %}"
+                    data-mask-url="{% static 'particles/land-mask-640x320.bin' %}"
+                    {% if design_preview %}data-particles-debug{% endif %}></div>
                 <figcaption aria-hidden="true"><span>01 / KOMUNIKI</span><span x-text="t('COMUNICAÇÃO · ARTES · LIDERANÇA', 'COMMUNICATION · ARTS · LEADERSHIP')">COMUNICAÇÃO · ARTES · LIDERANÇA</span></figcaption>
             </figure>
         </div>
@@ -261,4 +263,21 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+{% get_static_prefix as static_prefix %}
+{# Chaves com o prefixo estático remapeiam os imports relativos do three para as URLs com hash do collectstatic. #}
+<script type="importmap">
+{
+    "imports": {
+        "three": "{% static 'js/vendor/three-r186/three.module.js' %}",
+        "three/addons/loaders/GLTFLoader.js": "{% static 'js/vendor/three-r186/addons/loaders/GLTFLoader.js' %}",
+        "{{ static_prefix }}js/vendor/three-r186/three.core.js": "{% static 'js/vendor/three-r186/three.core.js' %}",
+        "{{ static_prefix }}js/vendor/three-r186/addons/utils/BufferGeometryUtils.js": "{% static 'js/vendor/three-r186/addons/utils/BufferGeometryUtils.js' %}",
+        "{{ static_prefix }}js/vendor/three-r186/addons/utils/SkeletonUtils.js": "{% static 'js/vendor/three-r186/addons/utils/SkeletonUtils.js' %}"
+    }
+}
+</script>
+<script type="module" src="{% static 'js/school-editorial-particles.js' %}"></script>
 {% endblock %}

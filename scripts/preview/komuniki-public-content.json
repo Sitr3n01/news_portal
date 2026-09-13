@@ -21,7 +21,7 @@
     "jovem_comunicador_about": "Keep the institutional mention on /sobre/; only the Home card is deactivated, as requested.",
     "news_url": "https://kellyfarias.com.br/news/",
     "kelly_photo": "/static/images/kelly-farias-komuniki.jpeg",
-    "approved_hero": "/static/images/komuniki-editorial-hero.png",
+    "hero": "Replaced on 2026-09-13 by the WebGL particle stage; the PNG remains only as demo media for prepare.py.",
     "empty_sections": "No public testimonials or social posts were displayed; do not fabricate records.",
     "content": "Retain course data, institutional copy, existing PT/EN translations and Portuguese fallbacks, and privacy copy."
   }

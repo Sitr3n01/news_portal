@@ -7,7 +7,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
@@ -66,7 +66,7 @@ def main(output_directory=None):
             checks.update({
                 'young_card_removed': 'jovem comunicador' not in main_text,
                 'test_social_hidden': soup.select_one('#social-section-title') is None,
-                'approved_hero_preserved': any(urlsplit(node['src']).path == '/static/images/komuniki-editorial-hero.png' for node in soup.select('img[src]')),
+                'particles_hero_present': soup.select_one('.ed-hero-art [data-particles]') is not None,
             })
         if route == '/sobre/':
             checks['institutional_project_preserved'] = 'jovem comunicador' in normalize(soup.main.get_text(' ', strip=True))

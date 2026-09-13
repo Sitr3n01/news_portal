@@ -1,5 +1,7 @@
 # Komuniki estática com destaque azul
 
+**Paleta atualizada:** ainda em 13/09/2026, os detalhes menta restantes passaram para azul claro `#b8d8ff`, incluindo o balão da ilustração. Consulte o [handoff atual](komuniki-handoff.md) para continuar o trabalho. O texto abaixo registra a remoção de movimento e a primeira troca de amarelo para azul.
+
 Revisão local de **13/09/2026**, na branch `codex/komuniki-editorial-test`, partindo do checkpoint de conteúdo oficial `8d7c349`. O usuário pediu a remoção de todo movimento, inclusive hover, mantendo os dados atualizados. Checkpoint desta apresentação: tag `codex/komuniki-static-blue`.
 
 ## Apresentação

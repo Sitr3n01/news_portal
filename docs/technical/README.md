@@ -28,6 +28,7 @@
 | Documento | Escopo |
 |-----------|--------|
 | [komuniki-editorial-preview.md](komuniki-editorial-preview.md) | Experimento local isolado: execução, matriz de conteúdo, capturas e validação |
+| [komuniki-particles.md](komuniki-particles.md) | Hero WebGL da Home: arquivos, parâmetros do `CONFIG`, validação e reversão |
 | [REDES_SOCIAIS.md](REDES_SOCIAIS.md) | Contas, posts, seção da home e sync Instagram/TikTok |
 | [REDES_SOCIAIS_CREDENCIAIS.md](REDES_SOCIAIS_CREDENCIAIS.md) | Como conectar credenciais oficiais de Instagram/TikTok |
 

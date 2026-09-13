@@ -167,6 +167,26 @@ def test_school_homepage_renders_kelly_intro_block(client, current_site):
 
 
 @pytest.mark.django_db
+def test_school_homepage_renders_particle_stage_with_local_three(client, current_site):
+    response = client.get(reverse('school:home'))
+
+    content = response.content.decode()
+    assert response.status_code == 200
+    # O hero é o palco WebGL; a ilustração estática saiu da Home
+    assert 'data-particles' in content
+    assert 'particles/rca44-geometry.glb' in content
+    assert 'particles/land-mask-640x320.bin' in content
+    assert 'images/komuniki-editorial-hero.png' not in content
+    # O gancho de depuração só existe na prévia local
+    assert 'data-particles-debug' not in content
+    # three vem da cópia local via import map: a CSP não libera CDN
+    assert '<script type="importmap">' in content
+    assert 'js/vendor/three-r186/three.module.js' in content
+    assert 'js/vendor/three-r186/three.core.js' in content
+    assert 'js/school-editorial-particles.js' in content
+
+
+@pytest.mark.django_db
 def test_school_team_page_redirects_to_news_blog(client, current_site):
     TeamMember.objects.create(site=current_site, name='Maria Atual', title='Direção', is_active=True)
 

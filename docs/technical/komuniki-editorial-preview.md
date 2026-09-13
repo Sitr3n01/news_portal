@@ -4,6 +4,8 @@ Implementado e validado localmente em 08/09/2026. Em 09/09/2026, após a aprova�
 
 ## Abrir a revisão
 
+**Para continuar o trabalho:** consulte o [handoff](komuniki-handoff.md). Os destaques verde-claros viraram azul claro `#b8d8ff`, e o hero da Home ganhou um [palco de partículas](komuniki-particles.md), única exceção à regra de nenhum movimento. O conteúdo oficial foi preservado.
+
 **Apresentação atual — 13/09/2026:** todo movimento foi removido, inclusive hover, e os destaques amarelos passaram para o azul oficial `#0b3a75`. Os dados oficiais foram preservados. Consulte [Apresentação estática e rollback](komuniki-static-blue.md) para a validação e o checkpoint atual.
 
 **Atualização de 12/09/2026:** o conteúdo das cinco páginas públicas oficiais foi conferido no navegador e aplicado à porta 8012. Contatos reais, três diferenciais e retirada da seção social de teste estão documentados em [Conteúdo oficial e rollback](komuniki-official-content.md). Os relatos de dados de exemplo e bloqueio de certificado abaixo são históricos. O design segue aprovado; esta entrega permanece local, sem publicação.

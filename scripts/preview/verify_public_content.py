@@ -1,4 +1,5 @@
 """Compare the local rendering with a public DOM capture made through the browser."""
+import argparse
 import contextlib
 import io
 import json
@@ -6,7 +7,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit
 
 from bs4 import BeautifulSoup
 
@@ -19,14 +20,16 @@ from scripts.preview.export_school_content import main as export_content  # noqa
 
 
 def normalize(text):
-    return re.sub(r'\s+', ' ', text).strip().casefold()
+    normalized = re.sub(r'\s+', ' ', text).strip().casefold()
+    # The template displays today's date, not a versioned publication timestamp.
+    return re.sub(r'(?<=última atualização: )\d{2}/\d{2}/\d{4}', '<dynamic-date>', normalized)
 
 
 def expression(text):
     return re.sub(r'\\u([0-9a-fA-F]{4})', lambda match: chr(int(match[1], 16)), text)
 
 
-def main():
+def main(output_directory=None):
     evidence = ROOT / '.preview/evidence/official-content'
     source = json.loads((evidence / 'published-pages.json').read_text(encoding='utf-8'))
     capture = io.StringIO()
@@ -63,10 +66,15 @@ def main():
             checks.update({
                 'young_card_removed': 'jovem comunicador' not in main_text,
                 'test_social_hidden': soup.select_one('#social-section-title') is None,
-                'approved_hero_preserved': bool(soup.select_one('img[src="/static/images/komuniki-editorial-hero.png"]')),
+                'approved_hero_preserved': any(urlsplit(node['src']).path == '/static/images/komuniki-editorial-hero.png' for node in soup.select('img[src]')),
             })
         if route == '/sobre/':
             checks['institutional_project_preserved'] = 'jovem comunicador' in normalize(soup.main.get_text(' ', strip=True))
+        if route == '/privacidade/':
+            from django.utils.timezone import localdate
+            date_text = soup.main.get_text(' ', strip=True)
+            current_date = re.search(r'Última atualização:\s*(\d{2}/\d{2}/\d{4})', date_text)
+            checks['dynamic_date_is_today'] = bool(current_date and current_date[1] == localdate().strftime('%d/%m/%Y'))
         if route == '/cursos/':
             checks['six_courses'] = len(soup.select('.ed-course-group article')) == 6
         if route == '/contact/':
@@ -77,10 +85,14 @@ def main():
             checks['form_contract'] = fields == [{key: node[key] for key in ('tag', 'name', 'type', 'required')} for node in before['fields']]
         results.append({'route': route, 'checks': checks, 'missing': missing, 'placeholders': placeholders, 'passed': all(checks.values())})
     report = {'source': source['source'], 'consulted_on': source['consulted_on'], 'pages': results, 'passed': all(page['passed'] for page in results)}
-    (evidence / 'parity.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
+    output = Path(output_directory) if output_directory else evidence
+    output.mkdir(parents=True, exist_ok=True)
+    (output / 'parity.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps(report, ensure_ascii=True, indent=2))
     return 0 if report['passed'] else 1
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output-dir', help='Optional evidence directory; keep separate reports for each review.')
+    sys.exit(main(parser.parse_args().output_dir))

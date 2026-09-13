@@ -35,13 +35,8 @@
                 </div>
             </div>
             <figure class="ed-hero-art">
-                <img src="{% static 'images/komuniki-editorial-hero.png' %}" width="1024" height="1024"
+                <img src="{% static 'images/komuniki-editorial-hero.png' %}?v=2" width="1024" height="1024"
                     alt="" fetchpriority="high" decoding="async">
-                <button type="button" class="ed-icon-button ed-art-motion-toggle" data-ed-motion-toggle aria-pressed="false"
-                    :aria-label="t('Pausar movimento da ilustração', 'Pause illustration motion')" aria-label="Pausar movimento da ilustração">
-                    <svg class="ed-art-pause" width="18" height="18" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true"><path d="M5 3h3v12H5zM10 3h3v12h-3z"/></svg>
-                    <svg class="ed-art-play" width="18" height="18" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true"><path d="m5 3 10 6-10 6z"/></svg>
-                </button>
                 <figcaption aria-hidden="true"><span>01 / KOMUNIKI</span><span x-text="t('COMUNICAÇÃO · ARTES · LIDERANÇA', 'COMMUNICATION · ARTS · LEADERSHIP')">COMUNICAÇÃO · ARTES · LIDERANÇA</span></figcaption>
             </figure>
         </div>
@@ -58,7 +53,7 @@
     </div>
 </section>
 <section id="hero-support-sheet" class="ed-section">
-    <div class="ed-wrap ed-award-grid ed-inverted" data-ed-theme="contrast">
+    <div class="ed-wrap ed-award-grid ed-inverted">
         <div><article class="award-card" aria-labelledby="award-card-title">
                     <div class="award-header">
                         <span class="award-icon" aria-hidden="true">
@@ -70,7 +65,7 @@
                         </span>
                         <span class="award-label" x-text="t('RECONHECIMENTO', 'RECOGNITION')">RECONHECIMENTO</span>
                     </div>
-                    <h3 data-ed-reveal id="award-card-title" class="award-title"
+                    <h3 id="award-card-title" class="award-title"
                         x-text="t('Premiada com o Prêmio Paulo Freire de Educação 2024', 'Awarded the 2024 Paulo Freire Education Award')">Premiada com o Prêmio Paulo Freire de Educação 2024</h3>
                     <div class="award-divider" aria-hidden="true"></div>
                     <p class="award-text"
@@ -79,7 +74,7 @@
         <div>
                 <p class="text-sm font-bold uppercase text-primary-700"
                     x-text="t('{{ home_config.visual_eyebrow|escapejs }}', '{{ home_config.visual_eyebrow_en|default:home_config.visual_eyebrow|escapejs }}')">{{ home_config.visual_eyebrow }}</p>
-                <h2 data-ed-reveal class="mt-4 font-display text-4xl font-extrabold leading-tight tracking-tight text-slate-950 md:text-6xl"
+                <h2 class="mt-4 font-display text-4xl font-extrabold leading-tight tracking-tight text-slate-950 md:text-6xl"
                     x-text="t('{{ home_config.visual_title|escapejs }}', '{{ home_config.visual_title_en|default:home_config.visual_title|escapejs }}')">{{ home_config.visual_title }}</h2>
                 <p class="mt-5 max-w-xl text-lg leading-relaxed text-slate-600 "
                     x-text="t('{{ home_config.proposal_description|escapejs }}', '{{ home_config.proposal_description_en|default:home_config.proposal_description|escapejs }}')">{{ home_config.proposal_description }}</p>
@@ -92,7 +87,7 @@
         <div class="max-w-3xl">
             <p class="text-sm font-bold uppercase text-primary-700"
                 x-text="t('{{ home_config.proposal_eyebrow|escapejs }}', '{{ home_config.proposal_eyebrow_en|default:home_config.proposal_eyebrow|escapejs }}')">{{ home_config.proposal_eyebrow }}</p>
-            <h2 data-ed-reveal class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl"
+            <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl"
                 x-text="t('{{ course_proposal_title|escapejs }}', '{{ course_proposal_title_en|default:course_proposal_title|escapejs }}')">{{ course_proposal_title }}</h2>
             <p class="mt-5 text-lg leading-relaxed text-slate-600"
                 x-text="t('{{ course_proposal_description|escapejs }}', '{{ course_proposal_description_en|default:course_proposal_description|escapejs }}')">
@@ -152,7 +147,7 @@
                 <div class="flex flex-col justify-center p-7 sm:p-9 md:p-12">
                     <p class="text-sm font-bold uppercase text-primary-700"
                         x-text="t('Quem está à frente', 'Who leads Komuniki')">Quem está à frente</p>
-                    <h2 data-ed-reveal class="mt-4 font-display text-3xl font-bold leading-tight text-slate-950 md:text-5xl"
+                    <h2 class="mt-4 font-display text-3xl font-bold leading-tight text-slate-950 md:text-5xl"
                         x-text="t('Kelly Farias, CEO da Komuniki', 'Kelly Farias, CEO of Komuniki')">
                         Kelly Farias, CEO da Komuniki
                     </h2>
@@ -186,7 +181,7 @@
         <div class="max-w-3xl">
             <p class="text-sm font-bold uppercase text-primary-700"
                 x-text="t('{{ home_config.testimonials_eyebrow|escapejs }}', '{{ home_config.testimonials_eyebrow_en|default:home_config.testimonials_eyebrow|escapejs }}')">{{ home_config.testimonials_eyebrow }}</p>
-            <h2 data-ed-reveal class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl"
+            <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl"
                 x-text="t('{{ home_config.testimonials_title|escapejs }}', '{{ home_config.testimonials_title_en|default:home_config.testimonials_title|escapejs }}')">{{ home_config.testimonials_title }}</h2>
             <p class="mt-5 text-lg leading-relaxed text-slate-600"
                 x-text="t('{{ home_config.testimonials_description|escapejs }}', '{{ home_config.testimonials_description_en|default:home_config.testimonials_description|escapejs }}')">
@@ -237,7 +232,7 @@
         <div class="grid lg:grid-cols-2">
             <div class="bg-white/35 p-8 md:p-12">
                 <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Cursos e mentorias', 'Courses and mentoring')">Cursos e mentorias</p>
-                <h2 data-ed-reveal class="mt-4 font-display text-3xl font-bold text-slate-950 md:text-4xl"
+                <h2 class="mt-4 font-display text-3xl font-bold text-slate-950 md:text-4xl"
                     x-text="t('{{ home_config.hiring_title|escapejs }}', '{{ home_config.hiring_title_en|default:home_config.hiring_title|escapejs }}')">{{ home_config.hiring_title }}</h2>
                 <p class="mt-4 leading-relaxed text-slate-600"
                     x-text="t('{{ home_config.hiring_description|escapejs }}', '{{ home_config.hiring_description_en|default:home_config.hiring_description|escapejs }}')">
@@ -251,7 +246,7 @@
             </div>
             <div class="p-8 text-white md:p-12 ed-inverted">
                 <p class="text-sm font-bold uppercase text-primary-100" x-text="t('Fale com a Komuniki', 'Talk to Komuniki')">Fale com a Komuniki</p>
-                <h2 data-ed-reveal class="mt-4 font-display text-3xl font-bold md:text-4xl"
+                <h2 class="mt-4 font-display text-3xl font-bold md:text-4xl"
                     x-text="t('{{ home_config.contact_title|escapejs }}', '{{ home_config.contact_title_en|default:home_config.contact_title|escapejs }}')">{{ home_config.contact_title }}</h2>
                 <p class="mt-4 leading-relaxed text-primary-50"
                     x-text="t('{{ home_config.contact_description|escapejs }}', '{{ home_config.contact_description_en|default:home_config.contact_description|escapejs }}')">

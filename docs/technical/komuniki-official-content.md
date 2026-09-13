@@ -1,5 +1,7 @@
 # Conteúdo oficial da Komuniki na revisão local
 
+**Revisão visual de 13/09/2026:** o conteúdo documentado aqui foi preservado na [versão estática com destaque azul](komuniki-static-blue.md), que remove todo movimento. Para reverter somente a apresentação, siga esse documento, sem restaurar o banco anterior ao conteúdo oficial. A validação visual abaixo descreve a aplicação original dos dados.
+
 Conteúdo público consultado em **12/09/2026**, no navegador, em [Home](https://komuniki.com.br/), [Sobre](https://komuniki.com.br/sobre/), [Cursos](https://komuniki.com.br/cursos/), [Contato](https://komuniki.com.br/contact/) e [Privacidade](https://komuniki.com.br/privacidade/). O HTTPS abriu normalmente nesta consulta; a pendência anterior de acesso ao site público foi resolvida. Não houve acesso ao banco ou à administração de produção.
 
 A versão principal está em **http://127.0.0.1:8012/**. A referência anterior permanece em **http://127.0.0.1:8011/**. Esta entrega é local, sem push, merge ou publicação.

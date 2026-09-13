@@ -1,4 +1,4 @@
-// Pass documented CUA tab/viewport handles. No independent browser connection.
+// Static presentation audit through documented CUA tab/viewport handles.
 import { appendFile } from 'node:fs/promises';
 import { preferences, VIEWPORTS } from './browser_e2e.mjs';
 export { VIEWPORTS };
@@ -14,18 +14,29 @@ export async function runCase(tab, viewportControl, viewport, dark, lang, output
             const box = document.querySelector('.ed-brand').getBoundingClientRect();
             const controls = document.querySelector('.ed-nav-right').getBoundingClientRect();
             return {
-                ready: doc.classList.contains('ed-motion-ready'),
+                motionControllerRemoved: !doc.classList.contains('ed-motion-ready')
+                    && !document.querySelector('[data-ed-motion-toggle],script[src*="school-editorial-motion"]'),
                 width: doc.clientWidth, height: doc.clientHeight,
                 overflow: doc.scrollWidth > doc.clientWidth + 1,
                 overlap: box.right > controls.left + 1,
                 heading: getComputedStyle(document.querySelector('h1')).opacity,
                 theme: doc.classList.contains('dark'), lang: doc.lang,
-                revealTransforms: [...document.querySelectorAll('[data-ed-reveal]')].some(e => getComputedStyle(e).transform !== 'none'),
+                hiddenHeadings: [...document.querySelectorAll('main h1,main h2,main h3')].some(e => getComputedStyle(e).opacity !== '1'),
+                animated: [...document.querySelectorAll('.ed-school,.ed-school *')].some(e => {
+                    const css = getComputedStyle(e);
+                    return css.animationName !== 'none' || css.transitionDuration.split(',').some(duration => duration.trim() !== '0s');
+                }),
+                scrollBehavior: getComputedStyle(doc).scrollBehavior,
+                emailBackground: getComputedStyle(document.querySelector('.ed-footer a[href^="mailto:"]')).backgroundColor,
+                emailColor: getComputedStyle(document.querySelector('.ed-footer a[href^="mailto:"]')).color,
+                officialEmail: !!document.querySelector('.ed-footer a[href="mailto:komunikicomunicacao@gmail.com"]'),
                 clipped: [...document.querySelectorAll('main .ed-card,main .ed-panel,form')].some(e => e.clientWidth > 0 && e.scrollWidth > e.clientWidth + 2),
                 menu: getComputedStyle(document.querySelector('.ed-nav-menu-button')).display !== 'none',
             };
         });
-        state.passed = state.ready && !state.overflow && !state.overlap && !state.clipped && !state.revealTransforms
+        state.passed = state.motionControllerRemoved && !state.overflow && !state.overlap && !state.clipped
+            && !state.hiddenHeadings && !state.animated && state.scrollBehavior === 'auto' && state.officialEmail
+            && state.emailBackground === 'rgb(11, 58, 117)' && state.emailColor === 'rgb(255, 255, 255)'
             && state.heading === '1' && state.theme === dark && state.lang === (lang === 'pt' ? 'pt-BR' : lang)
             && state.menu === (viewport.width < 1024) && Math.abs(state.width - viewport.width) <= 20;
         report.pages.push({ path, ...state });

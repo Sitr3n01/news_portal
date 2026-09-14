@@ -17,7 +17,7 @@ class DepartmentAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
     search_fields = ['name', 'slug']
     prepopulated_fields = {'slug': ('name',)}
     ux_list_title = 'Departamentos de contratação'
-    ux_list_description = 'Organize vagas por área para facilitar filtros no portal e análise interna das candidaturas.'
+    ux_list_description = 'Organize as vagas por área para a análise interna das candidaturas.'
     ux_list_icon = 'business'
     ux_list_actions = [
         {'label': 'Guia escolar', 'icon': 'school', 'url': reverse_lazy('admin_school_guide')},
@@ -53,28 +53,28 @@ class JobPostingAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
     readonly_fields = ['created_at', 'updated_at']
     radio_fields = {'status': admin.HORIZONTAL, 'employment_type': admin.HORIZONTAL}
     date_hierarchy = 'published_at'
-    ux_list_title = 'Vagas do portal escolar'
-    ux_list_description = 'Abra vagas quando houver oportunidade real, mantenha rascunhos privados e feche posições concluídas.'
+    ux_list_title = 'Vagas (registro interno)'
+    ux_list_description = 'As vagas não são mais publicadas no site da escola. Use este cadastro como registro interno das oportunidades e das candidaturas já recebidas.'
     ux_list_icon = 'work'
     ux_list_actions = [
         {'label': 'Guia escolar', 'icon': 'school', 'url': reverse_lazy('admin_school_guide')},
-        {'label': 'Abrir nova vaga', 'icon': 'add_business', 'url': reverse_lazy('admin:hiring_jobposting_add'), 'kind': 'primary'},
+        {'label': 'Nova vaga', 'icon': 'add_business', 'url': reverse_lazy('admin:hiring_jobposting_add'), 'kind': 'primary'},
     ]
     ux_list_filters = [
         {'label': 'Abertas', 'icon': 'work', 'url': '?status__exact=open'},
         {'label': 'Rascunhos', 'icon': 'draft', 'url': '?status__exact=draft'},
         {'label': 'Fechadas', 'icon': 'lock', 'url': '?status__exact=closed'},
     ]
-    ux_empty_message = 'Nenhuma vaga cadastrada. Crie uma vaga em rascunho e publique quando estiver revisada.'
+    ux_empty_message = 'Nenhuma vaga cadastrada.'
     ux_form_title = 'Vaga'
-    ux_form_description = 'Transforme uma oportunidade em uma página clara para candidatos, com descrição, requisitos e prazo.'
+    ux_form_description = 'Registro interno da vaga, com descrição, requisitos e prazo. Nada deste cadastro aparece no site.'
     ux_form_icon = 'work'
     ux_form_steps = [
-        'Preencha detalhes da vaga e selecione o departamento correto.',
-        'Explique responsabilidades e requisitos em linguagem objetiva.',
-        'Use status Aberta apenas quando a vaga puder receber candidaturas.',
+        'Preencha os detalhes da vaga e selecione o departamento correto.',
+        'Descreva responsabilidades e requisitos.',
+        'Use o status para registrar a situação da vaga.',
     ]
-    ux_after_save_description = 'Depois de publicar, acompanhe candidaturas recebidas pelo guia escolar.'
+    ux_after_save_description = 'As candidaturas já recebidas continuam em Candidaturas.'
     ux_after_save_actions = [
         {'label': 'Guia escolar', 'icon': 'school', 'url': reverse_lazy('admin_school_guide')},
         {'label': 'Candidaturas', 'icon': 'description', 'url': reverse_lazy('admin:hiring_application_changelist')},
@@ -88,12 +88,8 @@ class JobPostingAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
             'fields': ('description', 'requirements'),
             'classes': ('tab',),
         }),
-        ('Publicação', {
+        ('Situação', {
             'fields': ('status', 'published_at', 'deadline'),
-            'classes': ('tab',),
-        }),
-        ('SEO', {
-            'fields': ('meta_title', 'meta_description', 'meta_keywords'),
             'classes': ('tab',),
         }),
         ('Datas', {

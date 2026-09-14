@@ -16,46 +16,45 @@ A home da Komuniki é configurada por um registro único chamado **"Configuraç�
 
 ### Campos disponíveis
 
-Cada seção da home tem um bloco de campos correspondente. Os campos terminados em **(EN)** são opcionais — se vazios, o sistema usa o texto em português.
+O formulário segue a ordem da home. Os campos terminados em **(EN)** são opcionais — se vazios, o sistema usa o texto em português.
 
 | Seção na home | Campos no admin |
 |--------------|----------------|
 | Topo (hero) | `Selo do hero`, `Título do hero`, `Subtítulo do hero` |
-| Bloco visual | `Chamada visual`, `Título do bloco visual`, `Título do bloco de comunidade`, `Texto do bloco de comunidade` |
-| Proposta pedagógica | `Chamada da proposta`, `Título da proposta`, `Descrição da proposta` |
-| Vida escolar | `Chamada de vida escolar`, `Título de vida escolar`, `Descrição de vida escolar` |
-| Equipe | `Chamada da equipe`, `Título da equipe`, `Descrição da equipe` |
+| Bloco Komuniki, ao lado do reconhecimento | `Chamada do bloco Komuniki`, `Título do bloco Komuniki`, `Texto do bloco Komuniki` |
+| Seção de cursos | `Chamada da seção de cursos` |
 | Depoimentos | `Chamada de depoimentos`, `Título de depoimentos`, `Descrição de depoimentos` |
-| Trabalhe conosco | `Título de trabalhe conosco`, `Descrição de trabalhe conosco` |
-| Contato | `Título de contato`, `Descrição de contato` |
+| Chamadas finais | `Título da chamada de cursos`, `Texto da chamada de cursos`, `Título da chamada de contato`, `Texto da chamada de contato` |
 | SEO | `Título SEO`, `Descrição SEO`, `Palavras-chave SEO` |
 
+O título, a descrição e os cards das trilhas da seção de cursos ficam no código do site. Com o **Título SEO** preenchido, a aba do navegador mostra esse título; vazio, mostra o nome do site e o título do hero.
+
 > **Nota:** Se não existir nenhum registro de configuração no banco, a home exibe textos padrão definidos no código. Criar um registro no admin sobrescreve esses textos.
+
+> Campos do layout anterior da home, como vida escolar e equipe, continuam guardados, mas não aparecem no site. Só Super Administradores os veem, numa seção recolhida do formulário.
 
 ---
 
 ## 2. Blocos de Diferenciais (Cards da Home)
 
-Os "blocos de diferenciais" aparecem em três seções da home:
-
-- **Barra de confiança** — cards curtos no topo
-- **Proposta pedagógica** — cards explicativos do método
-- **Vida escolar** — cards de experiências cotidianas
+Os blocos aparecem na **barra de confiança**: a grade de cards logo abaixo da apresentação da home.
 
 ### Como adicionar um diferencial
 
 1. Na barra lateral, clique em **Komuniki → Blocos da Home**.
 2. Clique em **Adicionar Bloco da Home**.
 3. Preencha:
-   - **Local de exibição**: escolha entre `Barra de confiança`, `Proposta pedagógica` ou `Vida escolar`
+   - **Local de exibição**: `Barra de confiança`
    - **Título** (obrigatório) e **Título (EN)** (opcional)
    - **Descrição** (obrigatório) e **Descrição (EN)** (opcional)
-   - **Tom visual**: `Verde institucional`, `Âmbar`, `Slate` ou `Branco` — controla a cor do card
+   - **Tom visual**: fica guardado no cadastro, mas não muda a aparência dos cards na home atual
    - **Ativo**: marque para exibir; desmarque para ocultar sem excluir
    - **Ordem**: número inteiro; blocos são exibidos em ordem crescente
 4. Clique em **Salvar**.
 
-> Se não houver nenhum bloco ativo para uma seção, a home exibe um conjunto padrão do código.
+> Se não houver nenhum bloco ativo, a home exibe um conjunto padrão do código.
+
+> As posições **Proposta pedagógica** e **Vida escolar** eram do layout anterior e não aparecem no site. Só Super Administradores ainda as veem.
 
 ---
 
@@ -90,7 +89,7 @@ Use páginas para conteúdo longo e estático, como "Sobre Nós", "Regimento Esc
 3. Preencha **Nome**, **Cargo ou função**, **Foto** (opcional), **Biografia** (opcional), **E-mail** (opcional), **Ativo** e **Ordem**.
 4. Salve.
 
-> Os membros da equipe aparecem na página de equipe da escola, ordenados pelo campo **Ordem**.
+> Os membros da equipe não aparecem no site atual: o endereço antigo da página de equipe leva ao Blog da Kelly. O cadastro fica guardado.
 
 ### Depoimentos
 
@@ -108,7 +107,7 @@ Use páginas para conteúdo longo e estático, como "Sobre Nós", "Regimento Esc
 
 1. Na barra lateral, clique em **Sistema → Configurações do Site**.
 2. Clique no registro do site.
-3. Preencha `Facebook`, `Instagram`, `TikTok` e `YouTube` com URLs completas.
+3. Preencha `Facebook`, `Instagram`, `TikTok` e `YouTube` com URLs completas. Os ícones de Instagram e YouTube do rodapé usam esses links; se ficarem vazios, apontam para os perfis oficiais da Komuniki.
 4. Em **Seção de redes na home — textos**, ajuste título e subtítulo da área de redes.
 5. Salve.
 
@@ -184,9 +183,9 @@ Visitantes podem enviar mensagens via o formulário de contato da escola.
 
 ---
 
-## 8. Vagas de Emprego
+## 8. Vagas de Emprego (registro interno)
 
-O módulo de vagas está em **Recursos guardados** na barra lateral (visível apenas para Super Administradores).
+Desde 14/09/2026 as vagas **não aparecem no site**, e ninguém se candidata por ele. O módulo continua em **Recursos guardados** na barra lateral (visível apenas para Super Administradores), como registro interno das vagas e das candidaturas já recebidas.
 
 ### Criar um departamento
 
@@ -194,7 +193,7 @@ O módulo de vagas está em **Recursos guardados** na barra lateral (visível ap
 2. Preencha **Nome** e **URL amigável**.
 3. Salve.
 
-### Criar uma vaga
+### Registrar uma vaga
 
 1. Clique em **Vagas → Adicionar**.
 2. Preencha:
@@ -203,7 +202,7 @@ O módulo de vagas está em **Recursos guardados** na barra lateral (visível ap
    - **Descrição** e **Requisitos**
    - **Tipo de contratação**: Tempo integral, Meio período, Contrato ou Estágio
    - **Local** e **Faixa salarial** (ambos opcionais)
-   - **Status**: `Rascunho` (não visível), `Aberta` (aparece no site), `Fechada` (removida do site)
+   - **Status**: `Rascunho`, `Aberta` ou `Fechada` — situação interna; nenhum deles publica a vaga
    - **Prazo final** (opcional)
 3. Salve.
 

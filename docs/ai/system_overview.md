@@ -43,7 +43,7 @@ Ordem em `config/urls.py`:
 3. `admin/guias/*`
 4. `admin/`
 5. `sitemap.xml`
-6. `hiring/`
+6. `hiring/` (só o download de currículo, para staff)
 7. `contact/`
 8. `news/`
 9. `accounts/`
@@ -104,13 +104,14 @@ Context processors:
 
 ### `apps.school`
 
-- `SchoolHomeConfig`: textos da home, com variantes EN e fallbacks em `views.py`.
-- `SchoolFeature`: cards da home; não tem campo de ícone.
-- `Page`, `TeamMember`, `Testimonial`.
+- `SchoolHomeConfig`: textos da home, com variantes EN e fallbacks em `views.py`. O admin mostra só os campos que a Home editorial usa; os do layout anterior ficam recolhidos, para superusuários.
+- `SchoolFeature`: cards da home; não tem campo de ícone. A Home atual só exibe a posição `trust`.
+- `Page`, `TeamMember`, `Testimonial`. `TeamMember` não aparece no site: `/team/` redireciona para `/news/`.
+- Os templates públicos da escola e o de contato estendem `base_school_editorial.html`.
 
 ### `apps.hiring`
 
-- `Department`, `JobPosting`, `Application`.
+- `Department`, `JobPosting`, `Application`, só no admin. As vagas saíram do site em 14/09/2026: não há lista, detalhe nem formulário público.
 - Currículos usam nome UUID e download protegido por `X-Accel-Redirect`.
 
 ### `apps.contact`

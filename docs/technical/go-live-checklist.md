@@ -35,6 +35,8 @@ Use este checklist antes de publicar uma mudança em produção ou reconfigurar 
 - [ ] Existe superusuário ativo.
 - [ ] O registro `Site` principal tem domínio correto, via admin ou `python manage.py set_site_domain`.
 - [ ] `SiteExtension` contém contatos públicos e remetente da newsletter.
+- [ ] Em **Configurações do Site**, Instagram e YouTube estão vazios ou apontam para os perfis oficiais. Desde 14/09/2026 o rodapé da Komuniki usa esses campos e só cai nos perfis oficiais quando estão vazios. As migrações de dados gravaram `https://instagram.com/exemplo`, `https://youtube.com/exemplo` e `https://www.instagram.com/komunikiagencia/`, que o rodapé antigo nunca exibia.
+- [ ] A Home Komuniki tem os textos que o site editorial exibe (hero, bloco Komuniki, chamada da seção de cursos, depoimentos e chamadas finais), há blocos ativos na barra de confiança e a página Cursos está publicada. Veja [Troca do site](komuniki-troca-do-site.md#implantação).
 
 ## 5. E-mail e Newsletter
 
@@ -65,6 +67,8 @@ Use este checklist antes de publicar uma mudança em produção ou reconfigurar 
 - [ ] `https://komuniki.com.br/healthz/` retorna 200.
 - [ ] `https://www.komuniki.com.br/healthz/` retorna 200.
 - [ ] `https://komuniki.com.br/` carrega a home.
+- [ ] `https://komuniki.com.br/cursos/` carrega, e `https://komuniki.com.br/contact/?curso=jornalismo-cultural` mostra a etiqueta do curso.
+- [ ] `https://komuniki.com.br/hiring/` responde 404: as vagas saíram do site em 14/09/2026.
 - [ ] `https://kellyfarias.com.br/news/` carrega o portal de notícias.
 - [ ] `https://kellyfarias.com.br/` redireciona para `/news/`.
 - [ ] `/admin/` abre com HTTPS e login válido.

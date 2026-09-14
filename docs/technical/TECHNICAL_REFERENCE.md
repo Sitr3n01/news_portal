@@ -56,7 +56,7 @@ URL Router (config/urls.py)
   │
   ├─► /admin/         → Unfold Admin
   ├─► /news/          → apps.news.urls
-  ├─► /hiring/        → apps.hiring.urls
+  ├─► /hiring/        → apps.hiring.urls (só download de currículo, staff)
   ├─► /contact/       → apps.contact.urls
   ├─► /accounts/      → apps.accounts.urls
   └─► /              → apps.school.urls (catch-all)
@@ -526,7 +526,7 @@ Ordering: `[-created_at]`.
 |------|-----|-------|
 | `home` | `/` | `Testimonial.objects.filter(is_featured=True)` |
 | `page_detail` | `/<slug>/` | `Page.on_site.get(slug=slug, is_published=True)` |
-| `team_list` | `/team/` | `TeamMember.objects.filter(is_active=True).order_by('order', 'name')` |
+| `team_list` | `/team/` | Redireciona para `news:list`; não exibe membros |
 | `about` | `/sobre/` | Template estático |
 | `privacy` | `/privacidade/` | Template estático |
 
@@ -589,29 +589,15 @@ Enums para `status`:
 
 **`Department` e `JobPosting` têm `ForeignKey(Site)` + `on_site`** (isolados por site, migration `0006_site_isolation`). `Application` não tem `Site` próprio — herda da vaga via `job.site`. Currículos usam nome UUID (`resume_upload_path`). Detalhes em [APP_HIRING.md](APP_HIRING.md).
 
-#### Form: ApplicationForm
+#### Site público
 
-`clean_resume()`:
-```python
-ALLOWED_EXTENSIONS = ['.pdf', '.docx']
-MAX_SIZE = 5 * 1024 * 1024  # 5 MB
-
-# Valida extensão do nome + tipo MIME real do arquivo
-# Rejeita se extensão não permitida ou arquivo > 5MB
-```
-
-**Atualização:** `clean_resume` valida em três camadas — tipo MIME, extensão **e magic bytes** (`%PDF-`, `PK\x03\x04`, `\xd0\xcf\x11\xe0`). Os magic bytes são a defesa real, pois MIME e extensão são falsificáveis. Limite de 5 MB. Ver [APP_HIRING.md](APP_HIRING.md) e [SEGURANCA.md](SEGURANCA.md).
+As views `job_list` e `job_detail`, o `ApplicationForm` e os templates `hiring/*.html` foram removidos em 14/09/2026, com o site antigo da escola: `/hiring/` e `/hiring/<slug>/` respondem 404. A validação de upload por tipo MIME, extensão e magic bytes ficava em `ApplicationForm.clean_resume` e precisa voltar junto se a candidatura pelo site voltar. Ver [APP_HIRING.md](APP_HIRING.md).
 
 #### Views
 
-##### `job_detail`
+##### `download_resume`
 
-Antes de salvar candidatura, verifica duplicata por email+vaga:
-```python
-if Application.objects.filter(job=job, email=form.cleaned_data['email']).exists():
-    messages.warning(request, "Você já se candidatou a esta vaga.")
-    # Não revela se o email existe em outros contextos — mensagem é para o próprio usuário
-```
+`/hiring/application/<id>/resume/`. Exige staff e a permissão `hiring.view_application`. Em produção o nginx entrega o arquivo via `X-Accel-Redirect` (`/protected/`); com `DEBUG`, a view usa `FileResponse`.
 
 ---
 
@@ -990,7 +976,7 @@ urlpatterns = [
 |-----|-----------|-------------------|
 | school | `school` | `{% url 'school:home' %}` |
 | news | `news` | `{% url 'news:article_detail' article.slug %}` |
-| hiring | `hiring` | `{% url 'hiring:job_list' %}` |
+| hiring | `hiring` | `{% url 'hiring:download_resume' application.pk %}` |
 | contact | `contact` | `{% url 'contact:contact_page' %}` |
 | accounts | `accounts` | `{% url 'accounts:login' %}` |
 
@@ -1001,15 +987,18 @@ urlpatterns = [
 ### Hierarquia de Herança
 
 ```
-base.html
-├── base_news.html        (portal de notícias)
-│   ├── article_list.html
-│   ├── article_detail.html
-│   └── ...
-└── base_school.html      (portal da escola)
-    ├── home.html
-    ├── page_detail.html
-    └── ...
+base_news.html                 (portal de notícias e contas)
+├── news/article_list.html
+├── news/article_detail.html
+├── accounts/login.html
+├── auth/base_auth.html
+└── ...
+base_school_editorial.html     (site da escola)
+├── school/home.html
+├── school/about.html
+├── school/page_detail.html
+├── school/privacy.html
+└── contact/contact_page.html
 ```
 
 ### Diretório de Templates
@@ -1025,12 +1014,18 @@ Todos os templates estão na raiz `templates/` — não em `apps/<app>/templates
 ```
 templates/
 ├── components/
-│   ├── navbar.html
+│   ├── avatar.html
 │   ├── navbar_news.html
-│   ├── navbar_school.html
-│   ├── footer.html
 │   ├── footer_news.html
-│   └── footer_school.html
+│   ├── social_feed.html
+│   ├── social_post_card.html
+│   └── turnstile_script.html
+├── school/
+│   └── editorial/                  # navbar, rodapé e feed social do site da escola
+│       ├── navbar.html
+│       ├── footer.html
+│       ├── social_feed.html
+│       └── social_post_card.html
 └── news/
     └── partials/
         ├── article_card.html       # Card individual de artigo
@@ -1118,10 +1113,10 @@ Para análise de queries lentas: `EXPLAIN ANALYZE` no PostgreSQL ou `django-debu
 | Conta duplicada por capitalização | E-mail em minúsculas + busca `__iexact` | `apps/accounts/forms.py` + migration `0009` |
 | E-mail sumindo em silêncio | System check `accounts.E001` no deploy | `apps/accounts/checks.py` |
 | Clickjacking | `XFrameOptionsMiddleware` (DENY) + nginx | Middleware + nginx |
-| User enumeration | Mensagens genéricas em auth, registro, vagas | Views |
+| User enumeration | Mensagens genéricas em auth e registro | Views |
 | Session hijacking | HTTPONLY + SECURE cookies (prod) | `production.py` |
 | HTTPS downgrade | HSTS (1 ano, preload) + SECURE_SSL_REDIRECT | `production.py` |
-| File upload malicioso | Validação extensão + MIME (hiring) | `ApplicationForm.clean_resume` |
+| File upload malicioso | Sem upload público de currículo desde 14/09/2026 | — |
 | Iframe injection | Whitelist YouTube em bleach | `sanitization.py` |
 | CSP bypass | CSP headers (Django + nginx) | `base.py` + `nginx.conf` |
 | Scrapers/bots | Rate limiting no nginx (10 req/s) | `nginx.conf` |
@@ -1137,16 +1132,13 @@ Para análise de queries lentas: `EXPLAIN ANALYZE` no PostgreSQL ou `django-debu
 
 # Em register_view — mensagem de email duplicado
 "Este endereço de email já está em uso."  # Genérico — não confirma existência
-
-# Em job_detail — duplicata de candidatura
-"Você já se candidatou a esta vaga."  # OK — o usuário está logado, não é enumeration
 ```
 
 ### Upload de Arquivos
 
-`hiring/resumes/` — aceita PDF e DOCX, máximo 5MB. Validação em `ApplicationForm.clean_resume()`.
+`hiring/resumes/` guarda os currículos das candidaturas já recebidas. O formulário público que os recebia, com a validação `ApplicationForm.clean_resume()`, saiu em 14/09/2026 junto com as vagas.
 
-**Localização no servidor:** `MEDIA_ROOT/hiring/resumes/`. Servido por nginx com cache de 7 dias.
+**Localização no servidor:** `MEDIA_ROOT/hiring/resumes/`. O nginx bloqueia o acesso direto (`location /media/hiring/resumes/ { internal; }`); o download passa por `download_resume` com `X-Accel-Redirect`.
 
 **Atenção:** Não há antivirus scan. Para produção em ambiente sensível, considerar ClamAV ou serviço externo.
 

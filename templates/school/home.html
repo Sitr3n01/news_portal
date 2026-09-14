@@ -1,7 +1,7 @@
 {% extends 'base_school_editorial.html' %}
 {% load static %}
 
-{% block title %}{{ current_site.name }} - {{ home_config.hero_title }}{% endblock %}
+{% block title %}{% if home_config.meta_title %}{{ home_config.meta_title }}{% else %}{{ current_site.name }} - {{ home_config.hero_title }}{% endif %}{% endblock %}
 {% block meta_description %}{{ home_config.meta_description|default:site_settings.tagline|default:home_config.hero_subtitle }}{% endblock %}
 
 {% block editorial_page_class %}ed-home{% endblock %}

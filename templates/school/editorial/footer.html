@@ -16,7 +16,7 @@
                 </p>
 
                 <div class="mt-7 flex flex-wrap gap-3">
-                    <a href="https://www.instagram.com/komunikiescola/" target="_blank" rel="noopener noreferrer"
+                    <a href="{{ site_settings.instagram_url|default:'https://www.instagram.com/komunikiescola/' }}" target="_blank" rel="noopener noreferrer"
                         class="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-300 transition-colors focus:outline-none"
                         aria-label="Instagram Komuniki Escola">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -25,7 +25,7 @@
                                 clip-rule="evenodd" />
                         </svg>
                     </a>
-                    <a href="https://youtube.com/@escolakomuniki?si=8AR-FzPrJh8QCbu3" target="_blank" rel="noopener noreferrer"
+                    <a href="{{ site_settings.youtube_url|default:'https://youtube.com/@escolakomuniki?si=8AR-FzPrJh8QCbu3' }}" target="_blank" rel="noopener noreferrer"
                         class="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-300 transition-colors focus:outline-none"
                         aria-label="YouTube Escola Komuniki">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">

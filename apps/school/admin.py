@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import admin
 from django.urls import reverse_lazy
 from unfold.admin import ModelAdmin
@@ -7,9 +8,9 @@ from apps.common.admin_mixins import AdminUXMixin, SuperuserOnlyAdminMixin
 from .models import Page, SchoolFeature, SchoolHomeConfig, TeamMember, Testimonial
 
 VISIBLE_PAGE_SLUGS = ['cursos']
+# A Home atual só renderiza a barra de confiança; as outras posições eram do layout anterior.
 VISIBLE_FEATURE_PLACEMENTS = [
     SchoolFeature.Placement.TRUST,
-    SchoolFeature.Placement.LIFE,
 ]
 
 
@@ -102,8 +103,74 @@ class PageAdmin(AdminUXMixin, ModelAdmin):
         ]
 
 
+class SchoolHomeConfigAdminForm(forms.ModelForm):
+    """Rótulos com o lugar de cada texto na Home atual. Os nomes dos campos vêm do layout anterior."""
+
+    class Meta:
+        model = SchoolHomeConfig
+        fields = '__all__'
+        labels = {
+            'visual_eyebrow': 'Chamada do bloco Komuniki',
+            'visual_eyebrow_en': 'Chamada do bloco Komuniki (EN)',
+            'visual_title': 'Título do bloco Komuniki',
+            'visual_title_en': 'Título do bloco Komuniki (EN)',
+            'proposal_description': 'Texto do bloco Komuniki',
+            'proposal_description_en': 'Texto do bloco Komuniki (EN)',
+            'proposal_eyebrow': 'Chamada da seção de cursos',
+            'proposal_eyebrow_en': 'Chamada da seção de cursos (EN)',
+            'hiring_title': 'Título da chamada de cursos',
+            'hiring_title_en': 'Título da chamada de cursos (EN)',
+            'hiring_description': 'Texto da chamada de cursos',
+            'hiring_description_en': 'Texto da chamada de cursos (EN)',
+            'contact_title': 'Título da chamada de contato',
+            'contact_title_en': 'Título da chamada de contato (EN)',
+            'contact_description': 'Texto da chamada de contato',
+            'contact_description_en': 'Texto da chamada de contato (EN)',
+        }
+
+
+# Seções na ordem em que aparecem na Home atual.
+HOME_FIELDSETS = [
+    ('Site', {
+        'fields': ('site', 'is_active'),
+        'description': 'Cada site deve ter no máximo uma configuração de home escolar.',
+        'classes': ('tab',),
+    }),
+    ('Hero', {
+        'fields': _localized_fields('hero_badge', 'hero_title', 'hero_subtitle'),
+        'classes': ('tab',),
+    }),
+    ('Bloco Komuniki', {
+        'fields': _localized_fields('visual_eyebrow', 'visual_title', 'proposal_description'),
+        'description': 'Bloco ao lado do reconhecimento, logo abaixo do hero.',
+        'classes': ('tab',),
+    }),
+    ('Seção de cursos', {
+        'fields': _localized_fields('proposal_eyebrow'),
+        'description': 'O título, a descrição e os cards das trilhas são mantidos no código atual.',
+        'classes': ('tab',),
+    }),
+    ('Depoimentos', {
+        'fields': _localized_fields('testimonials_eyebrow', 'testimonials_title', 'testimonials_description'),
+        'description': 'A seção aparece quando há depoimentos destacados.',
+        'classes': ('tab',),
+    }),
+    ('Chamadas finais', {
+        'fields': _localized_fields('hiring_title', 'hiring_description', 'contact_title', 'contact_description'),
+        'description': 'Os dois painéis antes do rodapé: cursos e contato.',
+        'classes': ('tab',),
+    }),
+    ('SEO', {
+        'fields': ('meta_title', 'meta_title_en', 'meta_description', 'meta_description_en', 'meta_keywords', 'meta_keywords_en'),
+        'description': 'Com o título SEO preenchido, a aba do navegador usa esse título; sem ele, mostra o nome do site e o título do hero.',
+        'classes': ('tab',),
+    }),
+]
+
+
 @admin.register(SchoolHomeConfig)
 class SchoolHomeConfigAdmin(AdminUXMixin, ModelAdmin):
+    form = SchoolHomeConfigAdminForm
     list_display = ['site', 'hero_title', 'is_active', 'updated_at']
     list_filter = ['is_active', 'site']
     list_filter_submit = True
@@ -112,14 +179,11 @@ class SchoolHomeConfigAdmin(AdminUXMixin, ModelAdmin):
         'hero_title_en',
         'hero_subtitle',
         'hero_subtitle_en',
-        'proposal_title',
-        'proposal_title_en',
-        'life_title',
-        'life_title_en',
+        'meta_title',
     ]
     readonly_fields = ['created_at', 'updated_at']
     ux_list_title = 'Home Komuniki'
-    ux_list_description = 'A home é o centro da presença da Komuniki: hero, blocos de comunicação, cursos, projetos, depoimentos e contato.'
+    ux_list_description = 'A home é o centro da presença da Komuniki: hero, bloco Komuniki, cursos, depoimentos e chamadas finais.'
     ux_list_icon = 'home'
     ux_list_actions = [
         {'label': 'Guia Komuniki', 'icon': 'school', 'url': reverse_lazy('admin_school_guide')},
@@ -131,11 +195,11 @@ class SchoolHomeConfigAdmin(AdminUXMixin, ModelAdmin):
     ]
     ux_empty_message = 'Nenhuma home Komuniki configurada. Crie uma configuração ativa antes de divulgar o site.'
     ux_form_title = 'Configuração da Home Komuniki'
-    ux_form_description = 'Edite apenas os textos que aparecem na home atual da Komuniki. Campos legados ficam guardados para superusuários.'
+    ux_form_description = 'Edite os textos que aparecem na home atual da Komuniki. Campos do layout anterior ficam guardados, recolhidos e só para superusuários.'
     ux_form_icon = 'home'
     ux_form_steps = [
         'Comece pelo hero: selo, título e subtítulo precisam responder quem é a Komuniki.',
-        'Depois ajuste composição visual, cursos, projetos e depoimentos com textos objetivos.',
+        'Depois ajuste o bloco Komuniki, a chamada da seção de cursos e os depoimentos.',
         'Finalize as chamadas de cursos e contato para orientar o próximo passo do visitante.',
     ]
     ux_after_save_description = 'A home depende também dos blocos ativos e depoimentos destacados para ficar completa.'
@@ -144,43 +208,15 @@ class SchoolHomeConfigAdmin(AdminUXMixin, ModelAdmin):
         {'label': 'Blocos da Home', 'icon': 'auto_awesome', 'url': reverse_lazy('admin:school_schoolfeature_changelist')},
         {'label': 'Depoimentos', 'icon': 'format_quote', 'url': reverse_lazy('admin:school_testimonial_changelist')},
     ]
-    fieldsets = [
-        ('Site', {
-            'fields': ('site', 'is_active'),
-            'description': 'Cada site deve ter no máximo uma configuração de home escolar.',
-            'classes': ('tab',),
-        }),
-        ('Hero', {
-            'fields': _localized_fields('hero_badge', 'hero_title', 'hero_subtitle'),
-            'classes': ('tab',),
-        }),
-        ('Composição visual do hero', {
-            'fields': _localized_fields('visual_eyebrow', 'visual_title', 'visual_footer_title', 'visual_footer_text'),
-            'classes': ('tab',),
-        }),
-        ('Seção: proposta pedagógica', {
-            'fields': _localized_fields('proposal_eyebrow', 'proposal_title', 'proposal_description'),
-            'classes': ('tab',),
-        }),
-        ('Seção: vida escolar', {
-            'fields': _localized_fields('life_eyebrow', 'life_title', 'life_description'),
-            'classes': ('tab',),
-        }),
-        ('Seção: equipe', {
-            'fields': _localized_fields('team_eyebrow', 'team_title', 'team_description'),
-            'classes': ('tab',),
-        }),
-        ('Seção: depoimentos', {
-            'fields': _localized_fields('testimonials_eyebrow', 'testimonials_title', 'testimonials_description'),
-            'classes': ('tab',),
-        }),
-        ('Chamadas finais', {
-            'fields': _localized_fields('hiring_title', 'hiring_description', 'contact_title', 'contact_description'),
-            'classes': ('tab',),
-        }),
-        ('SEO', {
-            'fields': ('meta_title', 'meta_title_en', 'meta_description', 'meta_description_en', 'meta_keywords', 'meta_keywords_en'),
-            'classes': ('tab',),
+    fieldsets = HOME_FIELDSETS + [
+        ('Campos sem uso no site atual', {
+            'fields': _localized_fields(
+                'visual_footer_title', 'visual_footer_text', 'proposal_title',
+                'life_eyebrow', 'life_title', 'life_description',
+                'team_eyebrow', 'team_title', 'team_description',
+            ),
+            'description': 'Guardados do layout anterior da Home; nenhum deles aparece no site.',
+            'classes': ('collapse',),
         }),
         ('Datas', {
             'fields': ('created_at', 'updated_at'),
@@ -191,38 +227,7 @@ class SchoolHomeConfigAdmin(AdminUXMixin, ModelAdmin):
     def get_fieldsets(self, request, obj=None):
         if request.user.is_superuser:
             return super().get_fieldsets(request, obj)
-        return [
-            ('Site', {
-                'fields': ('site', 'is_active'),
-                'description': 'Cada site deve ter no máximo uma configuração ativa de home.',
-                'classes': ('tab',),
-            }),
-            ('Hero', {
-                'fields': _localized_fields('hero_badge', 'hero_title', 'hero_subtitle'),
-                'classes': ('tab',),
-            }),
-            ('Composição visual do hero', {
-                'fields': _localized_fields('visual_eyebrow', 'visual_title', 'visual_footer_title', 'visual_footer_text'),
-                'classes': ('tab',),
-            }),
-            ('Cursos e projetos', {
-                'fields': _localized_fields('proposal_eyebrow', 'proposal_description', 'life_eyebrow', 'life_title', 'life_description'),
-                'description': 'O título e os cards de cursos são mantidos no código atual; estes textos são os que aparecem ao redor da grade.',
-                'classes': ('tab',),
-            }),
-            ('Depoimentos', {
-                'fields': _localized_fields('testimonials_eyebrow', 'testimonials_title', 'testimonials_description'),
-                'classes': ('tab',),
-            }),
-            ('Chamadas finais', {
-                'fields': _localized_fields('hiring_title', 'hiring_description', 'contact_title', 'contact_description'),
-                'classes': ('tab',),
-            }),
-            ('SEO', {
-                'fields': ('meta_title', 'meta_title_en', 'meta_description', 'meta_description_en', 'meta_keywords', 'meta_keywords_en'),
-                'classes': ('tab',),
-            }),
-        ]
+        return HOME_FIELDSETS
 
 
 @admin.register(SchoolFeature)
@@ -235,7 +240,7 @@ class SchoolFeatureAdmin(AdminUXMixin, ModelAdmin):
     readonly_fields = ['created_at', 'updated_at']
     radio_fields = {'placement': admin.HORIZONTAL, 'tone': admin.HORIZONTAL}
     ux_list_title = 'Blocos da Home'
-    ux_list_description = 'Cadastre os blocos curtos que aparecem na home atual da Komuniki.'
+    ux_list_description = 'Cadastre os blocos curtos da barra de confiança, a grade de cards logo abaixo da apresentação da Home.'
     ux_list_icon = 'auto_awesome'
     ux_list_actions = [
         {'label': 'Guia Komuniki', 'icon': 'school', 'url': reverse_lazy('admin_school_guide')},
@@ -247,7 +252,7 @@ class SchoolFeatureAdmin(AdminUXMixin, ModelAdmin):
     ]
     ux_empty_message = 'Nenhum bloco cadastrado. Adicione blocos para completar a home da Komuniki.'
     ux_form_title = 'Bloco da Home'
-    ux_form_description = 'Cada bloco deve ser curto, específico e posicionado apenas em seções que aparecem no front atual.'
+    ux_form_description = 'Cada bloco deve ser curto e específico. Só a barra de confiança aparece na Home atual.'
     ux_form_icon = 'auto_awesome'
     ux_form_steps = [
         'Escolha onde o bloco aparecerá.',
@@ -297,7 +302,7 @@ class TeamMemberAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
     ordering = ['site', 'order', 'name']
     readonly_fields = ['created_at', 'updated_at']
     ux_list_title = 'Equipe escolar'
-    ux_list_description = 'Mantenha pessoas visíveis e bem identificadas para reforçar confiança de famílias e candidatos.'
+    ux_list_description = 'Os perfis de equipe não aparecem no site atual: a antiga página de equipe redireciona para Notícias. O cadastro fica guardado.'
     ux_list_icon = 'group'
     ux_list_actions = [
         {'label': 'Guia escolar', 'icon': 'school', 'url': reverse_lazy('admin_school_guide')},
@@ -307,14 +312,14 @@ class TeamMemberAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
         {'label': 'Ativos', 'icon': 'visibility', 'url': '?is_active__exact=1'},
         {'label': 'Ocultos', 'icon': 'visibility_off', 'url': '?is_active__exact=0'},
     ]
-    ux_empty_message = 'Nenhum membro de equipe cadastrado. Adicione pelo menos as lideranças ou responsáveis principais.'
+    ux_empty_message = 'Nenhum membro de equipe cadastrado.'
     ux_form_title = 'Perfil de equipe'
-    ux_form_description = 'Crie perfis humanos, objetivos e com foto quando possível; isso reduz dúvidas de famílias e visitantes.'
+    ux_form_description = 'Registro interno de equipe. Os perfis não são exibidos no site atual.'
     ux_form_icon = 'badge'
     ux_form_steps = [
         'Inclua nome, função e foto atualizada.',
         'Use uma bio curta, com foco em atuação e vínculo com a escola.',
-        'Marque como ativo para aparecer no portal.',
+        'Use o campo ativo para marcar quem continua na equipe.',
     ]
     ux_after_save_actions = [
         {'label': 'Guia escolar', 'icon': 'school', 'url': reverse_lazy('admin_school_guide')},
@@ -326,7 +331,6 @@ class TeamMemberAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
         }),
         ('Perfil', {
             'fields': ('bio', 'email'),
-            'description': 'O e-mail aparece apenas na página completa de equipe, não na home.',
         }),
         ('Exibição', {
             'fields': ('is_active', 'order'),

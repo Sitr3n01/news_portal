@@ -115,7 +115,7 @@ Para verificar o cenário principal, defina `$env:KOMUNIKI_PREVIEW_SCENARIO = 'l
 | Política de privacidade | Coluna de leitura, hierarquia e blocos | Todo o texto, listas, contato e aviso de atualização preservados. |
 | Página genérica do CMS | Título editorial, imagem e corpo de leitura | `sanitize_html`, título, imagem, conteúdo e contato mantidos. Demo verifica um título longo nas quatro larguras. |
 
-O novo `base_school_editorial.html` e `templates/school/editorial/` isolam a apresentação. O `base_school.html` original, o `base_news.html` e os dois componentes sociais compartilhados continuam idênticos aos do projeto original; vagas e Blog da Kelly conservam esses consumidores. Views, modelos, formulários e rotas públicas também permanecem idênticos.
+O novo `base_school_editorial.html` e `templates/school/editorial/` isolam a apresentação. Em 14/09/2026 o site antigo saiu do projeto: `base.html`, `base_school.html`, a navbar e o rodapé antigos e as páginas de vagas foram removidos, e o `master` local avançou até esta branch; veja [Troca do site](komuniki-troca-do-site.md). O `base_news.html` e os dois componentes sociais compartilhados seguem com o Blog da Kelly. Com o `master` igual à worktree, `verify_content.py` compara a versão nova com ela mesma e deixa de medir a migração.
 
 ## Evidências e limites
 

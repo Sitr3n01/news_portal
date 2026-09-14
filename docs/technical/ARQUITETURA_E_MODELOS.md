@@ -12,7 +12,7 @@
 
 | Rosto | Prefixo de URL | Apps que o sustentam |
 |-------|----------------|----------------------|
-| **Site da Escola** | `/` (raiz) | `school` (+ `hiring`, `contact`) |
+| **Site da Escola** | `/` (raiz) | `school` (+ `contact`) |
 | **Portal de Notícias** | `/news/` | `news` |
 | **Painel Admin** | `/admin/` | Django Unfold + `common` (dashboard e guias) |
 
@@ -23,7 +23,7 @@ O que decide qual rosto aparece é o **roteamento por caminho** (path-based rout
 /i18n/      → troca de idioma (pt-br / en)
 /admin/     → painel administrativo (Unfold) + guias de operação
 /sitemap.xml→ sitemap combinado (artigos + páginas)
-/hiring/    → vagas e candidaturas
+/hiring/    → download protegido de currículos (staff); as vagas saíram do site em 14/09/2026
 /contact/   → formulário de contato
 /news/      → portal de notícias
 /accounts/  → login, registro, recuperação de senha, conta
@@ -77,7 +77,7 @@ View do app (FBV)  →  consulta com .on_site (isola por site)
 Context processors  →  injetam site_settings + nav em TODO template
   │
   ▼
-Template (base.html / base_news.html / base_school.html)  →  HTML
+Template (base_news.html / base_school_editorial.html)  →  HTML
 ```
 
 ### Cadeia de middleware (definida em `base.py`)
@@ -114,7 +114,7 @@ apps/
   common/        → modelos abstratos, SiteExtension, sanitização, dashboard, guias
   accounts/      → CustomUser, papéis (roles), autenticação, grupos/permissões
   school/        → CMS da home, páginas, equipe, depoimentos, diferenciais
-  hiring/        → departamentos, vagas, candidaturas  (ver APP_HIRING.md)
+  hiring/        → departamentos, vagas, candidaturas; só no admin  (ver APP_HIRING.md)
   contact/       → mensagens de contato
   news/          → artigos, categorias, tags, comentários, newsletter, RSS
   media_library/ → biblioteca de mídia compartilhada
@@ -184,11 +184,11 @@ Coluna **Site?** indica se o modelo é isolado por site (`ForeignKey(Site)` + `o
 | accounts | `CustomUser` | — | `AbstractUser` | Usuário com `role`, `avatar`, `bio`; e-mail único |
 | school | `Page` | ✅ | Timestamp+SEO | Páginas institucionais (slug próprio) |
 | school | `SchoolHomeConfig` | 1-1 | Timestamp+SEO | Textos editáveis da home escolar (CMS) |
-| school | `SchoolFeature` | ✅ | Timestamp | Cards de diferenciais por seção (trust/proposal/life) |
-| school | `TeamMember` | ✅ | Timestamp | Membros da equipe |
+| school | `SchoolFeature` | ✅ | Timestamp | Cards de diferenciais por seção; a Home atual só exibe `trust` |
+| school | `TeamMember` | ✅ | Timestamp | Membros da equipe; fora do site (`/team/` leva a `/news/`) |
 | school | `Testimonial` | ✅ | Timestamp | Depoimentos |
 | hiring | `Department` | ✅ | — | Áreas/departamentos |
-| hiring | `JobPosting` | ✅ | Timestamp+SEO | Vagas (rascunho/aberta/fechada) |
+| hiring | `JobPosting` | ✅ | Timestamp+SEO | Vagas, registro interno fora do site (rascunho/aberta/fechada) |
 | hiring | `Application` | via vaga | Timestamp | Candidatura (currículo, status) |
 | contact | `ContactInquiry` | ✅ | Timestamp | Mensagem de contato (site setado na view) |
 | news | `Category` | — | Timestamp | Categoria hierárquica (self-parent) |

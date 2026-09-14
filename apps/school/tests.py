@@ -2,6 +2,7 @@ import pytest
 from django.contrib.sites.models import Site
 from django.urls import reverse
 
+from apps.common.models import SiteExtension
 from apps.school.models import Page, SchoolFeature, SchoolHomeConfig, TeamMember
 from apps.school.models import Testimonial as SchoolTestimonial
 
@@ -285,6 +286,49 @@ def test_school_team_page_redirects_to_news_blog(client, current_site):
 
     assert response.status_code == 302
     assert response['Location'] == reverse('news:list')
+
+
+@pytest.mark.django_db
+def test_school_footer_social_links_follow_site_settings(client, current_site):
+    SiteExtension.objects.update_or_create(
+        site=current_site,
+        defaults={
+            'instagram_url': 'https://www.instagram.com/komuniki_config_teste/',
+            'youtube_url': 'https://www.youtube.com/@komuniki_config_teste',
+        },
+    )
+
+    content = client.get(reverse('school:privacy')).content.decode()
+
+    # O rodapé usa os links cadastrados em Configurações do Site
+    assert 'href="https://www.instagram.com/komuniki_config_teste/"' in content
+    assert 'href="https://www.youtube.com/@komuniki_config_teste"' in content
+
+
+@pytest.mark.django_db
+def test_school_footer_social_links_fall_back_to_official_profiles(client, current_site):
+    SiteExtension.objects.update_or_create(site=current_site, defaults={'instagram_url': '', 'youtube_url': ''})
+
+    content = client.get(reverse('school:privacy')).content.decode()
+
+    assert 'href="https://www.instagram.com/komunikiescola/"' in content
+    assert 'href="https://youtube.com/@escolakomuniki?si=8AR-FzPrJh8QCbu3"' in content
+
+
+@pytest.mark.django_db
+def test_school_home_title_prefers_seo_title(client, current_site):
+    home, _ = SchoolHomeConfig.objects.update_or_create(
+        site=current_site,
+        defaults={'hero_title': 'Título do hero', 'meta_title': 'Komuniki | Escola de comunicação'},
+    )
+
+    content = client.get(reverse('school:home')).content.decode()
+    assert '<title>Komuniki | Escola de comunicação</title>' in content
+
+    home.meta_title = ''
+    home.save()
+    content = client.get(reverse('school:home')).content.decode()
+    assert '<title>Komuniki Teste - Título do hero</title>' in content
 
 
 @pytest.mark.django_db

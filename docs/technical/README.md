@@ -11,7 +11,7 @@
 | [TECHNICAL_REFERENCE.md](TECHNICAL_REFERENCE.md) | Referência extensa para debugging sensível |
 | [SEGURANCA.md](SEGURANCA.md) | Ameaças, proteções ativas e checklist de segurança |
 | [FLUXO_NEWSLETTER.md](FLUXO_NEWSLETTER.md) | Fluxo real da newsletter, fila e entregas |
-| [APP_HIRING.md](APP_HIRING.md) | Vagas, candidaturas e download protegido de currículos |
+| [APP_HIRING.md](APP_HIRING.md) | Vagas e candidaturas no admin, fora do site desde 14/09/2026, e download protegido de currículos |
 
 ## Operação
 
@@ -32,6 +32,7 @@
 | [komuniki-text-reveal.md](komuniki-text-reveal.md) | Reveal de texto por linha (GSAP): API `data-reveal`, correção dos acentos, validação e reversão |
 | [komuniki-underline-reveal.md](komuniki-underline-reveal.md) | Sublinhado animado ao interagir: ganchos `.ed-underline`, traço por linha e crescimento dos cards de trilhas, posição igual à do sublinhado antigo, validação e reversão |
 | [komuniki-curso-de-interesse.md](komuniki-curso-de-interesse.md) | Curso de interesse no contato: link dos cards de Cursos, etiqueta, campo gravado, admin, implantação e reversão |
+| [komuniki-troca-do-site.md](komuniki-troca-do-site.md) | Troca do site antigo da escola pelo editorial: o que saiu, o que ficou no admin, integração com o backend, implantação e reversão |
 | [REDES_SOCIAIS.md](REDES_SOCIAIS.md) | Contas, posts, seção da home e sync Instagram/TikTok |
 | [REDES_SOCIAIS_CREDENCIAIS.md](REDES_SOCIAIS_CREDENCIAIS.md) | Como conectar credenciais oficiais de Instagram/TikTok |
 

@@ -48,7 +48,7 @@ O sistema usa **cargos** para controlar o acesso. Cada cargo vê apenas o que é
 
 ## Por onde começar
 
-- [Manual do Portal Escolar (Komuniki)](manual_escola.md) — gerenciar a home, páginas, redes sociais, vagas e mensagens de contato
+- [Manual do Portal Escolar (Komuniki)](manual_escola.md) — gerenciar a home, páginas, redes sociais e mensagens de contato
 - [Manual do Portal de Notícias (Blog da Kelly)](manual_noticias.md) — publicar artigos, disparar newsletters, moderar comentários
 
 ## Regra de ouro

@@ -72,10 +72,8 @@ def dashboard_callback(request, context):
     )
     active_features = _count(
         'school.view_schoolfeature',
-        SchoolFeature.objects.filter(
-            is_active=True,
-            placement__in=[SchoolFeature.Placement.TRUST, SchoolFeature.Placement.LIFE],
-        ),
+        # A Home atual só renderiza a barra de confiança
+        SchoolFeature.objects.filter(is_active=True, placement=SchoolFeature.Placement.TRUST),
     )
     featured_testimonials = _count(
         'school.view_testimonial',

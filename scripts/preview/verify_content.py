@@ -81,7 +81,7 @@ for route in routes:
     report['pages'].append(result)
 
 for relative in (
-    'templates/base_school.html', 'templates/base_news.html',
+    'templates/base_news.html',
     'templates/components/social_feed.html', 'templates/components/social_post_card.html',
     'apps/school/views.py', 'apps/school/models.py', 'apps/contact/views.py',
     'apps/contact/forms.py', 'config/urls.py',

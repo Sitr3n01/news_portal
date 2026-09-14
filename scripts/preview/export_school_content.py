@@ -96,7 +96,7 @@ def main():
                 'COURSE_TRACKS', 'COURSE_GROUPS',
             )
         }
-        public_source_files = ['apps/school/views.py', 'templates/base_school.html'] + [
+        public_source_files = ['apps/school/views.py', 'apps/school/courses.py', 'templates/base_school_editorial.html'] + [
             f'templates/school/{name}.html' for name in ('home', 'about', 'page_detail', 'privacy')
         ]
         report = {

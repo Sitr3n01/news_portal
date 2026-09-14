@@ -149,6 +149,9 @@ def test_school_homepage_shows_course_tracks_linking_to_courses(client, current_
     # Os cards-trilha levam à página de cursos
     assert content.count(f'href="{courses_url}"') >= 3
     assert "t('Ver cursos', 'View courses')" in content
+    # Título e "Ver cursos" de cada card sublinham ao interagir com o card
+    assert content.count('text-slate-950 ed-underline-lines"') == 3
+    assert content.count('<span class="ed-underline" data-reveal="fade" x-text="t(\'Ver cursos\'') == 3
     # O catálogo detalhado vive em /cursos e não é duplicado na home
     assert 'Apresentação de Palco e Eventos' not in content
     assert 'Jornalismo Cultural' not in content
@@ -257,6 +260,8 @@ def test_school_text_links_carry_the_underline_reveal_hooks(client, current_site
     assert 'class="ed-brand ed-underline"' in content
     assert _navbar(content).count('class="ed-underline"') == 8
     assert content.count('transition-colors ed-underline" x-text=') == 6
+    # A coluna Contato do rodapé cabe o e-mail numa linha só
+    assert 'lg:col-span-7 ed-footer-columns"' in content
     if url_name == 'school:privacy':
         assert '<span class="ed-underline" x-text="t(\'Falar com a Komuniki\'' in content
 

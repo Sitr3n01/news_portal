@@ -57,15 +57,19 @@
 [data-reveal="mask"] .line{padding-block:.15em}
 /* The negative right margin gives back the .12em padding, so a line that filled its box still fits and does not wrap. */
 [data-reveal="mask"] .line-wrap{position:relative;top:-.15em;margin-bottom:-.3em;margin-right:-.12em}
-/* Underline reveal on interaction (hover and keyboard focus): the line grows from the left and leaves to the right. .ed-underline tightly wraps one line of text; .ed-underline-text is inline text that may wrap. The line lands where text-underline-offset drew it, with the same auto thickness: Blink rounds ascent and descent to whole pixels, floors the half-leading above the text and floors font-size / 10 for the thickness. On an inline box the half-leading is zero. */
-.ed-school .ed-underline{position:relative;--ed-underline-ascent:.96875em;--ed-underline-descent:.2412em}
+/* Underline reveal on interaction (hover and keyboard focus): the line grows from the left and leaves to the right. .ed-underline tightly wraps one line of text; .ed-underline-text is inline text that may wrap; .ed-underline-lines is a heading the text reveal splits into lines (fade), and each line gets its own, the .line shrinking to its text. Without the split (reduced motion, no JS) that heading keeps the instant underline. The line lands where text-underline-offset drew it, with the same auto thickness: Blink rounds ascent and descent to whole pixels, floors the half-leading above the text and floors font-size / 10 for the thickness. On an inline box the half-leading is zero. */
+.ed-school .ed-underline{position:relative}
+.ed-school :is(.ed-underline,.ed-underline-lines){--ed-underline-ascent:.96875em;--ed-underline-descent:.2412em}
 .ed-school .ed-footer-brand.ed-underline{--ed-underline-ascent:1em;--ed-underline-descent:.2em}
-.ed-school .ed-underline::after{content:"";position:absolute;left:0;right:0;top:calc(round(down,(100% - round(var(--ed-underline-ascent),1px) - round(var(--ed-underline-descent),1px)) / 2,1px) + round(var(--ed-underline-ascent),1px) + var(--ed-underline-offset,4px));height:max(1px,round(down,.1em,1px));background:currentColor;pointer-events:none;transform:scaleX(0);transform-origin:100% 50%;transition:transform .45s cubic-bezier(.25,1,.5,1)!important}
-.ed-school :is(a.ed-underline:hover,a.ed-underline:focus-visible,a:hover .ed-underline,a:focus-visible .ed-underline)::after{transform:scaleX(1);transform-origin:0 50%}
+.ed-school .ed-track-grid .ed-underline{--ed-underline-ascent:1.025em;--ed-underline-descent:.275em}
+.ed-school .ed-underline-lines .line{position:relative;width:fit-content}
+.ed-school :is(.ed-underline,.ed-underline-lines .line)::after{content:"";position:absolute;left:0;right:0;top:calc(round(down,(100% - round(var(--ed-underline-ascent),1px) - round(var(--ed-underline-descent),1px)) / 2,1px) + round(var(--ed-underline-ascent),1px) + var(--ed-underline-offset,4px));height:max(1px,round(down,.1em,1px));background:currentColor;pointer-events:none;transform:scaleX(0);transform-origin:100% 50%;transition:transform .45s cubic-bezier(.25,1,.5,1)!important}
+.ed-school :is(a.ed-underline:hover,a.ed-underline:focus-visible,a:hover .ed-underline,a:focus-visible .ed-underline,a:hover .ed-underline-lines .line,a:focus-visible .ed-underline-lines .line)::after{transform:scaleX(1);transform-origin:0 50%}
 .ed-school .ed-nav-links a[aria-current="page"]::after{transform:scaleX(1)}
+.ed-school a:is(:hover,:focus-visible) .ed-underline-lines:not(:has(.line)){text-decoration:underline;text-underline-offset:var(--ed-underline-offset,4px)}
 .ed-school .ed-underline-text{padding-bottom:max(0px,calc(var(--ed-underline-offset,4px) + max(1px,round(down,.1em,1px)) - round(.2412em,1px)));background:linear-gradient(currentColor,currentColor) 100% 100%/0 max(1px,round(down,.1em,1px)) no-repeat;transition:background-size .45s cubic-bezier(.25,1,.5,1)!important}
 .ed-school a:is(:hover,:focus-visible) .ed-underline-text{background-position:0 100%;background-size:100% max(1px,round(down,.1em,1px))}
-@media (prefers-reduced-motion:reduce){.ed-school .ed-underline::after,.ed-school .ed-underline-text{transition:none!important}}
+@media (prefers-reduced-motion:reduce){.ed-school :is(.ed-underline,.ed-underline-lines .line)::after,.ed-school .ed-underline-text{transition:none!important}}
 /* The only persistent layer is the navigation capsule. */
 .ed-nav{position:fixed;inset:0 0 auto;z-index:50;height:128px;display:flex;align-items:center;background:transparent;pointer-events:none}
 .ed-nav-pill{position:relative;pointer-events:auto;display:flex;align-items:center;justify-content:space-between;gap:24px;width:min(100% - 48px,1200px);min-height:80px;margin:auto;padding:12px 16px 12px 28px;border-radius:48px;background:var(--ed-card)}
@@ -108,7 +112,7 @@
 .ed-hero-art figcaption{display:flex;justify-content:space-between;gap:16px;color:var(--ed-muted);font:12px/1.6 "IBM Plex Mono",monospace}
 .ed-hero-bottom{margin-top:24px;padding-top:24px;border-top:1px solid var(--ed-line);display:flex;align-items:center;justify-content:space-between;gap:24px}
 .ed-school .ed-scroll-cue{display:grid;place-items:center;width:48px;height:48px;border:1px solid var(--ed-ink);border-radius:50%;color:var(--ed-ink)}
-.ed-award-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;padding:56px;border-radius:64px 64px 32px 32px}
+.ed-award-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;padding:56px;border-radius:32px}
 .ed-school .ed-award-grid h2{font-family:"Barlow Condensed",sans-serif;font-size:clamp(48px,5.3vw,72px);font-weight:700;line-height:.9}
 .ed-school .ed-award-grid h3{font-size:clamp(28px,3vw,40px)}
 .ed-award-grid .award-header{display:flex;align-items:center;gap:16px;margin-bottom:32px}
@@ -125,6 +129,10 @@
 .ed-track-grid>a{position:relative;min-height:330px;text-decoration:none!important}
 .ed-track-grid>a>span:first-child{background:var(--ed-mist);color:var(--ed-ink);border-radius:50%}
 .ed-track-grid>a:hover{background:var(--ed-mist)}
+/* Track cards are whole links: on hover or keyboard focus the card grows slightly, on the underline's curve. */
+.ed-school .ed-track-grid>a{transition:transform .45s cubic-bezier(.25,1,.5,1)!important}
+.ed-school .ed-track-grid>a:is(:hover,:focus-visible){transform:scale(1.02)}
+@media (prefers-reduced-motion:reduce){.ed-school .ed-track-grid>a{transition:none!important}}
 .ed-track-grid>a>p[class*="uppercase"]{margin-top:32px}
 .ed-track-grid>a>span:last-child{font:12px/1.6 "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:0}
 .ed-kelly figure{background:var(--ed-mist)}
@@ -189,7 +197,9 @@
 .ed-school .ed-footer{margin-top:80px;background:#000;color:#fff}
 .ed-school .ed-footer p,.ed-school .ed-footer a,.ed-school .ed-footer span{color:inherit}
 .ed-school .ed-footer h3{font:400 12px/1.6 "IBM Plex Mono",monospace;letter-spacing:-.03em}
-.ed-school .ed-footer a[href^="mailto:"]{display:inline;background:var(--ed-blue);color:#fff;box-decoration-break:clone;-webkit-box-decoration-break:clone;padding:2px 4px;overflow-wrap:anywhere}
+/* The footer e-mail stays on one line: from 640px the Contato column is at least as wide as it, and the other two columns give up the difference. */
+.ed-school .ed-footer a[href^="mailto:"]{display:inline;background:var(--ed-blue);color:#fff;box-decoration-break:clone;-webkit-box-decoration-break:clone;padding:2px 4px;white-space:nowrap}
+@media(min-width:640px){.ed-school .ed-footer-columns{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(min-content,1fr)}}
 .ed-school .ed-footer .ed-button{background:#fff;color:#000}
 .ed-school .ed-footer .ed-button:hover{background:var(--ed-blue-light)}
 .ed-school .ed-footer .ed-footer-brand{font-family:"Barlow Condensed",sans-serif;font-size:64px;line-height:.9;font-weight:700;text-transform:uppercase;letter-spacing:-.03em}

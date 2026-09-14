@@ -39,7 +39,7 @@ Implementado em 13/09/2026 na worktree `news_portal-komuniki-design`, branch `co
 |---|---|
 | `static/js/school-editorial-reveal.js` | Módulo único: blocos `{ el, mode, reset(), animateIn() }`, hero, grupos, blocos isolados, troca de idioma, resize e refresh depois de split refeito |
 | `static/js/vendor/gsap-3.15.0/` | `gsap.min.js`, `ScrollTrigger.min.js` e `SplitText.min.js` do pacote `gsap@3.15.0` |
-| `static/css/school-editorial.css` | Guard `.js [data-reveal]`, `.line-wrap`, `.line` e a correção dos acentos; folha em `?v=16` |
+| `static/css/school-editorial.css` | Guard `.js [data-reveal]`, `.line-wrap`, `.line` e a correção dos acentos; folha em `?v=17` |
 | `templates/base_school_editorial.html` | Classe `js` no `<head>`, os quatro scripts com `defer` (módulo em `?v=2`) e o `{% block footer %}` |
 | `templates/school/home.html`, `about.html`, `page_detail.html` | Atributos em todo o texto; `page_detail` só no ramo de Cursos |
 | `templates/school/editorial/footer.html` | Atributos condicionados a `reveal` |

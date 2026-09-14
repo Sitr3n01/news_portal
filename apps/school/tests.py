@@ -1,4 +1,7 @@
+from importlib import import_module
+
 import pytest
+from django.apps import apps as django_apps
 from django.contrib.sites.models import Site
 from django.urls import reverse
 
@@ -329,6 +332,86 @@ def test_school_home_title_prefers_seo_title(client, current_site):
     home.save()
     content = client.get(reverse('school:home')).content.decode()
     assert '<title>Komuniki Teste - Título do hero</title>' in content
+
+
+# O nome do módulo começa com número, então não dá para usar import comum
+real_public_data = import_module('apps.school.migrations.0010_komuniki_real_public_data')
+
+SEEDED_SITE_EXTENSION = {
+    'tagline': 'Moldando o futuro, inspirando mentes.',
+    'primary_email': 'contato@exemplo.edu.br',
+    'phone_number': '(11) 99999-9999',
+    'address': 'Rua da Educação, 123, São Paulo - SP',
+    'facebook_url': 'https://facebook.com/exemplo',
+    'instagram_url': 'https://instagram.com/exemplo',
+    'youtube_url': 'https://www.youtube.com/channel/UCidKmbl0ENPRl5vy70-GwfA',
+    'social_section_enabled': True,
+    'social_section_title': 'TESTE FASE 11 — Redes Sociais Kelly',
+}
+
+
+@pytest.mark.django_db
+def test_real_public_data_migration_replaces_seeded_values(current_site):
+    Site.objects.filter(pk=current_site.pk).update(name='Escola e Portal de Notícias')
+    SiteExtension.objects.update_or_create(site=current_site, defaults=SEEDED_SITE_EXTENSION)
+    SchoolFeature.objects.update_or_create(
+        site=current_site,
+        placement=SchoolFeature.Placement.TRUST,
+        title='Projeto Jovem Comunicador',
+        defaults={'description': 'Iniciativa social.', 'is_active': True},
+    )
+
+    real_public_data.apply_real_public_data(django_apps, None)
+    real_public_data.apply_real_public_data(django_apps, None)  # rodar de novo não muda nada
+
+    extension = SiteExtension.objects.get(site=current_site)
+    assert Site.objects.get(pk=current_site.pk).name == 'Komuniki'
+    assert extension.tagline == 'Comunicação que gera resultados'
+    assert extension.primary_email == 'komunikicomunicacao@gmail.com'
+    assert extension.phone_number == '(61) 92003-8428'
+    assert extension.address == 'QI 11 Bloco A Comércio Local salas 102/104 Guará 1\nBrasília DF, 70274-530, BR'
+    assert extension.facebook_url == ''
+    assert extension.instagram_url == 'https://www.instagram.com/komunikiescola/'
+    assert extension.youtube_url == 'https://youtube.com/@escolakomuniki?si=8AR-FzPrJh8QCbu3'
+    assert extension.social_section_enabled is False
+    assert extension.social_section_title == 'Acompanhe a Komuniki nas redes'
+    assert not SchoolFeature.objects.get(
+        site=current_site, placement=SchoolFeature.Placement.TRUST, title='Projeto Jovem Comunicador',
+    ).is_active
+
+
+@pytest.mark.django_db
+def test_real_public_data_migration_keeps_values_edited_in_admin(current_site):
+    SiteExtension.objects.update_or_create(
+        site=current_site,
+        defaults={
+            'instagram_url': 'https://www.instagram.com/outra_conta/',
+            'phone_number': '(61) 3333-4444',
+            'facebook_url': 'https://www.facebook.com/Komunikicomunicacao/',
+            'social_section_enabled': True,
+            'social_section_title': 'Nossas redes',
+        },
+    )
+
+    real_public_data.apply_real_public_data(django_apps, None)
+
+    extension = SiteExtension.objects.get(site=current_site)
+    assert extension.instagram_url == 'https://www.instagram.com/outra_conta/'
+    assert extension.phone_number == '(61) 3333-4444'
+    assert extension.facebook_url == 'https://www.facebook.com/Komunikicomunicacao/'
+    assert extension.social_section_enabled is True
+    assert extension.social_section_title == 'Nossas redes'
+
+
+@pytest.mark.django_db
+def test_migrated_database_starts_with_the_real_public_data(settings):
+    extension = SiteExtension.objects.get(site_id=settings.SITE_ID)
+
+    assert extension.instagram_url == 'https://www.instagram.com/komunikiescola/'
+    assert extension.youtube_url == 'https://youtube.com/@escolakomuniki?si=8AR-FzPrJh8QCbu3'
+    assert not SchoolFeature.objects.get(
+        site_id=settings.SITE_ID, placement=SchoolFeature.Placement.TRUST, title='Projeto Jovem Comunicador',
+    ).is_active
 
 
 @pytest.mark.django_db

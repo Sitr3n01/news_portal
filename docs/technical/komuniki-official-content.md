@@ -38,6 +38,8 @@ Set-Location 'C:\Users\Sitr3n\Documents\Github\news_portal-komuniki-design'
 
 A aplicação criou backup SQLite íntegro antes das dez alterações, dentro de uma transação que impede escritores concorrentes. Uma falha reverte a transação. Reexecutar depois do sucesso não altera o banco nem cria outro backup. Não há migração, mudança de API, sincronização automática ou alteração de credenciais. O comando é exclusivo da prévia; não deve ser adaptado para execução em produção sem revisão própria.
 
+Desde 14/09/2026 a migração `school.0010_komuniki_real_public_data` leva os mesmos dados reais a qualquer banco pelo `migrate`, trocando só os campos que ainda guardam valores semeados. Veja [Dados reais](komuniki-troca-do-site.md#dados-reais).
+
 ## Validação
 
 - **107 testes passaram:** 101 de escola, contato, redes sociais, componentes comuns e vagas, mais seis testes do aplicador: simulação sem gravação, backup/idempotência, conflito com edição existente, rollback em falha, rejeição do checkout original e rejeição de campos não permitidos.

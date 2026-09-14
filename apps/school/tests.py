@@ -3,6 +3,7 @@ from importlib import import_module
 import pytest
 from django.apps import apps as django_apps
 from django.contrib.sites.models import Site
+from django.templatetags.static import static
 from django.urls import reverse
 
 from apps.common.models import SiteExtension
@@ -171,7 +172,8 @@ def test_school_homepage_renders_kelly_intro_block(client, current_site):
     assert 'Kelly Farias, CEO da Komuniki' in content
     assert 'Jornalista, atriz, radialista' in content
     assert 'Kelly Farias, CEO of Komuniki' in content
-    assert 'images/kelly-farias-komuniki.jpeg' in content
+    # URL com hash do manifest: o nginx serve /static/ como immutable por 30 dias, então um caminho fixo manteria a foto antiga no cache
+    assert f'src="{static("images/kelly-farias-komuniki.jpeg")}"' in content
 
 
 @pytest.mark.django_db

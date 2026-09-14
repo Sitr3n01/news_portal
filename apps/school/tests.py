@@ -187,8 +187,12 @@ def test_school_homepage_renders_particle_stage_with_local_three(client, current
     assert 'js/school-editorial-particles.js' in content
 
 
+def _navbar(content):
+    return content[content.index('<nav class="ed-nav"'):content.index('</nav>')]
+
+
 @pytest.mark.django_db
-def test_school_homepage_marks_text_reveal_with_local_gsap(client, current_site):
+def test_school_homepage_reveals_all_text_with_local_gsap(client, current_site):
     response = client.get(reverse('school:home'))
 
     content = response.content.decode()
@@ -200,12 +204,58 @@ def test_school_homepage_marks_text_reveal_with_local_gsap(client, current_site)
     assert 'js/school-editorial-reveal.js' in content
     # O guard de FOUC nasce no <head>, antes de qualquer texto aparecer
     assert "document.documentElement.classList.add('js')" in content
-    # Exemplos aprovados: hero no load, título do prêmio no scroll e trilhas em cascata
+    # Hero no load, com os textos extras em ordem; o resto da página e o rodapé em grupos no scroll
     assert 'data-particles-scene data-reveal-hero' in content
-    assert 'data-reveal="mask"' in content
     assert 'data-reveal-lede' in content
-    assert 'data-reveal-group data-reveal-step="0.2"' in content
-    assert content.count('data-reveal="fade"') == 3
+    assert 'data-reveal-at="0.7"' in content
+    assert content.count('data-reveal="mask"') >= 4
+    assert content.count('data-reveal-group') >= 8
+    assert 'text-slate-300" data-reveal="fade"' in content
+    # A navbar fica estática
+    assert 'data-reveal' not in _navbar(content)
+
+
+@pytest.mark.django_db
+def test_school_about_page_reveals_all_text(client, current_site):
+    response = client.get(reverse('school:about'))
+
+    content = response.content.decode()
+    assert response.status_code == 200
+    assert 'data-reveal="mask"' in content
+    assert content.count('data-reveal-group') >= 10
+    assert 'text-slate-300" data-reveal="fade"' in content
+    assert 'data-reveal' not in _navbar(content)
+
+
+@pytest.mark.django_db
+def test_courses_page_reveals_all_text_but_other_cms_pages_stay_static(client, current_site):
+    Page.objects.update_or_create(
+        site=current_site,
+        slug='cursos',
+        defaults={'title': 'Cursos', 'content': 'Grade visual.', 'is_published': True},
+    )
+    Page.objects.create(site=current_site, title='Projeto', slug='projeto', content='Conteúdo', is_published=True)
+
+    courses = client.get(reverse('school:page_detail', args=['cursos'])).content.decode()
+    other = client.get(reverse('school:page_detail', args=['projeto'])).content.decode()
+
+    # Cursos densos usam passo menor na cascata; o rodapé entra junto
+    assert 'data-reveal-group data-reveal-step="0.1"' in courses
+    assert 'text-slate-300" data-reveal="fade"' in courses
+    assert 'data-reveal' not in _navbar(courses)
+    assert 'data-reveal="' not in other
+    assert 'data-reveal-group' not in other
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('url_name', ['contact:page', 'school:privacy'])
+def test_school_pages_outside_the_reveal_keep_text_static(client, current_site, url_name):
+    response = client.get(reverse(url_name))
+
+    content = response.content.decode()
+    assert response.status_code == 200
+    assert 'data-reveal="' not in content
+    assert 'data-reveal-group' not in content
 
 
 @pytest.mark.django_db

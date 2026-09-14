@@ -36,7 +36,7 @@
             }}
         };
     </script>
-    <link rel="stylesheet" href="{% static 'css/school-editorial.css' %}?v=13">
+    <link rel="stylesheet" href="{% static 'css/school-editorial.css' %}?v=14">
     <script src="{% static 'js/school-editorial.js' %}" defer></script>
     <script src="{% static 'js/vendor/htmx.min.js' %}" defer></script>
     <script src="{% static 'js/vendor/alpine.min.js' %}" defer></script>
@@ -69,7 +69,7 @@
         {% endif %}
         {% block content %}{% endblock %}
     </main>
-    {% include 'school/editorial/footer.html' %}
+    {% block footer %}{% include 'school/editorial/footer.html' %}{% endblock %}
     {% include 'components/turnstile_script.html' %}
     {% block extra_js %}{% endblock %}
 </body>

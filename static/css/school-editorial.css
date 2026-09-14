@@ -49,11 +49,13 @@
 /* Line-by-line text reveal (js/school-editorial-reveal.js). The guard hides text until GSAP has split it into lines. */
 .js [data-reveal],.js [data-reveal-lede]{opacity:0}
 .line-wrap{overflow:hidden;width:fit-content;padding-right:.12em}
-.line{display:block;white-space:nowrap}
+/* No nowrap: a word the layout breaks mid-word (a long Portuguese word at 375px, the e-mail) comes out of SplitText as one line, and nowrap would push it out of its box and change the height. */
+.line{display:block}
 /* Barlow at line-height .9 inks .05em above and .133em below each line (tilde, cedilla). The mask grows .15em each way; top and the negative margin put every line back where it was, and flow-root keeps that margin inside the heading. */
 [data-reveal="mask"]{display:flow-root}
 [data-reveal="mask"] .line{padding-block:.15em}
-[data-reveal="mask"] .line-wrap{position:relative;top:-.15em;margin-bottom:-.3em}
+/* The negative right margin gives back the .12em padding, so a line that filled its box still fits and does not wrap. */
+[data-reveal="mask"] .line-wrap{position:relative;top:-.15em;margin-bottom:-.3em;margin-right:-.12em}
 /* The only persistent layer is the navigation capsule. */
 .ed-nav{position:fixed;inset:0 0 auto;z-index:50;height:128px;display:flex;align-items:center;background:transparent;pointer-events:none}
 .ed-nav-pill{position:relative;pointer-events:auto;display:flex;align-items:center;justify-content:space-between;gap:24px;width:min(100% - 48px,1200px);min-height:80px;margin:auto;padding:12px 16px 12px 28px;border-radius:48px;background:var(--ed-card)}

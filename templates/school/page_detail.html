@@ -12,44 +12,42 @@
 {% if page.slug == 'cursos' and course_groups %}
 <section class="ed-section py-16 md:py-24">
     <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:px-8">
-        <div class="flex flex-col justify-center">
-            <h1 class="max-w-4xl font-display text-5xl font-extrabold leading-[0.98] tracking-tight text-slate-950 md:text-7xl"
+        <div class="flex flex-col justify-center" data-reveal-group>
+            <h1 class="max-w-4xl font-display text-5xl font-extrabold leading-[0.98] tracking-tight text-slate-950 md:text-7xl" data-reveal="mask"
                     x-text="t('Formação em comunicação, cultura e presença profissional', 'Training in communication, culture and professional presence')">
                     Formação em comunicação, cultura e presença profissional
                 </h1>
-            <p class="mt-7 max-w-2xl text-lg leading-relaxed text-slate-600 md:text-xl"
+            <p class="mt-7 max-w-2xl text-lg leading-relaxed text-slate-600 md:text-xl" data-reveal="fade"
                     x-text="t('Cursos profissionalizantes, livres e mentorias para quem quer comunicar melhor, produzir cultura, conduzir eventos e desenvolver segurança na expressão.', 'Professional and open courses plus mentoring for those who want to communicate better, produce culture, host events and build confidence in their expression.')">
                     Cursos profissionalizantes, livres e mentorias para quem quer comunicar melhor, produzir cultura, conduzir eventos e desenvolver segurança na expressão.
                 </p>
             <div class="mt-10 flex flex-col gap-3 sm:flex-row">
                     <a href="{% url 'contact:page' %}"
-                        class="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-700 px-7 py-3 text-base font-bold text-white focus:outline-none ed-button"
-                        x-text="t('Fale com a Komuniki', 'Talk to Komuniki')">
-                        Fale com a Komuniki
+                        class="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-700 px-7 py-3 text-base font-bold text-white focus:outline-none ed-button">
+                        <span data-reveal="fade" x-text="t('Fale com a Komuniki', 'Talk to Komuniki')">Fale com a Komuniki</span>
                     </a>
                     <a href="#grade-cursos"
-                        class="ed-chip inline-flex min-h-12 items-center justify-center rounded-full px-7 py-3 text-base font-bold text-primary-900 focus:outline-none ed-button ed-button-outline"
-                        x-text="t('Ver cursos', 'View courses')">
-                        Ver cursos
+                        class="ed-chip inline-flex min-h-12 items-center justify-center rounded-full px-7 py-3 text-base font-bold text-primary-900 focus:outline-none ed-button ed-button-outline">
+                        <span data-reveal="fade" x-text="t('Ver cursos', 'View courses')">Ver cursos</span>
                     </a>
                 </div>
             </div>
 
         <aside class="grid gap-4">
-                <div class="ed-card ed-inverted rounded-[1.75rem] p-6 text-white">
-                    <p class="text-sm font-bold uppercase text-primary-100" x-text="t('Reconhecimento', 'Recognition')">Reconhecimento</p>
-                    <h2 class="mt-4 font-display text-3xl font-bold leading-tight">{{ course_award }}</h2>
-                    <p class="mt-4 text-sm leading-relaxed text-primary-50"
+                <div class="ed-card ed-inverted rounded-[1.75rem] p-6 text-white" data-reveal-group>
+                    <p class="text-sm font-bold uppercase text-primary-100" data-reveal="fade" x-text="t('Reconhecimento', 'Recognition')">Reconhecimento</p>
+                    <h2 class="mt-4 font-display text-3xl font-bold leading-tight" data-reveal="fade">{{ course_award }}</h2>
+                    <p class="mt-4 text-sm leading-relaxed text-primary-50" data-reveal="fade"
                         x-text="t('Uma validação importante do impacto educacional e social da Komuniki.', 'An important validation of the educational and social impact of Komuniki.')">
                         Uma validação importante do impacto educacional e social da Komuniki.
                     </p>
                 </div>
-                <div class="ed-card rounded-[1.75rem] p-6">
-                    <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Trilhas disponíveis', 'Available tracks')">Trilhas disponíveis</p>
+                <div class="ed-card rounded-[1.75rem] p-6" data-reveal-group>
+                    <p class="text-sm font-bold uppercase text-primary-700" data-reveal="fade" x-text="t('Trilhas disponíveis', 'Available tracks')">Trilhas disponíveis</p>
                     <div class="mt-4 flex flex-wrap gap-2">
                         {% for group in course_groups %}
                         <span class="rounded-full border border-primary-700/15 bg-white/55 px-3 py-2 text-xs font-bold uppercase tracking-wide text-primary-800 ed-tag">
-                            {{ group.eyebrow }}
+                            <span data-reveal="fade">{{ group.eyebrow }}</span>
                         </span>
                         {% endfor %}
                     </div>
@@ -62,21 +60,21 @@
     <div class="space-y-14 md:space-y-16">
         {% for group in course_groups %}
         <div class="ed-course-group mx-auto grid max-w-7xl gap-7 px-4 sm:px-6 lg:grid-cols-[0.35fr_0.65fr] lg:px-8">
-            <div class="ed-panel rounded-[2rem] p-6 md:p-8" >
-                <p class="text-sm font-bold uppercase text-primary-700">{{ group.eyebrow }}</p>
-                <h2 class="mt-4 font-display text-3xl font-bold leading-tight text-slate-950 md:text-4xl">{{ group.title }}</h2>
-                <p class="mt-4 leading-relaxed text-slate-600">{{ group.description }}</p>
+            <div class="ed-panel rounded-[2rem] p-6 md:p-8" data-reveal-group>
+                <p class="text-sm font-bold uppercase text-primary-700"><span data-reveal="fade">{{ group.eyebrow }}</span></p>
+                <h2 class="mt-4 font-display text-3xl font-bold leading-tight text-slate-950 md:text-4xl" data-reveal="mask">{{ group.title }}</h2>
+                <p class="mt-4 leading-relaxed text-slate-600" data-reveal="fade">{{ group.description }}</p>
             </div>
 
             <div class="grid gap-5 md:grid-cols-2">
                 {% for course in group.courses %}
-                <article class="ed-card flex min-h-72 flex-col rounded-[1.75rem] p-6">
+                <article class="ed-card flex min-h-72 flex-col rounded-[1.75rem] p-6" data-reveal-group data-reveal-step="0.1">
                     <div class="flex items-start justify-between gap-4">
                         <div>
-                            <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary-700">
+                            <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary-700" data-reveal="fade">
                                 {{ group.eyebrow }}
                             </p>
-                            <h3 class="mt-3 font-display text-2xl font-bold leading-tight text-slate-950">
+                            <h3 class="mt-3 font-display text-2xl font-bold leading-tight text-slate-950" data-reveal="fade">
                                 {{ course.title }}
                             </h3>
                         </div>
@@ -88,17 +86,17 @@
                         </span>
                     </div>
 
-                    <p class="mt-5 leading-relaxed text-slate-600">
+                    <p class="mt-5 leading-relaxed text-slate-600" data-reveal="fade">
                         {{ course.summary }}
                     </p>
 
                     <dl class="mt-6 grid gap-3">
                         {% for detail in course.details %}
                         <div class="rounded-2xl border border-slate-200/70 bg-white/65 px-4 py-3">
-                            <dt class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                            <dt class="text-xs font-bold uppercase tracking-wide text-slate-500" data-reveal="fade">
                                 {{ detail.label }}
                             </dt>
-                            <dd class="mt-1 font-display text-lg font-bold text-slate-950">
+                            <dd class="mt-1 font-display text-lg font-bold text-slate-950" data-reveal="fade">
                                 {{ detail.value }}
                             </dd>
                         </div>
@@ -110,7 +108,7 @@
                         {% for note in course.notes %}
                         <li class="flex gap-2 text-sm leading-relaxed text-slate-600">
                             <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary-600"></span>
-                            {{ note }}
+                            <span data-reveal="fade">{{ note }}</span>
                         </li>
                         {% endfor %}
                     </ul>
@@ -127,32 +125,30 @@
     <div class="ed-panel ed-final-panel mx-auto max-w-7xl overflow-hidden rounded-[2.25rem]"
         >
         <div class="grid lg:grid-cols-2">
-            <div class="bg-white/35 p-8 md:p-12">
-                <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Próximas turmas', 'Upcoming classes')">Próximas turmas</p>
-                <h2 class="mt-4 font-display text-3xl font-bold text-slate-950 md:text-4xl"
+            <div class="bg-white/35 p-8 md:p-12" data-reveal-group>
+                <p class="text-sm font-bold uppercase text-primary-700" data-reveal="fade" x-text="t('Próximas turmas', 'Upcoming classes')">Próximas turmas</p>
+                <h2 class="mt-4 font-display text-3xl font-bold text-slate-950 md:text-4xl" data-reveal="mask"
                     x-text="t('Quer entender qual curso combina com seu momento?', 'Want to find out which course fits your moment?')">Quer entender qual curso combina com seu momento?</h2>
-                <p class="mt-4 leading-relaxed text-slate-600"
+                <p class="mt-4 leading-relaxed text-slate-600" data-reveal="fade"
                     x-text="t('A Komuniki pode orientar formatos, requisitos, turmas e caminhos de formação conforme seu objetivo.', 'Komuniki can guide you on formats, requirements, classes and training paths according to your goal.')">
                     A Komuniki pode orientar formatos, requisitos, turmas e caminhos de formação conforme seu objetivo.
                 </p>
                 <a href="{% url 'contact:page' %}"
-                    class="mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white transition-colors focus:outline-none ed-button"
-                    x-text="t('Conte-nos mais', 'Tell us more')">
-                    Conte-nos mais
+                    class="mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white transition-colors focus:outline-none ed-button">
+                    <span data-reveal="fade" x-text="t('Conte-nos mais', 'Tell us more')">Conte-nos mais</span>
                 </a>
             </div>
-            <div class="p-8 text-white md:p-12 ed-inverted">
-                <p class="text-sm font-bold uppercase text-primary-100" x-text="t('Blog de notícias', 'News blog')">Blog de notícias</p>
-                <h2 class="mt-4 font-display text-3xl font-bold md:text-4xl"
+            <div class="p-8 text-white md:p-12 ed-inverted" data-reveal-group>
+                <p class="text-sm font-bold uppercase text-primary-100" data-reveal="fade" x-text="t('Blog de notícias', 'News blog')">Blog de notícias</p>
+                <h2 class="mt-4 font-display text-3xl font-bold md:text-4xl" data-reveal="mask"
                     x-text="t('Acompanhe conteúdos e novidades', 'Follow content and updates')">Acompanhe conteúdos e novidades</h2>
-                <p class="mt-4 leading-relaxed text-primary-50"
+                <p class="mt-4 leading-relaxed text-primary-50" data-reveal="fade"
                     x-text="t('Veja publicações, notícias e atualizações da Komuniki no portal de notícias.', 'See posts, news and updates from Komuniki on the news portal.')">
                     Veja publicações, notícias e atualizações da Komuniki no portal de notícias.
                 </p>
                 <a href="{{ kelly_blog_public_url }}"
-                    class="mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-bold text-primary-900 transition-colors focus:outline-none ed-button ed-button-white"
-                    x-text="t('Ir para notícias', 'Go to news')">
-                    Ir para notícias
+                    class="mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-bold text-primary-900 transition-colors focus:outline-none ed-button ed-button-white">
+                    <span data-reveal="fade" x-text="t('Ir para notícias', 'Go to news')">Ir para notícias</span>
                 </a>
             </div>
         </div>
@@ -211,3 +207,5 @@
 </section>
 {% endif %}
 {% endblock %}
+
+{% block footer %}{% if page.slug == 'cursos' and course_groups %}{% include 'school/editorial/footer.html' with reveal=True %}{% else %}{{ block.super }}{% endif %}{% endblock %}

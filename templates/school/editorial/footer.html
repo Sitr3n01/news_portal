@@ -1,17 +1,17 @@
 <footer class="ed-footer">
     <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-16">
         <div class="grid grid-cols-1 gap-10 lg:grid-cols-12">
-            <div class="lg:col-span-5">
+            <div class="lg:col-span-5"{% if reveal %} data-reveal-group{% endif %}>
                 <a href="{% url 'school:home' %}" class="inline-flex items-center gap-3 rounded-lg focus:outline-none">
                     {% if site_settings and site_settings.logo %}
                     <img class="h-12 w-auto max-w-[13rem] object-contain" src="{{ site_settings.logo.url }}" loading="lazy"
                         alt="{{ current_site.name }}">
                     {% else %}
-                    <span class="ed-footer-brand">{{ current_site.name }}</span>
+                    <span class="ed-footer-brand"{% if reveal %} data-reveal="fade"{% endif %}>{{ current_site.name }}</span>
                     {% endif %}
                 </a>
 
-                <p class="mt-5 max-w-md text-base leading-relaxed text-slate-300">
+                <p class="mt-5 max-w-md text-base leading-relaxed text-slate-300"{% if reveal %} data-reveal="fade"{% endif %}>
                     {{ site_settings.tagline|default:"Comunicação que gera resultados." }}
                 </p>
 
@@ -37,58 +37,57 @@
             </div>
 
             <div class="grid grid-cols-1 gap-8 sm:grid-cols-3 lg:col-span-7">
-                <div>
-                    <h3 class="font-display text-sm font-bold uppercase text-white">Komuniki</h3>
+                <div{% if reveal %} data-reveal-group{% endif %}>
+                    <h3 class="font-display text-sm font-bold uppercase text-white"{% if reveal %} data-reveal="fade"{% endif %}>Komuniki</h3>
                     <ul class="mt-5 space-y-3">
-                        <li><a href="{% url 'school:home' %}" class="text-slate-300 transition-colors" x-text="t('Início', 'Home')">Início</a></li>
-                        <li><a href="{% url 'school:about' %}" class="text-slate-300 transition-colors" x-text="t('Sobre', 'About')">Sobre</a></li>
-                        <li><a href="{% url 'school:page_detail' 'cursos' %}" class="text-slate-300 transition-colors" x-text="t('Cursos', 'Courses')">Cursos</a></li>
-                        <li><a href="{{ kelly_blog_public_url }}" class="text-slate-300 transition-colors" x-text="t('Notícias', 'News')">Notícias</a></li>
+                        <li><a href="{% url 'school:home' %}" class="text-slate-300 transition-colors"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Início', 'Home')">Início</a></li>
+                        <li><a href="{% url 'school:about' %}" class="text-slate-300 transition-colors"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Sobre', 'About')">Sobre</a></li>
+                        <li><a href="{% url 'school:page_detail' 'cursos' %}" class="text-slate-300 transition-colors"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Cursos', 'Courses')">Cursos</a></li>
+                        <li><a href="{{ kelly_blog_public_url }}" class="text-slate-300 transition-colors"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Notícias', 'News')">Notícias</a></li>
                     </ul>
                 </div>
 
-                <div>
-                    <h3 class="font-display text-sm font-bold uppercase text-white" x-text="t('Atendimento', 'Support')">Atendimento</h3>
+                <div{% if reveal %} data-reveal-group{% endif %}>
+                    <h3 class="font-display text-sm font-bold uppercase text-white"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Atendimento', 'Support')">Atendimento</h3>
                     <ul class="mt-5 space-y-3">
-                        <li><a href="{% url 'contact:page' %}" class="text-slate-300 transition-colors" x-text="t('Contato', 'Contact')">Contato</a></li>
-                        <li><a href="{% url 'school:privacy' %}" class="text-slate-300 transition-colors" x-text="t('Privacidade', 'Privacy')">Privacidade</a></li>
+                        <li><a href="{% url 'contact:page' %}" class="text-slate-300 transition-colors"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Contato', 'Contact')">Contato</a></li>
+                        <li><a href="{% url 'school:privacy' %}" class="text-slate-300 transition-colors"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Privacidade', 'Privacy')">Privacidade</a></li>
                     </ul>
                 </div>
 
-                <div>
-                    <h3 class="font-display text-sm font-bold uppercase text-white" x-text="t('Contato', 'Contact')">Contato</h3>
+                <div{% if reveal %} data-reveal-group{% endif %}>
+                    <h3 class="font-display text-sm font-bold uppercase text-white"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Contato', 'Contact')">Contato</h3>
                     <ul class="mt-5 space-y-4 text-sm leading-relaxed">
                         {% if site_settings and site_settings.primary_email %}
                         <li>
-                            <span class="block text-slate-400" x-text="t('E-mail', 'Email')">E-mail</span>
-                            <a href="mailto:{{ site_settings.primary_email }}" class="font-semibold text-slate-100 transition-colors">{{ site_settings.primary_email }}</a>
+                            <span class="block text-slate-400"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('E-mail', 'Email')">E-mail</span>
+                            {% if reveal %}<span class="block" data-reveal="fade">{% endif %}<a href="mailto:{{ site_settings.primary_email }}" class="font-semibold text-slate-100 transition-colors">{{ site_settings.primary_email }}</a>{% if reveal %}</span>{% endif %}
                         </li>
                         {% endif %}
                         {% if site_settings and site_settings.phone_number %}
                         <li>
-                            <span class="block text-slate-400" x-text="t('Telefone', 'Phone')">Telefone</span>
-                            <span class="font-semibold text-slate-100">{{ site_settings.phone_number }}</span>
+                            <span class="block text-slate-400"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Telefone', 'Phone')">Telefone</span>
+                            {% if reveal %}<span class="block" data-reveal="fade">{% endif %}<span class="font-semibold text-slate-100">{{ site_settings.phone_number }}</span>{% if reveal %}</span>{% endif %}
                         </li>
                         {% endif %}
                         {% if site_settings and site_settings.address %}
                         <li>
-                            <span class="block text-slate-400" x-text="t('Endereço', 'Address')">Endereço</span>
-                            <span class="block whitespace-pre-line text-slate-200">{{ site_settings.address }}</span>
+                            <span class="block text-slate-400"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Endereço', 'Address')">Endereço</span>
+                            <span class="block whitespace-pre-line text-slate-200"{% if reveal %} data-reveal="fade"{% endif %}>{{ site_settings.address }}</span>
                         </li>
                         {% endif %}
                     </ul>
                     <a href="{% url 'contact:page' %}"
-                        class="mt-6 inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-bold text-primary-900 transition-colors focus:outline-none ed-button ed-button-white"
-                        x-text="t('Conte-nos mais', 'Tell us more')">
-                        Conte-nos mais
+                        class="mt-6 inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-bold text-primary-900 transition-colors focus:outline-none ed-button ed-button-white">
+                        <span{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Conte-nos mais', 'Tell us more')">Conte-nos mais</span>
                     </a>
                 </div>
             </div>
         </div>
 
-        <div class="mt-12 flex flex-col gap-3 border-t border-white/10 pt-7 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-            <p>&copy; {% now "Y" %} {{ current_site.name }}. <span x-text="t('Todos os direitos reservados.', 'All rights reserved.')">Todos os direitos reservados.</span></p>
-            <p x-text="t('Comunicação, artes, liderança, cursos e mentorias.', 'Communication, arts, leadership, courses and mentoring.')">Comunicação, artes, liderança, cursos e mentorias.</p>
+        <div class="mt-12 flex flex-col gap-3 border-t border-white/10 pt-7 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between"{% if reveal %} data-reveal-group{% endif %}>
+            {% if reveal %}<p data-reveal="fade" x-text="'© {% now "Y" %} {{ current_site.name|escapejs }}. ' + t('Todos os direitos reservados.', 'All rights reserved.')">&copy; {% now "Y" %} {{ current_site.name }}. Todos os direitos reservados.</p>{% else %}<p>&copy; {% now "Y" %} {{ current_site.name }}. <span x-text="t('Todos os direitos reservados.', 'All rights reserved.')">Todos os direitos reservados.</span></p>{% endif %}
+            <p{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Comunicação, artes, liderança, cursos e mentorias.', 'Communication, arts, leadership, courses and mentoring.')">Comunicação, artes, liderança, cursos e mentorias.</p>
         </div>
     </div>
 </footer>

@@ -1,10 +1,13 @@
 // Reveal de texto por linha: GSAP SplitText + ScrollTrigger, vendorizados em js/vendor/gsap-3.15.0.
 //
 //   <h2 data-reveal="mask">  headline grande: cada linha sobe de trás de um recorte
-//   <h3 data-reveal="fade">  título menor: cada linha surge sem recorte
-//   <div data-reveal-group data-reveal-step="0.2">  os [data-reveal] de dentro entram em cascata, com um gatilho só
-//   <section data-reveal-hero>  dispara no load, sem scroll: os [data-reveal] e o [data-reveal-lede] de dentro
+//   <p data-reveal="fade">   texto menor: cada linha surge sem recorte
+//   <div data-reveal-group data-reveal-step="0.2">  os [data-reveal] de dentro entram em cascata, com um gatilho só;
+//                                                   grupos irmãos na mesma fileira começam com STEP entre si
+//   <section data-reveal-hero>  dispara no load: os [data-reveal] de dentro (data-reveal-at="0.7" adia em segundos)
+//                               e o [data-reveal-lede]
 //
+// Marque o elemento que contém o texto, nunca um contêiner flex ou grid: as palavras virariam itens do layout.
 // Temporário: ?reveal-markers na URL liga os markers dos ScrollTriggers para conferir start e end.
 (() => {
     const DUR = 0.9;            // duração de cada linha
@@ -16,12 +19,13 @@
     const root = document.documentElement;
     const { gsap, ScrollTrigger, SplitText } = window;
     const blocks = [];
-    const observers = [];
+    const cleanups = [];
     let ctx = null;
+    const normalize = (text) => text.replace(/\s+/g, ' ').trim();
 
     const destroy = () => {
-        observers.forEach((observer) => observer.disconnect());
-        observers.length = 0;
+        cleanups.forEach((cleanup) => cleanup());
+        cleanups.length = 0;
         // O contexto reverte os SplitText (devolvendo o HTML original), tweens, timelines e ScrollTriggers.
         ctx?.revert();
         ctx = null;
@@ -44,12 +48,17 @@
         const mode = el.dataset.reveal === 'mask' ? 'mask' : 'fade';
         let state = 'hidden';   // hidden | pending | revealed
         let tl = null;
+        let splitText = '';
 
         const config = {
             type: 'lines',
             linesClass: 'line',
             autoSplit: true,    // refaz o split no resize e quando a webfont carrega
-            aria: 'auto',       // o título ganha aria-label com o texto e as linhas ficam aria-hidden
+            // Título: aria-label com o texto e linhas aria-hidden, como na spec. Parágrafo, item de lista e span não
+            // aceitam aria-label, e o leitor de tela ficaria mudo; neles as linhas continuam legíveis.
+            aria: /^H[1-6]$/.test(el.tagName) ? 'auto' : 'none',
+            // Na troca de idioma o bloco ganha um SplitText novo, que não deve restaurar o HTML do anterior.
+            overwrite: false,
             onSplit(self) {
                 if (mode === 'mask') {
                     for (const line of self.lines) {
@@ -63,6 +72,7 @@
                         wrap.classList.add('line-wrap');
                     }
                 }
+                splitText = normalize(el.textContent);
                 const tween = mode === 'mask'
                     ? gsap.fromTo(self.lines, { x: -50, yPercent: 100 }, { x: 0, yPercent: 0, duration: DUR, stagger: STAGGER, ease: EASE, paused: true })
                     : gsap.fromTo(self.lines, { x: -50, opacity: 0 }, { x: 0, opacity: 1, duration: DUR, stagger: STAGGER, ease: EASE, paused: true });
@@ -83,25 +93,36 @@
         if (mode === 'mask') {
             config.mask = 'lines';  // cria o wrapper de recorte
         }
+        // Com white-space pre*, as quebras do texto são conteúdo: viram <br> em vez de espaço.
+        if (getComputedStyle(el).whiteSpace.startsWith('pre')) {
+            config.reduceWhiteSpace = false;
+        }
 
         let split = SplitText.create(el, config);
 
-        // O x-text do Alpine troca PT/EN reescrevendo textContent, o que apaga as linhas. O split é refeito
-        // com o texto novo; o revert() vem antes porque o SplitText antigo restauraria o idioma anterior.
+        // O x-text do Alpine troca PT/EN reescrevendo o texto do elemento ou de um filho, o que apaga ou desatualiza
+        // as linhas. Recortes e linhas são desfeitos movendo os nós vivos de volta, porque o HTML guardado pelo
+        // SplitText traria o idioma anterior e perderia os vínculos do Alpine, e o texto novo é dividido.
         const observer = new MutationObserver(() => {
-            if (split.lines.every((line) => el.contains(line))) {
+            if (split.lines.every((line) => el.contains(line)) && normalize(el.textContent) === splitText) {
                 return;
             }
-            const text = el.textContent;
             ctx.add(() => {
-                split.revert();
-                el.textContent = text;
+                split.kill();
+                // Aposentada: um resize já agendado no SplitText antigo restauraria o HTML do idioma anterior.
+                split.isSplit = false;
+                tl?.kill();
+                for (const node of el.querySelectorAll('.line-mask, .line')) {
+                    node.replaceWith(...node.childNodes);
+                }
+                el.normalize();
+                el.removeAttribute('aria-label');
                 split = SplitText.create(el, config);
             });
             observer.takeRecords();
         });
-        observer.observe(el, { childList: true });
-        observers.push(observer);
+        observer.observe(el, { childList: true, subtree: true, characterData: true });
+        cleanups.push(() => observer.disconnect());
 
         const api = {
             el,
@@ -116,6 +137,11 @@
                     tl.play(0);
                 } else {
                     state = 'pending';
+                }
+            },
+            resplit() {
+                if (split.isSplit) {
+                    split.split(split.vars);
                 }
             },
         };
@@ -135,7 +161,7 @@
                 const tl = gsap.timeline({ delay: 0.15 });
                 tl.add('start');
                 for (const el of ownedBy(hero)) {
-                    tl.add(createBlock(el).animateIn, 'start');
+                    tl.add(createBlock(el).animateIn, `start+=${Number.parseFloat(el.dataset.revealAt) || 0}`);
                 }
                 const lede = hero.querySelector('[data-reveal-lede]');
                 if (lede) {
@@ -147,23 +173,33 @@
             for (const group of document.querySelectorAll('[data-reveal-group]')) {
                 const step = Number.parseFloat(group.dataset.revealStep);
                 const apis = ownedBy(group).map(createBlock);
-                const tl = gsap.timeline({
-                    scrollTrigger: {
-                        trigger: group,
-                        start: 'top bottom',
-                        end: 'top top',
-                        scrub: false,
-                        markers,
-                        // Como no bloco isolado: ao sair pela base da tela o grupo volta a esconder, e a próxima
-                        // entrada recomeça a cascata.
-                        toggleActions: 'play none none reset',
-                        onLeaveBack: () => apis.forEach((api) => api.reset()),
-                    },
-                });
+                const tl = gsap.timeline({ paused: true });
                 tl.add('start');
                 apis.forEach((api, i) => {
                     tl.add(api.reset, 'start');
                     tl.add(api.animateIn, `start+=${i * (Number.isNaN(step) ? STEP : step)}`);
+                });
+                // Grupos irmãos lado a lado, como cards de uma fileira, começam com STEP entre si. Empilhados, no
+                // celular, cada um começa ao entrar.
+                const rowDelay = () => {
+                    const top = group.getBoundingClientRect().top;
+                    const row = [...group.parentElement.children].filter((sibling) => sibling.matches('[data-reveal-group]')
+                        && Math.abs(sibling.getBoundingClientRect().top - top) < 2);
+                    return Math.max(0, row.indexOf(group)) * STEP;
+                };
+                ScrollTrigger.create({
+                    trigger: group,
+                    start: 'top bottom',
+                    end: 'top top',
+                    scrub: false,
+                    markers,
+                    onEnter: () => tl.delay(rowDelay()).restart(true),
+                    // Como no bloco isolado: ao sair pela base da tela o grupo volta a esconder, e a próxima entrada
+                    // recomeça a cascata.
+                    onLeaveBack: () => {
+                        tl.pause(0);
+                        apis.forEach((api) => api.reset());
+                    },
                 });
             }
 
@@ -188,7 +224,27 @@
         // Trocar o idioma muda a altura dos textos: os gatilhos abaixo precisam medir de novo.
         const langObserver = new MutationObserver(() => requestAnimationFrame(() => ScrollTrigger.refresh()));
         langObserver.observe(root, { attributes: true, attributeFilter: ['lang'] });
-        observers.push(langObserver);
+        cleanups.push(() => langObserver.disconnect());
+
+        // Texto em flex, inline ou pílula tem a largura das próprias linhas, e linha não quebra: o autoSplit, que
+        // observa o elemento, não percebe a viewport encolher. Largura nova da viewport, split novo em todos.
+        let lastWidth = window.innerWidth;
+        let resizeTimer = 0;
+        const onResize = () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (window.innerWidth !== lastWidth) {
+                    lastWidth = window.innerWidth;
+                    blocks.forEach((block) => block.resplit());
+                }
+            }, 200);
+        };
+        window.addEventListener('resize', onResize);
+        cleanups.push(() => {
+            clearTimeout(resizeTimer);
+            window.removeEventListener('resize', onResize);
+        });
+
         // Numa navegação comum o navegador libera tudo; isto cobre uma troca do htmx que remova o texto.
         for (const block of blocks) {
             block.el.addEventListener('htmx:beforeCleanupElement', destroy, { once: true });

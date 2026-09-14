@@ -1,89 +1,109 @@
 # Reveal de texto por linha da Komuniki
 
-Implementado em 13/09/2026 na worktree `news_portal-komuniki-design`, branch `codex/komuniki-editorial-test`, a partir de uma especificação fechada do usuário: GSAP SplitText + ScrollTrigger, dois modos (`mask` e `fade`) e valores fixos. É a segunda exceção à regra de nenhum movimento, ao lado do [hero de partículas](komuniki-particles.md).
+Implementado em 13/09/2026 na worktree `news_portal-komuniki-design`, branch `codex/komuniki-editorial-test`, a partir de uma especificação fechada do usuário: GSAP SplitText + ScrollTrigger, dois modos (`mask` e `fade`) e valores fixos. A primeira rodada cobriu três exemplos na Home (commit `34f0619`). Na segunda, o reveal passou a valer para todo o texto de Início, Sobre e Cursos, inclusive o rodapé dessas páginas. A navbar, Contato, Privacidade e as demais páginas do CMS continuam estáticas. É a segunda exceção à regra de nenhum movimento, ao lado do [hero de partículas](komuniki-particles.md).
 
 ## Decisões
 
-- **Valores da spec, sem ajuste.** Cada linha dura 0,9 s com `power3.out`, com 0,1 s entre linhas e 0,2 s entre blocos de um grupo. `mask`: `x -50 → 0` e `yPercent 100 → 0` dentro de um recorte. `fade`: `x -50 → 0` e `opacity 0 → 1`. O hero dispara 0,15 s depois do boot; o parágrafo entra em `start+=0.5` com `opacity 0 → 1` e `y 50 → 0`, em 0,8 s, `power2.out`.
-- **GSAP 3.15.0 vendorizado.** O projeto não tem npm nem bundler, e a CSP bloqueia CDN. Em 13/09/2026, `^3.13.0` resolvia para 3.15.0, que tem `mask`, `autoSplit` e `aria`. Os três builds UMD vieram do tarball do npm com a integridade sha512 conferida (`sha512-dMW4CWBT…jfZB+A==`) e são idênticos aos do pacote. A licença é a "Standard no-charge" da GSAP: gratuita, inclusive para uso comercial, mas não é MIT. Ela está citada no cabeçalho de cada arquivo.
-- **Só nas páginas editoriais.** Os scripts entram em `base_school_editorial.html`. Vagas, Equipe e Blog continuam com as animações próprias de `base_school.html`, `base.html` e `base_news.html`. A regra CSS que zera `animation` e `transition` continua: o GSAP escreve estilo inline a cada quadro e não depende dela.
-- **Acentos inteiros no modo `mask`.** Com o `line-height` de 0,9 da Barlow, o til e o acento agudo passam 0,05 em acima da caixa da linha, e a cedilha, 0,133 em abaixo. O recorte literal da spec cortaria "COMUNICAÇÃO" para sempre. A linha ganha `padding-block: .15em`, e o recorte volta ao lugar com `top: -.15em` e `margin-bottom: -.3em`, porque margens negativas entre irmãos colapsariam. O título vira `flow-root` para essa margem não vazar. A geometria final é idêntica à do texto estático. Como `yPercent: 100` é relativo à linha, agora mais alta, a subida percorre 1,2 em em vez de 0,9 em. O respiro opcional de .06em entre recortes não foi usado, para não mudar a altura dos títulos aprovados.
-- **O hero de partículas fica fora da timeline.** Os canvases ficam fora do `figure`, e a forma acompanha a posição dele a cada quadro. O tween de ilustração da spec só esmaeceria a legenda e faria a forma saltar. A timeline do hero anima só o título e o parágrafo.
-- **PT/EN pelo Alpine.** O `x-text` troca o idioma reescrevendo `textContent`, o que apaga as linhas. Um `MutationObserver` por título detecta a troca, reverte o SplitText antigo, que senão restauraria o idioma anterior no próximo resize, e divide o texto novo mantendo o estado: o que estava revelado continua revelado, e o que estava escondido continua escondido. Os scripts do GSAP carregam depois do Alpine, e a mudança de `lang` no `<html>` chama `ScrollTrigger.refresh()`.
-- **Estado final depois de um re-split.** O SplitText aplica ao tween novo o tempo do anterior. Se o resize cria linhas, a última pararia no meio, por isso o módulo reforça `progress(1)` num microtask.
-- **O grupo reinicia como o bloco isolado.** O timeline do grupo usa `toggleActions: 'play none none reset'`, e o `onLeaveBack` devolve os filhos ao estado inicial. Assim a cascata recomeça quando o usuário sobe e desce.
-- **Guard de FOUC.** O script inline do `<head>` adiciona `js` ao `<html>`, exceto com movimento reduzido. Se o módulo não tiver rodado até o `DOMContentLoaded`, a classe sai. O módulo também remove `js` quando falta o GSAP ou quando o init lança erro. O parágrafo do hero tem o mesmo guard, com `[data-reveal-lede]`.
-- **Limpeza.** Tudo nasce num `gsap.context()`. `window.komunikiReveal.destroy()` desliga os observers e reverte SplitText, tweens e ScrollTriggers. O evento `htmx:beforeCleanupElement` num título chama essa limpeza; numa navegação comum, o navegador libera tudo.
+- **Valores da spec, sem ajuste.** Cada linha dura 0,9 s, com `power3.out` e 0,1 s entre linhas; blocos de um grupo ficam 0,2 s um do outro. No `mask`, a linha vai de `x -50` a 0 e de `yPercent 100` a 0 dentro de um recorte. No `fade`, vai de `x -50` a 0 e de `opacity 0` a 1. O hero dispara 0,15 s depois do boot, e o parágrafo entra em `start+=0.5`, em 0,8 s, `power2.out`.
+- **GSAP 3.15.0 vendorizado.** O projeto não tem npm nem bundler, e a CSP bloqueia CDN. Em 13/09/2026, `^3.13.0` resolvia para 3.15.0. Os três builds UMD vieram do tarball do npm, com a integridade sha512 conferida (`sha512-dMW4CWBT…jfZB+A==`). A licença é a "Standard no-charge" da GSAP: gratuita, inclusive para uso comercial, mas não é MIT.
+- **Onde entra.** Os scripts carregam em `base_school_editorial.html`. Os atributos ficam nos templates de Início, Sobre e Cursos, e no rodapé só quando a página o inclui com `reveal=True`, pelo `{% block footer %}`. Vagas, Equipe e Blog mantêm as animações próprias. A regra CSS que zera `animation` e `transition` continua, porque o GSAP escreve estilo inline e não depende dela.
+- **Modos.** `mask` vai no h1 e nos h2 de seção alinhados à esquerda. Todo o resto usa `fade`: títulos de card, parágrafos, rótulos, etiquetas, itens de lista, `dt`/`dd`, texto de botão e rodapé. O título centralizado da chamada final de Sobre também usa `fade`, porque o `.line-wrap` com `width: fit-content` alinharia as linhas à esquerda.
+- **O que recebe o atributo.** Sempre o elemento que contém o texto, nunca um contêiner flex ou grid, cujas palavras virariam itens do layout.
+  - Botões e pílulas ganham um span interno: a caixa fica visível e só o rótulo anima.
+  - E-mail e telefone do rodapé, que são inline e o e-mail tem destaque azul, ganham um span em bloco em volta.
+  - O copyright virou um `x-text` único no parágrafo. Um filho com `x-text` que quebrasse de linha seria clonado pelo SplitText e reinicializado pelo Alpine.
+  - Ficam sem reveal: a legenda do post social, cujo `-webkit-line-clamp` as linhas em bloco quebrariam, e os ícones, marcadores e caixas.
+- **Cascatas.**
+  - No hero, os textos extras usam `data-reveal-at`: legenda da arte em 0,1, botões em 0,7 e 0,9, "Explore a Komuniki" em 1,1.
+  - Cada coluna, card ou introdução de seção é um `data-reveal-group`.
+  - Grupos irmãos na mesma fileira começam com 0,2 s entre si, o que faz a onda dos cards. Empilhados, no celular, cada um começa ao entrar.
+  - Os cards de curso, densos, usam `data-reveal-step="0.1"`.
+  - Ao subir até o grupo sair pela base da tela, ele volta a esconder, e a próxima entrada recomeça a cascata.
+- **Acentos no `mask`.** Com o `line-height` de 0,9 da Barlow, til e agudo passam 0,05 em acima da caixa da linha, e a cedilha, 0,133 em abaixo. A correção:
+  - a linha ganha `padding-block: .15em`;
+  - o recorte volta ao lugar com `top: -.15em`, `margin-bottom: -.3em` (margens negativas entre irmãos colapsariam) e `margin-right: -.12em`, que devolve o `padding-right` da spec;
+  - o título vira `flow-root`.
+
+  A geometria final é idêntica. Como `yPercent: 100` é relativo à linha, agora mais alta, a subida percorre 1,2 em. O nome no rodapé fica dentro de um `inline-flex`, onde o padding mudaria a linha de base; "KOMUNIKI" não tem acento, então usa `fade`.
+- **`.line` sem `nowrap`.** A spec pede `white-space: nowrap`. Uma palavra que o layout quebra no meio, como "PROFISSIONALIZANTE" a 375 px ou o e-mail, sai do SplitText como uma linha só. Com `nowrap` ela transbordaria e mudaria a altura da página. Sem `nowrap`, as linhas continuam sendo as que o SplitText mediu, mas podem quebrar dentro de si.
+- **Acessibilidade.** Títulos mantêm `aria: "auto"`, como na spec: `aria-label` com o texto e linhas `aria-hidden`. Parágrafo, item de lista e span não aceitam `aria-label`, e o leitor de tela ficaria mudo. Neles o módulo usa `aria: "none"`, e o texto das linhas continua na árvore de acessibilidade.
+- **PT/EN pelo Alpine.** O `x-text` reescreve o texto e apaga as linhas. O módulo desfaz recortes e linhas movendo os nós vivos de volta e divide o texto novo mantendo o estado (revelado continua revelado). Não restaura o HTML guardado pelo SplitText, que traria o idioma anterior. A instância antiga é aposentada com `isSplit = false`, para que um resize já agendado nela não restaure o idioma anterior. A mudança de `lang` chama `ScrollTrigger.refresh()`.
+- **Resize.** O `autoSplit` observa a largura do próprio elemento. Texto em flex, pílula ou link inline não muda de largura quando a viewport encolhe, e as linhas ficariam largas demais. Quando a largura da viewport muda, todos os blocos são redivididos.
+- **Estado final e texto pré-formatado.** Depois de um re-split, `progress(1)` é reforçado num microtask, porque o SplitText aplicaria o tempo do tween anterior. Com `white-space: pre*`, como no endereço, as quebras viram `<br>` em vez de espaço.
+- **Guard de FOUC e limpeza.** O `<head>` adiciona `js` ao `<html>`, exceto com movimento reduzido, e a remove no `DOMContentLoaded` se o módulo não tiver rodado. O módulo também a remove quando falta GSAP ou quando o init falha. `window.komunikiReveal.destroy()` desliga observers e listeners e reverte SplitText, tweens e ScrollTriggers.
 
 ## Arquivos
 
 | Arquivo | Papel |
 |---|---|
-| `static/js/school-editorial-reveal.js` | Módulo único: constantes, blocos com `{ el, mode, reset(), animateIn() }`, hero, grupos, blocos isolados e boot depois das fontes |
+| `static/js/school-editorial-reveal.js` | Módulo único: blocos `{ el, mode, reset(), animateIn() }`, hero, grupos, blocos isolados, troca de idioma e resize |
 | `static/js/vendor/gsap-3.15.0/` | `gsap.min.js`, `ScrollTrigger.min.js` e `SplitText.min.js` do pacote `gsap@3.15.0` |
-| `static/css/school-editorial.css` | Guard `.js [data-reveal]`, `.line-wrap`, `.line` e a correção dos acentos; folha em `?v=13` |
-| `templates/base_school_editorial.html` | Classe `js` no `<head>` e os quatro scripts com `defer`, depois do Alpine |
-| `templates/school/home.html` | Os três exemplos aprovados |
-| `apps/school/tests.py` | `test_school_homepage_marks_text_reveal_with_local_gsap` |
+| `static/css/school-editorial.css` | Guard `.js [data-reveal]`, `.line-wrap`, `.line` e a correção dos acentos; folha em `?v=14` |
+| `templates/base_school_editorial.html` | Classe `js` no `<head>`, os quatro scripts com `defer` e o `{% block footer %}` |
+| `templates/school/home.html`, `about.html`, `page_detail.html` | Atributos em todo o texto; `page_detail` só no ramo de Cursos |
+| `templates/school/editorial/footer.html` | Atributos condicionados a `reveal` |
+| `templates/school/editorial/social_feed.html`, `social_post_card.html` | Feed social da Home, quando ativo |
+| `apps/school/tests.py` | Reveal nas três páginas, navbar sem marcação e Contato, Privacidade e outras páginas do CMS estáticas |
 
 ## Como marcar
 
 ```html
-<section data-reveal-hero>                        <!-- dispara no load -->
+<section data-reveal-hero>                          <!-- dispara no load -->
   <h1 data-reveal="mask">…</h1>
   <p data-reveal-lede>…</p>
+  <a class="ed-button"><span data-reveal="fade" data-reveal-at="0.7">…</span></a>
 </section>
-<h2 data-reveal="mask">…</h2>                      <!-- bloco isolado, com ScrollTrigger próprio -->
-<div data-reveal-group data-reveal-step="0.2">     <!-- um gatilho só, filhos em cascata -->
-  <h3 data-reveal="fade">…</h3>
+<div class="grid">
+  <article data-reveal-group>                         <!-- cards lado a lado entram em onda -->
+    <h3 data-reveal="fade">…</h3>
+    <p data-reveal="fade">…</p>
+  </article>
 </div>
+<p data-reveal="fade">…</p>                           <!-- fora de hero e grupo: bloco isolado -->
 ```
-
-`mask` é para headlines grandes; `fade`, para títulos menores e blocos em coluna. Cada `[data-reveal]` pertence ao hero ou ao grupo mais próximo. Fora deles, é um bloco isolado com `start: 'top bottom'`, `end: 'top top'`, `onEnter` e `onLeaveBack`. Evite `mask` em título centralizado: o `.line-wrap` usa `width: fit-content` e alinharia as linhas à esquerda.
-
-Exemplos aplicados na Home: o título do hero (`mask`, no load), o título do bloco do prêmio (`mask`, isolado) e os três títulos das trilhas (`fade`, em grupo). A aplicação nos demais títulos espera aprovação.
 
 ## Como testar
 
-Na prévia http://127.0.0.1:8013/:
+Na prévia http://127.0.0.1:8013/, ou na 8012 depois de reiniciá-la, porque ela roda com `--noreload`:
 
-1. Role até o título do prêmio: as três linhas entram com 0,1 s entre si.
-2. Suba até ele sair pela base da tela e desça de novo: o reveal recomeça. O mesmo vale para os cards de trilhas, em cascata de 0,2 s.
-3. Redimensione a janela devagar: as quebras se refazem cerca de 200 ms depois, e o texto continua visível.
-4. Inspecione o título do hero. O `h1` tem `aria-label` com o texto original. Dentro dele há `.line-mask.line-wrap` com `overflow: clip` inline e `.line`, ambos com `aria-hidden="true"`. O `overflow: clip` do SplitText sobrepõe o `overflow: hidden` do CSS, e os dois recortam.
-5. Ative "reduzir movimento" no sistema: não há classe `js` nem split, e o texto fica estático.
-6. No DevTools, em Network, use Slow 4G com o cache desligado: título e parágrafo ficam invisíveis até o split e então animam, sem piscar.
-7. Troque PT/EN: os títulos são refeitos no idioma novo sem perder o estado.
+1. Role pelas três páginas: cada bloco entra quando chega à tela, com as linhas 0,1 s uma da outra. Os cards lado a lado entram em onda.
+2. Suba até uma seção sair pela base da tela e desça de novo: a cascata recomeça.
+3. Redimensione a janela devagar: as quebras se refazem e nada transborda.
+4. Inspecione o h1: `aria-label` com o texto, `.line-mask.line-wrap` com `overflow: clip` inline e `.line` dentro. Um parágrafo tem as linhas sem `aria-hidden`.
+5. Ative "reduzir movimento" no sistema: não há classe `js`, split nem animação.
+6. No DevTools, use Slow 4G com o cache desligado: nenhum texto aparece antes de animar.
+7. Troque PT/EN nas três páginas, também depois de redimensionar: o texto troca e continua visível.
 
 Temporário: `?reveal-markers` na URL mostra os markers de `start` e `end`.
 
 ## Validação
 
-Feita em 13/09/2026 na prévia 8013, onde as 36 verificações do roteiro CDP passaram. O roteiro usa o Edge headless e fica em `.preview/evidence/text-reveal/reveal-cdp.mjs`, fora do Git. Com a prévia no ar, `node reveal-cdp.mjs` grava `summary.json`, `fouc-samples.json` e as capturas na mesma pasta.
+Feita em 13/09/2026: 38 verificações passaram no Edge headless via CDP. Os roteiros `reveal-all.mjs` e `cdp-lib.mjs`, o `summary.json` e as capturas estão em `.preview/evidence/text-reveal-all/`, fora do Git. A primeira rodada, com os três exemplos, está em `.preview/evidence/text-reveal/`.
 
 | Critério | Resultado |
 |---|---|
-| Cascata entre linhas | Título do prêmio: as linhas partem a 13, 109 e 209 ms |
-| Cascata do grupo | Primeiras linhas dos três títulos a 18, 209 e 410 ms, com 0,1 s entre linhas dentro de cada um |
-| Reinício | Subir até o bloco sair pela base devolve o estado inicial; descer repete os mesmos intervalos, no bloco e no grupo |
-| Salto e recarga | Pular direto ao fim, ou recarregar já rolado, deixa prêmio e trilhas revelados |
-| Geometria | Em 1440 e 375 px, posições das linhas, alturas dos títulos, blocos seguintes e altura da página idênticas às do texto estático (diferença ≤ 0,1 px) |
-| Acentos | Cedilha e til inteiros no estado final (`premio-acentos-revelado.png`). No estado inicial a captura sai toda preta, sem nenhum traço de letra (`premio-estado-inicial.png`) |
-| Resize | 1440 → 1024 → 768 → 375 → 1440 px em inglês: o texto continua em inglês, dividido e revelado, sem rolagem horizontal |
-| Idioma | EN refaz hero e prêmio com `aria-label` em inglês, preservando o que estava revelado ou escondido; a volta para PT também funciona |
-| Acessibilidade | Na árvore real, os headings têm o nome completo, como "Comunicação que gera resultados", e recortes e linhas são ignorados por `aria-hidden` |
-| Movimento reduzido | Sem `js` e sem split; título e parágrafo com opacidade 1 |
-| Rede lenta | Slow 4G sem cache: estilo aplicado a 3,9 s, split a 5,1 s e fim a 6,5 s, sem título ou parágrafo visível antes do split |
-| Markers | 4 com `?reveal-markers` (dois gatilhos × start/end) e nenhum sem o parâmetro |
-| Cards | Em `fade` dentro de `.ed-card`, que tem `overflow: hidden`, o `x: -50` passa do padding de 24 px, e o começo da linha aparece cortado enquanto ela ainda está esmaecida (`trilhas-cascata-meio.png`). É o deslocamento da spec; convém considerar isso ao aplicar em outros cards |
-| Console | Nenhuma mensagem do reveal. Continuam os avisos preexistentes do Tailwind CDN, o 404 de `/favicon.ico` e o bloqueio de armazenamento do Turnstile no Edge |
-| Estáticos de produção | O `collectstatic` com `CompressedManifestStaticFilesStorage` passou: módulo, GSAP e CSS saíram com hash e `.gz`, e nenhum source map é referenciado |
-| Testes | 468 testes do pytest (com as variáveis `SECRET_KEY` e `DB_*` que o CI define) e o Ruff passaram |
+| Marcação nova x anterior | Com movimento reduzido, todo o texto de `main` e `footer` fica nas mesmas posições que na versão commitada (8012), em Início, Sobre e Cursos, a 1440 e 375 px |
+| Load | 70, 44 e 96 blocos divididos; nada visível antes da hora; navbar sem marcação; nenhum `x-text` aninhado |
+| Depois de rolar | Todos os blocos revelados; texto e altura da página idênticos ao estático (diferença ≤ 1 px); nenhuma linha transbordando e nenhuma rolagem horizontal |
+| Cascatas | Trilhas da Início em onda, com 0,2 s entre cards e entre os textos de cada card; reinício ao subir e descer; card de curso com 0,1 s |
+| Idioma | Cada bloco confere com o `x-text` calculado pelo Alpine em PT, em EN, em EN a 375 px e de volta em PT; nenhum `aria-label` desatualizado |
+| Acessibilidade | O h1 tem o nome inteiro e linhas ocultas; as linhas de parágrafo, o botão e o link do rodapé são legíveis |
+| Fora do pedido | Contato e Privacidade sem reveal e sem texto escondido |
+| Rede lenta | Slow 4G sem cache: estilo aplicado a 3,9 s e todos os blocos divididos a 5,1 s, nenhum visível antes |
+| Markers | Presentes com `?reveal-markers` |
+| Console | Nenhuma mensagem do reveal. Continuam o 404 de `/favicon.ico` e os avisos preexistentes do Tailwind CDN e do Turnstile |
+| Estáticos de produção | O `collectstatic` com `CompressedManifestStaticFilesStorage` passou |
+| Testes | 472 testes do pytest (com as variáveis `SECRET_KEY` e `DB_*` do CI) e o Ruff passaram |
 
-Limites: Chromium (Edge), em pixels CSS, sem aparelhos físicos, Safari ou Firefox. O movimento reduzido e a rede lenta foram emulados pelo CDP. O roteiro `scripts/preview/presentation_e2e.mjs`, do Codex, não foi executado. Em duas execuções o Edge headless deixou de entregar quadros de `requestAnimationFrame` e os tweens pararam no quadro 0; isso coincidiu com a abertura da mesma página no navegador do Claude Code. Repetida com os quadros normais, a verificação passou inteira. Se a trava voltar, o roteiro aborta sozinho em 300 s.
+Limites e observações:
+
+- Chromium (Edge), em pixels CSS, sem aparelhos físicos, Safari ou Firefox. Movimento reduzido e rede lenta foram emulados pelo CDP.
+- O feed social e os depoimentos não existem no banco local e não foram exercitados no navegador.
+- **Corte durante a entrada:** dentro de caixas com `overflow: hidden` e pouco padding (cards e o painel dos grupos de Cursos), o `x: -50` da spec corta o começo da linha enquanto ela entra. O corte some quando a linha chega (`cursos-grupo-meio.png`). Mantido assim a pedido do usuário em 13/09/2026.
+- **Quadros congelados no teste:** em algumas execuções o Edge headless parou de entregar quadros de `requestAnimationFrame`. O `cdp-lib.mjs` empurra o ticker do GSAP quando isso acontece e registra quantas vezes; na rodada válida o contador ficou em zero.
 
 ## Reversão
 
-- **Tirar só os exemplos:** apagar os atributos `data-reveal*` de `templates/school/home.html`. Sem elementos marcados, o módulo não faz nada.
-- **Tirar o sistema:** remover os quatro `<script>` e o guard do `<head>` em `base_school_editorial.html`, o bloco "Line-by-line text reveal" de `school-editorial.css` (subindo a versão da folha), o teste novo e, se quiser, `static/js/school-editorial-reveal.js` e `static/js/vendor/gsap-3.15.0/`.
+- **Tirar o reveal de uma página:** apagar os atributos `data-reveal*` do template dela e o `{% block footer %}` que passa `reveal=True`.
+- **Tirar o sistema:** remover os quatro `<script>` e o guard do `<head>` em `base_school_editorial.html`, o bloco "Line-by-line text reveal" de `school-editorial.css` (subindo a versão da folha) e os testes do reveal. Se quiser, apague também `static/js/school-editorial-reveal.js` e `static/js/vendor/gsap-3.15.0/`. Sem atributos, os spans internos dos botões e das etiquetas não mudam nada no visual.
 - **Atualizar o GSAP:** criar outra pasta `gsap-X.Y.Z` e trocar os caminhos no base. Não sobrescrever arquivos de uma pasta já publicada.

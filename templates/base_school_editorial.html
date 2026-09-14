@@ -9,6 +9,12 @@
             document.documentElement.classList.toggle('dark', localStorage.getItem('theme') === 'dark');
             document.documentElement.lang = localStorage.getItem('lang') === 'en' ? 'en' : 'pt-BR';
         } catch (_) {}
+        // Guard do reveal de texto: [data-reveal] fica invisível até o GSAP dividir as linhas. Com movimento
+        // reduzido o texto nunca some; se o módulo não chegar a rodar, o DOMContentLoaded devolve o texto.
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('js');
+            document.addEventListener('DOMContentLoaded', () => window.komunikiReveal || document.documentElement.classList.remove('js'));
+        }
     </script>
     <title>{% block title %}{{ site_settings.tagline|default:current_site.name }}{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}{{ site_settings.tagline }}{% endblock %}">
@@ -30,10 +36,15 @@
             }}
         };
     </script>
-    <link rel="stylesheet" href="{% static 'css/school-editorial.css' %}?v=12">
+    <link rel="stylesheet" href="{% static 'css/school-editorial.css' %}?v=13">
     <script src="{% static 'js/school-editorial.js' %}" defer></script>
     <script src="{% static 'js/vendor/htmx.min.js' %}" defer></script>
     <script src="{% static 'js/vendor/alpine.min.js' %}" defer></script>
+    {# Depois do Alpine: quando o reveal divide as linhas, o x-text já escreveu os títulos no idioma salvo. #}
+    <script src="{% static 'js/vendor/gsap-3.15.0/gsap.min.js' %}" defer></script>
+    <script src="{% static 'js/vendor/gsap-3.15.0/ScrollTrigger.min.js' %}" defer></script>
+    <script src="{% static 'js/vendor/gsap-3.15.0/SplitText.min.js' %}" defer></script>
+    <script src="{% static 'js/school-editorial-reveal.js' %}?v=1" defer></script>
     {% block extra_css %}{% endblock %}
 </head>
 <body class="ed-school" x-data="schoolEditorial" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>

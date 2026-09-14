@@ -8,16 +8,18 @@
 
 {% block content %}
 
-<section class="ed-hero" data-particles-scene>
+<section class="ed-hero" data-particles-scene data-reveal-hero>
     <div class="ed-wrap">
         <div class="ed-hero-grid">
             <div class="ed-hero-copy">
                 <div class="ed-tag"><span x-text="t('{{ home_config.hero_badge|escapejs }}', '{{ home_config.hero_badge_en|default:home_config.hero_badge|escapejs }}')">{{ home_config.hero_badge }}</span></div>
                 <h1 class="mt-8 max-w-5xl font-display text-5xl font-extrabold leading-[0.98] tracking-tight text-slate-950 md:text-7xl lg:text-8xl"
+                    data-reveal="mask"
                     x-text="t('{{ home_config.hero_title|escapejs }}', '{{ home_config.hero_title_en|default:home_config.hero_title|escapejs }}')">
                     {{ home_config.hero_title }}
                 </h1>
                 <p class="mt-7 max-w-2xl text-lg leading-relaxed text-slate-600 md:text-xl"
+                    data-reveal-lede
                     x-text="t('{{ home_config.hero_subtitle|escapejs }}', '{{ home_config.hero_subtitle_en|default:home_config.hero_subtitle|escapejs }}')">
                     {{ home_config.hero_subtitle }}
                 </p>
@@ -77,6 +79,7 @@
                 <p class="text-sm font-bold uppercase text-primary-700"
                     x-text="t('{{ home_config.visual_eyebrow|escapejs }}', '{{ home_config.visual_eyebrow_en|default:home_config.visual_eyebrow|escapejs }}')">{{ home_config.visual_eyebrow }}</p>
                 <h2 class="mt-4 font-display text-4xl font-extrabold leading-tight tracking-tight text-slate-950 md:text-6xl"
+                    data-reveal="mask"
                     x-text="t('{{ home_config.visual_title|escapejs }}', '{{ home_config.visual_title_en|default:home_config.visual_title|escapejs }}')">{{ home_config.visual_title }}</h2>
                 <p class="mt-5 max-w-xl text-lg leading-relaxed text-slate-600 "
                     x-text="t('{{ home_config.proposal_description|escapejs }}', '{{ home_config.proposal_description_en|default:home_config.proposal_description|escapejs }}')">{{ home_config.proposal_description }}</p>
@@ -108,7 +111,7 @@
             {% endfor %}
         </div>
 
-        <div class="ed-track-grid mt-11 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div class="ed-track-grid mt-11 grid gap-5 md:grid-cols-2 lg:grid-cols-3" data-reveal-group data-reveal-step="0.2">
             {% for track in course_tracks %}
             <a href="{% url 'school:page_detail' 'cursos' %}"
                 class="ed-card flex flex-col rounded-[1.75rem] p-6 focus:outline-none">
@@ -121,6 +124,7 @@
                 <p class="mt-5 text-sm font-bold uppercase text-primary-700"
                     x-text="t('{{ track.eyebrow|escapejs }}', '{{ track.eyebrow_en|default:track.eyebrow|escapejs }}')">{{ track.eyebrow }}</p>
                 <h3 class="mt-2 font-display text-2xl font-bold text-slate-950"
+                    data-reveal="fade"
                     x-text="t('{{ track.title|escapejs }}', '{{ track.title_en|default:track.title|escapejs }}')">{{ track.title }}</h3>
                 <p class="mt-3 leading-relaxed text-slate-600"
                     x-text="t('{{ track.description|escapejs }}', '{{ track.description_en|default:track.description|escapejs }}')">{{ track.description }}</p>

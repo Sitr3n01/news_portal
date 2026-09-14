@@ -188,6 +188,27 @@ def test_school_homepage_renders_particle_stage_with_local_three(client, current
 
 
 @pytest.mark.django_db
+def test_school_homepage_marks_text_reveal_with_local_gsap(client, current_site):
+    response = client.get(reverse('school:home'))
+
+    content = response.content.decode()
+    assert response.status_code == 200
+    # GSAP vem da cópia local, como o three: a CSP não libera CDN
+    assert 'js/vendor/gsap-3.15.0/gsap.min.js' in content
+    assert 'js/vendor/gsap-3.15.0/ScrollTrigger.min.js' in content
+    assert 'js/vendor/gsap-3.15.0/SplitText.min.js' in content
+    assert 'js/school-editorial-reveal.js' in content
+    # O guard de FOUC nasce no <head>, antes de qualquer texto aparecer
+    assert "document.documentElement.classList.add('js')" in content
+    # Exemplos aprovados: hero no load, título do prêmio no scroll e trilhas em cascata
+    assert 'data-particles-scene data-reveal-hero' in content
+    assert 'data-reveal="mask"' in content
+    assert 'data-reveal-lede' in content
+    assert 'data-reveal-group data-reveal-step="0.2"' in content
+    assert content.count('data-reveal="fade"') == 3
+
+
+@pytest.mark.django_db
 def test_school_team_page_redirects_to_news_blog(client, current_site):
     TeamMember.objects.create(site=current_site, name='Maria Atual', title='Direção', is_active=True)
 

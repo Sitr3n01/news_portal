@@ -74,7 +74,7 @@ news_portal/
 │   ├── accounts/           # Autenticação e usuários
 │   ├── common/             # Utilitários compartilhados (models abstratos, sanitização)
 │   ├── contact/            # Formulários de contato
-│   ├── hiring/             # Vagas e candidaturas
+│   ├── hiring/             # Vagas e candidaturas (só admin)
 │   ├── media_library/      # Biblioteca de mídia
 │   ├── news/               # Portal de notícias (artigos, newsletter, comentários)
 │   └── school/             # Site da escola (páginas, equipe, depoimentos)
@@ -147,7 +147,7 @@ O app mais complexo. Contém:
 
 ### `apps/hiring` — Vagas
 
-Vagas por departamento com pipeline de candidaturas (RECEIVED → REVIEWING → SHORTLISTED → INTERVIEW → REJECTED/ACCEPTED).
+Vagas por departamento com pipeline de candidaturas (RECEIVED → REVIEWING → SHORTLISTED → INTERVIEW → REJECTED/ACCEPTED). Desde 14/09/2026 as vagas não aparecem no site: restam o admin e o download protegido de currículos. Ver [APP_HIRING.md](APP_HIRING.md).
 
 ### `apps/contact` — Contato
 
@@ -204,8 +204,8 @@ def article_detail(request, slug):
 
 ```html
 <!-- Estenda a base correta para o portal -->
-{% extends "base_news.html" %}   {# notícias #}
-{% extends "base_school.html" %} {# escola #}
+{% extends "base_news.html" %}             {# notícias #}
+{% extends "base_school_editorial.html" %} {# escola #}
 
 <!-- Nunca use |safe — use o filtro customizado -->
 {{ article.content|sanitize_html }}

@@ -112,12 +112,10 @@ def school_guide(request):
     has_access = _can_any(user, SCHOOL_PERMISSIONS)
     home_configs = SchoolHomeConfig.objects.filter(is_active=True).count()
     published_courses = Page.objects.filter(slug='cursos', is_published=True).count()
+    # A Home atual só renderiza a barra de confiança
     active_features = SchoolFeature.objects.filter(
         is_active=True,
-        placement__in=[
-            SchoolFeature.Placement.TRUST,
-            SchoolFeature.Placement.LIFE,
-        ],
+        placement=SchoolFeature.Placement.TRUST,
     ).count()
     featured_testimonials = Testimonial.objects.filter(is_featured=True).count()
     unread_messages = ContactInquiry.objects.filter(status=ContactInquiry.Status.NEW).count()

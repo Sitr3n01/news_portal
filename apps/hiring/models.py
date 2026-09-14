@@ -59,7 +59,7 @@ class JobPosting(TimeStampedModel, SEOModel):
     employment_type = models.CharField('Tipo de contratação', max_length=20, choices=EmploymentType.choices, default=EmploymentType.FULL_TIME)
     location = models.CharField('Local', max_length=200, blank=True)
     salary_range = models.CharField('Faixa salarial', max_length=200, blank=True)
-    status = models.CharField('Status', max_length=20, choices=Status.choices, default=Status.DRAFT, help_text='Rascunho: não visível. Aberta: visível no site. Fechada: removida do site.')
+    status = models.CharField('Status', max_length=20, choices=Status.choices, default=Status.DRAFT, help_text='Situação interna da vaga. As vagas não são publicadas no site.')
     published_at = models.DateTimeField('Publicado em', null=True, blank=True)
     deadline = models.DateTimeField('Prazo final', null=True, blank=True, help_text='Data limite para receber candidaturas.')
 

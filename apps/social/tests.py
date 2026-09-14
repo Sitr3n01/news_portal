@@ -421,7 +421,7 @@ def test_home_hides_tiktok_cards_when_show_tiktok_off(client, current_site):
 
 @pytest.mark.django_db
 def test_home_hides_instagram_button_and_cards_when_show_instagram_off(client, current_site):
-    # URL exclusiva da seção (o rodapé tem um link fixo de Instagram próprio).
+    # O rodapé também usa o instagram_url do site, então o botão é conferido só dentro da seção.
     section_ig_url = 'https://www.instagram.com/komuniki_secao_teste/'
     SiteExtension.objects.update_or_create(
         site=current_site,
@@ -438,10 +438,11 @@ def test_home_hides_instagram_button_and_cards_when_show_instagram_off(client, c
     _post(tk, caption='Post do TikTok', is_manual=True, external_id='')
 
     content = client.get(reverse('school:home')).content.decode()
+    social_section = content.split('aria-labelledby="social-section-title"', 1)[1].split('</section>', 1)[0]
 
-    assert section_ig_url not in content      # botão do Instagram da seção escondido
-    assert 'Post do Instagram' not in content  # cards do Instagram escondidos
-    assert 'Post do TikTok' in content         # TikTok continua aparecendo
+    assert section_ig_url not in social_section  # botão do Instagram da seção escondido
+    assert 'Post do Instagram' not in content    # cards do Instagram escondidos
+    assert 'Post do TikTok' in content           # TikTok continua aparecendo
 
 
 @pytest.mark.django_db
@@ -464,8 +465,8 @@ def test_socialpost_changelist_renders_readonly_feed_summary(client, current_sit
 
 @pytest.mark.django_db
 def test_home_reflects_disabling_after_initial_render(client, current_site):
-    # Regressão: o framework de Sites cacheia a SiteExtension no processo, então
-    # desligar a seção não surtia efeito até reiniciar. O signal de clear_cache corrige.
+    # Regressão: o framework de Sites cacheia o Site no processo, e ler site.extension deixava a seção ligada até
+    # reiniciar. O context processor lê a SiteExtension do banco a cada request.
     ext, _ = SiteExtension.objects.update_or_create(
         site=current_site, defaults={'social_section_enabled': True},
     )

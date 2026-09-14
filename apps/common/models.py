@@ -22,6 +22,10 @@ class SEOModel(models.Model):
 class SiteExtension(models.Model):
     site = models.OneToOneField(Site, on_delete=models.CASCADE, related_name='extension')
     tagline = models.CharField(max_length=255, blank=True)
+    tagline_en = models.CharField(
+        'Tagline (EN)', max_length=255, blank=True, default='',
+        help_text='Opcional. Se vazio, usa o texto em português.',
+    )
     logo = models.ImageField(upload_to='site_logos/', blank=True)
     favicon = models.ImageField(upload_to='site_favicons/', blank=True)
     primary_email = models.EmailField(blank=True)

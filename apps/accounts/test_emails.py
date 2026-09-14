@@ -118,14 +118,23 @@ def test_build_email_context_does_not_raise_without_site_extension():
     """
     site = Site.objects.get_current()
     SiteExtension.objects.filter(site=site).delete()
-    # django.contrib.sites cacheia o Site (e o acessor `.extension` fica preso
-    # à instância) no nível do processo, não da transação de teste — sem
-    # limpar aqui, o resultado dependeria de qual outro teste rodou antes.
-    Site.objects.clear_cache()
 
     context = build_email_context()
 
     assert context['site_settings'] is None
+
+
+@pytest.mark.django_db
+def test_build_email_context_reads_site_settings_saved_elsewhere():
+    """Uma edição salva por outro worker do gunicorn, ou por uma migração, precisa chegar ao e-mail."""
+    site = Site.objects.get_current()
+    SiteExtension.objects.update_or_create(site=site, defaults={'tagline': 'Antes'})
+    assert build_email_context()['site_settings'].tagline == 'Antes'
+
+    # update() não passa por este processo nem dispara signals
+    SiteExtension.objects.filter(site=site).update(tagline='Depois')
+
+    assert build_email_context()['site_settings'].tagline == 'Depois'
 
 
 @pytest.mark.django_db

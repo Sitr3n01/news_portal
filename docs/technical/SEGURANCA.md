@@ -27,10 +27,10 @@
 | Escalada por login social | O Google só autentica; cargo/grupo/`is_staff` vêm do banco e nunca são escritos no fluxo | `apps/accounts/oauth_views.py` |
 | Sequestro por e-mail no OAuth | Casamento por e-mail exige `email_verified` do Google; identidade chaveada pelo `sub` imutável | `apps/accounts/oauth_google.py` |
 | Conta duplicada por capitalização | E-mail normalizado na gravação + busca `__iexact` | `apps/accounts/forms.py` + migration `0009` |
-| Enumeração de usuários | Mensagens e redirecionamentos idênticos em cadastro/reset/candidatura | Views e forms |
+| Enumeração de usuários | Mensagens e redirecionamentos idênticos em cadastro e reset | Views e forms |
 | E-mail sumindo em silêncio | System check `accounts.E001` barra backend fake fora de DEBUG, no deploy | `apps/accounts/checks.py` |
 | Clickjacking | `X-Frame-Options: DENY` | Middleware + nginx |
-| Upload malicioso | Extensão + MIME + **magic bytes** (5 MB) | `hiring/forms.py` |
+| Upload malicioso de currículo | Sem upload público desde 14/09/2026: o formulário de candidatura saiu com as vagas | — |
 | Vazamento de currículo | Nome UUID + download autenticado via `X-Accel-Redirect` | `hiring` + nginx |
 | iframe hostil | Whitelist apenas YouTube | `sanitization.py` |
 | Scripts externos | CSP (Django + nginx espelhado) | `base.py` + `nginx.conf` |
@@ -108,7 +108,6 @@ Authorization Code + PKCE, implementação própria (sem `allauth`/`social-auth`
 A política é **nunca revelar** se um e-mail/usuário existe:
 - **Cadastro** ([`apps/accounts/forms.py`](../../apps/accounts/forms.py)): e-mail duplicado retorna mensagem genérica — *"Não foi possível criar a conta. Verifique os dados e tente novamente."*
 - **Reset de senha:** resposta, mensagem e próxima tela idênticas, exista ou não a conta.
-- **Candidatura duplicada** (`hiring`): mesma mensagem de sucesso, sem revelar que aquele e-mail já se candidatou.
 
 ### E-mail como identidade
 `CustomUser.email` é `unique=True` **no banco** — constraint real, não só validação de formulário. A comparação é **case-insensitive** na aplicação: o cadastro grava em minúsculas e as buscas de identidade usam `__iexact`. Antes disso, `Fulano@x.com` e `FULANO@X.COM` viravam duas contas para a mesma caixa (corrigido na migration `0009`; `manage.py find_duplicate_emails` relata colisões remanescentes, sem nunca fundir contas por conta própria).
@@ -122,11 +121,12 @@ A política é **nunca revelar** se um e-mail/usuário existe:
 
 ## 4. Upload e currículos (LGPD)
 
-Detalhado em [APP_HIRING.md](APP_HIRING.md#5-currículos-o-ponto-mais-sensível). Resumo das três barreiras:
+Detalhado em [APP_HIRING.md](APP_HIRING.md#5-currículos-o-ponto-mais-sensível). Desde 14/09/2026 o site não recebe currículos: o formulário de candidatura saiu junto com as vagas. Os currículos já gravados seguem protegidos por duas barreiras:
 
 1. **Nome imprevisível:** `resume_upload_path` grava com `uuid4().hex` — nada de URL adivinhável.
-2. **Validação real de conteúdo:** [`ApplicationForm.clean_resume`](../../apps/hiring/forms.py) confere tipo MIME, extensão **e magic bytes** (`%PDF-`, `PK\x03\x04`, `\xd0\xcf\x11\xe0`). Os magic bytes são a defesa que vale — MIME e extensão são falsificáveis. Limite de 5 MB.
-3. **Entrega protegida:** `download_resume` exige `staff` + permissão `hiring.view_application`; em produção delega ao nginx via `X-Accel-Redirect` a partir de uma *location interna* (`/protected/`). O nginx **bloqueia** acesso público direto a `/media/hiring/resumes/`.
+2. **Entrega protegida:** `download_resume` exige `staff` + permissão `hiring.view_application`; em produção delega ao nginx via `X-Accel-Redirect` a partir de uma *location interna* (`/protected/`). O nginx **bloqueia** acesso público direto a `/media/hiring/resumes/`.
+
+A validação real de conteúdo — tipo MIME, extensão e **magic bytes** (`%PDF-`, `PK\x03\x04`, `\xd0\xcf\x11\xe0`), com limite de 5 MB — ficava em `ApplicationForm.clean_resume` e saiu com o formulário. Se a candidatura pelo site voltar, essa validação volta junto.
 
 ---
 

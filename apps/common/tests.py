@@ -6,6 +6,7 @@ from django.urls import NoReverseMatch, reverse
 
 from apps.accounts.admin_roles import ensure_admin_role_groups
 from apps.common.context_processors import site_context
+from apps.common.models import SiteExtension
 from apps.school.models import Page, SchoolFeature, SchoolHomeConfig
 
 
@@ -233,6 +234,18 @@ def test_site_context_exposes_public_cross_domain_urls(current_site):
 
 
 @pytest.mark.django_db
+def test_site_context_reads_site_settings_saved_by_another_worker(current_site):
+    SiteExtension.objects.update_or_create(site=current_site, defaults={'tagline': 'Antes'})
+    request = RequestFactory().get('/')
+    assert site_context(request)['site_settings'].tagline == 'Antes'
+
+    # update() não passa por este processo nem dispara signals, como uma edição salva em outro worker do gunicorn
+    SiteExtension.objects.filter(site=current_site).update(tagline='Depois')
+
+    assert site_context(request)['site_settings'].tagline == 'Depois'
+
+
+@pytest.mark.django_db
 def test_page_admin_staff_only_sees_courses_page(client, django_user_model, current_site):
     Page.objects.update_or_create(
         site=current_site,
@@ -294,7 +307,8 @@ def test_school_feature_admin_staff_only_sees_front_home_placements(client, djan
 
     add_response = client.get(reverse('admin:school_schoolfeature_add'))
     choices = [choice[0] for choice in add_response.context['adminform'].form.fields['placement'].choices]
-    assert choices == [SchoolFeature.Placement.TRUST, SchoolFeature.Placement.LIFE]
+    # A Home atual só mostra a barra de confiança
+    assert choices == [SchoolFeature.Placement.TRUST]
 
 
 @pytest.mark.django_db
@@ -308,7 +322,8 @@ def test_school_home_admin_staff_hides_legacy_fields(client, django_user_model, 
     client.force_login(user)
 
     response = client.get(reverse('admin:school_schoolhomeconfig_change', args=[home.pk]))
-    fields = set(response.context['adminform'].form.fields)
+    form = response.context['adminform'].form
+    fields = set(form.fields)
 
     assert response.status_code == 200
     assert 'hero_title_en' in fields
@@ -318,6 +333,11 @@ def test_school_home_admin_staff_hides_legacy_fields(client, django_user_model, 
     assert 'team_description_en' not in fields
     assert 'proposal_title' not in fields
     assert 'proposal_title_en' not in fields
+    # Campos do layout anterior que a Home atual não mostra
+    assert 'visual_footer_title' not in fields
+    assert 'life_title' not in fields
+    # Os campos hiring_* alimentam o painel final de cursos, e o rótulo diz isso
+    assert form.fields['hiring_title'].label == 'Título da chamada de cursos'
 
 
 @pytest.mark.django_db

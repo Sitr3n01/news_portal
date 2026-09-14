@@ -1,14 +1,14 @@
 # App `hiring` — Vagas e Candidaturas
 
-> Como funcionam departamentos, vagas e candidaturas: do formulário público até o download protegido de currículos no admin.
+> Como funcionam departamentos, vagas e candidaturas no admin, e o download protegido de currículos. As vagas saíram do site público em 14/09/2026.
 >
-> Documentos relacionados: [ARQUITETURA_E_MODELOS.md](ARQUITETURA_E_MODELOS.md) · [SEGURANCA.md](SEGURANCA.md)
+> Documentos relacionados: [ARQUITETURA_E_MODELOS.md](ARQUITETURA_E_MODELOS.md) · [SEGURANCA.md](SEGURANCA.md) · [Troca do site da Komuniki](komuniki-troca-do-site.md)
 
 ---
 
 ## 1. Visão geral
 
-O app `hiring` é o "Trabalhe conosco" da escola. Está montado em `/hiring/`, mas no admin aparece sob **Portal Escolar** (conceitualmente pertence à escola). Três modelos:
+O app `hiring` era o "Trabalhe conosco" da escola. **Desde 14/09/2026 as vagas não aparecem no site.** A lista, o detalhe e o formulário de candidatura saíram junto com o site antigo da escola. Modelos, dados e admin continuam, em **Recursos guardados**, visíveis só para superusuários. O prefixo `/hiring/` segue montado em [`config/urls.py`](../../config/urls.py) por causa de uma única rota: o download protegido de currículos, usado pelo admin.
 
 ```mermaid
 erDiagram
@@ -21,7 +21,7 @@ erDiagram
 | Modelo | Isolado por site? | Papel |
 |--------|:-----------------:|-------|
 | `Department` | ✅ `ForeignKey(Site)` + `on_site` | Áreas (Pedagógico, Administrativo, …) |
-| `JobPosting` | ✅ `ForeignKey(Site)` + `on_site` | A vaga em si, com fluxo de status |
+| `JobPosting` | ✅ `ForeignKey(Site)` + `on_site` | A vaga, como registro interno |
 | `Application` | herda da vaga | Candidatura (dados do candidato + currículo) |
 
 > **Correção importante:** documentação antiga afirmava que vagas eram "globais, sem `Site`". **Não é verdade no código atual** — `Department` e `JobPosting` têm `ForeignKey(Site)` e `on_site` (migration `0006_site_isolation`). `Application` não tem `Site` próprio porque o site é determinado pela vaga.
@@ -36,7 +36,7 @@ erDiagram
 - Managers: `objects` + `on_site`.
 
 ### `JobPosting`
-Herda `TimeStampedModel` + `SEOModel`.
+Herda `TimeStampedModel` + `SEOModel`. Os campos de SEO continuam no modelo, mas o admin deixou de mostrá-los em 14/09/2026, porque a vaga não tem mais página.
 
 | Campo | Observação |
 |-------|------------|
@@ -44,8 +44,8 @@ Herda `TimeStampedModel` + `SEOModel`.
 | `title`, `slug` | Slug único por site (`unique_job_posting_slug_per_site`) |
 | `description`, `requirements` | Conteúdo da vaga |
 | `employment_type` | `full_time` / `part_time` / `contract` / `internship` |
-| `status` | `draft` (não visível) / `open` (no site) / `closed` (fora do site) |
-| `published_at` | Carimbado ao abrir a vaga |
+| `status` | `draft` / `open` / `closed` — situação interna; nenhum status publica a vaga (texto de ajuda da migração `0008`) |
+| `published_at` | Carimbado pela ação em lote que abre vagas no admin |
 | `deadline` | Prazo final para candidaturas |
 
 **Validação de integridade multi-site** — `JobPosting.clean()`:
@@ -65,7 +65,7 @@ Herda `TimeStampedModel`.
 | `job` | FK para a vaga (define o site implicitamente) |
 | `first_name`, `last_name`, `email`, `phone` | Dados do candidato |
 | `cover_letter` | Carta de apresentação (opcional) |
-| `resume` | Arquivo — **nome gerado via UUID** (ver seção 4) |
+| `resume` | Arquivo — **nome gerado via UUID** (ver seção 5) |
 | `status` | Pipeline de triagem (ver seção 3) |
 | `notes` | Notas internas, **não visíveis ao candidato** |
 
@@ -75,7 +75,7 @@ Herda `TimeStampedModel`.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Recebida: candidato envia formulário
+    [*] --> Recebida: candidatura gravada
     Recebida --> EmAnalise: equipe começa triagem
     EmAnalise --> PreSelecionada
     EmAnalise --> Rejeitada
@@ -86,43 +86,34 @@ stateDiagram-v2
     Rejeitada --> [*]
 ```
 
+Sem o formulário público, nenhuma candidatura nova chega pelo site. As candidaturas já gravadas continuam no admin com o mesmo fluxo.
+
 Os status (`Application.Status`): `received → reviewing → shortlisted → interview → rejected/accepted`.
 
 No admin ([`apps/hiring/admin.py`](../../apps/hiring/admin.py)), as transições mais comuns têm **ações em lote**: "Marcar como Em Análise", "Marcar como Aceito", "Marcar como Rejeitado". Filtros rápidos levam direto a Recebidas / Em análise / Entrevista.
 
 ---
 
-## 4. Fluxo público: candidatar-se
+## 4. Site público: removido em 14/09/2026
 
-Em [`apps/hiring/views.py`](../../apps/hiring/views.py):
+Saíram do código:
 
-### `job_list` — `/hiring/`
-Lista apenas vagas **abertas** do site atual:
-```python
-JobPosting.on_site.select_related('department').filter(site=request.site, status=OPEN)
-```
+| Item | Onde ficava |
+|------|-------------|
+| Lista de vagas abertas (`job_list`, `/hiring/`) | `apps/hiring/views.py`, `templates/hiring/job_list.html` |
+| Detalhe e candidatura (`job_detail`, `/hiring/<slug>/`) | `apps/hiring/views.py`, `templates/hiring/job_detail.html` |
+| Formulário `ApplicationForm`, com a validação do currículo | `apps/hiring/forms.py` |
+| Base visual do site antigo, usada só por essas páginas | `templates/base_school.html`, com `navbar_school` e `footer_school` |
 
-### `job_detail` — `/hiring/<slug>/`
-Mostra a vaga e processa o formulário de candidatura (`ApplicationForm`). Lógica de submissão:
+Hoje `/hiring/` e `/hiring/<slug>/` respondem 404 (`test_job_pages_are_no_longer_public`).
 
-```python
-if form.is_valid():
-    email = form.cleaned_data['email']
-    if not Application.objects.filter(job=job, email=email).exists():
-        application = form.save(commit=False)
-        application.job = job
-        application.save()
-    messages.success(request, 'Sua candidatura foi enviada com sucesso!')
-    return redirect('hiring:job_detail', slug=job.slug)
-```
-
-**Detalhe de segurança/UX:** se já existe candidatura com aquele e-mail para aquela vaga, o sistema **silenciosamente não cria duplicata** — mas mostra a **mesma mensagem de sucesso**. Isso evita revelar a um terceiro se um e-mail já se candidatou (anti-enumeration), sem atrapalhar o candidato legítimo.
+Para trazer as vagas de volta, recupere esses arquivos do commit `02027f0` e refaça os templates sobre `base_school_editorial.html`. O formulário precisa voltar com a validação por magic bytes (seção 5) e com a regra anti-enumeração: uma candidatura duplicada, com o mesmo e-mail na mesma vaga, não era gravada, mas recebia a mesma mensagem de sucesso.
 
 ---
 
 ## 5. Currículos: o ponto mais sensível
 
-Currículos são dados pessoais (LGPD) e não podem vazar por URL adivinhável. O sistema protege isso em **três camadas**.
+Currículos são dados pessoais (LGPD) e não podem vazar por URL adivinhável. Os já gravados continuam protegidos por duas camadas. A validação do upload saiu com o formulário.
 
 ### Camada 1 — Nome de arquivo imprevisível
 [`resume_upload_path`](../../apps/hiring/models.py) gera o nome com UUID:
@@ -132,19 +123,16 @@ def resume_upload_path(instance, filename):
 ```
 Assim o caminho não deriva do nome do candidato — ninguém adivinha `joao-silva.pdf`.
 
-### Camada 2 — Validação de upload (`ApplicationForm.clean_resume`)
-Em [`apps/hiring/forms.py`](../../apps/hiring/forms.py), três checagens em sequência:
+### Validação de upload — saiu com o formulário
+`ApplicationForm.clean_resume` fazia três checagens em sequência:
 
 1. **Tipo MIME declarado** ∈ `{pdf, msword, docx}`.
 2. **Extensão** ∈ `{.pdf, .doc, .docx}`.
-3. **Assinatura real do arquivo (magic bytes)** — lê os primeiros bytes e confere:
-   - `%PDF-` → PDF
-   - `PK\x03\x04` → `.docx` (é um zip)
-   - `\xd0\xcf\x11\xe0` → `.doc` (formato OLE2)
+3. **Assinatura real do arquivo (magic bytes)** — `%PDF-` para PDF, `PK\x03\x04` para `.docx` (um zip) e `\xd0\xcf\x11\xe0` para `.doc` (OLE2).
 
-A checagem 3 é o que realmente importa: o tipo MIME e a extensão são **falsificáveis** pelo cliente; os magic bytes não. Limite de tamanho: **5 MB**.
+A checagem 3 era a que importava: MIME e extensão são **falsificáveis** pelo cliente; os magic bytes não. Limite de tamanho: **5 MB**. Sem formulário público, não há upload de currículo pelo site.
 
-### Camada 3 — Download protegido (nunca direto de `/media/`)
+### Camada 2 — Download protegido (nunca direto de `/media/`)
 A view [`download_resume`](../../apps/hiring/views.py) é a **única** porta para baixar um currículo:
 
 ```python
@@ -197,22 +185,18 @@ No admin, o link "Baixar currículo" (`resume_link` em `ApplicationAdmin`) apont
 
 | Rota | View | Acesso |
 |------|------|--------|
-| `/hiring/` | `job_list` | Público |
 | `/hiring/application/<id>/resume/` | `download_resume` | Staff + permissão |
-| `/hiring/<slug>/` | `job_detail` | Público (catch-all, por último) |
 
-> A rota de download fica **antes** do catch-all `<slug:slug>/`, senão "application" seria interpretado como slug de vaga.
+`/hiring/` e `/hiring/<slug>/` respondem 404 desde 14/09/2026.
 
 ---
 
 ## 7. Checklist mental ao mexer no hiring
 
-- [ ] Vaga não aparece no site? Confira `status=open` e se a view usa `on_site` com `site=request.site`.
 - [ ] Erro ao salvar vaga? Pode ser `clean()` — departamento de outro site.
 - [ ] Currículo não baixa em produção? Verifique a location `/protected/` no nginx e o header `X-Accel-Redirect`.
-- [ ] Upload recusado? A validação por magic bytes rejeita arquivos cujo conteúdo não bate com PDF/Word, mesmo com extensão correta.
-- [ ] Candidatura "sumiu"? Pode ser duplicata silenciosa (mesmo e-mail + mesma vaga).
+- [ ] Pediram as vagas de volta no site? Siga a seção 4: views, formulário com validação por magic bytes e templates sobre a base editorial.
 
 ---
 
-_Última atualização: 2026-06-03 — gerado a partir de leitura direta do código._
+_Última atualização: 2026-09-14 — vagas fora do site público._

@@ -10,6 +10,7 @@ Este diretório é a fonte de verdade da documentação do projeto. A árvore fo
 | Editor do Blog da Kelly | [user/manual_noticias.md](user/manual_noticias.md) |
 | Administrador Komuniki | [user/manual_escola.md](user/manual_escola.md) |
 | Desenvolvedor | [technical/README.md](technical/README.md) |
+| Revisão local do redesign Komuniki | [technical/komuniki-editorial-preview.md](technical/komuniki-editorial-preview.md) |
 | Deploy/go-live | [technical/go-live-checklist.md](technical/go-live-checklist.md) |
 | Agente de IA | [ai/README.md](ai/README.md) |
 

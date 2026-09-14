@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "consulted_on": "2026-09-12",
+  "source_url": "https://komuniki.com.br/",
+  "source_pages": ["/", "/sobre/", "/cursos/", "/contact/", "/privacidade/"],
+  "site": {"id": 1, "name": "Komuniki"},
+  "site_extension": {
+    "tagline": {"before": "Moldando o futuro, inspirando mentes.", "value": "Comunicação que gera resultados", "source": "Public footer on all five pages"},
+    "primary_email": {"before": "contato@exemplo.edu.br", "value": "komunikicomunicacao@gmail.com", "source": "/contact/ and public footer"},
+    "phone_number": {"before": "(11) 99999-9999", "value": "(61) 92003-8428", "source": "/contact/ and public footer"},
+    "address": {"before": "Rua da Educação, 123, São Paulo - SP", "value": "QI 11 Bloco A Comércio Local salas 102/104 Guará 1\nBrasília DF, 70274-530, BR", "source": "/contact/ and public footer; line break preserved"},
+    "instagram_url": {"before": "https://instagram.com/exemplo", "value": "https://www.instagram.com/komunikiescola/", "source": "Public footer"},
+    "youtube_url": {"before": "https://youtube.com/exemplo", "value": "https://youtube.com/@escolakomuniki?si=8AR-FzPrJh8QCbu3", "source": "Public footer"},
+    "facebook_url": {"before": "https://facebook.com/exemplo", "value": "", "source": "Remove local example; no Facebook destination published on the inspected pages"},
+    "social_section_enabled": {"before": true, "value": false, "source": "Match public Home, which does not display this section; not a claim about hidden production settings"},
+    "social_section_title": {"before": "TESTE FASE 11 — Redes Sociais Kelly", "value": "Acompanhe a Komuniki nas redes", "source": "Restore existing model default to remove test copy; unpublished while the section is disabled"}
+  },
+  "deactivate_feature": {"placement": "trust", "title": "Projeto Jovem Comunicador"},
+  "home_features": ["Mentorias com Kelly Farias", "Cursos online, híbridos e presenciais", "Atuação corporativa"],
+  "preserve": {
+    "jovem_comunicador_about": "Keep the institutional mention on /sobre/; only the Home card is deactivated, as requested.",
+    "news_url": "https://kellyfarias.com.br/news/",
+    "kelly_photo": "/static/images/kelly-farias-komuniki.jpeg",
+    "hero": "Replaced on 2026-09-13 by the WebGL particle stage; the PNG remains only as demo media for prepare.py.",
+    "empty_sections": "No public testimonials or social posts were displayed; do not fabricate records.",
+    "content": "Retain course data, institutional copy, existing PT/EN translations and Portuguese fallbacks, and privacy copy."
+  }
+}

@@ -1,0 +1,50 @@
+<nav class="ed-nav" aria-label="Principal" x-data="{ mobileMenuOpen: false }"
+    @keydown.escape.window="if (mobileMenuOpen) { mobileMenuOpen = false; $refs.menuToggle.focus(); }">
+    <div class="ed-nav-blur" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    <div class="ed-nav-pill">
+        <a href="{% url 'school:home' %}" class="ed-brand{% if not site_settings or not site_settings.logo %} ed-underline{% endif %}">
+            {% if site_settings and site_settings.logo %}
+            <img src="{{ site_settings.logo.url }}" alt="{{ current_site.name }}" width="150" height="44">
+            {% else %}{{ current_site.name }}{% endif %}
+        </a>
+        <div class="ed-nav-right">
+            <div class="ed-nav-links">
+                <a href="{% url 'school:home' %}" class="ed-underline" {% if request.resolver_match.url_name == 'home' %}aria-current="page"{% endif %} x-text="t('Início', 'Home')">Início</a>
+                <a href="{% url 'school:about' %}" class="ed-underline" {% if request.resolver_match.url_name == 'about' %}aria-current="page"{% endif %} x-text="t('Sobre', 'About')">Sobre</a>
+                <a href="{% url 'school:page_detail' 'cursos' %}" class="ed-underline" {% if page.slug == 'cursos' %}aria-current="page"{% endif %} x-text="t('Cursos', 'Courses')">Cursos</a>
+                <a href="{{ kelly_blog_public_url }}" class="ed-underline" x-text="t('Notícias', 'News')">Notícias</a>
+            </div>
+            <a href="{% url 'contact:page' %}" class="ed-button ed-grow ed-nav-contact" x-text="t('Fale com a Komuniki', 'Talk to Komuniki')">Fale com a Komuniki</a>
+            <div class="ed-nav-controls">
+                <button type="button" class="ed-icon-button" @click="toggleTheme($event)"
+                    :aria-label="theme === 'dark' ? t('Modo claro', 'Light mode') : t('Modo escuro', 'Dark mode')"
+                    :aria-pressed="theme === 'dark'">
+                    <svg x-show="theme !== 'dark'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                    </svg>
+                    <svg x-show="theme === 'dark'" x-cloak class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </button>
+                <button type="button" class="ed-icon-button ed-language" @click="lang = lang === 'pt' ? 'en' : 'pt'"
+                    :aria-label="t('Mudar idioma', 'Change language')"><span x-text="lang === 'pt' ? 'EN' : 'PT'">EN</span></button>
+                <button type="button" class="ed-icon-button ed-nav-menu-button" x-ref="menuToggle"
+                    @click="mobileMenuOpen = !mobileMenuOpen" :aria-expanded="mobileMenuOpen.toString()"
+                    aria-controls="school-mobile-menu" :aria-label="mobileMenuOpen ? t('Fechar menu', 'Close menu') : t('Abrir menu', 'Open menu')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <path x-show="!mobileMenuOpen" d="M4 8h16M4 16h16"/><path x-show="mobileMenuOpen" d="m6 6 12 12M6 18 18 6"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div id="school-mobile-menu" class="ed-mobile-menu" x-cloak x-show="mobileMenuOpen" @click.outside="mobileMenuOpen = false">
+            <a href="{% url 'school:home' %}"><span class="ed-underline" x-text="t('Início', 'Home')">Início</span></a>
+            <a href="{% url 'school:about' %}"><span class="ed-underline" x-text="t('Sobre', 'About')">Sobre</span></a>
+            <a href="{% url 'school:page_detail' 'cursos' %}"><span class="ed-underline" x-text="t('Cursos', 'Courses')">Cursos</span></a>
+            <a href="{{ kelly_blog_public_url }}"><span class="ed-underline" x-text="t('Notícias', 'News')">Notícias</span></a>
+            <a href="{% url 'contact:page' %}" class="ed-button ed-grow" x-text="t('Fale com a Komuniki', 'Talk to Komuniki')">Fale com a Komuniki</a>
+        </div>
+    </div>
+</nav>

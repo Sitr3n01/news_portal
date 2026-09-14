@@ -28,7 +28,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 
 from apps.common.context_processors import NEWS_PORTAL_NAME
-from apps.common.models import SiteExtension
+from apps.common.site_settings import get_site_settings
 
 logger = logging.getLogger('apps.email')
 
@@ -193,12 +193,9 @@ def build_email_context(extra=None):
 
     if site is not None:
         base_url = f'{scheme}://{site.domain}'
-        try:
-            site_settings = site.extension
-        except SiteExtension.DoesNotExist:
-            # SiteExtension é OneToOne opcional: site recém-criado (ou de
-            # teste) legitimamente pode não ter um ainda.
-            site_settings = None
+        # SiteExtension é OneToOne opcional: site recém-criado (ou de teste)
+        # legitimamente pode não ter um ainda, e aí vem None.
+        site_settings = get_site_settings(site)
 
     context = {
         'news_portal_name': NEWS_PORTAL_NAME,

@@ -5,7 +5,6 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
-from apps.hiring.forms import ApplicationForm
 from apps.hiring.models import Application, Department, JobPosting
 
 
@@ -20,54 +19,21 @@ def current_site(settings):
 
 
 @pytest.mark.django_db
-def test_hiring_job_list_filters_current_site(client, current_site):
-    other_site = Site.objects.create(domain='jobs.other', name='Vagas Outro Site')
-    current_department = Department.objects.create(site=current_site, name='Pedagógico', slug='pedagogico')
-    other_department = Department.objects.create(site=other_site, name='Pedagógico', slug='pedagogico')
+def test_job_pages_are_no_longer_public(client, current_site):
+    department = Department.objects.create(site=current_site, name='Pedagógico', slug='pedagogico')
     JobPosting.objects.create(
         site=current_site,
-        department=current_department,
-        title='Professor Atual',
-        slug='professor',
-        description='x',
-        requirements='y',
-        status=JobPosting.Status.OPEN,
-    )
-    JobPosting.objects.create(
-        site=other_site,
-        department=other_department,
-        title='Professor Outro Site',
+        department=department,
+        title='Professor',
         slug='professor',
         description='x',
         requirements='y',
         status=JobPosting.Status.OPEN,
     )
 
-    response = client.get(reverse('hiring:list'))
-
-    content = response.content.decode()
-    assert response.status_code == 200
-    assert 'Professor Atual' in content
-    assert 'Professor Outro Site' not in content
-
-
-@pytest.mark.django_db
-def test_hiring_job_detail_filters_current_site(client, current_site):
-    other_site = Site.objects.create(domain='detail.other', name='Detalhe Outro Site')
-    other_department = Department.objects.create(site=other_site, name='Pedagógico', slug='pedagogico')
-    JobPosting.objects.create(
-        site=other_site,
-        department=other_department,
-        title='Vaga de outro site',
-        slug='vaga-externa',
-        description='não vazar',
-        requirements='não vazar',
-        status=JobPosting.Status.OPEN,
-    )
-
-    response = client.get(reverse('hiring:job_detail', args=['vaga-externa']))
-
-    assert response.status_code == 404
+    # Vagas saíram do site da escola: lista e detalhe não existem mais; o cadastro fica no admin
+    assert client.get('/hiring/').status_code == 404
+    assert client.get('/hiring/professor/').status_code == 404
 
 
 @pytest.mark.django_db
@@ -141,22 +107,3 @@ def test_download_resume_staff_with_perm_ok(client, django_user_model, applicati
     assert response.status_code == 200
     # Nunca expõe o caminho público; serve apenas via location interna do nginx
     assert response['X-Accel-Redirect'].startswith('/protected/hiring/resumes/')
-
-
-@pytest.mark.django_db
-def test_clean_resume_rejects_spoofed_content(tmp_path, settings):
-    settings.MEDIA_ROOT = str(tmp_path)
-    # content_type e extensão dizem PDF, mas o conteúdo não é; deve ser rejeitado.
-    upload = SimpleUploadedFile('cv.pdf', b'isto nao e um pdf', content_type='application/pdf')
-    form = ApplicationForm(
-        data={
-            'first_name': 'Ana',
-            'last_name': 'Silva',
-            'email': 'ana@example.com',
-            'phone': '11999999999',
-            'cover_letter': '',
-        },
-        files={'resume': upload},
-    )
-    assert not form.is_valid()
-    assert 'resume' in form.errors

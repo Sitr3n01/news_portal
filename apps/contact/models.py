@@ -22,6 +22,7 @@ class ContactInquiry(TimeStampedModel):
     email = models.EmailField('E-mail')
     phone = models.CharField('Telefone', max_length=30, blank=True)
     subject = models.CharField('Assunto', max_length=50, choices=Subject.choices, default=Subject.GENERAL)
+    course_interest = models.CharField('Curso de interesse', max_length=120, blank=True, help_text='Preenchido quando o visitante chega pelo card de um curso na página Cursos.')
     message = models.TextField('Mensagem')
     status = models.CharField('Status', max_length=20, choices=Status.choices, default=Status.NEW, help_text='Marque como Lida, Respondida ou Arquivada conforme o atendimento.')
 

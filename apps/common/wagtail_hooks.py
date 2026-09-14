@@ -42,6 +42,7 @@ class SiteExtensionSnippetViewSet(SnippetViewSet):
         MultiFieldPanel(
             [
                 FieldPanel('tagline'),
+                FieldPanel('tagline_en'),
                 FieldPanel('logo'),
                 FieldPanel('favicon'),
             ],

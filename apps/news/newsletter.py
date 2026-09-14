@@ -9,6 +9,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import strip_tags
 
+from apps.common.site_settings import get_site_settings
+
 from .models import Article, NewsletterDelivery, NewsletterSubscription
 
 logger = logging.getLogger(__name__)
@@ -66,10 +68,7 @@ def get_newsletter_context(article, site=None, request=None, subscription=None):
     """
     site = site or article.site
 
-    try:
-        site_settings = site.extension
-    except AttributeError:
-        site_settings = None
+    site_settings = get_site_settings(site)
 
     if request is not None:
         protocol = 'https' if request.is_secure() else 'http'

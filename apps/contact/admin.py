@@ -11,12 +11,12 @@ from .models import ContactInquiry
 
 @admin.register(ContactInquiry)
 class ContactInquiryAdmin(AdminUXMixin, ModelAdmin):
-    list_display = ['read_button', 'name', 'email', 'subject', 'message_preview', 'site', 'status', 'created_at']
+    list_display = ['read_button', 'name', 'email', 'subject', 'course_interest', 'message_preview', 'site', 'status', 'created_at']
     list_display_links = ['name']
-    list_filter = ['status', 'site', 'created_at']
+    list_filter = ['status', 'course_interest', 'site', 'created_at']
     list_filter_submit = True
-    search_fields = ['name', 'email', 'phone', 'subject', 'message']
-    readonly_fields = ['site', 'name', 'email', 'phone', 'subject', 'message_display', 'created_at', 'updated_at']
+    search_fields = ['name', 'email', 'phone', 'subject', 'course_interest', 'message']
+    readonly_fields = ['site', 'name', 'email', 'phone', 'subject', 'course_interest', 'message_display', 'created_at', 'updated_at']
     radio_fields = {'status': admin.HORIZONTAL}
     ux_list_title = 'Mensagens de contato'
     ux_list_description = 'Use esta tela como uma fila de atendimento: responda mensagens novas, marque como lidas e arquive o que já foi tratado.'
@@ -46,7 +46,7 @@ class ContactInquiryAdmin(AdminUXMixin, ModelAdmin):
     ]
     fieldsets = [
         ('Dados de Contato', {
-            'fields': ('site', 'name', 'email', 'phone', 'subject', 'message_display', 'created_at', 'updated_at'),
+            'fields': ('site', 'name', 'email', 'phone', 'subject', 'course_interest', 'message_display', 'created_at', 'updated_at'),
         }),
         ('Status', {
             'fields': ('status',),

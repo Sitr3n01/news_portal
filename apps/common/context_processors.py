@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 
+from apps.common.site_settings import get_site_settings
 from apps.common.turnstile import get_turnstile_site_key
 from apps.news.models import Category
 
@@ -24,10 +25,7 @@ def site_context(request):
         # a 404 é pior do que botão nenhum.
         'google_oauth_enabled': settings.GOOGLE_OAUTH_ENABLED,
     }
-    try:
-        context['site_settings'] = current_site.extension
-    except Exception:
-        context['site_settings'] = None
+    context['site_settings'] = get_site_settings(current_site)
     return context
 
 

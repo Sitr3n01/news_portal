@@ -266,16 +266,41 @@
         }
     };
 
+    // Com a webfont em cache o init roda antes da primeira pintura, e dividir e medir todo o texto a atrasa: uma animação
+    // iniciada no init já teria andado ou acabado quando a página aparecesse (o título de Cursos, primeiro da cascata,
+    // surgia parado). O tempo do GSAP fica parado até um quadro depois da primeira pintura; o teto cobre aba oculta.
+    const afterFirstPaint = (callback) => {
+        let done = false;
+        const run = () => {
+            if (!done) {
+                done = true;
+                requestAnimationFrame(callback);
+            }
+        };
+        if (window.PerformanceObserver && PerformanceObserver.supportedEntryTypes?.includes('paint')) {
+            new PerformanceObserver((list, observer) => {
+                observer.disconnect();
+                run();
+            }).observe({ type: 'paint', buffered: true });
+        } else {
+            requestAnimationFrame(run);
+        }
+        setTimeout(run, 1000);
+    };
+
     // Linha depende da métrica da fonte: dividir antes da webfont carregar deixa as quebras erradas.
     Promise.race([
         document.fonts ? document.fonts.ready : Promise.resolve(),
         new Promise((resolve) => setTimeout(resolve, 2500)),
     ]).then(() => {
+        gsap.globalTimeline.pause();
         try {
             init();
         } catch (error) {
             destroy();
             console.error('Reveal de texto indisponível:', error);
+        } finally {
+            afterFirstPaint(() => gsap.globalTimeline.resume());
         }
     });
 })();

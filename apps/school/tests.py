@@ -338,3 +338,29 @@ def test_courses_page_renders_komuniki_course_cards(client, current_site):
     assert 'Produção Cultural' in content
     assert 'Comunicação Destravada' in content
     assert 'Vencedor do Prêmio Paulo Freire de Educação 2024' in content
+    # Cada card de curso é um link para Contato, com traço por linha no título e crescimento ao interagir
+    contact_url = reverse('contact:page')
+    assert content.count(f'<a href="{contact_url}" class="ed-card flex min-h-72 flex-col rounded-[1.75rem] p-6 focus:outline-none ed-grow"') == 6
+    assert content.count('text-slate-950 ed-underline-lines" data-reveal="fade"') == 6
+
+
+@pytest.mark.django_db
+def test_school_call_to_action_buttons_grow_on_interaction(client, current_site):
+    Page.objects.update_or_create(
+        site=current_site,
+        slug='cursos',
+        defaults={'title': 'Cursos', 'content': 'Grade visual.', 'is_published': True},
+    )
+
+    home = client.get(reverse('school:home')).content.decode()
+    about = client.get(reverse('school:about')).content.decode()
+    courses = client.get(reverse('school:page_detail', args=['cursos'])).content.decode()
+
+    # "Conte-nos mais", "Conheça os cursos" e "Fale com a Komuniki" crescem; navbar e menu móvel entram na conta
+    assert _navbar(home).count('class="ed-button ed-grow') == 2
+    assert home.count('ed-button ed-grow') == 7
+    assert about.count('ed-button ed-grow') == 4
+    assert courses.count('ed-button ed-grow') == 5
+    # "Ver cursos" e "Ir para notícias", fora do pedido, continuam sem crescer
+    assert 'focus:outline-none ed-button ed-button-outline">' in courses
+    assert 'focus:outline-none ed-button ed-button-white">' in courses

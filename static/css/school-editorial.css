@@ -44,7 +44,7 @@
 .ed-school .ed-chip{background:var(--ed-mist);border:0;box-shadow:none;color:var(--ed-ink)}
 .ed-school .ed-button.ed-button-outline{background:transparent;border:1.5px solid var(--ed-muted);color:var(--ed-ink)}
 /* Links without the animated underline (prose, future links) keep the instant one. */
-.ed-school a:not(.ed-button,.ed-underline):not(:has(.ed-underline,.ed-underline-text)):hover{text-decoration:underline;text-underline-offset:4px}
+.ed-school a:not(.ed-button,.ed-underline):not(:has(.ed-underline,.ed-underline-text,.ed-underline-lines)):hover{text-decoration:underline;text-underline-offset:4px}
 .ed-school .ed-skip{position:fixed;z-index:100;top:8px;left:8px;padding:12px 20px;background:var(--ed-blue-light);color:#000;transform:translateY(-180%)}
 .ed-school .ed-skip:focus{transform:translateY(0)}
 /* Line-by-line text reveal (js/school-editorial-reveal.js). The guard hides text until GSAP has split it into lines. */
@@ -129,10 +129,10 @@
 .ed-track-grid>a{position:relative;min-height:330px;text-decoration:none!important}
 .ed-track-grid>a>span:first-child{background:var(--ed-mist);color:var(--ed-ink);border-radius:50%}
 .ed-track-grid>a:hover{background:var(--ed-mist)}
-/* Track cards are whole links: on hover or keyboard focus the card grows slightly, on the underline's curve. */
-.ed-school .ed-track-grid>a{transition:transform .45s cubic-bezier(.25,1,.5,1)!important}
-.ed-school .ed-track-grid>a:is(:hover,:focus-visible){transform:scale(1.02)}
-@media (prefers-reduced-motion:reduce){.ed-school .ed-track-grid>a{transition:none!important}}
+/* .ed-grow: links that grow slightly on hover or keyboard focus, on the underline's curve (track and course cards, the "Conte-nos mais", "Conheça os cursos" and "Fale com a Komuniki" buttons). */
+.ed-school .ed-grow{transition:transform .45s cubic-bezier(.25,1,.5,1)!important}
+.ed-school .ed-grow:is(:hover,:focus-visible){transform:scale(1.02)}
+@media (prefers-reduced-motion:reduce){.ed-school .ed-grow{transition:none!important}}
 .ed-track-grid>a>p[class*="uppercase"]{margin-top:32px}
 .ed-track-grid>a>span:last-child{font:12px/1.6 "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:0}
 .ed-kelly figure{background:var(--ed-mist)}
@@ -169,7 +169,7 @@
 .ed-school .ed-course-group dl>div{border:0;border-radius:8px;background:var(--ed-mist);padding:16px}
 .ed-school .ed-course-group dl dt{font:12px/1.6 "IBM Plex Mono",monospace;color:var(--ed-muted)}
 .ed-school .ed-course-group dl dd{font:500 18px/1.3 Inter,sans-serif}
-.ed-school .ed-course-group article>div:first-child>span{background:var(--ed-mist);color:var(--ed-ink);border-radius:50%}
+.ed-school .ed-course-group .ed-card>div:first-child>span{background:var(--ed-mist);color:var(--ed-ink);border-radius:50%}
 .ed-school .ed-contact-header{margin-inline:0;text-align:left;max-width:850px}
 .ed-school .contact-form{background:transparent;border:0;box-shadow:none;border-radius:0}
 .ed-school .contact-control{display:block;background:var(--ed-mist);color:var(--ed-ink);border:1px solid var(--ed-line);border-radius:8px;box-shadow:none;font:400 16px/1.5 Inter,sans-serif}

@@ -25,11 +25,11 @@
                 </p>
                 <div class="ed-hero-actions">
                     <a href="{% url 'contact:page' %}"
-                        class="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-700 px-7 py-3 text-base font-bold text-white focus:outline-none ed-button">
+                        class="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-700 px-7 py-3 text-base font-bold text-white focus:outline-none ed-button ed-grow">
                         <span data-reveal="fade" data-reveal-at="0.7" x-text="t('Conte-nos mais', 'Tell us more')">Conte-nos mais</span>
                     </a>
                     <a href="{% url 'school:page_detail' 'cursos' %}"
-                        class="ed-chip inline-flex min-h-12 items-center justify-center rounded-full px-7 py-3 text-base font-bold text-primary-900 focus:outline-none ed-button ed-button-outline">
+                        class="ed-chip inline-flex min-h-12 items-center justify-center rounded-full px-7 py-3 text-base font-bold text-primary-900 focus:outline-none ed-button ed-grow ed-button-outline">
                         <span data-reveal="fade" data-reveal-at="0.9" x-text="t('Conheça os cursos', 'Explore the courses')">Conheça os cursos</span>
                     </a>
                 </div>
@@ -112,7 +112,7 @@
         <div class="ed-track-grid mt-11 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {% for track in course_tracks %}
             <a href="{% url 'school:page_detail' 'cursos' %}"
-                class="ed-card flex flex-col rounded-[1.75rem] p-6 focus:outline-none" data-reveal-group>
+                class="ed-card flex flex-col rounded-[1.75rem] p-6 focus:outline-none ed-grow" data-reveal-group>
                 <span class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100 text-primary-700">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
@@ -243,7 +243,7 @@
                     {{ home_config.hiring_description }}
                 </p>
                 <a href="{% url 'school:page_detail' 'cursos' %}"
-                    class="mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white transition-colors focus:outline-none ed-button">
+                    class="mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white transition-colors focus:outline-none ed-button ed-grow">
                     <span data-reveal="fade" x-text="t('Conheça os cursos', 'Explore the courses')">Conheça os cursos</span>
                 </a>
             </div>
@@ -256,7 +256,7 @@
                     {{ home_config.contact_description }}
                 </p>
                 <a href="{% url 'contact:page' %}"
-                    class="mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-bold text-primary-900 transition-colors focus:outline-none ed-button ed-button-white">
+                    class="mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-bold text-primary-900 transition-colors focus:outline-none ed-button ed-grow ed-button-white">
                     <span data-reveal="fade" x-text="t('Conte-nos mais', 'Tell us more')">Conte-nos mais</span>
                 </a>
             </div>

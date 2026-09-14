@@ -23,7 +23,7 @@
                 </p>
             <div class="mt-10 flex flex-col gap-3 sm:flex-row">
                     <a href="{% url 'contact:page' %}"
-                        class="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-700 px-7 py-3 text-base font-bold text-white focus:outline-none ed-button">
+                        class="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-700 px-7 py-3 text-base font-bold text-white focus:outline-none ed-button ed-grow">
                         <span data-reveal="fade" x-text="t('Fale com a Komuniki', 'Talk to Komuniki')">Fale com a Komuniki</span>
                     </a>
                     <a href="#grade-cursos"
@@ -68,13 +68,13 @@
 
             <div class="grid gap-5 md:grid-cols-2">
                 {% for course in group.courses %}
-                <article class="ed-card flex min-h-72 flex-col rounded-[1.75rem] p-6" data-reveal-group data-reveal-step="0.1">
+                <a href="{% url 'contact:page' %}" class="ed-card flex min-h-72 flex-col rounded-[1.75rem] p-6 focus:outline-none ed-grow" data-reveal-group data-reveal-step="0.1">
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary-700" data-reveal="fade">
                                 {{ group.eyebrow }}
                             </p>
-                            <h3 class="mt-3 font-display text-2xl font-bold leading-tight text-slate-950" data-reveal="fade">
+                            <h3 class="mt-3 font-display text-2xl font-bold leading-tight text-slate-950 ed-underline-lines" data-reveal="fade">
                                 {{ course.title }}
                             </h3>
                         </div>
@@ -113,7 +113,7 @@
                         {% endfor %}
                     </ul>
                     {% endif %}
-                </article>
+                </a>
                 {% endfor %}
             </div>
         </div>
@@ -134,7 +134,7 @@
                     A Komuniki pode orientar formatos, requisitos, turmas e caminhos de formação conforme seu objetivo.
                 </p>
                 <a href="{% url 'contact:page' %}"
-                    class="mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white transition-colors focus:outline-none ed-button">
+                    class="mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white transition-colors focus:outline-none ed-button ed-grow">
                     <span data-reveal="fade" x-text="t('Conte-nos mais', 'Tell us more')">Conte-nos mais</span>
                 </a>
             </div>
@@ -198,7 +198,7 @@
                     x-text="t('Nossa equipe pode ajudar com cursos, mentorias, projetos e informações institucionais.', 'Our team can help with courses, mentoring, projects and institutional information.')">Nossa equipe pode ajudar com cursos, mentorias, projetos e informações institucionais.</p>
             </div>
             <a href="{% url 'contact:page' %}"
-                class="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white transition-colors focus:outline-none ed-button"
+                class="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-6 py-3 text-sm font-bold text-white transition-colors focus:outline-none ed-button ed-grow"
                 x-text="t('Conte-nos mais', 'Tell us more')">
                 Conte-nos mais
             </a>

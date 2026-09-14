@@ -14,7 +14,7 @@
                 <a href="{% url 'school:page_detail' 'cursos' %}" class="ed-underline" {% if page.slug == 'cursos' %}aria-current="page"{% endif %} x-text="t('Cursos', 'Courses')">Cursos</a>
                 <a href="{{ kelly_blog_public_url }}" class="ed-underline" x-text="t('Notícias', 'News')">Notícias</a>
             </div>
-            <a href="{% url 'contact:page' %}" class="ed-button ed-nav-contact" x-text="t('Fale com a Komuniki', 'Talk to Komuniki')">Fale com a Komuniki</a>
+            <a href="{% url 'contact:page' %}" class="ed-button ed-grow ed-nav-contact" x-text="t('Fale com a Komuniki', 'Talk to Komuniki')">Fale com a Komuniki</a>
             <div class="ed-nav-controls">
                 <button type="button" class="ed-icon-button" @click="theme = theme === 'dark' ? 'light' : 'dark'"
                     :aria-label="theme === 'dark' ? t('Modo claro', 'Light mode') : t('Modo escuro', 'Dark mode')"
@@ -44,7 +44,7 @@
             <a href="{% url 'school:about' %}"><span class="ed-underline" x-text="t('Sobre', 'About')">Sobre</span></a>
             <a href="{% url 'school:page_detail' 'cursos' %}"><span class="ed-underline" x-text="t('Cursos', 'Courses')">Cursos</span></a>
             <a href="{{ kelly_blog_public_url }}"><span class="ed-underline" x-text="t('Notícias', 'News')">Notícias</span></a>
-            <a href="{% url 'contact:page' %}" class="ed-button" x-text="t('Fale com a Komuniki', 'Talk to Komuniki')">Fale com a Komuniki</a>
+            <a href="{% url 'contact:page' %}" class="ed-button ed-grow" x-text="t('Fale com a Komuniki', 'Talk to Komuniki')">Fale com a Komuniki</a>
         </div>
     </div>
 </nav>

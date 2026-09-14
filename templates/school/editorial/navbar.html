@@ -2,17 +2,17 @@
     @keydown.escape.window="if (mobileMenuOpen) { mobileMenuOpen = false; $refs.menuToggle.focus(); }">
     <div class="ed-nav-blur" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
     <div class="ed-nav-pill">
-        <a href="{% url 'school:home' %}" class="ed-brand">
+        <a href="{% url 'school:home' %}" class="ed-brand{% if not site_settings or not site_settings.logo %} ed-underline{% endif %}">
             {% if site_settings and site_settings.logo %}
             <img src="{{ site_settings.logo.url }}" alt="{{ current_site.name }}" width="150" height="44">
             {% else %}{{ current_site.name }}{% endif %}
         </a>
         <div class="ed-nav-right">
             <div class="ed-nav-links">
-                <a href="{% url 'school:home' %}" {% if request.resolver_match.url_name == 'home' %}aria-current="page"{% endif %} x-text="t('Início', 'Home')">Início</a>
-                <a href="{% url 'school:about' %}" {% if request.resolver_match.url_name == 'about' %}aria-current="page"{% endif %} x-text="t('Sobre', 'About')">Sobre</a>
-                <a href="{% url 'school:page_detail' 'cursos' %}" {% if page.slug == 'cursos' %}aria-current="page"{% endif %} x-text="t('Cursos', 'Courses')">Cursos</a>
-                <a href="{{ kelly_blog_public_url }}" x-text="t('Notícias', 'News')">Notícias</a>
+                <a href="{% url 'school:home' %}" class="ed-underline" {% if request.resolver_match.url_name == 'home' %}aria-current="page"{% endif %} x-text="t('Início', 'Home')">Início</a>
+                <a href="{% url 'school:about' %}" class="ed-underline" {% if request.resolver_match.url_name == 'about' %}aria-current="page"{% endif %} x-text="t('Sobre', 'About')">Sobre</a>
+                <a href="{% url 'school:page_detail' 'cursos' %}" class="ed-underline" {% if page.slug == 'cursos' %}aria-current="page"{% endif %} x-text="t('Cursos', 'Courses')">Cursos</a>
+                <a href="{{ kelly_blog_public_url }}" class="ed-underline" x-text="t('Notícias', 'News')">Notícias</a>
             </div>
             <a href="{% url 'contact:page' %}" class="ed-button ed-nav-contact" x-text="t('Fale com a Komuniki', 'Talk to Komuniki')">Fale com a Komuniki</a>
             <div class="ed-nav-controls">
@@ -40,10 +40,10 @@
             </div>
         </div>
         <div id="school-mobile-menu" class="ed-mobile-menu" x-cloak x-show="mobileMenuOpen" @click.outside="mobileMenuOpen = false">
-            <a href="{% url 'school:home' %}" x-text="t('Início', 'Home')">Início</a>
-            <a href="{% url 'school:about' %}" x-text="t('Sobre', 'About')">Sobre</a>
-            <a href="{% url 'school:page_detail' 'cursos' %}" x-text="t('Cursos', 'Courses')">Cursos</a>
-            <a href="{{ kelly_blog_public_url }}" x-text="t('Notícias', 'News')">Notícias</a>
+            <a href="{% url 'school:home' %}"><span class="ed-underline" x-text="t('Início', 'Home')">Início</span></a>
+            <a href="{% url 'school:about' %}"><span class="ed-underline" x-text="t('Sobre', 'About')">Sobre</span></a>
+            <a href="{% url 'school:page_detail' 'cursos' %}"><span class="ed-underline" x-text="t('Cursos', 'Courses')">Cursos</span></a>
+            <a href="{{ kelly_blog_public_url }}"><span class="ed-underline" x-text="t('Notícias', 'News')">Notícias</span></a>
             <a href="{% url 'contact:page' %}" class="ed-button" x-text="t('Fale com a Komuniki', 'Talk to Komuniki')">Fale com a Komuniki</a>
         </div>
     </div>

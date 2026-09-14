@@ -7,7 +7,7 @@
                     <img class="h-12 w-auto max-w-[13rem] object-contain" src="{{ site_settings.logo.url }}" loading="lazy"
                         alt="{{ current_site.name }}">
                     {% else %}
-                    <span class="ed-footer-brand"{% if reveal %} data-reveal="fade"{% endif %}>{{ current_site.name }}</span>
+                    <span class="ed-footer-brand ed-underline"{% if reveal %} data-reveal="fade"{% endif %}>{{ current_site.name }}</span>
                     {% endif %}
                 </a>
 
@@ -40,18 +40,18 @@
                 <div{% if reveal %} data-reveal-group{% endif %}>
                     <h3 class="font-display text-sm font-bold uppercase text-white"{% if reveal %} data-reveal="fade"{% endif %}>Komuniki</h3>
                     <ul class="mt-5 space-y-3">
-                        <li><a href="{% url 'school:home' %}" class="text-slate-300 transition-colors"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Início', 'Home')">Início</a></li>
-                        <li><a href="{% url 'school:about' %}" class="text-slate-300 transition-colors"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Sobre', 'About')">Sobre</a></li>
-                        <li><a href="{% url 'school:page_detail' 'cursos' %}" class="text-slate-300 transition-colors"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Cursos', 'Courses')">Cursos</a></li>
-                        <li><a href="{{ kelly_blog_public_url }}" class="text-slate-300 transition-colors"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Notícias', 'News')">Notícias</a></li>
+                        <li{% if reveal %} data-reveal="fade"{% endif %}><a href="{% url 'school:home' %}" class="text-slate-300 transition-colors ed-underline" x-text="t('Início', 'Home')">Início</a></li>
+                        <li{% if reveal %} data-reveal="fade"{% endif %}><a href="{% url 'school:about' %}" class="text-slate-300 transition-colors ed-underline" x-text="t('Sobre', 'About')">Sobre</a></li>
+                        <li{% if reveal %} data-reveal="fade"{% endif %}><a href="{% url 'school:page_detail' 'cursos' %}" class="text-slate-300 transition-colors ed-underline" x-text="t('Cursos', 'Courses')">Cursos</a></li>
+                        <li{% if reveal %} data-reveal="fade"{% endif %}><a href="{{ kelly_blog_public_url }}" class="text-slate-300 transition-colors ed-underline" x-text="t('Notícias', 'News')">Notícias</a></li>
                     </ul>
                 </div>
 
                 <div{% if reveal %} data-reveal-group{% endif %}>
                     <h3 class="font-display text-sm font-bold uppercase text-white"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Atendimento', 'Support')">Atendimento</h3>
                     <ul class="mt-5 space-y-3">
-                        <li><a href="{% url 'contact:page' %}" class="text-slate-300 transition-colors"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Contato', 'Contact')">Contato</a></li>
-                        <li><a href="{% url 'school:privacy' %}" class="text-slate-300 transition-colors"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('Privacidade', 'Privacy')">Privacidade</a></li>
+                        <li{% if reveal %} data-reveal="fade"{% endif %}><a href="{% url 'contact:page' %}" class="text-slate-300 transition-colors ed-underline" x-text="t('Contato', 'Contact')">Contato</a></li>
+                        <li{% if reveal %} data-reveal="fade"{% endif %}><a href="{% url 'school:privacy' %}" class="text-slate-300 transition-colors ed-underline" x-text="t('Privacidade', 'Privacy')">Privacidade</a></li>
                     </ul>
                 </div>
 
@@ -61,7 +61,7 @@
                         {% if site_settings and site_settings.primary_email %}
                         <li>
                             <span class="block text-slate-400"{% if reveal %} data-reveal="fade"{% endif %} x-text="t('E-mail', 'Email')">E-mail</span>
-                            {% if reveal %}<span class="block" data-reveal="fade">{% endif %}<a href="mailto:{{ site_settings.primary_email }}" class="font-semibold text-slate-100 transition-colors">{{ site_settings.primary_email }}</a>{% if reveal %}</span>{% endif %}
+                            {% if reveal %}<span class="block" data-reveal="fade">{% endif %}<a href="mailto:{{ site_settings.primary_email }}" class="font-semibold text-slate-100 transition-colors"><span class="ed-underline-text">{{ site_settings.primary_email }}</span></a>{% if reveal %}</span>{% endif %}
                         </li>
                         {% endif %}
                         {% if site_settings and site_settings.phone_number %}

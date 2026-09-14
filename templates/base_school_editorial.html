@@ -36,7 +36,7 @@
             }}
         };
     </script>
-    <link rel="stylesheet" href="{% static 'css/school-editorial.css' %}?v=14">
+    <link rel="stylesheet" href="{% static 'css/school-editorial.css' %}?v=16">
     <script src="{% static 'js/school-editorial.js' %}" defer></script>
     <script src="{% static 'js/vendor/htmx.min.js' %}" defer></script>
     <script src="{% static 'js/vendor/alpine.min.js' %}" defer></script>
@@ -44,11 +44,11 @@
     <script src="{% static 'js/vendor/gsap-3.15.0/gsap.min.js' %}" defer></script>
     <script src="{% static 'js/vendor/gsap-3.15.0/ScrollTrigger.min.js' %}" defer></script>
     <script src="{% static 'js/vendor/gsap-3.15.0/SplitText.min.js' %}" defer></script>
-    <script src="{% static 'js/school-editorial-reveal.js' %}?v=1" defer></script>
+    <script src="{% static 'js/school-editorial-reveal.js' %}?v=2" defer></script>
     {% block extra_css %}{% endblock %}
 </head>
 <body class="ed-school" x-data="schoolEditorial" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-    <a class="ed-skip" href="#main-content" x-text="t('Ir para o conteúdo', 'Skip to content')">Ir para o conteúdo</a>
+    <a class="ed-skip" href="#main-content"><span class="ed-underline" x-text="t('Ir para o conteúdo', 'Skip to content')">Ir para o conteúdo</span></a>
     {% include 'school/editorial/navbar.html' %}
     <main id="main-content" tabindex="-1" class="{% block editorial_page_class %}{% endblock %}">
         {% if design_preview_demo %}

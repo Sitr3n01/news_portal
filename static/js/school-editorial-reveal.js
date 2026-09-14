@@ -21,9 +21,20 @@
     const blocks = [];
     const cleanups = [];
     let ctx = null;
+    let refreshTimer = 0;
     const normalize = (text) => text.replace(/\s+/g, ' ').trim();
 
+    // Um split refeito (largura nova, webfont, idioma) muda a altura do texto depois que o ScrollTrigger mediu a
+    // página. O refresh do próprio resize pode rodar antes dos splits; sem medir de novo, o start dos gatilhos abaixo
+    // fica errado e, no fim da página, passa do scroll máximo: o último grupo nunca entra. Os blocos refazem o split
+    // na mesma leva, então o refresh é um só, depois do último.
+    const refreshAfterSplit = () => {
+        clearTimeout(refreshTimer);
+        refreshTimer = setTimeout(() => ScrollTrigger.refresh(), 100);
+    };
+
     const destroy = () => {
+        clearTimeout(refreshTimer);
         cleanups.forEach((cleanup) => cleanup());
         cleanups.length = 0;
         // O contexto reverte os SplitText (devolvendo o HTML original), tweens, timelines e ScrollTriggers.
@@ -60,6 +71,10 @@
             // Na troca de idioma o bloco ganha um SplitText novo, que não deve restaurar o HTML do anterior.
             overwrite: false,
             onSplit(self) {
+                // splitText só está vazio no primeiro split, feito antes de os gatilhos medirem a página.
+                if (splitText) {
+                    refreshAfterSplit();
+                }
                 if (mode === 'mask') {
                     for (const line of self.lines) {
                         let wrap = line.parentElement;

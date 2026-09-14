@@ -30,6 +30,7 @@
 | [komuniki-editorial-preview.md](komuniki-editorial-preview.md) | Experimento local isolado: execução, matriz de conteúdo, capturas e validação |
 | [komuniki-particles.md](komuniki-particles.md) | Hero WebGL da Home: arquivos, parâmetros do `CONFIG`, validação e reversão |
 | [komuniki-text-reveal.md](komuniki-text-reveal.md) | Reveal de texto por linha (GSAP): API `data-reveal`, correção dos acentos, validação e reversão |
+| [komuniki-underline-reveal.md](komuniki-underline-reveal.md) | Sublinhado animado ao interagir: ganchos `.ed-underline`, posição igual à do sublinhado antigo, validação e reversão |
 | [REDES_SOCIAIS.md](REDES_SOCIAIS.md) | Contas, posts, seção da home e sync Instagram/TikTok |
 | [REDES_SOCIAIS_CREDENCIAIS.md](REDES_SOCIAIS_CREDENCIAIS.md) | Como conectar credenciais oficiais de Instagram/TikTok |
 

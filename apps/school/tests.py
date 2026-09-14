@@ -210,7 +210,7 @@ def test_school_homepage_reveals_all_text_with_local_gsap(client, current_site):
     assert 'data-reveal-at="0.7"' in content
     assert content.count('data-reveal="mask"') >= 4
     assert content.count('data-reveal-group') >= 8
-    assert 'text-slate-300" data-reveal="fade"' in content
+    assert '<li data-reveal="fade"><a ' in content
     # A navbar fica estática
     assert 'data-reveal' not in _navbar(content)
 
@@ -223,7 +223,7 @@ def test_school_about_page_reveals_all_text(client, current_site):
     assert response.status_code == 200
     assert 'data-reveal="mask"' in content
     assert content.count('data-reveal-group') >= 10
-    assert 'text-slate-300" data-reveal="fade"' in content
+    assert '<li data-reveal="fade"><a ' in content
     assert 'data-reveal' not in _navbar(content)
 
 
@@ -241,10 +241,24 @@ def test_courses_page_reveals_all_text_but_other_cms_pages_stay_static(client, c
 
     # Cursos densos usam passo menor na cascata; o rodapé entra junto
     assert 'data-reveal-group data-reveal-step="0.1"' in courses
-    assert 'text-slate-300" data-reveal="fade"' in courses
+    assert '<li data-reveal="fade"><a ' in courses
     assert 'data-reveal' not in _navbar(courses)
     assert 'data-reveal="' not in other
     assert 'data-reveal-group' not in other
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('url_name', ['school:home', 'school:about', 'contact:page', 'school:privacy'])
+def test_school_text_links_carry_the_underline_reveal_hooks(client, current_site, url_name):
+    content = client.get(reverse(url_name)).content.decode()
+
+    # O traço fica num elemento justo ao texto: o próprio link inline ou um span interno
+    assert '<a class="ed-skip" href="#main-content"><span class="ed-underline"' in content
+    assert 'class="ed-brand ed-underline"' in content
+    assert _navbar(content).count('class="ed-underline"') == 8
+    assert content.count('transition-colors ed-underline" x-text=') == 6
+    if url_name == 'school:privacy':
+        assert '<span class="ed-underline" x-text="t(\'Falar com a Komuniki\'' in content
 
 
 @pytest.mark.django_db

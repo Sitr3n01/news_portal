@@ -93,6 +93,14 @@
                         wrap.classList.add('line-wrap');
                     }
                 }
+                // Uma palavra sozinha pode quebrar no meio dentro de uma linha do SplitText (ex.: "Profissionalizante"
+                // a 375px), e o traço de .ed-underline-lines supõe uma linha por linha visual: sairia uma barra só,
+                // no lugar errado, cobrindo as duas linhas quebradas. A linha mais alta que sua própria line-height
+                // volta para o sublinhado nativo do navegador, que acompanha cada linha visual sozinho.
+                for (const line of self.lines) {
+                    const rowHeight = Number.parseFloat(getComputedStyle(line).lineHeight);
+                    line.classList.toggle('ed-line-wraps', rowHeight > 0 && line.getBoundingClientRect().height > rowHeight * 1.4);
+                }
                 splitText = normalize(el.textContent);
                 // Prepare every line before exposing the block, even while the global timeline is paused.
                 // Lazy writes could leave the final text visible until its staggered entrance starts (Firefox).

@@ -33,6 +33,7 @@
 | [komuniki-underline-reveal.md](komuniki-underline-reveal.md) | Sublinhado animado ao interagir: ganchos `.ed-underline`, traço por linha e crescimento dos cards de trilhas, posição igual à do sublinhado antigo, validação e reversão |
 | [komuniki-curso-de-interesse.md](komuniki-curso-de-interesse.md) | Curso de interesse no contato: link dos cards de Cursos, etiqueta, campo gravado, admin, implantação e reversão |
 | [komuniki-troca-do-site.md](komuniki-troca-do-site.md) | Troca do site antigo da escola pelo editorial: o que saiu, o que ficou no admin, integração com o backend, implantação e reversão |
+| [komuniki-transicao-e-rolagem.md](komuniki-transicao-e-rolagem.md) | Fade entre páginas, rolagem suave, título de Cursos e webfonts, Cursos em inglês e Configurações do Site sem cache de processo |
 | [REDES_SOCIAIS.md](REDES_SOCIAIS.md) | Contas, posts, seção da home e sync Instagram/TikTok |
 | [REDES_SOCIAIS_CREDENCIAIS.md](REDES_SOCIAIS_CREDENCIAIS.md) | Como conectar credenciais oficiais de Instagram/TikTok |
 

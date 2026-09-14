@@ -290,15 +290,15 @@ def sanitize_content(value: str) -> str:
 
 ##### `site_context(request)`
 
-Sempre injetado. Retorna:
+Sempre injetado. Retorna, entre outros:
 ```python
 {
-    'current_site': Site.objects.get_current(request),
-    'site_settings': SiteExtension.objects.get_or_create(site=current_site)[0],
+    'current_site': get_current_site(request),
+    'site_settings': get_site_settings(current_site),  # apps/common/site_settings.py
 }
 ```
 
-**Atenção:** `get_or_create` cria um `SiteExtension` vazio se não existir — não lança exceção.
+**Atenção:** `site_settings` é `None` quando o site não tem `SiteExtension`; nada é criado. A leitura vai ao banco a cada request, de propósito: o `Site` fica em cache no processo, e o acessor `site.extension`, preso a ele, deixava uma edição salva em outro worker do gunicorn invisível até o worker ser reciclado. A newsletter e os e-mails de conta usam o mesmo `get_site_settings`.
 
 ##### `news_nav_context(request)`
 
@@ -1325,7 +1325,7 @@ Registrados em `TEMPLATES[0]['OPTIONS']['context_processors']` de `base.py`:
 
 Variáveis disponíveis em **todos** os templates:
 - `current_site` — `django.contrib.sites.Site` instance
-- `site_settings` — `SiteExtension` instance (criado automaticamente se não existir)
+- `site_settings` — `SiteExtension` lida do banco a cada request, ou `None` se o site não tiver uma
 
 Variáveis disponíveis **apenas em `/news/**`**:
 - `nav_categories` — QuerySet de categorias pai

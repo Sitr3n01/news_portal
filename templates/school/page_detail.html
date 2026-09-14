@@ -26,7 +26,7 @@
                         class="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-700 px-7 py-3 text-base font-bold text-white focus:outline-none ed-button ed-grow">
                         <span data-reveal="fade" x-text="t('Fale com a Komuniki', 'Talk to Komuniki')">Fale com a Komuniki</span>
                     </a>
-                    <a href="#grade-cursos"
+                    <a href="#grade-cursos" data-smooth-scroll
                         class="ed-chip inline-flex min-h-12 items-center justify-center rounded-full px-7 py-3 text-base font-bold text-primary-900 focus:outline-none ed-button ed-button-outline">
                         <span data-reveal="fade" x-text="t('Ver cursos', 'View courses')">Ver cursos</span>
                     </a>
@@ -36,7 +36,8 @@
         <aside class="grid gap-4">
                 <div class="ed-card ed-inverted rounded-[1.75rem] p-6 text-white" data-reveal-group>
                     <p class="text-sm font-bold uppercase text-primary-100" data-reveal="fade" x-text="t('Reconhecimento', 'Recognition')">Reconhecimento</p>
-                    <h2 class="mt-4 font-display text-3xl font-bold leading-tight" data-reveal="fade">{{ course_award }}</h2>
+                    <h2 class="mt-4 font-display text-3xl font-bold leading-tight" data-reveal="fade"
+                        x-text="t('{{ course_award|escapejs }}', '{{ course_award_en|escapejs }}')">{{ course_award }}</h2>
                     <p class="mt-4 text-sm leading-relaxed text-primary-50" data-reveal="fade"
                         x-text="t('Uma validação importante do impacto educacional e social da Komuniki.', 'An important validation of the educational and social impact of Komuniki.')">
                         Uma validação importante do impacto educacional e social da Komuniki.
@@ -47,7 +48,7 @@
                     <div class="mt-4 flex flex-wrap gap-2">
                         {% for group in course_groups %}
                         <span class="rounded-full border border-primary-700/15 bg-white/55 px-3 py-2 text-xs font-bold uppercase tracking-wide text-primary-800 ed-tag">
-                            <span data-reveal="fade">{{ group.eyebrow }}</span>
+                            <span data-reveal="fade" x-text="t('{{ group.eyebrow|escapejs }}', '{{ group.eyebrow_en|escapejs }}')">{{ group.eyebrow }}</span>
                         </span>
                         {% endfor %}
                     </div>
@@ -61,9 +62,11 @@
         {% for group in course_groups %}
         <div class="ed-course-group mx-auto grid max-w-7xl gap-7 px-4 sm:px-6 lg:grid-cols-[0.35fr_0.65fr] lg:px-8">
             <div class="ed-panel rounded-[2rem] p-6 md:p-8" data-reveal-group>
-                <p class="text-sm font-bold uppercase text-primary-700"><span data-reveal="fade">{{ group.eyebrow }}</span></p>
-                <h2 class="mt-4 font-display text-3xl font-bold leading-tight text-slate-950 md:text-4xl" data-reveal="mask">{{ group.title }}</h2>
-                <p class="mt-4 leading-relaxed text-slate-600" data-reveal="fade">{{ group.description }}</p>
+                <p class="text-sm font-bold uppercase text-primary-700"><span data-reveal="fade" x-text="t('{{ group.eyebrow|escapejs }}', '{{ group.eyebrow_en|escapejs }}')">{{ group.eyebrow }}</span></p>
+                <h2 class="mt-4 font-display text-3xl font-bold leading-tight text-slate-950 md:text-4xl" data-reveal="mask"
+                    x-text="t('{{ group.title|escapejs }}', '{{ group.title_en|escapejs }}')">{{ group.title }}</h2>
+                <p class="mt-4 leading-relaxed text-slate-600" data-reveal="fade"
+                    x-text="t('{{ group.description|escapejs }}', '{{ group.description_en|escapejs }}')">{{ group.description }}</p>
             </div>
 
             <div class="grid gap-5 md:grid-cols-2">
@@ -71,10 +74,12 @@
                 <a href="{% url 'contact:page' %}?curso={{ course.slug }}" class="ed-card flex min-h-72 flex-col rounded-[1.75rem] p-6 focus:outline-none ed-grow" data-reveal-group data-reveal-step="0.1">
                     <div class="flex items-start justify-between gap-4">
                         <div>
-                            <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary-700" data-reveal="fade">
+                            <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary-700" data-reveal="fade"
+                                x-text="t('{{ group.eyebrow|escapejs }}', '{{ group.eyebrow_en|escapejs }}')">
                                 {{ group.eyebrow }}
                             </p>
-                            <h3 class="mt-3 font-display text-2xl font-bold leading-tight text-slate-950 ed-underline-lines" data-reveal="fade">
+                            <h3 class="mt-3 font-display text-2xl font-bold leading-tight text-slate-950 ed-underline-lines" data-reveal="fade"
+                                x-text="t('{{ course.title|escapejs }}', '{{ course.title_en|escapejs }}')">
                                 {{ course.title }}
                             </h3>
                         </div>
@@ -86,17 +91,20 @@
                         </span>
                     </div>
 
-                    <p class="mt-5 leading-relaxed text-slate-600" data-reveal="fade">
+                    <p class="mt-5 leading-relaxed text-slate-600" data-reveal="fade"
+                        x-text="t('{{ course.summary|escapejs }}', '{{ course.summary_en|escapejs }}')">
                         {{ course.summary }}
                     </p>
 
                     <dl class="mt-6 grid gap-3">
                         {% for detail in course.details %}
                         <div class="rounded-2xl border border-slate-200/70 bg-white/65 px-4 py-3">
-                            <dt class="text-xs font-bold uppercase tracking-wide text-slate-500" data-reveal="fade">
+                            <dt class="text-xs font-bold uppercase tracking-wide text-slate-500" data-reveal="fade"
+                                x-text="t('{{ detail.label|escapejs }}', '{{ detail.label_en|escapejs }}')">
                                 {{ detail.label }}
                             </dt>
-                            <dd class="mt-1 font-display text-lg font-bold text-slate-950" data-reveal="fade">
+                            <dd class="mt-1 font-display text-lg font-bold text-slate-950" data-reveal="fade"
+                                x-text="t('{{ detail.value|escapejs }}', '{{ detail.value_en|escapejs }}')">
                                 {{ detail.value }}
                             </dd>
                         </div>
@@ -108,7 +116,7 @@
                         {% for note in course.notes %}
                         <li class="flex gap-2 text-sm leading-relaxed text-slate-600">
                             <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary-600"></span>
-                            <span data-reveal="fade">{{ note }}</span>
+                            <span data-reveal="fade" x-text="t('{{ note.text|escapejs }}', '{{ note.text_en|escapejs }}')">{{ note.text }}</span>
                         </li>
                         {% endfor %}
                     </ul>

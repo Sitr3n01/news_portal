@@ -90,7 +90,7 @@ def main():
 
         code_content = {
             name: getattr(views, name) for name in (
-                'HOME_FALLBACK', 'TRUST_FEATURES_FALLBACK', 'COURSE_AWARD',
+                'HOME_FALLBACK', 'TRUST_FEATURES_FALLBACK', 'COURSE_AWARD', 'COURSE_AWARD_EN',
                 'COURSE_PROPOSAL_TITLE', 'COURSE_PROPOSAL_TITLE_EN',
                 'COURSE_PROPOSAL_DESCRIPTION', 'COURSE_PROPOSAL_DESCRIPTION_EN',
                 'COURSE_TRACKS', 'COURSE_GROUPS',

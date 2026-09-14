@@ -9,6 +9,14 @@
             document.documentElement.classList.toggle('dark', localStorage.getItem('theme') === 'dark');
             document.documentElement.lang = localStorage.getItem('lang') === 'en' ? 'en' : 'pt-BR';
         } catch (_) {}
+        // Transição entre páginas: main e footer esperam a página ficar pronta (js/school-editorial.js). O teto deixa o
+        // conteúdo visível mesmo que um script falhe.
+        document.documentElement.dataset.edPage = 'loading';
+        setTimeout(() => {
+            if (document.documentElement.dataset.edPage === 'loading') {
+                delete document.documentElement.dataset.edPage;
+            }
+        }, 4000);
         // Guard do reveal de texto: [data-reveal] fica invisível até o GSAP dividir as linhas. Com movimento
         // reduzido o texto nunca some; se o módulo não chegar a rodar, o DOMContentLoaded devolve o texto.
         if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -36,15 +44,15 @@
             }}
         };
     </script>
-    <link rel="stylesheet" href="{% static 'css/school-editorial.css' %}?v=18">
-    <script src="{% static 'js/school-editorial.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'css/school-editorial.css' %}?v=19">
+    <script src="{% static 'js/school-editorial.js' %}?v=2" defer></script>
     <script src="{% static 'js/vendor/htmx.min.js' %}" defer></script>
     <script src="{% static 'js/vendor/alpine.min.js' %}" defer></script>
     {# Depois do Alpine: quando o reveal divide as linhas, o x-text já escreveu os títulos no idioma salvo. #}
     <script src="{% static 'js/vendor/gsap-3.15.0/gsap.min.js' %}" defer></script>
     <script src="{% static 'js/vendor/gsap-3.15.0/ScrollTrigger.min.js' %}" defer></script>
     <script src="{% static 'js/vendor/gsap-3.15.0/SplitText.min.js' %}" defer></script>
-    <script src="{% static 'js/school-editorial-reveal.js' %}?v=3" defer></script>
+    <script src="{% static 'js/school-editorial-reveal.js' %}?v=4" defer></script>
     {% block extra_css %}{% endblock %}
 </head>
 <body class="ed-school" x-data="schoolEditorial" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>

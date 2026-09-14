@@ -169,6 +169,7 @@ Visitantes podem enviar mensagens via o formulário de contato da escola.
 | Campo | Para que serve |
 |-------|----------------|
 | Tagline | Slogan exibido no rodapé |
+| Tagline (EN) | O mesmo slogan em inglês, mostrado quando o visitante troca o idioma; vazio, fica o português |
 | Logo | Logotipo do site |
 | Favicon | Ícone na aba do navegador |
 | E-mail principal | E-mail de contato exibido no rodapé |

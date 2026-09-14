@@ -40,7 +40,7 @@
                     <div class="flex flex-wrap items-center gap-3" x-data="{ open: true }" x-show="open">
                         <input type="hidden" name="{{ form.course_interest.name }}" value="{{ selected_course.slug }}" x-ref="interest">
                         <p class="text-sm font-bold text-slate-700" x-text="t('Curso de interesse', 'Course of interest')">Curso de interesse</p>
-                        <span class="ed-tag">{{ selected_course.title }}</span>
+                        <span class="ed-tag" x-text="t('{{ selected_course.title|escapejs }}', '{{ selected_course.title_en|escapejs }}')">{{ selected_course.title }}</span>
                         <a href="{% url 'contact:page' %}" class="text-sm font-bold text-primary-700" @click.prevent="open = false; $refs.interest.value = ''"
                             aria-label="Remover o curso de interesse" :aria-label="t('Remover o curso de interesse', 'Remove the course of interest')"><span class="ed-underline" x-text="t('Remover', 'Remove')">Remover</span></a>
                     </div>
@@ -84,8 +84,8 @@
                             <label for="{{ form.subject.id_for_label }}" class="block text-sm font-bold text-slate-700" x-text="t('Assunto', 'Subject')">Assunto</label>
                             <select name="{{ form.subject.name }}" id="{{ form.subject.id_for_label }}"
                                 class="contact-control mt-2 h-12 w-full rounded-2xl border px-4 text-slate-950 outline-none">
-                                {% for value, name in form.fields.subject.choices %}
-                                <option value="{{ value }}"{% if form.subject.value == value %} selected{% endif %}>{{ name }}</option>
+                                {% for value, name, name_en in form.subject_options %}
+                                <option value="{{ value }}"{% if form.subject.value == value %} selected{% endif %} x-text="t('{{ name|escapejs }}', '{{ name_en|escapejs }}')">{{ name }}</option>
                                 {% endfor %}
                             </select>
                             {% for error in form.subject.errors %}

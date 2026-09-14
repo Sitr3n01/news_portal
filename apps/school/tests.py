@@ -6,6 +6,7 @@ from django.contrib.sites.models import Site
 from django.urls import reverse
 
 from apps.common.models import SiteExtension
+from apps.school.courses import COURSE_GROUPS
 from apps.school.models import Page, SchoolFeature, SchoolHomeConfig, TeamMember
 from apps.school.models import Testimonial as SchoolTestimonial
 
@@ -412,6 +413,55 @@ def test_migrated_database_starts_with_the_real_public_data(settings):
     assert not SchoolFeature.objects.get(
         site_id=settings.SITE_ID, placement=SchoolFeature.Placement.TRUST, title='Projeto Jovem Comunicador',
     ).is_active
+
+
+def test_course_catalog_has_english_for_every_text():
+    missing = []
+    for group in COURSE_GROUPS:
+        texts = [(group, 'eyebrow'), (group, 'title'), (group, 'description')]
+        for course in group['courses']:
+            texts += [(course, 'title'), (course, 'summary')]
+            texts += [(detail, key) for detail in course['details'] for key in ('label', 'value')]
+            texts += [(note, 'text') for note in course['notes']]
+        missing += [item[key] for item, key in texts if not item.get(f'{key}_en')]
+
+    assert missing == []
+
+
+@pytest.mark.django_db
+def test_courses_page_offers_english_for_the_catalog(client, current_site):
+    Page.objects.update_or_create(site=current_site, slug='cursos', defaults={'title': 'Cursos', 'is_published': True})
+
+    content = client.get(reverse('school:page_detail', args=['cursos'])).content.decode()
+
+    # Cada texto do catálogo vai para o x-text com a versão em inglês, que o Alpine mostra ao trocar o idioma
+    assert "t('Jornalismo Cultural', 'Cultural Journalism')" in content
+    assert "t('Carga horária', 'Course hours')" in content
+    assert "t('Encaminhamento para registro profissional de Comunicador', 'Guidance toward professional Communicator registration')" in content
+    assert "'Winner of the 2024 Paulo Freire Education Award'" in content
+
+
+@pytest.mark.django_db
+def test_contact_course_tag_offers_the_english_course_name(client, current_site):
+    content = client.get(reverse('contact:page') + '?curso=jornalismo-cultural').content.decode()
+
+    assert "t('Jornalismo Cultural', 'Cultural Journalism')" in content
+
+
+@pytest.mark.django_db
+def test_contact_subjects_offer_english_labels(client, current_site):
+    content = client.get(reverse('contact:page')).content.decode()
+
+    assert "t('Cursos e inscrições', 'Courses and enrollment')" in content
+    assert "t('Outro', 'Other')" in content
+
+
+@pytest.mark.django_db
+def test_footer_tagline_offers_english(client, current_site):
+    # A migração common.0010 preenche o slogan real em inglês
+    content = client.get(reverse('school:privacy')).content.decode()
+
+    assert "t('Comunicação que gera resultados', 'Communication that drives results')" in content
 
 
 @pytest.mark.django_db

@@ -56,7 +56,7 @@ O rodapé antigo tinha Instagram e YouTube fixos no código e ignorava o banco, 
 ## Implantação
 
 1. **Backup do banco**, como o `kellysys-deploy` já faz antes de alterar os containers.
-2. **`migrate`.** Aplica `contact.0005`, do curso de interesse, necessária antes de o site receber mensagens, `hiring.0008` e `school.0010`, que troca os valores de exemplo pelos [dados reais](#dados-reais).
+2. **`migrate`.** Aplica `contact.0005`, do curso de interesse, necessária antes de o site receber mensagens, `hiring.0008`, `school.0010`, que troca os valores de exemplo pelos [dados reais](#dados-reais), e `common.0010`, que cria o slogan em inglês (veja [Transição e rolagem](komuniki-transicao-e-rolagem.md)).
 3. **Configurações do Site.** Depois do `migrate`, confira se contatos, Instagram e YouTube são os da escola. Um valor editado no admin não é trocado, mesmo que esteja errado.
 4. **Conteúdo exibido pela Home editorial.** Os textos vêm dos mesmos modelos, mas a Home nova mostra campos que a antiga não usava, como o bloco Komuniki. O conteúdo oficial da revisão foi aplicado só em `.preview/local.sqlite3`. Em produção, confira no admin a Home Komuniki, os blocos ativos da barra de confiança e a página Cursos publicada. `scripts/preview/export_school_content.py` exporta esses dados em modo somente leitura para a comparação.
 5. **Smoke test:** Home, Sobre, Cursos, Contato e Privacidade carregam, `/contact/?curso=jornalismo-cultural` mostra a etiqueta e `/hiring/` responde 404. Os itens estão no [checklist de go-live](go-live-checklist.md).

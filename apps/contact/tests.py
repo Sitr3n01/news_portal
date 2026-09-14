@@ -79,10 +79,10 @@ def test_contact_page_tags_the_course_chosen_on_the_courses_page(client):
 
     content = response.content.decode()
     assert response.status_code == 200
-    assert '<span class="ed-tag">Jornalismo Cultural</span>' in content
+    assert '<span class="ed-tag" x-text="t(\'Jornalismo Cultural\', \'Cultural Journalism\')">Jornalismo Cultural</span>' in content
     assert 'name="course_interest" value="jornalismo-cultural"' in content
     # O assunto já vem em "Cursos e inscrições"
-    assert '<option value="admissions" selected>' in content
+    assert '<option value="admissions" selected x-text=' in content
 
 
 @pytest.mark.django_db

@@ -465,8 +465,8 @@ def test_socialpost_changelist_renders_readonly_feed_summary(client, current_sit
 
 @pytest.mark.django_db
 def test_home_reflects_disabling_after_initial_render(client, current_site):
-    # Regressão: o framework de Sites cacheia a SiteExtension no processo, então
-    # desligar a seção não surtia efeito até reiniciar. O signal de clear_cache corrige.
+    # Regressão: o framework de Sites cacheia o Site no processo, e ler site.extension deixava a seção ligada até
+    # reiniciar. O context processor lê a SiteExtension do banco a cada request.
     ext, _ = SiteExtension.objects.update_or_create(
         site=current_site, defaults={'social_section_enabled': True},
     )

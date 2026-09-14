@@ -613,6 +613,9 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
         uniforms.uLayer.value = 1;
         front.render(scene, camera);
         frames++;
+        if (frames === 1) {
+            announceReady(container);
+        }
     };
 
     // Arraste sobre o espaço da forma. No toque só o gesto horizontal gira: o vertical continua rolando a página.
@@ -666,6 +669,8 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
             start();
         } else {
             stop();
+            // Página aberta já rolada: não há palco na tela para esperar.
+            announceReady(container);
         }
     });
     const themeObserver = new MutationObserver(syncTheme);
@@ -719,6 +724,15 @@ export async function mountParticles(container, { modelUrl, maskUrl, config: ove
     };
 }
 
+// O módulo da página (js/school-editorial.js) só mostra a Home depois deste aviso: o primeiro quadro desenhado, o palco
+// fora da tela ou a falha da montagem. Até lá o conteúdo fica sob o fade, então o palco não surge atrasado.
+function announceReady(element) {
+    if (!('particlesReady' in element.dataset)) {
+        element.dataset.particlesReady = '';
+        element.dispatchEvent(new CustomEvent('komuniki:particles-ready'));
+    }
+}
+
 async function mountFromDataset(element) {
     const { modelUrl, maskUrl, config } = element.dataset;
     const handle = await mountParticles(element, { modelUrl, maskUrl, config: config ? JSON.parse(config) : {} });
@@ -730,5 +744,8 @@ async function mountFromDataset(element) {
 }
 
 for (const element of document.querySelectorAll('[data-particles]')) {
-    mountFromDataset(element).catch((error) => console.error('Partículas da Home indisponíveis:', error));
+    mountFromDataset(element).catch((error) => {
+        announceReady(element);
+        console.error('Partículas da Home indisponíveis:', error);
+    });
 }

@@ -43,13 +43,19 @@
         blocks.length = 0;
         root.classList.remove('js');
     };
-    // O guard do <head> confere esta referência no DOMContentLoaded para saber se o módulo chegou a rodar.
-    window.komunikiReveal = { blocks, destroy };
+    // O guard do <head> confere esta referência no DOMContentLoaded para saber se o módulo chegou a rodar. O módulo da
+    // página (js/school-editorial.js) espera o ready para mostrar o conteúdo já dividido.
+    let markReady;
+    const ready = new Promise((resolve) => {
+        markReady = resolve;
+    });
+    window.komunikiReveal = { blocks, destroy, ready };
 
     // Movimento reduzido, GSAP ausente ou guard já desfeito: texto estático, sem split.
     if (!root.classList.contains('js') || !gsap || !ScrollTrigger || !SplitText
         || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         root.classList.remove('js');
+        markReady();
         return;
     }
     gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -288,9 +294,11 @@
         setTimeout(run, 1000);
     };
 
-    // Linha depende da métrica da fonte: dividir antes da webfont carregar deixa as quebras erradas.
+    // Linha depende da métrica da fonte: dividir antes da webfont carregar deixa as quebras erradas, e o autoSplit
+    // redividia o bloco quando ela chegava. Em Cursos isso caía no meio da entrada do título, que saltava para o fim.
+    // O módulo da página carrega as três webfonts; sem ele, fica o document.fonts.ready.
     Promise.race([
-        document.fonts ? document.fonts.ready : Promise.resolve(),
+        window.komunikiPage?.fontsReady ?? (document.fonts ? document.fonts.ready : Promise.resolve()),
         new Promise((resolve) => setTimeout(resolve, 2500)),
     ]).then(() => {
         gsap.globalTimeline.pause();
@@ -300,7 +308,13 @@
             destroy();
             console.error('Reveal de texto indisponível:', error);
         } finally {
-            afterFirstPaint(() => gsap.globalTimeline.resume());
+            markReady();
+            // As entradas começam quando a página aparece, junto com o fade do conteúdo.
+            if (window.komunikiPage) {
+                window.komunikiPage.shown.then(() => requestAnimationFrame(() => gsap.globalTimeline.resume()));
+            } else {
+                afterFirstPaint(() => gsap.globalTimeline.resume());
+            }
         }
     });
 })();

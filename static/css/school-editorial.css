@@ -7,6 +7,11 @@
 .ed-school *{box-sizing:border-box}
 /* Static presentation in both themes, including utility classes and form states. */
 .ed-school *,.ed-school *::before,.ed-school *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+/* Page transition (js/school-editorial.js): main and footer stay invisible until the page is ready, then fade in; an internal link fades them out before navigating. The navigation capsule stays put. An attribute, not a class, because the Tailwind runtime rescans the page on every class change on <html>. */
+.ed-school>:is(main,footer){transition:opacity .4s cubic-bezier(.25,1,.5,1)!important}
+:root:is([data-ed-page="loading"],[data-ed-page="leaving"]) .ed-school>:is(main,footer){opacity:0;pointer-events:none}
+:root[data-ed-page="leaving"] .ed-school>:is(main,footer){transition-duration:.2s!important}
+@media (prefers-reduced-motion:reduce){.ed-school>:is(main,footer){transition:none!important}}
 .ed-school [x-cloak]{display:none!important}
 .ed-school ::selection{background:var(--ed-blue-light);color:#000}
 .ed-school :focus-visible{outline:2px solid currentColor;outline-offset:5px;box-shadow:none}

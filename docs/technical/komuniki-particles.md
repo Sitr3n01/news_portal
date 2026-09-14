@@ -38,6 +38,7 @@ O hero da Home é uma nuvem WebGL de 16.000 triângulos (9.000 em telas abaixo d
 - **Para atualizar o three:** criar outra pasta `three-rNNN` e trocar os caminhos no import map de `home.html`. Não sobrescrever arquivos de uma pasta já publicada.
 - Na prévia local o espaço recebe `data-particles-debug`, que expõe `window.komunikiParticles` com `renderers` (as duas camadas), `state` (forma, tema, `drawCalls` e demais contadores) e `dispose()`. Fora da prévia o atributo não é renderizado.
 - `dispose()` para o loop, desliga observers e `Timer`, libera geometria, material e os dois renderers e remove os canvases. O módulo o chama quando o htmx limpa o espaço; numa navegação comum o navegador já libera tudo.
+- Desde 14/09/2026 o espaço recebe `data-particles-ready` e dispara `komuniki:particles-ready` quando desenha o primeiro quadro, quando está fora da tela ou quando a montagem falha. O módulo da página (`js/school-editorial.js`) espera esse aviso para mostrar a Home já com o palco desenhado, com teto de 2,5 s. O script está em `?v=3`. Veja [Transição e rolagem](komuniki-transicao-e-rolagem.md).
 
 ## Onde ajustar
 

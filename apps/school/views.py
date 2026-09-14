@@ -129,6 +129,7 @@ PROPOSAL_FEATURES_FALLBACK = [
 ]
 
 COURSE_AWARD = 'Vencedor do Prêmio Paulo Freire de Educação 2024'
+COURSE_AWARD_EN = 'Winner of the 2024 Paulo Freire Education Award'
 COURSE_PROPOSAL_TITLE = 'Cursos para comunicação, cultura e presença profissional'
 COURSE_PROPOSAL_TITLE_EN = 'Courses for communication, culture and professional presence'
 COURSE_PROPOSAL_DESCRIPTION = 'Conheça formações profissionalizantes, cursos livres e mentorias para comunicar melhor, produzir cultura, conduzir eventos e destravar sua expressão.'
@@ -203,6 +204,7 @@ def page_detail(request, slug):
     if page.slug == 'cursos':
         context.update({
             'course_award': COURSE_AWARD,
+            'course_award_en': COURSE_AWARD_EN,
             'course_groups': COURSE_GROUPS,
         })
     return render(request, 'school/page_detail.html', context)

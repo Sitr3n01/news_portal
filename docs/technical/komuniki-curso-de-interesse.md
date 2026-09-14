@@ -71,7 +71,7 @@ Feita em 14/09/2026. O roteiro, os resultados e as capturas estão em `.preview/
 | Remover | A etiqueta some sem recarregar, o campo oculto fica vazio e a mensagem digitada continua |
 | Slug fora do catálogo | Sem etiqueta, sem campo oculto, assunto padrão e nenhum pedaço da URL na página |
 | Contato sem curso | Igual ao anterior: sem etiqueta e com o assunto "Geral" |
-| Idioma | Em inglês, "Course of interest", "Remove" e o aria-label traduzidos; a etiqueta mantém o nome do curso |
+| Idioma | Em inglês, "Course of interest", "Remove" e o aria-label traduzidos. Desde 14/09/2026 a etiqueta também mostra o nome do curso em inglês; a mensagem continua gravando o nome em português |
 | 375 px | Etiqueta de "Apresentação de Palco e Eventos" sem rolagem horizontal |
 | Gravação e admin | Nos testes do Django, a mensagem enviada a partir de um card grava "Jornalismo Cultural", um slug inventado grava vazio, e o admin lista e filtra o curso |
 | Migrações e testes | `makemigrations --check` sem mudanças pendentes; 482 testes do pytest e o Ruff passaram |

@@ -11,7 +11,8 @@
                     {% endif %}
                 </a>
 
-                <p class="mt-5 max-w-md text-base leading-relaxed text-slate-300"{% if reveal %} data-reveal="fade"{% endif %}>
+                <p class="mt-5 max-w-md text-base leading-relaxed text-slate-300"{% if reveal %} data-reveal="fade"{% endif %}
+                    x-text="t('{{ site_settings.tagline|default:"Comunicação que gera resultados."|escapejs }}', '{{ site_settings.tagline_en|escapejs }}')">
                     {{ site_settings.tagline|default:"Comunicação que gera resultados." }}
                 </p>
 

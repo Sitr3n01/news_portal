@@ -6,6 +6,7 @@ from django.urls import NoReverseMatch, reverse
 
 from apps.accounts.admin_roles import ensure_admin_role_groups
 from apps.common.context_processors import site_context
+from apps.common.models import SiteExtension
 from apps.school.models import Page, SchoolFeature, SchoolHomeConfig
 
 
@@ -230,6 +231,18 @@ def test_site_context_exposes_public_cross_domain_urls(current_site):
 
     assert context['komuniki_public_url'] == 'https://komuniki.com.br/'
     assert context['kelly_blog_public_url'] == 'https://kellyfarias.com.br/news/'
+
+
+@pytest.mark.django_db
+def test_site_context_reads_site_settings_saved_by_another_worker(current_site):
+    SiteExtension.objects.update_or_create(site=current_site, defaults={'tagline': 'Antes'})
+    request = RequestFactory().get('/')
+    assert site_context(request)['site_settings'].tagline == 'Antes'
+
+    # update() não passa por este processo nem dispara signals, como uma edição salva em outro worker do gunicorn
+    SiteExtension.objects.filter(site=current_site).update(tagline='Depois')
+
+    assert site_context(request)['site_settings'].tagline == 'Depois'
 
 
 @pytest.mark.django_db

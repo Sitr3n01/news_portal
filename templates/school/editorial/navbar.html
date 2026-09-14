@@ -16,7 +16,7 @@
             </div>
             <a href="{% url 'contact:page' %}" class="ed-button ed-grow ed-nav-contact" x-text="t('Fale com a Komuniki', 'Talk to Komuniki')">Fale com a Komuniki</a>
             <div class="ed-nav-controls">
-                <button type="button" class="ed-icon-button" @click="theme = theme === 'dark' ? 'light' : 'dark'"
+                <button type="button" class="ed-icon-button" @click="toggleTheme($event)"
                     :aria-label="theme === 'dark' ? t('Modo claro', 'Light mode') : t('Modo escuro', 'Dark mode')"
                     :aria-pressed="theme === 'dark'">
                     <svg x-show="theme !== 'dark'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

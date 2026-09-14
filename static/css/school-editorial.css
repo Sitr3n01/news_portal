@@ -12,6 +12,12 @@
 :root:is([data-ed-page="loading"],[data-ed-page="leaving"]) .ed-school>:is(main,footer){opacity:0;pointer-events:none}
 :root[data-ed-page="leaving"] .ed-school>:is(main,footer){transition-duration:.2s!important}
 @media (prefers-reduced-motion:reduce){.ed-school>:is(main,footer){transition:none!important}}
+/* Theme toggle only: the new theme expands over the old snapshot without moving the page. */
+:root[data-ed-theme-reveal]::view-transition-group(root){animation:none}
+:root[data-ed-theme-reveal]::view-transition-image-pair(root){isolation:auto}
+:root[data-ed-theme-reveal]::view-transition-old(root),:root[data-ed-theme-reveal]::view-transition-new(root){animation:none;mix-blend-mode:normal}
+:root[data-ed-theme-reveal]::view-transition-old(root){z-index:1}
+:root[data-ed-theme-reveal]::view-transition-new(root){z-index:2}
 .ed-school [x-cloak]{display:none!important}
 .ed-school ::selection{background:var(--ed-blue-light);color:#000}
 .ed-school :focus-visible{outline:2px solid currentColor;outline-offset:5px;box-shadow:none}

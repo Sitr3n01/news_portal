@@ -105,7 +105,60 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('schoolEditorial', () => ({
         theme: readPreference('theme', 'light') === 'dark' ? 'dark' : 'light',
         lang: readPreference('lang', 'pt') === 'en' ? 'en' : 'pt',
+        themeTransitioning: false,
         t(pt, en) { return this.lang === 'en' && en ? en : pt; },
+        async toggleTheme(event) {
+            if (this.themeTransitioning) return;
+            const root = document.documentElement;
+            const nextTheme = this.theme === 'dark' ? 'light' : 'dark';
+            const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const applyTheme = async () => {
+                this.theme = nextTheme;
+                // Wait for Alpine's watcher, icons and accessible labels before capturing the new theme.
+                await this.$nextTick();
+            };
+            if (!document.startViewTransition || !root.animate || reducedMotion() || root.dataset.edPage) {
+                await applyTheme();
+                return;
+            }
+
+            // The button center also works for keyboard activation and when the page is scrolled.
+            const rect = event.currentTarget.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+            const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+            this.themeTransitioning = true;
+            root.dataset.edThemeReveal = '';
+            let transition;
+            try {
+                transition = document.startViewTransition(applyTheme);
+                // A hidden tab or interrupted capture can skip the animation; the theme still changes.
+                const finished = transition.finished.catch(() => {});
+                try {
+                    await transition.ready;
+                    if (reducedMotion()) {
+                        transition.skipTransition();
+                    } else {
+                        root.animate({
+                            clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`],
+                        }, {
+                            duration: 450,
+                            easing: 'cubic-bezier(.4,0,.2,1)',
+                            pseudoElement: '::view-transition-new(root)',
+                        });
+                    }
+                } catch (_) {
+                    transition.skipTransition();
+                }
+                await finished;
+            } catch (_) {
+                transition?.skipTransition();
+                await applyTheme();
+            } finally {
+                delete root.dataset.edThemeReveal;
+                this.themeTransitioning = false;
+            }
+        },
         init() {
             document.documentElement.classList.toggle('dark', this.theme === 'dark');
             document.documentElement.lang = this.lang === 'en' ? 'en' : 'pt-BR';

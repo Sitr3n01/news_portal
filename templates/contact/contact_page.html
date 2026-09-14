@@ -36,6 +36,16 @@
                     </div>
                     {% endif %}
 
+                    {% if selected_course %}
+                    <div class="flex flex-wrap items-center gap-3" x-data="{ open: true }" x-show="open">
+                        <input type="hidden" name="{{ form.course_interest.name }}" value="{{ selected_course.slug }}" x-ref="interest">
+                        <p class="text-sm font-bold text-slate-700" x-text="t('Curso de interesse', 'Course of interest')">Curso de interesse</p>
+                        <span class="ed-tag">{{ selected_course.title }}</span>
+                        <a href="{% url 'contact:page' %}" class="text-sm font-bold text-primary-700" @click.prevent="open = false; $refs.interest.value = ''"
+                            aria-label="Remover o curso de interesse" :aria-label="t('Remover o curso de interesse', 'Remove the course of interest')"><span class="ed-underline" x-text="t('Remover', 'Remove')">Remover</span></a>
+                    </div>
+                    {% endif %}
+
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div>
                             <label for="{{ form.name.id_for_label }}" class="block text-sm font-bold text-slate-700" x-text="t('Nome completo', 'Full name')">Nome completo</label>

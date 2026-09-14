@@ -26,7 +26,7 @@ Implementado em 14/09/2026 na worktree `news_portal-komuniki-design`, branch `co
 | Todas as páginas | "Ir para o conteúdo" | span interno |
 | Início | título dos cards de trilhas | `.ed-underline-lines` no `h3`: um traço por linha do reveal |
 | Início | "Ver cursos" dos cards de trilhas | `.ed-underline` no span |
-| Cursos | título dos cards de curso | `.ed-underline-lines` no `h3`; o card é um `<a>` para Contato com `.ed-grow` |
+| Cursos | título dos cards de curso | `.ed-underline-lines` no `h3`; o card é um `<a>` para Contato com `?curso=<slug>` e `.ed-grow` (veja [Curso de interesse](komuniki-curso-de-interesse.md)) |
 | Rodapé | seis links | `.ed-underline` no link; nas páginas com reveal, o `data-reveal` passou do link para o `<li>` |
 | Rodapé | nome da marca | `.ed-underline` no span `ed-footer-brand` |
 | Rodapé e Contato | e-mails | `<span class="ed-underline-text">`. O do rodapé fica numa linha só; o de Contato quebra linha quando falta espaço |

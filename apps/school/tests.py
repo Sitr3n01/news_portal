@@ -338,9 +338,11 @@ def test_courses_page_renders_komuniki_course_cards(client, current_site):
     assert 'Produção Cultural' in content
     assert 'Comunicação Destravada' in content
     assert 'Vencedor do Prêmio Paulo Freire de Educação 2024' in content
-    # Cada card de curso é um link para Contato, com traço por linha no título e crescimento ao interagir
+    # Cada card de curso leva a Contato com o slug do curso, com traço por linha no título e crescimento ao interagir
     contact_url = reverse('contact:page')
-    assert content.count(f'<a href="{contact_url}" class="ed-card flex min-h-72 flex-col rounded-[1.75rem] p-6 focus:outline-none ed-grow"') == 6
+    for slug in ['comunicador-profissionalizante', 'producao-cultural', 'jornalismo-cultural',
+                 'apresentacao-de-palco-e-eventos', 'espanhol-conversacao-e-escrita', 'comunicacao-destravada']:
+        assert f'<a href="{contact_url}?curso={slug}" class="ed-card flex min-h-72 flex-col rounded-[1.75rem] p-6 focus:outline-none ed-grow"' in content
     assert content.count('text-slate-950 ed-underline-lines" data-reveal="fade"') == 6
 
 

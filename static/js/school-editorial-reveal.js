@@ -94,9 +94,11 @@
                     }
                 }
                 splitText = normalize(el.textContent);
+                // Prepare every line before exposing the block, even while the global timeline is paused.
+                // Lazy writes could leave the final text visible until its staggered entrance starts (Firefox).
                 const tween = mode === 'mask'
-                    ? gsap.fromTo(self.lines, { x: -50, yPercent: 100 }, { x: 0, yPercent: 0, duration: DUR, stagger: STAGGER, ease: EASE, paused: true })
-                    : gsap.fromTo(self.lines, { x: -50, opacity: 0 }, { x: 0, opacity: 1, duration: DUR, stagger: STAGGER, ease: EASE, paused: true });
+                    ? gsap.fromTo(self.lines, { x: -50, yPercent: 100 }, { x: 0, yPercent: 0, duration: DUR, stagger: STAGGER, ease: EASE, paused: true, lazy: false })
+                    : gsap.fromTo(self.lines, { x: -50, opacity: 0 }, { x: 0, opacity: 1, duration: DUR, stagger: STAGGER, ease: EASE, paused: true, lazy: false });
                 tl = tween;
                 gsap.set(el, { opacity: 1 });
                 if (state === 'revealed') {

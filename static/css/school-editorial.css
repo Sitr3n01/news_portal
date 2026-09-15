@@ -228,13 +228,11 @@
 @media(max-width:1100px){.ed-nav-pill{gap:16px;padding-left:24px}.ed-nav-right{gap:16px}.ed-nav-links{gap:16px}.ed-nav .ed-button{padding-inline:16px;font-size:14px}.ed-school .ed-brand{font-size:24px}}
 @media(max-width:1023px){.ed-nav-links{display:none}.ed-school .ed-nav-menu-button{display:inline-flex}.ed-award-grid{gap:32px;padding:40px}.ed-hero-grid{grid-template-columns:1fr 1fr}.ed-school .ed-hero h1{font-size:clamp(64px,9.5vw,100px)}}
 @media(min-width:1024px){.ed-mobile-menu{display:none!important}}
-/* 768-1023px, which includes a phone in Chrome's "desktop site" mode (980px): the Home tracks and the Cursos livres drop to two columns, and the odd card out is centered under the pair instead of sitting on the left. Four half tracks keep every card as wide as before; a group with a single course keeps its full-width card. */
-@media(min-width:768px) and (max-width:1023px){
- .ed-school :is(.ed-track-grid,.ed-course-group>div:last-child){grid-template-columns:repeat(4,minmax(0,1fr))}
- .ed-school :is(.ed-track-grid,.ed-course-group>div:last-child)>*{grid-column:span 2}
- .ed-school :is(.ed-track-grid,.ed-course-group>div:last-child)>:last-child:nth-child(odd):not(:first-child){grid-column:2/span 2}
- .ed-school .ed-course-group>div:last-child>:only-child{grid-column:1/-1}
-}
+/* A lone last card in a two-column grid spans the row at one column's width (the grid's gap-5 or gap-4 taken out) and sits centered under the pair instead of on the left. The Home tracks switch at Tailwind's md, 768-1023px, which includes a phone in Chrome's "desktop site" mode (980px). The trust cards and each Cursos group size their columns with auto-fit, so they query their own width: two columns fit from two minimum tracks plus a gap, three from three plus two gaps. A group with a single course keeps its full-width card. */
+@media(min-width:768px) and (max-width:1023px){.ed-school .ed-track-grid>:last-child:nth-child(odd):not(:first-child){grid-column:1/-1;justify-self:center;width:calc((100% - 1.25rem)/2)}}
+.ed-school :is(.ed-trust-grid,.ed-course-group>div:last-child){container-type:inline-size}
+@container (456px <= width < 692px){.ed-school .ed-trust-grid>:last-child:nth-child(odd):not(:first-child){grid-column:1/-1;justify-self:center;width:calc((100% - 1rem)/2)}}
+@container (660px <= width < 1000px){.ed-school .ed-course-group>div:last-child>:last-child:nth-child(odd):not(:first-child){grid-column:1/-1;justify-self:center;width:calc((100% - 1.25rem)/2)}}
 @media(max-width:767px){
  .ed-root{scroll-padding-top:112px}.ed-school main{padding-top:104px}
  .ed-nav{height:104px}.ed-nav-pill{width:calc(100% - 32px);padding:10px 12px 10px 20px;min-height:72px;gap:8px}

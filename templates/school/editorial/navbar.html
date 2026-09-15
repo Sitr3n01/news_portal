@@ -39,7 +39,11 @@
                 </button>
             </div>
         </div>
-        <div id="school-mobile-menu" class="ed-mobile-menu" x-cloak x-show="mobileMenuOpen" @click.outside="mobileMenuOpen = false">
+        <div id="school-mobile-menu" class="ed-mobile-menu" x-cloak x-show="mobileMenuOpen"
+            x-transition:enter="ed-mobile-menu-enter" x-transition:enter-start="ed-mobile-menu-enter-start"
+            x-transition:enter-end="ed-mobile-menu-enter-end" x-transition:leave="ed-mobile-menu-leave"
+            x-transition:leave-start="ed-mobile-menu-leave-start" x-transition:leave-end="ed-mobile-menu-leave-end"
+            @click.outside="mobileMenuOpen = false">
             <a href="{% url 'school:home' %}"><span class="ed-underline" x-text="t('Início', 'Home')">Início</span></a>
             <a href="{% url 'school:about' %}"><span class="ed-underline" x-text="t('Sobre', 'About')">Sobre</span></a>
             <a href="{% url 'school:page_detail' 'cursos' %}"><span class="ed-underline" x-text="t('Cursos', 'Courses')">Cursos</span></a>

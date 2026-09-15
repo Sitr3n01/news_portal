@@ -122,11 +122,8 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-            // The button center also works for keyboard activation and when the page is scrolled.
-            const rect = event.currentTarget.getBoundingClientRect();
-            const x = rect.left + rect.width / 2;
-            const y = rect.top + rect.height / 2;
-            const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+            // Preserve the button synchronously: event.currentTarget is not reliable after an await.
+            const trigger = event.currentTarget;
             this.themeTransitioning = true;
             root.dataset.edThemeReveal = '';
             let transition;
@@ -139,6 +136,12 @@ document.addEventListener('alpine:init', () => {
                     if (reducedMotion()) {
                         transition.skipTransition();
                     } else {
+                        // The pseudo-elements now exist. Reading the center here keeps the reveal in
+                        // the same mobile viewport state as the snapshot when browser chrome moves.
+                        const rect = trigger.getBoundingClientRect();
+                        const x = rect.left + rect.width / 2;
+                        const y = rect.top + rect.height / 2;
+                        const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
                         root.animate({
                             clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`],
                         }, {

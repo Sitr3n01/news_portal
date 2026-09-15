@@ -12,8 +12,8 @@
 :root:is([data-ed-page="loading"],[data-ed-page="leaving"]) .ed-school>:is(main,footer){opacity:0;pointer-events:none}
 :root[data-ed-page="leaving"] .ed-school>:is(main,footer){transition-duration:.2s!important}
 @media (prefers-reduced-motion:reduce){.ed-school>:is(main,footer){transition:none!important}}
-/* Theme toggle only: the new theme expands over the old snapshot without moving the page. */
-:root[data-ed-theme-reveal]::view-transition-group(root){animation:none}
+/* Theme toggle only: the new theme expands over the old snapshot without moving the page.
+   Keep the UA root-group animation: it carries snapshot geometry when mobile browser controls move. */
 :root[data-ed-theme-reveal]::view-transition-image-pair(root){isolation:auto}
 :root[data-ed-theme-reveal]::view-transition-old(root),:root[data-ed-theme-reveal]::view-transition-new(root){animation:none;mix-blend-mode:normal}
 :root[data-ed-theme-reveal]::view-transition-old(root){z-index:1}
@@ -104,9 +104,15 @@
 .ed-icon-button{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:0;border-radius:24px;background:transparent;color:var(--ed-ink);cursor:pointer}
 .ed-icon-button:hover{background:var(--ed-mist)}
 .ed-school .ed-nav-menu-button{display:none}
-.ed-mobile-menu{position:absolute;top:calc(100% + 8px);left:0;right:0;max-height:calc(100svh - 132px);overflow-y:auto;display:grid;gap:8px;padding:24px;border-radius:24px;background:var(--ed-card)}
+.ed-mobile-menu{position:absolute;top:calc(100% + 8px);left:0;right:0;max-height:calc(100svh - 132px);overflow-y:auto;display:grid;gap:8px;padding:24px;border-radius:24px;background:var(--ed-card);transform-origin:top center}
 .ed-mobile-menu>a{padding:12px;font-size:16px}
 .ed-language{font:400 12px "IBM Plex Mono",monospace}
+/* Explicit menu motion only: transform/opacity keeps the fixed navigation geometry stable. */
+@media(max-width:1023px) and (prefers-reduced-motion:no-preference){
+ .ed-school .ed-mobile-menu.ed-mobile-menu-enter,.ed-school .ed-mobile-menu.ed-mobile-menu-leave{transition:opacity .22s cubic-bezier(.25,1,.5,1),transform .22s cubic-bezier(.25,1,.5,1)!important}
+ .ed-school .ed-mobile-menu.ed-mobile-menu-enter-start,.ed-school .ed-mobile-menu.ed-mobile-menu-leave-end{opacity:0;transform:translateY(-8px) scale(.98)}
+ .ed-school .ed-mobile-menu.ed-mobile-menu-enter-end,.ed-school .ed-mobile-menu.ed-mobile-menu-leave-start{opacity:1;transform:translateY(0) scale(1)}
+}
 /* Home: oversized editorial opening; the particle layers run under and over the copy. */
 .ed-hero{position:relative;isolation:isolate;padding:40px 0 24px}
 .ed-hero>.ed-wrap{position:relative;z-index:1}

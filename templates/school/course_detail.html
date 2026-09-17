@@ -29,7 +29,7 @@
                 <h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-slate-950 md:text-6xl" data-reveal="mask"
                     x-text="t('{{ hero_title|escapejs }}', '{{ course.title_en|escapejs }}')">{{ hero_title }}</h1>
                 <p class="mt-6 text-lg leading-relaxed text-slate-600 md:text-xl" data-reveal="fade"
-                    x-text="t('{{ course.page.hero_tagline|escapejs }}', '{{ course.page.hero_tagline|escapejs }}')">{{ course.page.hero_tagline }}</p>
+                    x-text="t('{{ course.page.hero_tagline|escapejs }}', '{{ course.page.hero_tagline_en|escapejs }}')">{{ course.page.hero_tagline }}</p>
 
                 <dl class="mt-8 flex flex-wrap gap-3">
                     {% for detail in course.details %}
@@ -46,7 +46,7 @@
                     <a href="{% url 'contact:page' %}?curso={{ course.slug }}"
                         class="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-700 px-7 py-3 text-base font-bold text-white focus:outline-none ed-button ed-grow">
                         <span data-reveal="fade"
-                            x-text="t('{{ course.page.hero_cta_label|escapejs }}', '{{ course.page.hero_cta_label|escapejs }}')">{{ course.page.hero_cta_label }}</span>
+                            x-text="t('{{ course.page.hero_cta_label|escapejs }}', '{{ course.page.hero_cta_label_en|escapejs }}')">{{ course.page.hero_cta_label }}</span>
                     </a>
                 </div>
             </div>
@@ -66,14 +66,14 @@
     <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div data-reveal-group>
             <p class="text-sm font-bold uppercase text-primary-700" data-reveal="fade"
-                x-text="t('Sobre o curso', 'Sobre o curso')">Sobre o curso</p>
+                x-text="t('Sobre o curso', 'About the course')">Sobre o curso</p>
             <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-4xl" data-reveal="mask"
-                x-text="t('Apresentação do curso', 'Apresentação do curso')">Apresentação do curso</h2>
+                x-text="t('Apresentação do curso', 'Course overview')">Apresentação do curso</h2>
         </div>
         <div class="ed-panel mt-8 rounded-[2rem] p-6 text-lg leading-relaxed text-slate-600 md:p-10 md:text-xl" data-reveal-group>
             {% for paragraph in course.page.intro %}
             <p{% if not forloop.first %} class="mt-5"{% endif %} data-reveal="fade"
-                x-text="t('{{ paragraph|escapejs }}', '{{ paragraph|escapejs }}')">{{ paragraph }}</p>
+                x-text="t('{{ paragraph.text|escapejs }}', '{{ paragraph.text_en|escapejs }}')">{{ paragraph.text }}</p>
             {% endfor %}
         </div>
     </div>
@@ -85,12 +85,12 @@
         {% if section.kind == 'cards' %}
         <div class="max-w-3xl" data-reveal-group>
             <p class="text-sm font-bold uppercase text-primary-700" data-reveal="fade"
-                x-text="t('{{ section.eyebrow|escapejs }}', '{{ section.eyebrow|escapejs }}')">{{ section.eyebrow }}</p>
+                x-text="t('{{ section.eyebrow|escapejs }}', '{{ section.eyebrow_en|escapejs }}')">{{ section.eyebrow }}</p>
             <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-4xl" data-reveal="mask"
-                x-text="t('{{ section.title|escapejs }}', '{{ section.title|escapejs }}')">{{ section.title }}</h2>
+                x-text="t('{{ section.title|escapejs }}', '{{ section.title_en|escapejs }}')">{{ section.title }}</h2>
             {% if section.lead %}
             <p class="mt-4 leading-relaxed text-slate-600" data-reveal="fade"
-                x-text="t('{{ section.lead|escapejs }}', '{{ section.lead|escapejs }}')">{{ section.lead }}</p>
+                x-text="t('{{ section.lead|escapejs }}', '{{ section.lead_en|escapejs }}')">{{ section.lead }}</p>
             {% endif %}
         </div>
         <div class="mt-9 grid gap-5 sm:grid-cols-2">
@@ -98,9 +98,9 @@
             <article class="ed-card rounded-[1.75rem] p-6" data-reveal-group data-reveal-step="0.1">
                 <p class="ed-mono text-primary-700" data-reveal="fade" aria-hidden="true">{{ forloop.counter|stringformat:"02d" }}</p>
                 <h3 class="mt-3 font-display text-xl font-bold text-slate-950" data-reveal="fade"
-                    x-text="t('{{ item.title|escapejs }}', '{{ item.title|escapejs }}')">{{ item.title }}</h3>
+                    x-text="t('{{ item.title|escapejs }}', '{{ item.title_en|escapejs }}')">{{ item.title }}</h3>
                 <p class="mt-3 leading-relaxed text-slate-600" data-reveal="fade"
-                    x-text="t('{{ item.body|escapejs }}', '{{ item.body|escapejs }}')">{{ item.body }}</p>
+                    x-text="t('{{ item.body|escapejs }}', '{{ item.body_en|escapejs }}')">{{ item.body }}</p>
             </article>
             {% endfor %}
         </div>
@@ -108,36 +108,36 @@
         {% elif section.kind == 'list' %}
         <div class="max-w-3xl" data-reveal-group>
             <p class="text-sm font-bold uppercase text-primary-700" data-reveal="fade"
-                x-text="t('{{ section.eyebrow|escapejs }}', '{{ section.eyebrow|escapejs }}')">{{ section.eyebrow }}</p>
+                x-text="t('{{ section.eyebrow|escapejs }}', '{{ section.eyebrow_en|escapejs }}')">{{ section.eyebrow }}</p>
             <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-4xl" data-reveal="mask"
-                x-text="t('{{ section.title|escapejs }}', '{{ section.title|escapejs }}')">{{ section.title }}</h2>
+                x-text="t('{{ section.title|escapejs }}', '{{ section.title_en|escapejs }}')">{{ section.title }}</h2>
             {% if section.lead %}
             <p class="mt-4 leading-relaxed text-slate-600" data-reveal="fade"
-                x-text="t('{{ section.lead|escapejs }}', '{{ section.lead|escapejs }}')">{{ section.lead }}</p>
+                x-text="t('{{ section.lead|escapejs }}', '{{ section.lead_en|escapejs }}')">{{ section.lead }}</p>
             {% endif %}
         </div>
         <ul class="mt-8 grid gap-3 sm:grid-cols-2" data-reveal-group data-reveal-step="0.05">
             {% for item in section.items %}
             <li class="flex gap-3 text-base leading-relaxed text-slate-600">
                 <span class="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary-600" aria-hidden="true"></span>
-                <span data-reveal="fade" x-text="t('{{ item|escapejs }}', '{{ item|escapejs }}')">{{ item }}</span>
+                <span data-reveal="fade" x-text="t('{{ item.text|escapejs }}', '{{ item.text_en|escapejs }}')">{{ item.text }}</span>
             </li>
             {% endfor %}
         </ul>
         {% if section.note %}
         <p class="mt-6 max-w-3xl text-sm leading-relaxed text-slate-500" data-reveal="fade"
-            x-text="t('{{ section.note|escapejs }}', '{{ section.note|escapejs }}')">{{ section.note }}</p>
+            x-text="t('{{ section.note|escapejs }}', '{{ section.note_en|escapejs }}')">{{ section.note }}</p>
         {% endif %}
 
         {% elif section.kind == 'prose' %}
         <div class="max-w-3xl" data-reveal-group>
             <p class="text-sm font-bold uppercase text-primary-700" data-reveal="fade"
-                x-text="t('{{ section.eyebrow|escapejs }}', '{{ section.eyebrow|escapejs }}')">{{ section.eyebrow }}</p>
+                x-text="t('{{ section.eyebrow|escapejs }}', '{{ section.eyebrow_en|escapejs }}')">{{ section.eyebrow }}</p>
             <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-4xl" data-reveal="mask"
-                x-text="t('{{ section.title|escapejs }}', '{{ section.title|escapejs }}')">{{ section.title }}</h2>
+                x-text="t('{{ section.title|escapejs }}', '{{ section.title_en|escapejs }}')">{{ section.title }}</h2>
             {% for paragraph in section.body %}
             <p class="mt-4 leading-relaxed text-slate-600" data-reveal="fade"
-                x-text="t('{{ paragraph|escapejs }}', '{{ paragraph|escapejs }}')">{{ paragraph }}</p>
+                x-text="t('{{ paragraph.text|escapejs }}', '{{ paragraph.text_en|escapejs }}')">{{ paragraph.text }}</p>
             {% endfor %}
         </div>
 
@@ -145,16 +145,16 @@
         <div class="ed-panel ed-inverted mx-auto max-w-4xl rounded-[2rem] p-8 md:p-12" data-reveal-group>
             {% if section.title %}
             <h2 class="font-display text-2xl font-bold md:text-3xl" data-reveal="mask"
-                x-text="t('{{ section.title|escapejs }}', '{{ section.title|escapejs }}')">{{ section.title }}</h2>
+                x-text="t('{{ section.title|escapejs }}', '{{ section.title_en|escapejs }}')">{{ section.title }}</h2>
             {% endif %}
             {% if section.lead %}
             <p class="mt-4 leading-relaxed text-primary-50" data-reveal="fade"
-                x-text="t('{{ section.lead|escapejs }}', '{{ section.lead|escapejs }}')">{{ section.lead }}</p>
+                x-text="t('{{ section.lead|escapejs }}', '{{ section.lead_en|escapejs }}')">{{ section.lead }}</p>
             {% endif %}
             <div class="mt-6 space-y-3">
                 {% for line in section.lines %}
                 <p class="font-display text-2xl font-bold leading-snug md:text-3xl" data-reveal="fade"
-                    x-text="t('{{ line|escapejs }}', '{{ line|escapejs }}')">{{ line }}</p>
+                    x-text="t('{{ line.text|escapejs }}', '{{ line.text_en|escapejs }}')">{{ line.text }}</p>
                 {% endfor %}
             </div>
         </div>
@@ -171,22 +171,22 @@
                         </svg>
                     </span>
                     <span class="award-label" data-reveal="fade"
-                        x-text="t('{{ section.eyebrow|escapejs }}', '{{ section.eyebrow|escapejs }}')">{{ section.eyebrow }}</span>
+                        x-text="t('{{ section.eyebrow|escapejs }}', '{{ section.eyebrow_en|escapejs }}')">{{ section.eyebrow }}</span>
                 </div>
                 <h3 id="award-{{ course.slug }}-title" class="award-title" data-reveal="fade"
-                    x-text="t('{{ section.badge_title|escapejs }}', '{{ section.badge_title|escapejs }}')">{{ section.badge_title }}</h3>
+                    x-text="t('{{ section.badge_title|escapejs }}', '{{ section.badge_title_en|escapejs }}')">{{ section.badge_title }}</h3>
                 <div class="award-divider" aria-hidden="true"></div>
                 <p class="award-text" data-reveal="fade"
-                    x-text="t('{{ section.badge_intro|escapejs }}', '{{ section.badge_intro|escapejs }}')">{{ section.badge_intro }}</p>
+                    x-text="t('{{ section.badge_intro|escapejs }}', '{{ section.badge_intro_en|escapejs }}')">{{ section.badge_intro }}</p>
             </article></div>
             <div data-reveal-group>
                 <p class="text-sm font-bold uppercase text-primary-700" data-reveal="fade"
-                    x-text="t('{{ section.eyebrow|escapejs }}', '{{ section.eyebrow|escapejs }}')">{{ section.eyebrow }}</p>
+                    x-text="t('{{ section.eyebrow|escapejs }}', '{{ section.eyebrow_en|escapejs }}')">{{ section.eyebrow }}</p>
                 <h2 class="mt-4 font-display text-3xl font-bold leading-tight tracking-tight text-slate-950 md:text-4xl" data-reveal="mask"
-                    x-text="t('{{ section.title|escapejs }}', '{{ section.title|escapejs }}')">{{ section.title }}</h2>
+                    x-text="t('{{ section.title|escapejs }}', '{{ section.title_en|escapejs }}')">{{ section.title }}</h2>
                 {% for paragraph in section.body %}
                 <p class="mt-4 text-lg leading-relaxed text-slate-600" data-reveal="fade"
-                    x-text="t('{{ paragraph|escapejs }}', '{{ paragraph|escapejs }}')">{{ paragraph }}</p>
+                    x-text="t('{{ paragraph.text|escapejs }}', '{{ paragraph.text_en|escapejs }}')">{{ paragraph.text }}</p>
                 {% endfor %}
             </div>
         </div>
@@ -198,18 +198,18 @@
 <section class="ed-section px-4 py-14 sm:px-6 md:py-20 lg:px-8">
     <div class="ed-panel mx-auto max-w-4xl rounded-[2.25rem] p-8 text-center md:p-12" data-reveal-group>
         <h2 class="font-display text-3xl font-bold text-slate-950 md:text-4xl" data-reveal="mask"
-            x-text="t('{{ course.page.final_cta.title|escapejs }}', '{{ course.page.final_cta.title|escapejs }}')">{{ course.page.final_cta.title }}</h2>
+            x-text="t('{{ course.page.final_cta.title|escapejs }}', '{{ course.page.final_cta.title_en|escapejs }}')">{{ course.page.final_cta.title }}</h2>
         <p class="mx-auto mt-4 max-w-2xl leading-relaxed text-slate-600" data-reveal="fade"
-            x-text="t('{{ course.page.final_cta.text|escapejs }}', '{{ course.page.final_cta.text|escapejs }}')">{{ course.page.final_cta.text }}</p>
+            x-text="t('{{ course.page.final_cta.text|escapejs }}', '{{ course.page.final_cta.text_en|escapejs }}')">{{ course.page.final_cta.text }}</p>
         {% if course.page.final_cta.highlight %}
         <p class="mx-auto mt-5 max-w-2xl font-display text-xl font-bold text-slate-950 md:text-2xl" data-reveal="fade"
-            x-text="t('{{ course.page.final_cta.highlight|escapejs }}', '{{ course.page.final_cta.highlight|escapejs }}')">{{ course.page.final_cta.highlight }}</p>
+            x-text="t('{{ course.page.final_cta.highlight|escapejs }}', '{{ course.page.final_cta.highlight_en|escapejs }}')">{{ course.page.final_cta.highlight }}</p>
         {% endif %}
         <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
             <a href="{% url 'contact:page' %}?curso={{ course.slug }}"
                 class="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-600 px-7 py-3 text-sm font-bold text-white transition-colors focus:outline-none ed-button ed-grow">
                 <span data-reveal="fade"
-                    x-text="t('{{ course.page.final_cta.primary_label|escapejs }}', '{{ course.page.final_cta.primary_label|escapejs }}')">{{ course.page.final_cta.primary_label }}</span>
+                    x-text="t('{{ course.page.final_cta.primary_label|escapejs }}', '{{ course.page.final_cta.primary_label_en|escapejs }}')">{{ course.page.final_cta.primary_label }}</span>
             </a>
             {% if course.page.final_cta.secondary_label %}
             <a
@@ -221,7 +221,7 @@
                 {% endif %}
                 class="ed-chip inline-flex min-h-12 items-center justify-center rounded-full px-7 py-3 text-sm font-bold text-primary-900 focus:outline-none ed-button ed-button-outline ed-grow">
                 <span data-reveal="fade"
-                    x-text="t('{{ course.page.final_cta.secondary_label|escapejs }}', '{{ course.page.final_cta.secondary_label|escapejs }}')">{{ course.page.final_cta.secondary_label }}</span>
+                    x-text="t('{{ course.page.final_cta.secondary_label|escapejs }}', '{{ course.page.final_cta.secondary_label_en|escapejs }}')">{{ course.page.final_cta.secondary_label }}</span>
             </a>
             {% endif %}
         </div>

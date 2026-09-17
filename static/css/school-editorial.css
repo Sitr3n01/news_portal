@@ -274,11 +274,12 @@
    Classe própria, para não herdar o tamanho de título gigante de .ed-hero-grid/.ed-hero h1. Abaixo
    de 1024px empilha: o texto tem prioridade sobre a decoração numa tela estreita. */
 .ed-course-hero{position:relative;isolation:isolate}
-.ed-course-hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1.1fr;gap:32px;align-items:center}
+.ed-course-hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:1.2fr 1fr;gap:32px;align-items:center}
+.ed-course-hero-grid>.ed-contact-header{min-width:0}
 .ed-course-hero-art{min-width:0}
 .ed-course-particles{position:relative;width:100%;aspect-ratio:.9;cursor:grab;touch-action:pan-y;-webkit-user-select:none;user-select:none}
 .ed-course-particles.is-dragging{cursor:grabbing}
 .ed-course-particles-canvas{position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:none;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 48px,#000 calc(100% - 90px),transparent);mask-image:linear-gradient(to bottom,transparent,#000 48px,#000 calc(100% - 90px),transparent)}
 .ed-course-particles-back{z-index:0}
 .ed-course-particles-front{z-index:2}
-@media(max-width:1023px){.ed-course-hero-grid{grid-template-columns:1fr;gap:24px}.ed-course-particles{max-width:380px;margin:0 auto}}
+@media(max-width:1179px){.ed-course-hero-grid{grid-template-columns:1fr;gap:24px}.ed-course-particles{max-width:380px;margin:0 auto}}

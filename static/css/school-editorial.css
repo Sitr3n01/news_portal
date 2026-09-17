@@ -24,7 +24,7 @@
 .ed-school img{max-width:100%}
 .ed-school svg{flex-shrink:0}
 .ed-school main{padding-top:128px;min-height:65vh}
-.ed-school h1,.ed-school h2,.ed-school h3{color:inherit;text-transform:uppercase;overflow-wrap:anywhere;text-wrap:pretty}
+.ed-school h1,.ed-school h2,.ed-school h3{color:inherit;text-transform:uppercase;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto;text-wrap:pretty}
 .ed-school h2,.ed-school h3{font-family:Inter,Arial,sans-serif;font-weight:450;letter-spacing:-.03em;line-height:1.1}
 .ed-school h1,.ed-school .ed-display{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:700;line-height:.9;letter-spacing:-.03em;font-size:clamp(48px,7.6vw,112px)}
 .ed-school h2{font-size:clamp(28px,3.1vw,40px)}
@@ -257,3 +257,29 @@
  .ed-school .ed-hero h1,.ed-school .ed-interior>.ed-section:first-child h1{font-size:48px}
  .ed-root[lang="en"] .ed-school .ed-hero h1,.ed-root[lang="en"] .ed-school .ed-interior>.ed-section:first-child h1{font-size:clamp(38px,13.5vw,48px)}
 }
+/* Botão flutuante do WhatsApp (só no layout editorial da escola). Reusa o scale de .ed-grow no hover/focus, mas
+   declara sua própria transition: como esta regra vem depois de .ed-grow no arquivo, um "transition" aqui venceria
+   sozinho e apagaria a suavização do transform vinda de lá, então repete as duas propriedades juntas. Isso também
+   troca o "!important" que .ed-grow desliga sob prefers-reduced-motion pelo próprio, então a regra seguinte repete
+   o desligamento para este seletor. */
+.ed-school .ed-whatsapp{position:fixed;right:24px;bottom:calc(24px + env(safe-area-inset-bottom));z-index:40;display:flex;align-items:center;justify-content:center;width:60px;height:60px;border-radius:50%;background:#25d366;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.24);transition:transform .3s cubic-bezier(.25,1,.5,1),box-shadow .3s cubic-bezier(.25,1,.5,1)!important}
+.ed-school .ed-whatsapp:is(:hover,:focus-visible){box-shadow:0 10px 24px rgba(0,0,0,.32)}
+@media (prefers-reduced-motion:reduce){.ed-school .ed-whatsapp{transition:none!important}}
+.ed-whatsapp-icon{width:30px;height:30px}
+@media(max-width:767px){.ed-school .ed-whatsapp{right:16px;bottom:calc(16px + env(safe-area-inset-bottom));width:56px;height:56px}.ed-whatsapp-icon{width:28px;height:28px}}
+/* Hero das páginas de curso: mesmo padrão de duas camadas do hero da Home (static/js/
+   school-editorial-particles-tsuru.js) — um canvas atrás do texto e outro na frente, cobrindo a
+   hero inteira, não só a caixa .ed-course-particles. .ed-course-hero vira contexto de empilhamento
+   (como .ed-hero); a caixa só define o enquadramento da câmera (setViewOffset) e a área de arraste.
+   Classe própria, para não herdar o tamanho de título gigante de .ed-hero-grid/.ed-hero h1. Abaixo
+   de 1024px empilha: o texto tem prioridade sobre a decoração numa tela estreita. */
+.ed-course-hero{position:relative;isolation:isolate}
+.ed-course-hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:1.2fr 1fr;gap:32px;align-items:center}
+.ed-course-hero-grid>.ed-contact-header{min-width:0}
+.ed-course-hero-art{min-width:0}
+.ed-course-particles{position:relative;width:100%;aspect-ratio:.9;cursor:grab;touch-action:pan-y;-webkit-user-select:none;user-select:none}
+.ed-course-particles.is-dragging{cursor:grabbing}
+.ed-course-particles-canvas{position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:none;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 48px,#000 calc(100% - 90px),transparent);mask-image:linear-gradient(to bottom,transparent,#000 48px,#000 calc(100% - 90px),transparent)}
+.ed-course-particles-back{z-index:0}
+.ed-course-particles-front{z-index:2}
+@media(max-width:1179px){.ed-course-hero-grid{grid-template-columns:1fr;gap:24px}.ed-course-particles{max-width:380px;margin:0 auto}}

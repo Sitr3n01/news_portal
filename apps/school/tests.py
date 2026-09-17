@@ -7,7 +7,7 @@ from django.templatetags.static import static
 from django.urls import reverse
 
 from apps.common.models import SiteExtension
-from apps.school.courses import COURSE_GROUPS
+from apps.school.courses import COURSE_GROUPS, find_course, hero_title_for_display
 from apps.school.models import Page, SchoolFeature, SchoolHomeConfig, TeamMember
 from apps.school.models import Testimonial as SchoolTestimonial
 
@@ -517,12 +517,234 @@ def test_courses_page_renders_komuniki_course_cards(client, current_site):
     assert 'Produção Cultural' in content
     assert 'Comunicação Destravada' in content
     assert 'Vencedor do Prêmio Paulo Freire de Educação 2024' in content
-    # Cada card de curso leva a Contato com o slug do curso, com traço por linha no título e crescimento ao interagir
-    contact_url = reverse('contact:page')
+    # Cada card de curso leva à página detalhada do curso, com traço por linha no título e crescimento ao interagir
     for slug in ['comunicador-profissionalizante', 'producao-cultural', 'jornalismo-cultural',
                  'apresentacao-de-palco-e-eventos', 'espanhol-conversacao-e-escrita', 'comunicacao-destravada']:
-        assert f'<a href="{contact_url}?curso={slug}" class="ed-card flex min-h-72 flex-col rounded-[1.75rem] p-6 focus:outline-none ed-grow"' in content
+        course_url = reverse('school:course_detail', kwargs={'course_slug': slug})
+        assert f'<a href="{course_url}" class="ed-card flex min-h-72 flex-col rounded-[1.75rem] p-6 focus:outline-none ed-grow"' in content
     assert content.count('text-slate-950 ed-underline-lines" data-reveal="fade"') == 6
+
+
+ALL_COURSE_SLUGS = [
+    'comunicador-profissionalizante', 'producao-cultural', 'jornalismo-cultural',
+    'apresentacao-de-palco-e-eventos', 'espanhol-conversacao-e-escrita', 'comunicacao-destravada',
+]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('slug', ALL_COURSE_SLUGS)
+def test_course_detail_page_renders_for_every_catalog_course(client, current_site, slug):
+    course = find_course(slug)
+
+    response = client.get(reverse('school:course_detail', kwargs={'course_slug': slug}))
+
+    content = response.content.decode()
+    assert response.status_code == 200
+    assert f'<title>{course["title"]} - {current_site.name}</title>' in content
+    assert course['page']['hero_tagline'] in content
+    assert course['page']['final_cta']['title'] in content
+    # O CTA do hero e o CTA final levam a Contato com o curso pré-selecionado
+    contact_url = reverse('contact:page')
+    assert content.count(f'href="{contact_url}?curso={slug}"') >= 2
+    # Breadcrumb: Início / Cursos / <curso atual>, curso atual sem link
+    assert '>Início<' in content
+    assert course['title'] in content
+    assert 'aria-current="page"' in content
+    # "Cursos" fica marcado como seção atual na navbar
+    assert content.index('<nav class="ed-nav"') < content.index('aria-current="page"')
+
+
+@pytest.mark.django_db
+def test_course_detail_page_404s_for_unknown_slug(client, current_site):
+    response = client.get('/cursos/curso-que-nao-existe/')
+
+    assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_course_detail_page_reveals_all_text(client, current_site):
+    content = client.get(reverse('school:course_detail', kwargs={'course_slug': 'comunicador-profissionalizante'})).content.decode()
+
+    assert 'data-reveal="mask"' in content
+    assert content.count('data-reveal-group') >= 6
+    assert 'data-reveal' not in _navbar(content)
+    # O breadcrumb é wayfinding estático, como a navbar: sem reveal
+    breadcrumb = content[content.index('<nav class="mb-8'):content.index('</nav>', content.index('<nav class="mb-8'))]
+    assert 'data-reveal' not in breadcrumb
+
+
+@pytest.mark.django_db
+def test_course_detail_award_callout_renders_for_comunicacao_destravada(client, current_site):
+    content = client.get(reverse('school:course_detail', kwargs={'course_slug': 'comunicacao-destravada'})).content.decode()
+
+    assert 'Prêmio Paulo Freire de Educação — CLDF 2024' in content
+    assert 'award-card' in content
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('slug', ALL_COURSE_SLUGS)
+def test_course_detail_renders_tsuru_particle_stage_with_local_three(client, current_site, slug):
+    content = client.get(reverse('school:course_detail', kwargs={'course_slug': slug})).content.decode()
+
+    assert 'ed-course-hero-grid' in content
+    assert 'data-particles-tsuru' in content
+    assert 'particles/tsuru.glb' in content
+    assert 'particles/guirlanda-tsurus.glb' in content
+    # O gancho de depuração só existe na prévia local
+    assert 'data-particles-debug' not in content
+    # three vem da cópia local via import map: a CSP não libera CDN
+    assert '<script type="importmap">' in content
+    assert 'js/vendor/three-r186/three.module.js' in content
+    assert 'js/vendor/three-r186/three.core.js' in content
+    assert 'js/school-editorial-particles-tsuru.js' in content
+
+
+@pytest.mark.django_db
+def test_tsuru_particle_stage_stays_out_of_other_school_pages(client, current_site):
+    Page.objects.update_or_create(site=current_site, slug='cursos', defaults={'title': 'Cursos', 'is_published': True})
+
+    pages = [
+        ('school:home', []), ('school:about', []), ('school:privacy', []),
+        ('contact:page', []), ('school:page_detail', ['cursos']),
+    ]
+    for url_name, args in pages:
+        content = client.get(reverse(url_name, args=args)).content.decode()
+        assert 'data-particles-tsuru' not in content, f'a nuvem de tsurus vazou para {url_name}'
+        assert 'school-editorial-particles-tsuru.js' not in content, f'o módulo do tsuru carregou em {url_name}'
+
+
+@pytest.mark.django_db
+def test_course_sitemap_lists_every_course_detail_url(client, current_site):
+    response = client.get('/sitemap-school-courses.xml')
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    for slug in ALL_COURSE_SLUGS:
+        assert reverse('school:course_detail', kwargs={'course_slug': slug}) in content
+
+
+def test_hero_title_for_display_inserts_soft_hyphen_at_the_syllable_break():
+    # \xad é o hífen condicional: invisível a menos que o navegador quebre a linha bem ali.
+    assert hero_title_for_display('Comunicador Profissionalizante') == 'Comunicador Profissionali\xadzante'
+    assert hero_title_for_display('Apresentação de Palco e Eventos') == 'Apresenta\xadção de Palco e Eventos'
+    assert hero_title_for_display('Espanhol – Conversação e Escrita') == 'Espanhol – Conversa\xadção e Escrita'
+    # Sem palavra longa conhecida, o título sai inalterado.
+    assert hero_title_for_display('Comunicação Destravada') == 'Comunicação Destravada'
+
+
+@pytest.mark.django_db
+def test_course_detail_hero_h1_carries_soft_hyphen_but_breadcrumb_and_title_tag_do_not(client, current_site):
+    content = client.get(reverse('school:course_detail', kwargs={'course_slug': 'comunicador-profissionalizante'})).content.decode()
+
+    h1 = content[content.index('<h1'):content.index('</h1>')]
+    assert '\xad' in h1
+    # O <title> da aba e o breadcrumb continuam com o texto original, sem o hífen condicional.
+    assert '<title>Comunicador Profissionalizante - ' in content
+    breadcrumb = content[content.index('<nav class="mb-8'):content.index('</nav>', content.index('<nav class="mb-8'))]
+    assert '\xad' not in breadcrumb
+    assert 'Comunicador Profissionalizante' in breadcrumb
+
+
+def test_site_extension_whatsapp_number_strips_formatting_and_adds_country_code():
+    # Já internacional (tem "+"): só remove a formatação, sem tocar no código do país.
+    assert SiteExtension(phone_number='+55 (61) 99999-9999').whatsapp_number == '5561999999999'
+    # Como o admin realmente cadastra hoje (sem "+55"): DDD + número, 11 dígitos -> completa com 55.
+    assert SiteExtension(phone_number='(61) 92003-8428').whatsapp_number == '5561920038428'
+    assert SiteExtension(phone_number='').whatsapp_number == ''
+
+
+@pytest.mark.django_db
+def test_whatsapp_button_renders_with_normalized_number_and_message(client, current_site):
+    SiteExtension.objects.update_or_create(site=current_site, defaults={'phone_number': '(61) 92003-8428'})
+
+    content = client.get(reverse('school:home')).content.decode()
+
+    assert 'ed-whatsapp' in content
+    assert (
+        'href="https://wa.me/5561920038428'
+        '?text=Ol%C3%A1%21%20Gostaria%20de%20saber%20mais%20sobre%20a%20Komuniki."' in content
+    )
+    assert 'aria-label="Falar com a Komuniki pelo WhatsApp"' in content
+    assert 'target="_blank"' in content
+    assert 'rel="noopener noreferrer"' in content
+
+
+@pytest.mark.django_db
+def test_whatsapp_button_hidden_without_phone_number(client, current_site):
+    SiteExtension.objects.update_or_create(site=current_site, defaults={'phone_number': ''})
+
+    content = client.get(reverse('school:home')).content.decode()
+
+    assert 'ed-whatsapp' not in content
+    assert 'wa.me' not in content
+
+
+@pytest.mark.django_db
+def test_course_final_cta_falar_com_a_komuniki_links_to_whatsapp(client, current_site):
+    SiteExtension.objects.update_or_create(site=current_site, defaults={'phone_number': '(61) 92003-8428'})
+
+    # comunicador-profissionalizante: secondary_label é "Falar com a Komuniki". O botão flutuante já
+    # tem esse mesmo link; a contagem 2 confirma que o CTA final também passou a usá-lo.
+    content = client.get(reverse('school:course_detail', kwargs={'course_slug': 'comunicador-profissionalizante'})).content.decode()
+    assert content.count('href="https://wa.me/5561920038428?text=Ol%C3%A1%21%20Gostaria%20de%20saber%20mais%20sobre%20a%20Komuniki."') == 2
+    assert content.count('ed-button ed-button-outline ed-grow') == 1
+
+    # jornalismo-cultural: secondary_label é "Consultar próximas turmas", continua indo para o contato.
+    # O único wa.me da página é o botão flutuante, sempre presente; o CTA final não duplica isso.
+    content = client.get(reverse('school:course_detail', kwargs={'course_slug': 'jornalismo-cultural'})).content.decode()
+    contact_url = reverse('contact:page')
+    assert f'href="{contact_url}?curso=jornalismo-cultural"' in content
+    assert content.count('wa.me') == 1
+
+
+@pytest.mark.django_db
+def test_course_final_cta_falls_back_to_contact_without_phone_number(client, current_site):
+    SiteExtension.objects.update_or_create(site=current_site, defaults={'phone_number': ''})
+
+    content = client.get(reverse('school:course_detail', kwargs={'course_slug': 'comunicador-profissionalizante'})).content.decode()
+
+    assert 'wa.me' not in content
+    contact_url = reverse('contact:page')
+    # Sem telefone, o botão "Falar com a Komuniki" cai de volta para o contato: os 3 CTAs da página
+    # (hero + final principal + final secundário) apontam para lá.
+    assert content.count(f'href="{contact_url}?curso=comunicador-profissionalizante"') == 3
+
+
+@pytest.mark.django_db
+def test_whatsapp_button_appears_on_every_komuniki_public_page(client, current_site):
+    SiteExtension.objects.update_or_create(site=current_site, defaults={'phone_number': '(61) 92003-8428'})
+    Page.objects.update_or_create(site=current_site, slug='cursos', defaults={'title': 'Cursos', 'is_published': True})
+
+    pages = [
+        ('school:home', []), ('school:about', []), ('school:privacy', []), ('contact:page', []),
+        ('school:page_detail', ['cursos']), ('school:course_detail', ['comunicador-profissionalizante']),
+    ]
+    for url_name, args in pages:
+        content = client.get(reverse(url_name, args=args)).content.decode()
+        assert 'ed-whatsapp' in content, f'faltou o botão do WhatsApp em {url_name}'
+
+
+@pytest.mark.django_db
+def test_whatsapp_button_does_not_reach_the_news_portal(client, current_site):
+    SiteExtension.objects.update_or_create(site=current_site, defaults={'phone_number': '(61) 92003-8428'})
+
+    content = client.get(reverse('news:list')).content.decode()
+
+    assert 'ed-whatsapp' not in content
+    assert 'wa.me' not in content
+
+
+@pytest.mark.django_db
+def test_existing_komuniki_pages_still_return_200_alongside_whatsapp_button(client, current_site):
+    SiteExtension.objects.update_or_create(site=current_site, defaults={'phone_number': '(61) 92003-8428'})
+    Page.objects.update_or_create(site=current_site, slug='cursos', defaults={'title': 'Cursos', 'is_published': True})
+
+    pages = [
+        ('school:home', []), ('school:about', []), ('school:privacy', []), ('contact:page', []),
+        ('school:page_detail', ['cursos']), ('school:course_detail', ['comunicador-profissionalizante']),
+    ]
+    for url_name, args in pages:
+        assert client.get(reverse(url_name, args=args)).status_code == 200
 
 
 @pytest.mark.django_db

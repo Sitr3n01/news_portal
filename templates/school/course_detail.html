@@ -1,4 +1,5 @@
 {% extends 'base_school_editorial.html' %}
+{% load static %}
 
 {% block title %}{{ course.title }} - {{ current_site.name }}{% endblock %}
 {% block meta_description %}{{ course.page.meta_description }}{% endblock %}
@@ -21,32 +22,42 @@
             </ol>
         </nav>
 
-        <div class="ed-contact-header" data-reveal-group data-reveal-step="0.08">
-            <p class="text-sm font-bold uppercase text-primary-700" data-reveal="fade"
-                x-text="t('{{ group.eyebrow|escapejs }}', '{{ group.eyebrow_en|escapejs }}')">{{ group.eyebrow }}</p>
-            <h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-slate-950 md:text-6xl" data-reveal="mask"
-                x-text="t('{{ course.title|escapejs }}', '{{ course.title_en|escapejs }}')">{{ course.title }}</h1>
-            <p class="mt-6 text-lg leading-relaxed text-slate-600 md:text-xl" data-reveal="fade"
-                x-text="t('{{ course.page.hero_tagline|escapejs }}', '{{ course.page.hero_tagline|escapejs }}')">{{ course.page.hero_tagline }}</p>
+        <div class="ed-course-hero-grid">
+            <div class="ed-contact-header" data-reveal-group data-reveal-step="0.08">
+                <p class="text-sm font-bold uppercase text-primary-700" data-reveal="fade"
+                    x-text="t('{{ group.eyebrow|escapejs }}', '{{ group.eyebrow_en|escapejs }}')">{{ group.eyebrow }}</p>
+                <h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-slate-950 md:text-6xl" data-reveal="mask"
+                    x-text="t('{{ course.title|escapejs }}', '{{ course.title_en|escapejs }}')">{{ course.title }}</h1>
+                <p class="mt-6 text-lg leading-relaxed text-slate-600 md:text-xl" data-reveal="fade"
+                    x-text="t('{{ course.page.hero_tagline|escapejs }}', '{{ course.page.hero_tagline|escapejs }}')">{{ course.page.hero_tagline }}</p>
 
-            <dl class="mt-8 flex flex-wrap gap-3">
-                {% for detail in course.details %}
-                <div class="ed-chip min-w-[140px] rounded-2xl px-4 py-3">
-                    <dt class="text-xs font-bold uppercase tracking-wide text-slate-500" data-reveal="fade"
-                        x-text="t('{{ detail.label|escapejs }}', '{{ detail.label_en|escapejs }}')">{{ detail.label }}</dt>
-                    <dd class="mt-1 font-display text-lg font-bold text-slate-950" data-reveal="fade"
-                        x-text="t('{{ detail.value|escapejs }}', '{{ detail.value_en|escapejs }}')">{{ detail.value }}</dd>
+                <dl class="mt-8 flex flex-wrap gap-3">
+                    {% for detail in course.details %}
+                    <div class="ed-chip min-w-[140px] rounded-2xl px-4 py-3">
+                        <dt class="text-xs font-bold uppercase tracking-wide text-slate-500" data-reveal="fade"
+                            x-text="t('{{ detail.label|escapejs }}', '{{ detail.label_en|escapejs }}')">{{ detail.label }}</dt>
+                        <dd class="mt-1 font-display text-lg font-bold text-slate-950" data-reveal="fade"
+                            x-text="t('{{ detail.value|escapejs }}', '{{ detail.value_en|escapejs }}')">{{ detail.value }}</dd>
+                    </div>
+                    {% endfor %}
+                </dl>
+
+                <div class="mt-8">
+                    <a href="{% url 'contact:page' %}?curso={{ course.slug }}"
+                        class="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-700 px-7 py-3 text-base font-bold text-white focus:outline-none ed-button ed-grow">
+                        <span data-reveal="fade"
+                            x-text="t('{{ course.page.hero_cta_label|escapejs }}', '{{ course.page.hero_cta_label|escapejs }}')">{{ course.page.hero_cta_label }}</span>
+                    </a>
                 </div>
-                {% endfor %}
-            </dl>
-
-            <div class="mt-8">
-                <a href="{% url 'contact:page' %}?curso={{ course.slug }}"
-                    class="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-700 px-7 py-3 text-base font-bold text-white focus:outline-none ed-button ed-grow">
-                    <span data-reveal="fade"
-                        x-text="t('{{ course.page.hero_cta_label|escapejs }}', '{{ course.page.hero_cta_label|escapejs }}')">{{ course.page.hero_cta_label }}</span>
-                </a>
             </div>
+
+            <figure class="ed-course-hero-art">
+                <div class="ed-course-particles" data-particles-tsuru
+                    data-tsuru-url="{% static 'particles/tsuru.glb' %}"
+                    data-garland-url="{% static 'particles/guirlanda-tsurus.glb' %}"
+                    {% if design_preview %}data-particles-debug{% endif %}
+                    aria-hidden="true"></div>
+            </figure>
         </div>
     </div>
 </section>
@@ -213,3 +224,20 @@
 {% endblock %}
 
 {% block footer %}{% include 'school/editorial/footer.html' with reveal=True %}{% endblock %}
+
+{% block extra_js %}
+{% get_static_prefix as static_prefix %}
+{# Chaves com o prefixo estático remapeiam os imports relativos do three para as URLs com hash do collectstatic. #}
+<script type="importmap">
+{
+    "imports": {
+        "three": "{% static 'js/vendor/three-r186/three.module.js' %}",
+        "three/addons/loaders/GLTFLoader.js": "{% static 'js/vendor/three-r186/addons/loaders/GLTFLoader.js' %}",
+        "{{ static_prefix }}js/vendor/three-r186/three.core.js": "{% static 'js/vendor/three-r186/three.core.js' %}",
+        "{{ static_prefix }}js/vendor/three-r186/addons/utils/BufferGeometryUtils.js": "{% static 'js/vendor/three-r186/addons/utils/BufferGeometryUtils.js' %}",
+        "{{ static_prefix }}js/vendor/three-r186/addons/utils/SkeletonUtils.js": "{% static 'js/vendor/three-r186/addons/utils/SkeletonUtils.js' %}"
+    }
+}
+</script>
+<script type="module" src="{% static 'js/school-editorial-particles-tsuru.js' %}?v=1"></script>
+{% endblock %}

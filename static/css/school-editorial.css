@@ -267,3 +267,12 @@
 @media (prefers-reduced-motion:reduce){.ed-school .ed-whatsapp{transition:none!important}}
 .ed-whatsapp-icon{width:30px;height:30px}
 @media(max-width:767px){.ed-school .ed-whatsapp{right:16px;bottom:calc(16px + env(safe-area-inset-bottom));width:56px;height:56px}.ed-whatsapp-icon{width:28px;height:28px}}
+/* Hero das páginas de curso: mesmo padrão de duas colunas (texto + palco 3D) do hero da Home
+   (static/js/school-editorial-particles-tsuru.js), numa classe própria para não herdar o tamanho de
+   título gigante de .ed-hero-grid/.ed-hero h1. Abaixo de 1024px empilha: o texto tem prioridade sobre
+   a decoração numa tela estreita. */
+.ed-course-hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:32px;align-items:center}
+.ed-course-hero-art{min-width:0}
+.ed-course-particles{position:relative;width:100%;aspect-ratio:1}
+.ed-course-particles-canvas{position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:none}
+@media(max-width:1023px){.ed-course-hero-grid{grid-template-columns:1fr;gap:24px}.ed-course-particles{max-width:320px;margin:0 auto}}

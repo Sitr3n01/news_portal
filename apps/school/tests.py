@@ -582,6 +582,38 @@ def test_course_detail_award_callout_renders_for_comunicacao_destravada(client, 
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize('slug', ALL_COURSE_SLUGS)
+def test_course_detail_renders_tsuru_particle_stage_with_local_three(client, current_site, slug):
+    content = client.get(reverse('school:course_detail', kwargs={'course_slug': slug})).content.decode()
+
+    assert 'ed-course-hero-grid' in content
+    assert 'data-particles-tsuru' in content
+    assert 'particles/tsuru.glb' in content
+    assert 'particles/guirlanda-tsurus.glb' in content
+    # O gancho de depuração só existe na prévia local
+    assert 'data-particles-debug' not in content
+    # three vem da cópia local via import map: a CSP não libera CDN
+    assert '<script type="importmap">' in content
+    assert 'js/vendor/three-r186/three.module.js' in content
+    assert 'js/vendor/three-r186/three.core.js' in content
+    assert 'js/school-editorial-particles-tsuru.js' in content
+
+
+@pytest.mark.django_db
+def test_tsuru_particle_stage_stays_out_of_other_school_pages(client, current_site):
+    Page.objects.update_or_create(site=current_site, slug='cursos', defaults={'title': 'Cursos', 'is_published': True})
+
+    pages = [
+        ('school:home', []), ('school:about', []), ('school:privacy', []),
+        ('contact:page', []), ('school:page_detail', ['cursos']),
+    ]
+    for url_name, args in pages:
+        content = client.get(reverse(url_name, args=args)).content.decode()
+        assert 'data-particles-tsuru' not in content, f'a nuvem de tsurus vazou para {url_name}'
+        assert 'school-editorial-particles-tsuru.js' not in content, f'o módulo do tsuru carregou em {url_name}'
+
+
+@pytest.mark.django_db
 def test_course_sitemap_lists_every_course_detail_url(client, current_site):
     response = client.get('/sitemap-school-courses.xml')
 

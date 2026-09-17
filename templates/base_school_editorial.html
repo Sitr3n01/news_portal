@@ -44,7 +44,7 @@
             }}
         };
     </script>
-    <link rel="stylesheet" href="{% static 'css/school-editorial.css' %}?v=25">
+    <link rel="stylesheet" href="{% static 'css/school-editorial.css' %}?v=28">
     <script src="{% static 'js/school-editorial.js' %}?v=4" defer></script>
     <script src="{% static 'js/vendor/htmx.min.js' %}" defer></script>
     <script src="{% static 'js/vendor/alpine.min.js' %}" defer></script>
@@ -78,6 +78,7 @@
         {% block content %}{% endblock %}
     </main>
     {% block footer %}{% include 'school/editorial/footer.html' %}{% endblock %}
+    {% include 'school/editorial/whatsapp_button.html' %}
     {% include 'components/turnstile_script.html' %}
     {% block extra_js %}{% endblock %}
 </body>

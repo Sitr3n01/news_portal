@@ -1,3 +1,5 @@
+import re
+
 from django.contrib.sites.models import Site
 from django.db import models
 
@@ -83,3 +85,19 @@ class SiteExtension(models.Model):
 
     def __str__(self):
         return f'Configurações de {self.site.name}'
+
+    @property
+    def whatsapp_number(self):
+        """phone_number em dígitos, pronto para o link wa.me. Não é campo de banco (sem
+        migration): phone_number continua a única fonte de verdade, isto só formata.
+
+        O admin digita o telefone sem +55 (ex.: "(61) 92003-8428", DDD + número). Sem
+        um "+" no valor original, um resultado de 10 ou 11 dígitos é DDD+telefone
+        brasileiro sem o código do país, que o wa.me exige: completamos com 55 nesse
+        caso. Um número já internacional (com "+", de qualquer país) não é alterado,
+        só tem a formatação removida.
+        """
+        digits = re.sub(r'\D', '', self.phone_number)
+        if digits and '+' not in self.phone_number and not digits.startswith('55') and len(digits) in (10, 11):
+            digits = f'55{digits}'
+        return digits

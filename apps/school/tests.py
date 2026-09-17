@@ -591,6 +591,77 @@ def test_course_sitemap_lists_every_course_detail_url(client, current_site):
         assert reverse('school:course_detail', kwargs={'course_slug': slug}) in content
 
 
+def test_site_extension_whatsapp_number_strips_formatting_and_adds_country_code():
+    # Já internacional (tem "+"): só remove a formatação, sem tocar no código do país.
+    assert SiteExtension(phone_number='+55 (61) 99999-9999').whatsapp_number == '5561999999999'
+    # Como o admin realmente cadastra hoje (sem "+55"): DDD + número, 11 dígitos -> completa com 55.
+    assert SiteExtension(phone_number='(61) 92003-8428').whatsapp_number == '5561920038428'
+    assert SiteExtension(phone_number='').whatsapp_number == ''
+
+
+@pytest.mark.django_db
+def test_whatsapp_button_renders_with_normalized_number_and_message(client, current_site):
+    SiteExtension.objects.update_or_create(site=current_site, defaults={'phone_number': '(61) 92003-8428'})
+
+    content = client.get(reverse('school:home')).content.decode()
+
+    assert 'ed-whatsapp' in content
+    assert (
+        'href="https://wa.me/5561920038428'
+        '?text=Ol%C3%A1%21%20Gostaria%20de%20saber%20mais%20sobre%20a%20Komuniki."' in content
+    )
+    assert 'aria-label="Falar com a Komuniki pelo WhatsApp"' in content
+    assert 'target="_blank"' in content
+    assert 'rel="noopener noreferrer"' in content
+
+
+@pytest.mark.django_db
+def test_whatsapp_button_hidden_without_phone_number(client, current_site):
+    SiteExtension.objects.update_or_create(site=current_site, defaults={'phone_number': ''})
+
+    content = client.get(reverse('school:home')).content.decode()
+
+    assert 'ed-whatsapp' not in content
+    assert 'wa.me' not in content
+
+
+@pytest.mark.django_db
+def test_whatsapp_button_appears_on_every_komuniki_public_page(client, current_site):
+    SiteExtension.objects.update_or_create(site=current_site, defaults={'phone_number': '(61) 92003-8428'})
+    Page.objects.update_or_create(site=current_site, slug='cursos', defaults={'title': 'Cursos', 'is_published': True})
+
+    pages = [
+        ('school:home', []), ('school:about', []), ('school:privacy', []), ('contact:page', []),
+        ('school:page_detail', ['cursos']), ('school:course_detail', ['comunicador-profissionalizante']),
+    ]
+    for url_name, args in pages:
+        content = client.get(reverse(url_name, args=args)).content.decode()
+        assert 'ed-whatsapp' in content, f'faltou o botão do WhatsApp em {url_name}'
+
+
+@pytest.mark.django_db
+def test_whatsapp_button_does_not_reach_the_news_portal(client, current_site):
+    SiteExtension.objects.update_or_create(site=current_site, defaults={'phone_number': '(61) 92003-8428'})
+
+    content = client.get(reverse('news:list')).content.decode()
+
+    assert 'ed-whatsapp' not in content
+    assert 'wa.me' not in content
+
+
+@pytest.mark.django_db
+def test_existing_komuniki_pages_still_return_200_alongside_whatsapp_button(client, current_site):
+    SiteExtension.objects.update_or_create(site=current_site, defaults={'phone_number': '(61) 92003-8428'})
+    Page.objects.update_or_create(site=current_site, slug='cursos', defaults={'title': 'Cursos', 'is_published': True})
+
+    pages = [
+        ('school:home', []), ('school:about', []), ('school:privacy', []), ('contact:page', []),
+        ('school:page_detail', ['cursos']), ('school:course_detail', ['comunicador-profissionalizante']),
+    ]
+    for url_name, args in pages:
+        assert client.get(reverse(url_name, args=args)).status_code == 200
+
+
 @pytest.mark.django_db
 def test_school_call_to_action_buttons_grow_on_interaction(client, current_site):
     Page.objects.update_or_create(

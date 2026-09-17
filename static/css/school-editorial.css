@@ -257,3 +257,13 @@
  .ed-school .ed-hero h1,.ed-school .ed-interior>.ed-section:first-child h1{font-size:48px}
  .ed-root[lang="en"] .ed-school .ed-hero h1,.ed-root[lang="en"] .ed-school .ed-interior>.ed-section:first-child h1{font-size:clamp(38px,13.5vw,48px)}
 }
+/* Botão flutuante do WhatsApp (só no layout editorial da escola). Reusa o scale de .ed-grow no hover/focus, mas
+   declara sua própria transition: como esta regra vem depois de .ed-grow no arquivo, um "transition" aqui venceria
+   sozinho e apagaria a suavização do transform vinda de lá, então repete as duas propriedades juntas. Isso também
+   troca o "!important" que .ed-grow desliga sob prefers-reduced-motion pelo próprio, então a regra seguinte repete
+   o desligamento para este seletor. */
+.ed-school .ed-whatsapp{position:fixed;right:24px;bottom:calc(24px + env(safe-area-inset-bottom));z-index:40;display:flex;align-items:center;justify-content:center;width:60px;height:60px;border-radius:50%;background:#25d366;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.24);transition:transform .3s cubic-bezier(.25,1,.5,1),box-shadow .3s cubic-bezier(.25,1,.5,1)!important}
+.ed-school .ed-whatsapp:is(:hover,:focus-visible){box-shadow:0 10px 24px rgba(0,0,0,.32)}
+@media (prefers-reduced-motion:reduce){.ed-school .ed-whatsapp{transition:none!important}}
+.ed-whatsapp-icon{width:30px;height:30px}
+@media(max-width:767px){.ed-school .ed-whatsapp{right:16px;bottom:calc(16px + env(safe-area-inset-bottom));width:56px;height:56px}.ed-whatsapp-icon{width:28px;height:28px}}

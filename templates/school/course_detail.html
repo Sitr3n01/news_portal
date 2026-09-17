@@ -27,7 +27,7 @@
                 <p class="text-sm font-bold uppercase text-primary-700" data-reveal="fade"
                     x-text="t('{{ group.eyebrow|escapejs }}', '{{ group.eyebrow_en|escapejs }}')">{{ group.eyebrow }}</p>
                 <h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-slate-950 md:text-6xl" data-reveal="mask"
-                    x-text="t('{{ course.title|escapejs }}', '{{ course.title_en|escapejs }}')">{{ course.title }}</h1>
+                    x-text="t('{{ hero_title|escapejs }}', '{{ course.title_en|escapejs }}')">{{ hero_title }}</h1>
                 <p class="mt-6 text-lg leading-relaxed text-slate-600 md:text-xl" data-reveal="fade"
                     x-text="t('{{ course.page.hero_tagline|escapejs }}', '{{ course.page.hero_tagline|escapejs }}')">{{ course.page.hero_tagline }}</p>
 
@@ -212,8 +212,14 @@
                     x-text="t('{{ course.page.final_cta.primary_label|escapejs }}', '{{ course.page.final_cta.primary_label|escapejs }}')">{{ course.page.final_cta.primary_label }}</span>
             </a>
             {% if course.page.final_cta.secondary_label %}
-            <a href="{% url 'contact:page' %}?curso={{ course.slug }}"
-                class="ed-chip inline-flex min-h-12 items-center justify-center rounded-full px-7 py-3 text-sm font-bold text-primary-900 focus:outline-none ed-button ed-button-outline">
+            <a
+                {% if course.page.final_cta.secondary_label == "Falar com a Komuniki" and site_settings.whatsapp_number %}
+                href="https://wa.me/{{ site_settings.whatsapp_number }}?text={{ "Olá! Gostaria de saber mais sobre a Komuniki."|urlencode }}"
+                target="_blank" rel="noopener noreferrer"
+                {% else %}
+                href="{% url 'contact:page' %}?curso={{ course.slug }}"
+                {% endif %}
+                class="ed-chip inline-flex min-h-12 items-center justify-center rounded-full px-7 py-3 text-sm font-bold text-primary-900 focus:outline-none ed-button ed-button-outline ed-grow">
                 <span data-reveal="fade"
                     x-text="t('{{ course.page.final_cta.secondary_label|escapejs }}', '{{ course.page.final_cta.secondary_label|escapejs }}')">{{ course.page.final_cta.secondary_label }}</span>
             </a>

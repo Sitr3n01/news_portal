@@ -7,7 +7,7 @@ from django.templatetags.static import static
 from django.urls import reverse
 
 from apps.common.models import SiteExtension
-from apps.school.courses import COURSE_GROUPS, find_course
+from apps.school.courses import COURSE_GROUPS, find_course, hero_title_for_display
 from apps.school.models import Page, SchoolFeature, SchoolHomeConfig, TeamMember
 from apps.school.models import Testimonial as SchoolTestimonial
 
@@ -623,6 +623,28 @@ def test_course_sitemap_lists_every_course_detail_url(client, current_site):
         assert reverse('school:course_detail', kwargs={'course_slug': slug}) in content
 
 
+def test_hero_title_for_display_inserts_soft_hyphen_at_the_syllable_break():
+    # \xad é o hífen condicional: invisível a menos que o navegador quebre a linha bem ali.
+    assert hero_title_for_display('Comunicador Profissionalizante') == 'Comunicador Profissionali\xadzante'
+    assert hero_title_for_display('Apresentação de Palco e Eventos') == 'Apresenta\xadção de Palco e Eventos'
+    assert hero_title_for_display('Espanhol – Conversação e Escrita') == 'Espanhol – Conversa\xadção e Escrita'
+    # Sem palavra longa conhecida, o título sai inalterado.
+    assert hero_title_for_display('Comunicação Destravada') == 'Comunicação Destravada'
+
+
+@pytest.mark.django_db
+def test_course_detail_hero_h1_carries_soft_hyphen_but_breadcrumb_and_title_tag_do_not(client, current_site):
+    content = client.get(reverse('school:course_detail', kwargs={'course_slug': 'comunicador-profissionalizante'})).content.decode()
+
+    h1 = content[content.index('<h1'):content.index('</h1>')]
+    assert '\xad' in h1
+    # O <title> da aba e o breadcrumb continuam com o texto original, sem o hífen condicional.
+    assert '<title>Comunicador Profissionalizante - ' in content
+    breadcrumb = content[content.index('<nav class="mb-8'):content.index('</nav>', content.index('<nav class="mb-8'))]
+    assert '\xad' not in breadcrumb
+    assert 'Comunicador Profissionalizante' in breadcrumb
+
+
 def test_site_extension_whatsapp_number_strips_formatting_and_adds_country_code():
     # Já internacional (tem "+"): só remove a formatação, sem tocar no código do país.
     assert SiteExtension(phone_number='+55 (61) 99999-9999').whatsapp_number == '5561999999999'
@@ -655,6 +677,37 @@ def test_whatsapp_button_hidden_without_phone_number(client, current_site):
 
     assert 'ed-whatsapp' not in content
     assert 'wa.me' not in content
+
+
+@pytest.mark.django_db
+def test_course_final_cta_falar_com_a_komuniki_links_to_whatsapp(client, current_site):
+    SiteExtension.objects.update_or_create(site=current_site, defaults={'phone_number': '(61) 92003-8428'})
+
+    # comunicador-profissionalizante: secondary_label é "Falar com a Komuniki". O botão flutuante já
+    # tem esse mesmo link; a contagem 2 confirma que o CTA final também passou a usá-lo.
+    content = client.get(reverse('school:course_detail', kwargs={'course_slug': 'comunicador-profissionalizante'})).content.decode()
+    assert content.count('href="https://wa.me/5561920038428?text=Ol%C3%A1%21%20Gostaria%20de%20saber%20mais%20sobre%20a%20Komuniki."') == 2
+    assert content.count('ed-button ed-button-outline ed-grow') == 1
+
+    # jornalismo-cultural: secondary_label é "Consultar próximas turmas", continua indo para o contato.
+    # O único wa.me da página é o botão flutuante, sempre presente; o CTA final não duplica isso.
+    content = client.get(reverse('school:course_detail', kwargs={'course_slug': 'jornalismo-cultural'})).content.decode()
+    contact_url = reverse('contact:page')
+    assert f'href="{contact_url}?curso=jornalismo-cultural"' in content
+    assert content.count('wa.me') == 1
+
+
+@pytest.mark.django_db
+def test_course_final_cta_falls_back_to_contact_without_phone_number(client, current_site):
+    SiteExtension.objects.update_or_create(site=current_site, defaults={'phone_number': ''})
+
+    content = client.get(reverse('school:course_detail', kwargs={'course_slug': 'comunicador-profissionalizante'})).content.decode()
+
+    assert 'wa.me' not in content
+    contact_url = reverse('contact:page')
+    # Sem telefone, o botão "Falar com a Komuniki" cai de volta para o contato: os 3 CTAs da página
+    # (hero + final principal + final secundário) apontam para lá.
+    assert content.count(f'href="{contact_url}?curso=comunicador-profissionalizante"') == 3
 
 
 @pytest.mark.django_db

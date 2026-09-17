@@ -923,3 +923,22 @@ def find_course_group(slug):
             if course['slug'] == slug:
                 return group
     return None
+
+
+# Hífen condicional (U+00AD): invisível, só aparece se o navegador realmente quebrar a linha ali. O
+# CSS "hyphens: auto" existe, mas depende de um dicionário de hifenização nem sempre presente no
+# navegador; para os títulos compridos que já quebraram no meio da palavra (sem respeitar sílaba),
+# a separação abaixo é explícita e correta em português, e funciona em qualquer navegador.
+_TITLE_HYPHENATION = {
+    'Profissionalizante': 'Profissionali­zante',
+    'Apresentação': 'Apresenta­ção',
+    'Conversação': 'Conversa­ção',
+}
+
+
+def hero_title_for_display(title):
+    """course['title'] com hífen condicional nas palavras compridas conhecidas, só para o H1 da
+    página do curso. Não mexe no valor original: breadcrumb, cards e <title> continuam exatos."""
+    for word, hyphenated in _TITLE_HYPHENATION.items():
+        title = title.replace(word, hyphenated)
+    return title

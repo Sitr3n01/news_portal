@@ -24,7 +24,7 @@
 .ed-school img{max-width:100%}
 .ed-school svg{flex-shrink:0}
 .ed-school main{padding-top:128px;min-height:65vh}
-.ed-school h1,.ed-school h2,.ed-school h3{color:inherit;text-transform:uppercase;overflow-wrap:anywhere;text-wrap:pretty}
+.ed-school h1,.ed-school h2,.ed-school h3{color:inherit;text-transform:uppercase;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto;text-wrap:pretty}
 .ed-school h2,.ed-school h3{font-family:Inter,Arial,sans-serif;font-weight:450;letter-spacing:-.03em;line-height:1.1}
 .ed-school h1,.ed-school .ed-display{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:700;line-height:.9;letter-spacing:-.03em;font-size:clamp(48px,7.6vw,112px)}
 .ed-school h2{font-size:clamp(28px,3.1vw,40px)}

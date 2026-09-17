@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from apps.common.social_section import get_social_section_posts
 
-from .courses import COURSE_GROUPS, find_course, find_course_group
+from .courses import COURSE_GROUPS, find_course, find_course_group, hero_title_for_display
 from .models import Page, SchoolFeature, SchoolHomeConfig, Testimonial
 
 HOME_FALLBACK = {
@@ -218,6 +218,7 @@ def course_detail(request, course_slug):
     return render(request, 'school/course_detail.html', {
         'course': course,
         'group': find_course_group(course_slug),
+        'hero_title': hero_title_for_display(course['title']),
         # A navbar destaca "Cursos" comparando page.slug: sem uma Page real aqui, este dicionário basta.
         'page': {'slug': 'cursos'},
     })

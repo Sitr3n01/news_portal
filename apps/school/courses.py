@@ -1376,7 +1376,10 @@ COURSE_GROUPS = [
                                 {'text': 'Pessoas que produzem vídeos ou conteúdos para redes sociais', 'text_en': 'People who produce videos or content for social media'},
                                 {'text': 'Quem sente dificuldade durante apresentações, entrevistas ou reuniões', 'text_en': 'Anyone who struggles during presentations, interviews or meetings'},
                                 {'text': 'Quem tem boas ideias, mas encontra dificuldade para organizá-las ao falar', 'text_en': 'Anyone with good ideas who struggles to organize them out loud'},
-                                {'text': 'Pessoas que desejam desenvolver mais segurança e presença ao se expressar', 'text_en': 'People who want to build more confidence and presence when expressing themselves'},
+                                {
+                                    'text': 'Pessoas que desejam desenvolver mais segurança e presença ao se expressar',
+                                    'text_en': 'People who want to build more confidence and presence when expressing themselves',
+                                },
                             ],
                             'note': (
                                 'Você não precisa trabalhar profissionalmente com comunicação para desenvolver sua '

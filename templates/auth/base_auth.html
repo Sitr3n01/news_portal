@@ -28,7 +28,7 @@ painel não precisa de menu de categorias nem de "Criar conta".
             {% endif %}
         </a>
 
-        <button type="button" @click="theme = theme === 'dark' ? 'light' : 'dark'"
+        <button type="button" @click="toggleTheme($event)"
             class="p-2 rounded-lg text-slate-500 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             x-bind:aria-label="t('Alternar tema', 'Toggle theme')" aria-label="Alternar tema">
             <span class="material-symbols-outlined text-xl" x-text="theme === 'dark' ? 'light_mode' : 'dark_mode'">dark_mode</span>

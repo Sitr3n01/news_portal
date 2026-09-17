@@ -77,7 +77,8 @@
                             DEFAULT: "#1152d4"
                         },
                         "background-light": "#ffffff",
-                        "background-dark": "#101622",
+                        // Preto puro, como o site da escola. Só o escuro usa este token.
+                        "background-dark": "#000000",
                         "slate-900": "#1a1a1a",
                         "slate-500": "#6b7280",
                     },
@@ -94,6 +95,7 @@
 
     <!-- HTMX & Alpine.js (vendorizados e pinados) -->
     <script src="{% static 'js/vendor/htmx.min.js' %}" defer></script>
+    <script defer src="{% static 'js/news-theme-reveal.js' %}"></script>
     <script defer src="{% static 'js/vendor/alpine.min.js' %}"></script>
 
     <style>
@@ -171,6 +173,41 @@
         [x-cloak] {
             display: none !important;
         }
+
+        /* Tema escuro neutro, como o do site da escola. A escala slate do Tailwind é azulada, e slate-600/700
+           também são cor de texto no tema claro — por isso a troca acontece só nos utilitários dark:, pelos tons
+           neutros de mesma luminosidade, e o tema claro fica intacto. O seletor html.dark tem um elemento a mais
+           que o .dark gerado pelo Tailwind, então prevalece. slate-900 já é neutro pela paleta acima. */
+        html.dark .dark\:bg-slate-800 { background-color: #262626; }
+        html.dark .dark\:bg-slate-800\/50 { background-color: rgb(38 38 38 / 0.5); }
+        html.dark .dark\:bg-slate-800\/30 { background-color: rgb(38 38 38 / 0.3); }
+        html.dark .dark\:bg-slate-700 { background-color: #3d3d3d; }
+        html.dark .dark\:bg-slate-600 { background-color: #525252; }
+        html.dark .dark\:bg-gray-800 { background-color: #262626; }
+        html.dark .dark\:bg-gray-700 { background-color: #3d3d3d; }
+        html.dark .dark\:border-slate-800 { border-color: #262626; }
+        html.dark .dark\:border-slate-700 { border-color: #3d3d3d; }
+        html.dark .dark\:border-slate-600 { border-color: #525252; }
+        html.dark .dark\:border-gray-800 { border-color: #262626; }
+        html.dark .dark\:border-gray-700 { border-color: #3d3d3d; }
+        html.dark .dark\:text-slate-50 { color: #fafafa; }
+        html.dark .dark\:text-slate-100 { color: #f5f5f5; }
+        html.dark .dark\:text-slate-200 { color: #e5e5e5; }
+        html.dark .dark\:text-slate-300 { color: #d4d4d4; }
+        html.dark .dark\:text-slate-400 { color: #a3a3a3; }
+        html.dark .dark\:text-slate-500 { color: #737373; }
+        html.dark .dark\:text-slate-600 { color: #525252; }
+        html.dark .dark\:text-slate-700 { color: #3d3d3d; }
+        html.dark .dark\:placeholder-slate-400::placeholder { color: #a3a3a3; }
+
+        /* Circular reveal do tema (js/news-theme-reveal.js): o tema novo cresce por cima do antigo, sem mover a
+           página. A animação de grupo da UA fica de pé: é ela que carrega a geometria do snapshot quando os
+           controles do navegador móvel se mexem. */
+        :root[data-theme-reveal]::view-transition-image-pair(root) { isolation: auto; }
+        :root[data-theme-reveal]::view-transition-old(root),
+        :root[data-theme-reveal]::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+        :root[data-theme-reveal]::view-transition-old(root) { z-index: 1; }
+        :root[data-theme-reveal]::view-transition-new(root) { z-index: 2; }
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -183,7 +220,18 @@
     <div x-data="{
         theme: localStorage.getItem('theme') || 'light',
         lang: localStorage.getItem('lang') || 'pt',
-        t(pt, en) { return this.lang === 'en' ? en : pt; }
+        themeTransitioning: false,
+        t(pt, en) { return this.lang === 'en' ? en : pt; },
+        async toggleTheme(event) {
+            if (this.themeTransitioning) return;
+            const apply = async () => {
+                this.theme = this.theme === 'dark' ? 'light' : 'dark';
+                await this.$nextTick();
+            };
+            this.themeTransitioning = true;
+            try { await (window.themeReveal ? window.themeReveal(event, apply) : apply()); }
+            finally { this.themeTransitioning = false; }
+        }
     }" x-init="
         document.documentElement.classList.toggle('dark', theme === 'dark');
         document.documentElement.lang = lang;

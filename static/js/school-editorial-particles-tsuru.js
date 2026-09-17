@@ -1,9 +1,8 @@
 // Hero das páginas de curso: a mesma técnica do hero da Home (docs/technical/komuniki-particles.md),
-// aplicada aos modelos de origami tsuru. Uma nuvem de triângulos que se remonta em loop entre um
-// tsuru sozinho, uma guirlanda de quatro tsurus num barbante, e uma nuvem dispersa. Toda a animação
-// mora no vertex shader: a CPU copia quatro buffers quando a forma troca e, fora isso, só escreve
-// uniforms. Ao contrário da Home, esta caixa não fica atrás do texto do hero (tem sua própria coluna),
-// então usa uma só camada de canvas, sem o corte frente/trás por normal de câmera que a Home precisa.
+// aplicada aos modelos de origami tsuru — inclusive as duas camadas e o arrastar para girar. Uma
+// nuvem de triângulos que se remonta em loop entre um tsuru sozinho, uma guirlanda de quatro tsurus
+// num barbante, e uma nuvem dispersa. Toda a animação mora no vertex shader: a CPU copia quatro
+// buffers quando a forma troca e, fora isso, só escreve uniforms e a rotação.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
@@ -17,23 +16,31 @@ export const CONFIG = {
     triVar:      0.135,
     dwellSolid:  3.2,    // segundos parado nas formas sólidas
     dwellLoose:  1.8,    // segundos parado no disperso
-    looseRadius: 3.7,    // raio da nuvem dispersa
+    looseRadius: 4.6,    // raio da nuvem dispersa; maior que o tsuru para avançar pela coluna de texto
 };
 
 const SHAPE_NAMES = ['tsuru', 'guirlanda', 'disperso'];
 // A guirlanda tem 0,68% da área no barbante: ponderando só por área ele receberia ~190 de 28.000
 // partículas espalhadas pela altura da cena e viraria uma linha pontilhada invisível.
 const SHARES = { barbante: 0.06 };
-// Inclinação da cena, usada como rotação inicial da nuvem e como base para medir o alfa "na vista"
-// (etapa 5 do pipeline): as asas do tsuru são chapas planas que, vistas de frente, colapsam em
-// linhas finas e cobririam quase nenhum pixel da grade de alfa.
+// Inclinação da cena, usada como rotação inicial da nuvem (antes do arraste) e como base para medir
+// o alfa "na vista" (etapa 5 do pipeline): as asas do tsuru são chapas planas que, vistas de frente,
+// colapsam em linhas finas e cobririam quase nenhum pixel da grade de alfa.
 const VIEW = { x: 0.45, y: -0.72 };
 // ~0,0014 rad por quadro a 60 Hz, medido em segundos para não acelerar em telas de 120/144 Hz.
 const ROTATION_PER_SECOND = 0.0014 * 60;
 const REDUCED_MOTION_TIME_SCALE = 0.25;
 const MAX_FRAME_DELTA = 0.05;
-// Acima deste total de pixels de buffer, o pixel ratio cede para poupar memória de GPU.
-const MAX_CANVAS_PIXELS = 1400000;
+// Arrastar com mouse ou toque gira a forma. Ao soltar, a inércia se dissolve na rotação automática
+// e a inclinação volta aos poucos para a vista de VIEW.
+const DRAG_RADIANS_PER_PIXEL = 0.006;
+const MAX_TILT = 0.6;
+const MAX_SPIN = 6;
+const SPIN_DAMPING = 2.2;
+const TILT_RETURN = 1.2;
+// As camadas cobrem a hero inteira e cada uma tem antialias: acima deste total de pixels de buffer
+// por camada, o pixel ratio cede para poupar memória de GPU.
+const MAX_LAYER_PIXELS = 2000000;
 
 // Mesma paleta do hero da Home, para as duas nuvens de partículas do site lerem como o mesmo sistema.
 // `ink` é a mesma partícula no tema claro: tons médios que aparecem tanto sobre o fundo claro quanto
@@ -51,7 +58,8 @@ const VERTEX_SHADER = /* glsl */ `
 // ---------- vertex ----------
 attribute vec3 aFrom, aTo, aNormFrom, aNormTo, aColor, aColorInk, aBary;
 attribute float aSeed, aScale;
-uniform float uProgress, uTime, uSpread, uDrift, uAlphaFrom, uAlphaTo, uOcclusion, uInk;
+uniform float uProgress, uTime, uSpread, uDrift, uAlphaFrom, uAlphaTo, uOcclusion;
+uniform float uLayer, uInk;
 varying vec3 vColor, vBary;
 varying float vGlow, vAlpha;
 
@@ -77,6 +85,14 @@ void main() {
 
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
 
+  // CAMADAS. A nuvem é desenhada em dois canvases, um atrás e outro na frente do texto do hero.
+  // Cada partícula pertence ao lado do plano que passa pelo centro da forma; perto dele as duas
+  // camadas se cruzam suavemente, então nada pisca quando a rotação ou o arraste levam a partícula
+  // de um lado para o outro.
+  float centerZ = (modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0)).z;
+  float front   = smoothstep(-0.35, 0.35, mv.z - centerZ);
+  float layer   = mix(1.0 - front, front, uLayer);
+
   // OCLUSÃO POR NORMAL. Blending aditivo não tem teste de profundidade, então o verso e o
   // interior do papel somam por cima da frente e a silhueta vira um borrão. A faixa -0.35..0.02
   // mira só no que está de costas: uma faixa mais larga apaga junto as partículas de raspão,
@@ -100,8 +116,9 @@ void main() {
   vColor = mix(aColor, aColorInk, uInk);
   vBary  = aBary;
   vGlow  = mix(0.74 + arc * 0.80, 1.0, uInk);
-  vAlpha = mix(uAlphaFrom, uAlphaTo, t) * (1.0 - arc * 0.35) * vis;
-  gl_Position = projectionMatrix * mv;
+  vAlpha = mix(uAlphaFrom, uAlphaTo, t) * (1.0 - arc * 0.35) * vis * layer;
+  // Fora desta camada o triângulo vai para fora do recorte e nem é rasterizado.
+  gl_Position = layer < 0.002 ? vec4(2.0, 2.0, 2.0, 1.0) : projectionMatrix * mv;
 }
 `;
 
@@ -362,7 +379,7 @@ function pickPaletteEntry(totalWeight) {
     return PALETTE[0];
 }
 
-// Um triângulo desenhado N vezes: uma única chamada de draw para a nuvem inteira.
+// Um triângulo desenhado N vezes: uma única chamada de draw por camada para a nuvem inteira.
 function buildCloudGeometry(shape, count, config) {
     const geometry = new THREE.InstancedBufferGeometry();
     geometry.instanceCount = count;
@@ -401,7 +418,9 @@ function buildCloudGeometry(shape, count, config) {
     return { geometry, morph };
 }
 
-export async function mountParticles(container, { tsuruUrl, garlandUrl, config: overrides = {} } = {}) {
+const roundCssPixels = (value) => Math.round(value * 100) / 100;
+
+export async function mountParticles(container, { tsuruUrl, garlandUrl, config: overrides = {}, layerHost } = {}) {
     const config = { ...CONFIG, ...overrides };
     const count = config.count;
     const [tsuruParts, garlandParts] = await Promise.all([loadNamedParts(tsuruUrl), loadNamedParts(garlandUrl)]);
@@ -422,6 +441,7 @@ export async function mountParticles(container, { tsuruUrl, garlandUrl, config: 
             uAlphaFrom: { value: shapes[0].alpha },
             uAlphaTo: { value: shapes[0].alpha },
             uOcclusion: { value: 1 },
+            uLayer: { value: 0 },
             uInk: { value: 0 },
         },
         vertexShader: VERTEX_SHADER,
@@ -434,33 +454,55 @@ export async function mountParticles(container, { tsuruUrl, garlandUrl, config: 
     const cloud = new THREE.Mesh(geometry, material);
     // A bounding sphere é a do triângulo base, minúscula: sem isto a nuvem some da tela.
     cloud.frustumCulled = false;
+    // VIEW também como rotação inicial da mesh, para casar com a orientação usada para medir o
+    // alfa (autoAlpha acima). A rotação em Y continua girando a partir daqui; a inclinação em X
+    // decai de volta a este valor depois de um arraste (ver TILT_RETURN abaixo).
     cloud.rotation.set(VIEW.x, VIEW.y, 0);
     const scene = new THREE.Scene();
     scene.add(cloud);
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
     camera.position.z = 11;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setClearColor(0x000000, 0);
-    renderer.domElement.className = 'ed-course-particles-canvas';
-    renderer.domElement.setAttribute('aria-hidden', 'true');
-    container.appendChild(renderer.domElement);
+    // Duas camadas transparentes com a mesma cena: a de trás passa sob o texto do hero e a da
+    // frente sobre ele. Cada camada é um canvas cobrindo a hero inteira, então há uma chamada de
+    // draw por camada.
+    const host = layerHost ?? container.closest('[data-particles-scene]') ?? container;
+    const layers = ['back', 'front'].map((name) => {
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, depth: false, stencil: false });
+        renderer.setClearColor(0x000000, 0);
+        renderer.domElement.className = `ed-course-particles-canvas ed-course-particles-${name}`;
+        renderer.domElement.setAttribute('aria-hidden', 'true');
+        return renderer;
+    });
+    const [back, front] = layers;
+    host.prepend(back.domElement);
+    host.append(front.domElement);
 
+    // A câmera enquadra o slot da caixa (`container`), como o palco original; os canvases só
+    // mostram mais do mesmo plano ao redor. A forma fica no mesmo lugar e tamanho, e nada bate
+    // numa borda.
     let layoutKey = '';
     const syncLayout = () => {
-        const rect = container.getBoundingClientRect();
-        const width = Math.max(1, Math.round(rect.width));
-        const height = Math.max(1, Math.round(rect.height));
-        const ratio = Math.min(window.devicePixelRatio, 2, Math.sqrt(MAX_CANVAS_PIXELS / (width * height)));
-        const key = `${width}|${height}|${ratio}`;
+        const frame = back.domElement.getBoundingClientRect();
+        const slot = container.getBoundingClientRect();
+        const width = roundCssPixels(Math.max(1, frame.width));
+        const height = roundCssPixels(Math.max(1, frame.height));
+        const slotWidth = roundCssPixels(Math.max(1, slot.width));
+        const slotHeight = roundCssPixels(Math.max(1, slot.height));
+        const offsetX = roundCssPixels(frame.left - slot.left);
+        const offsetY = roundCssPixels(frame.top - slot.top);
+        const ratio = Math.min(window.devicePixelRatio, 2, Math.sqrt(MAX_LAYER_PIXELS / (width * height)));
+        const key = `${width}|${height}|${slotWidth}|${slotHeight}|${offsetX}|${offsetY}|${ratio}`;
         if (key === layoutKey) {
             return;
         }
         layoutKey = key;
-        renderer.setPixelRatio(ratio);
-        renderer.setSize(width, height, false);
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
+        for (const renderer of layers) {
+            renderer.setPixelRatio(ratio);
+            renderer.setSize(width, height, false);
+        }
+        camera.aspect = slotWidth / slotHeight;
+        camera.setViewOffset(slotWidth, slotHeight, offsetX, offsetY, width, height);
     };
 
     // A luz soma sobre o preto do tema escuro. Sobre o fundo claro ela estouraria para branco,
@@ -481,6 +523,8 @@ export async function mountParticles(container, { tsuruUrl, garlandUrl, config: 
     let time = 0;
     let frames = 0;
     let frameId = 0;
+    let drag = null;
+    let spin = 0;
 
     // Trocar de forma = quatro cópias de buffer e needsUpdate. Depois disso a CPU não toca em
     // nenhum buffer: o loop só escreve uniforms e a rotação.
@@ -534,15 +578,61 @@ export async function mountParticles(container, { tsuruUrl, garlandUrl, config: 
                     morphing = true;
                 }
             }
-            cloud.rotation.y += ROTATION_PER_SECOND * delta;
+        }
+        if (!drag) {
+            // A rotação automática continua; a inércia do arraste se dissolve nela.
+            cloud.rotation.y += ((reducedMotion.matches ? 0 : ROTATION_PER_SECOND) + spin) * delta;
+            spin *= Math.exp(-delta * SPIN_DAMPING);
+            if (!reducedMotion.matches) {
+                // Decai de volta para a inclinação de VIEW, não para zero: é essa inclinação,
+                // não a vista de frente do modelo, que casa com o alfa calibrado em autoAlpha.
+                cloud.rotation.x = VIEW.x + (cloud.rotation.x - VIEW.x) * Math.exp(-delta * TILT_RETURN);
+            }
         }
         syncLayout();
         uniforms.uTime.value = time;
-        renderer.render(scene, camera);
+        uniforms.uLayer.value = 0;
+        back.render(scene, camera);
+        uniforms.uLayer.value = 1;
+        front.render(scene, camera);
         frames++;
         if (frames === 1) {
             announceReady(container);
         }
+    };
+
+    // Arraste sobre o espaço da forma. No toque só o gesto horizontal gira: o vertical continua rolando a página.
+    const onPointerDown = (event) => {
+        if (event.button !== 0) {
+            return;
+        }
+        drag = { id: event.pointerId, x: event.clientX, y: event.clientY, time: event.timeStamp };
+        spin = 0;
+        container.setPointerCapture(event.pointerId);
+        container.classList.add('is-dragging');
+    };
+    const onPointerMove = (event) => {
+        if (!drag || event.pointerId !== drag.id) {
+            return;
+        }
+        const dx = event.clientX - drag.x;
+        const dy = event.clientY - drag.y;
+        const seconds = Math.max((event.timeStamp - drag.time) / 1000, 1 / 240);
+        cloud.rotation.y += dx * DRAG_RADIANS_PER_PIXEL;
+        cloud.rotation.x = THREE.MathUtils.clamp(cloud.rotation.x + dy * DRAG_RADIANS_PER_PIXEL, -MAX_TILT, MAX_TILT);
+        spin = THREE.MathUtils.clamp((dx * DRAG_RADIANS_PER_PIXEL) / seconds, -MAX_SPIN, MAX_SPIN);
+        drag = { id: drag.id, x: event.clientX, y: event.clientY, time: event.timeStamp };
+    };
+    const onPointerUp = (event) => {
+        if (!drag || event.pointerId !== drag.id) {
+            return;
+        }
+        // Parar antes de soltar, ou movimento reduzido, zera a inércia.
+        if (event.timeStamp - drag.time > 80 || reducedMotion.matches) {
+            spin = 0;
+        }
+        drag = null;
+        container.classList.remove('is-dragging');
     };
 
     const start = () => {
@@ -556,12 +646,13 @@ export async function mountParticles(container, { tsuruUrl, garlandUrl, config: 
         frameId = 0;
     };
 
-    // É fundo de página: nada renderiza enquanto a caixa está fora da viewport.
+    // É fundo de página: nada renderiza enquanto o hero está fora da viewport.
     const intersectionObserver = new IntersectionObserver((entries) => {
         if (entries[entries.length - 1].isIntersecting) {
             start();
         } else {
             stop();
+            // Página aberta já rolada: não há palco na tela para esperar.
             announceReady(container);
         }
     });
@@ -570,22 +661,33 @@ export async function mountParticles(container, { tsuruUrl, garlandUrl, config: 
     applyMotionPreference();
     themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     reducedMotion.addEventListener('change', applyMotionPreference);
-    intersectionObserver.observe(container);
+    intersectionObserver.observe(host);
+    container.addEventListener('pointerdown', onPointerDown);
+    container.addEventListener('pointermove', onPointerMove);
+    container.addEventListener('pointerup', onPointerUp);
+    container.addEventListener('pointercancel', onPointerUp);
 
     const dispose = () => {
         stop();
         intersectionObserver.disconnect();
         themeObserver.disconnect();
+        container.removeEventListener('pointerdown', onPointerDown);
+        container.removeEventListener('pointermove', onPointerMove);
+        container.removeEventListener('pointerup', onPointerUp);
+        container.removeEventListener('pointercancel', onPointerUp);
+        container.classList.remove('is-dragging');
         reducedMotion.removeEventListener('change', applyMotionPreference);
         timer.dispose();
         geometry.dispose();
         material.dispose();
-        renderer.dispose();
-        renderer.domElement.remove();
+        for (const renderer of layers) {
+            renderer.dispose();
+            renderer.domElement.remove();
+        }
     };
 
     return {
-        renderer,
+        renderers: layers,
         dispose,
         get state() {
             return {
@@ -597,7 +699,8 @@ export async function mountParticles(container, { tsuruUrl, garlandUrl, config: 
                 running: frameId !== 0,
                 reducedMotion: reducedMotion.matches,
                 theme: uniforms.uInk.value === 1 ? 'claro' : 'escuro',
-                drawCalls: renderer.info.render.calls,
+                rotation: [cloud.rotation.x, cloud.rotation.y],
+                drawCalls: layers.reduce((total, renderer) => total + renderer.info.render.calls, 0),
                 count,
             };
         },

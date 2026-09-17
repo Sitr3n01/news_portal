@@ -9,7 +9,7 @@
 {% block editorial_page_class %}ed-interior ed-course-detail{% endblock %}
 
 {% block content %}
-<section class="ed-section py-16 md:py-24">
+<section class="ed-section ed-course-hero py-16 md:py-24" data-particles-scene>
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <nav class="mb-8" :aria-label="t('Trilha', 'Breadcrumb')">
             <ol class="flex flex-wrap items-center gap-2 text-sm font-medium text-slate-500">
@@ -239,5 +239,5 @@
     }
 }
 </script>
-<script type="module" src="{% static 'js/school-editorial-particles-tsuru.js' %}?v=1"></script>
+<script type="module" src="{% static 'js/school-editorial-particles-tsuru.js' %}?v=4"></script>
 {% endblock %}

@@ -2,7 +2,21 @@ from django.contrib.sitemaps import Sitemap
 from django.db.models import Max
 from django.urls import reverse
 
+from .courses import COURSE_GROUPS
 from .models import Page
+
+
+class CourseSitemap(Sitemap):
+    """Páginas detalhadas dos cursos: catálogo estático em courses.py, sem updated_at."""
+
+    changefreq = 'monthly'
+    priority = 0.6
+
+    def items(self):
+        return [course['slug'] for group in COURSE_GROUPS for course in group['courses'] if course.get('page')]
+
+    def location(self, slug):
+        return reverse('school:course_detail', kwargs={'course_slug': slug})
 
 
 class PageSitemap(Sitemap):

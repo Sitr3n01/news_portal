@@ -13,11 +13,12 @@ from apps.accounts import panel_views
 from apps.common import admin_guides
 from apps.common.views import health_check, robots_txt
 from apps.news.sitemaps import ArticleSitemap
-from apps.school.sitemaps import PageSitemap
+from apps.school.sitemaps import CourseSitemap, PageSitemap
 
 sitemaps = {
     'news': ArticleSitemap,
     'school': PageSitemap,
+    'school-courses': CourseSitemap,
 }
 
 # Cache de 6h no CDN/Cloudflare, e deliberadamente NÃO no DatabaseCache.

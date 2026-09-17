@@ -9,5 +9,6 @@ urlpatterns = [
     path('team/', views.team_list, name='team_list'),
     path('sobre/', views.about, name='about'),
     path('privacidade/', views.privacy, name='privacy'),
+    path('cursos/<slug:course_slug>/', views.course_detail, name='course_detail'),
     path('<slug:slug>/', views.page_detail, name='page_detail'),
 ]

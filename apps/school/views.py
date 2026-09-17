@@ -1,8 +1,9 @@
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
 from apps.common.social_section import get_social_section_posts
 
-from .courses import COURSE_GROUPS
+from .courses import COURSE_GROUPS, find_course, find_course_group
 from .models import Page, SchoolFeature, SchoolHomeConfig, Testimonial
 
 HOME_FALLBACK = {
@@ -208,6 +209,18 @@ def page_detail(request, slug):
             'course_groups': COURSE_GROUPS,
         })
     return render(request, 'school/page_detail.html', context)
+
+
+def course_detail(request, course_slug):
+    course = find_course(course_slug)
+    if not course or not course.get('page'):
+        raise Http404('Curso não encontrado.')
+    return render(request, 'school/course_detail.html', {
+        'course': course,
+        'group': find_course_group(course_slug),
+        # A navbar destaca "Cursos" comparando page.slug: sem uma Page real aqui, este dicionário basta.
+        'page': {'slug': 'cursos'},
+    })
 
 
 def team_list(request):

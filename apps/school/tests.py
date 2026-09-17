@@ -7,7 +7,7 @@ from django.templatetags.static import static
 from django.urls import reverse
 
 from apps.common.models import SiteExtension
-from apps.school.courses import COURSE_GROUPS
+from apps.school.courses import COURSE_GROUPS, find_course
 from apps.school.models import Page, SchoolFeature, SchoolHomeConfig, TeamMember
 from apps.school.models import Testimonial as SchoolTestimonial
 
@@ -517,12 +517,78 @@ def test_courses_page_renders_komuniki_course_cards(client, current_site):
     assert 'Produção Cultural' in content
     assert 'Comunicação Destravada' in content
     assert 'Vencedor do Prêmio Paulo Freire de Educação 2024' in content
-    # Cada card de curso leva a Contato com o slug do curso, com traço por linha no título e crescimento ao interagir
-    contact_url = reverse('contact:page')
+    # Cada card de curso leva à página detalhada do curso, com traço por linha no título e crescimento ao interagir
     for slug in ['comunicador-profissionalizante', 'producao-cultural', 'jornalismo-cultural',
                  'apresentacao-de-palco-e-eventos', 'espanhol-conversacao-e-escrita', 'comunicacao-destravada']:
-        assert f'<a href="{contact_url}?curso={slug}" class="ed-card flex min-h-72 flex-col rounded-[1.75rem] p-6 focus:outline-none ed-grow"' in content
+        course_url = reverse('school:course_detail', kwargs={'course_slug': slug})
+        assert f'<a href="{course_url}" class="ed-card flex min-h-72 flex-col rounded-[1.75rem] p-6 focus:outline-none ed-grow"' in content
     assert content.count('text-slate-950 ed-underline-lines" data-reveal="fade"') == 6
+
+
+ALL_COURSE_SLUGS = [
+    'comunicador-profissionalizante', 'producao-cultural', 'jornalismo-cultural',
+    'apresentacao-de-palco-e-eventos', 'espanhol-conversacao-e-escrita', 'comunicacao-destravada',
+]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('slug', ALL_COURSE_SLUGS)
+def test_course_detail_page_renders_for_every_catalog_course(client, current_site, slug):
+    course = find_course(slug)
+
+    response = client.get(reverse('school:course_detail', kwargs={'course_slug': slug}))
+
+    content = response.content.decode()
+    assert response.status_code == 200
+    assert f'<title>{course["title"]} - {current_site.name}</title>' in content
+    assert course['page']['hero_tagline'] in content
+    assert course['page']['final_cta']['title'] in content
+    # O CTA do hero e o CTA final levam a Contato com o curso pré-selecionado
+    contact_url = reverse('contact:page')
+    assert content.count(f'href="{contact_url}?curso={slug}"') >= 2
+    # Breadcrumb: Início / Cursos / <curso atual>, curso atual sem link
+    assert '>Início<' in content
+    assert course['title'] in content
+    assert 'aria-current="page"' in content
+    # "Cursos" fica marcado como seção atual na navbar
+    assert content.index('<nav class="ed-nav"') < content.index('aria-current="page"')
+
+
+@pytest.mark.django_db
+def test_course_detail_page_404s_for_unknown_slug(client, current_site):
+    response = client.get('/cursos/curso-que-nao-existe/')
+
+    assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_course_detail_page_reveals_all_text(client, current_site):
+    content = client.get(reverse('school:course_detail', kwargs={'course_slug': 'comunicador-profissionalizante'})).content.decode()
+
+    assert 'data-reveal="mask"' in content
+    assert content.count('data-reveal-group') >= 6
+    assert 'data-reveal' not in _navbar(content)
+    # O breadcrumb é wayfinding estático, como a navbar: sem reveal
+    breadcrumb = content[content.index('<nav class="mb-8'):content.index('</nav>', content.index('<nav class="mb-8'))]
+    assert 'data-reveal' not in breadcrumb
+
+
+@pytest.mark.django_db
+def test_course_detail_award_callout_renders_for_comunicacao_destravada(client, current_site):
+    content = client.get(reverse('school:course_detail', kwargs={'course_slug': 'comunicacao-destravada'})).content.decode()
+
+    assert 'Prêmio Paulo Freire de Educação — CLDF 2024' in content
+    assert 'award-card' in content
+
+
+@pytest.mark.django_db
+def test_course_sitemap_lists_every_course_detail_url(client, current_site):
+    response = client.get('/sitemap-school-courses.xml')
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    for slug in ALL_COURSE_SLUGS:
+        assert reverse('school:course_detail', kwargs={'course_slug': slug}) in content
 
 
 @pytest.mark.django_db

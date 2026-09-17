@@ -102,6 +102,24 @@ document.addEventListener('alpine:init', () => {
     const savePreference = (key, value) => {
         try { localStorage.setItem(key, value); } catch (_) { /* Private browsing remains usable. */ }
     };
+    // The view transition pseudo-elements live in the snapshot containing block, which spans the retractable
+    // browser UI: on mobile its origin sits above the layout viewport and its size is the large viewport's.
+    // getBoundingClientRect() answers in layout viewport coordinates, so the reveal center needs the difference.
+    const snapshotBlock = () => {
+        const fallback = { width: innerWidth, height: innerHeight, offsetTop: 0 };
+        if (!window.CSS || !CSS.supports('height', '100lvh') || !document.body) {
+            return fallback;
+        }
+        const probe = document.createElement('div');
+        probe.style.cssText = 'position:fixed;left:0;top:0;width:100lvw;height:100lvh;visibility:hidden;pointer-events:none';
+        document.body.appendChild(probe);
+        const { width, height } = probe.getBoundingClientRect();
+        probe.remove();
+        // Chrome for Android keeps the retractable bar at the top and reports the visible height in innerHeight,
+        // while iOS Safari already reports the large viewport there: what the large viewport has in excess is
+        // what sits above the page.
+        return width > 0 && height > 0 ? { width, height, offsetTop: Math.max(0, height - innerHeight) } : fallback;
+    };
     Alpine.data('schoolEditorial', () => ({
         theme: readPreference('theme', 'light') === 'dark' ? 'dark' : 'light',
         lang: readPreference('lang', 'pt') === 'en' ? 'en' : 'pt',
@@ -139,11 +157,18 @@ document.addEventListener('alpine:init', () => {
                         // The pseudo-elements now exist. Reading the center here keeps the reveal in
                         // the same mobile viewport state as the snapshot when browser chrome moves.
                         const rect = trigger.getBoundingClientRect();
+                        const block = snapshotBlock();
                         const x = rect.left + rect.width / 2;
-                        const y = rect.top + rect.height / 2;
-                        const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+                        const y = rect.top + rect.height / 2 + block.offsetTop;
+                        const radius = Math.hypot(Math.max(x, block.width - x), Math.max(y, block.height - y));
+                        // Percentages, not pixels: they resolve against the pseudo-element's own box, so the circle
+                        // keeps the icon whatever unit the browser measures that box in. Chrome for Android measures
+                        // it in device pixels, which shrank the reveal by devicePixelRatio and parked it near the
+                        // top-left corner. A percentage radius in circle() resolves against the box diagonal / sqrt(2).
+                        const reference = Math.hypot(block.width, block.height) / Math.SQRT2;
+                        const at = `at ${(x / block.width * 100).toFixed(3)}% ${(y / block.height * 100).toFixed(3)}%`;
                         root.animate({
-                            clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`],
+                            clipPath: [`circle(0% ${at})`, `circle(${(radius / reference * 100).toFixed(3)}% ${at})`],
                         }, {
                             duration: 450,
                             easing: 'cubic-bezier(.4,0,.2,1)',

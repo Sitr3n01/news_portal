@@ -1289,7 +1289,7 @@ COURSE_GROUPS = [
                             'eyebrow': 'Reconhecimento',
                             'eyebrow_en': 'Recognition',
                             'title': 'Método premiado',
-                            'title_en': 'Award-winning method',
+                            'title_en': 'Recognized method',
                             'badge_title': 'Prêmio Paulo Freire de Educação — CLDF 2024',
                             'badge_title_en': 'Prêmio Paulo Freire de Educação — CLDF 2024',
                             'badge_intro': (

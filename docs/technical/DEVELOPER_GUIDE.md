@@ -119,7 +119,8 @@ Também contém:
 - `apps/common/sanitization.py` — **toda** sanitização HTML passa por aqui. Nunca use `bleach` diretamente em outro app.
 - `apps/common/templatetags/sanitize.py` — filtro de template `{{ content|sanitize_html }}`.
 - `apps/common/context_processors.py` — injeta `current_site` e `site_settings` em todos os templates.
-- `apps/common/dashboard.py` — callback do dashboard do admin.
+- `apps/common/dashboard.py` — saúde do envio de e-mails/newsletter e guias, usados pela visão geral.
+- `apps/common/newsroom/` — painel unificado: navegação, espaços de trabalho, visão geral (`/painel/`).
 
 ### `apps/accounts` — Usuários
 
@@ -398,4 +399,4 @@ Centralização intencional. A lista de tags/atributos permitidos precisa ser co
 As categorias são carregadas dinamicamente por `news_nav_context` em `apps/common/context_processors.py`. Basta criar uma categoria parent no admin — ela aparece automaticamente.
 
 **O dashboard admin não mostra meus dados novos?**
-O dashboard é configurado em `apps/common/dashboard.py` via `DASHBOARD_CALLBACK`. Adicione suas métricas lá. Não use `INDEX_DASHBOARD` — chave errada do Unfold.
+A página inicial é a visão geral unificada (`/painel/`). Indicadores ficam em `apps/common/newsroom/dashboard.py` e itens de menu em `apps/common/newsroom/navigation.py`. Ver [PAINEL_UNIFICADO.md](PAINEL_UNIFICADO.md).

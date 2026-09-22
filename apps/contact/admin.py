@@ -63,7 +63,7 @@ class ContactInquiryAdmin(AdminUXMixin, ModelAdmin):
         return format_html(
             '<a href="{}" class="kb-read-btn" '
             'style="display:inline-flex;align-items:center;gap:4px;'
-            'padding:4px 12px;border-radius:6px;background:#1152d4;color:#fff;'
+            'padding:4px 12px;border-radius:7px;background:#171717;color:#fff;'
             'font-size:13px;font-weight:500;text-decoration:none;white-space:nowrap;">'
             'Ler</a>',
             url,

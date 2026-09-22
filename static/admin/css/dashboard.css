@@ -1,22 +1,30 @@
 :root {
-    --kb-surface: var(--body-bg, #111827);
-    --kb-surface-container: #1f2937;
-    --kb-surface-container-high: #273244;
-    --kb-outline: rgba(148, 163, 184, 0.18);
-    --kb-text: #f9fafb;
-    --kb-text-muted: #9ca3af;
-    --kb-primary: #1152d4;
-    --kb-primary-soft: rgba(17, 82, 212, 0.14);
-    --kb-success: #22c55e;
-    --kb-success-soft: rgba(34, 197, 94, 0.12);
-    --kb-warning: #f59e0b;
-    --kb-warning-soft: rgba(245, 158, 11, 0.14);
-    --kb-danger: #ef4444;
-    --kb-danger-soft: rgba(239, 68, 68, 0.14);
-    --kb-neutral-soft: rgba(148, 163, 184, 0.12);
-    --kb-radius-sm: 10px;
-    --kb-radius-md: 16px;
-    --kb-radius-lg: 24px;
+    /* Tokens do design system `kb-` (guias de operação e ajudas contextuais do
+       /admin/). Desde o painel unificado seguem a paleta clara do Newsroom
+       (static/newsroom/css/newsroom.css) — antes eram do tema escuro forçado. */
+    --kb-surface: #ffffff;
+    --kb-surface-container: #ffffff;
+    --kb-surface-container-high: #fafafa;
+    --kb-surface-subtle: #fafafa;
+    --kb-outline: #eaeaea;
+    --kb-outline-strong: #d4d4d4;
+    --kb-text: #171717;
+    --kb-text-muted: #737373;
+    --kb-primary: #171717;
+    --kb-primary-hover: #343434;
+    --kb-primary-soft: #eff6ff;
+    --kb-accent: #2563eb;
+    --kb-accent-strong: #1d4ed8;
+    --kb-success: #15803d;
+    --kb-success-soft: #f0fdf4;
+    --kb-warning: #c2410c;
+    --kb-warning-soft: #fff7ed;
+    --kb-danger: #b91c1c;
+    --kb-danger-soft: #fef2f2;
+    --kb-neutral-soft: #f5f5f5;
+    --kb-radius-sm: 8px;
+    --kb-radius-md: 10px;
+    --kb-radius-lg: 12px;
 }
 
 .kb-dashboard,
@@ -55,7 +63,7 @@
 
 .kb-eyebrow {
     margin: 0 0 0.35rem;
-    color: #93c5fd;
+    color: var(--kb-text-muted);
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0;
@@ -121,7 +129,7 @@
 
 .kb-button {
     padding: 0.65rem 0.9rem;
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--kb-surface-subtle);
     border: 1px solid var(--kb-outline);
     color: var(--kb-text);
 }
@@ -136,12 +144,12 @@
 .kb-action-link:hover,
 .kb-text-link:hover,
 .kb-small-action:hover {
-    border-color: rgba(147, 197, 253, 0.5);
-    color: #bfdbfe;
+    border-color: var(--kb-outline-strong);
+    color: var(--kb-accent-strong);
 }
 
 .kb-button-primary:hover {
-    background: #0f46b7;
+    background: var(--kb-primary-hover);
     color: #fff;
 }
 
@@ -188,7 +196,7 @@
 
 .kb-card-clickable:hover {
     background: var(--kb-surface-container-high);
-    border-color: rgba(147, 197, 253, 0.45);
+    border-color: var(--kb-outline-strong);
     transform: translateY(-1px);
 }
 
@@ -197,7 +205,7 @@
 .kb-action-link:focus-visible,
 .kb-text-link:focus-visible,
 .kb-small-action:focus-visible {
-    outline: 2px solid rgba(147, 197, 253, 0.9);
+    outline: 2px solid var(--kb-accent);
     outline-offset: 3px;
 }
 
@@ -226,7 +234,7 @@
     height: 2.65rem;
     flex: 0 0 auto;
     background: var(--kb-tone-soft, var(--kb-neutral-soft));
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--kb-outline);
     border-radius: 50%;
     color: var(--kb-tone-color, var(--kb-text-muted));
 }
@@ -335,7 +343,7 @@
     justify-content: flex-start;
     min-width: 0;
     padding: 0.65rem 0.7rem;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--kb-surface-subtle);
     border: 1px solid transparent;
     color: var(--kb-text);
 }
@@ -347,7 +355,7 @@
 
 .kb-action-link .material-symbols-outlined {
     flex: 0 0 auto;
-    color: #93c5fd;
+    color: var(--kb-accent);
 }
 
 .kb-activity-grid {
@@ -369,13 +377,13 @@
 }
 
 .kb-activity-title .material-symbols-outlined {
-    color: #93c5fd;
+    color: var(--kb-accent);
     font-size: 1.15rem;
 }
 
 .kb-text-link {
     min-height: auto;
-    color: #93c5fd;
+    color: var(--kb-accent);
     font-size: 0.78rem;
 }
 
@@ -394,7 +402,7 @@
     gap: 0.8rem;
     min-height: 4.2rem;
     padding: 0.75rem 0;
-    border-top: 1px solid rgba(148, 163, 184, 0.12);
+    border-top: 1px solid var(--kb-outline);
 }
 
 .kb-activity-item:first-child {
@@ -419,7 +427,7 @@
 }
 
 .kb-activity-name:hover {
-    color: #bfdbfe;
+    color: var(--kb-accent-strong);
 }
 
 .kb-activity-meta,
@@ -433,16 +441,16 @@
 }
 
 .kb-activity-status {
-    color: #cbd5e1;
+    color: var(--kb-text-muted);
 }
 
 .kb-small-action {
     flex: 0 0 auto;
     min-height: 2rem;
     padding: 0.45rem 0.65rem;
-    background: rgba(17, 82, 212, 0.13);
-    border: 1px solid rgba(147, 197, 253, 0.22);
-    color: #bfdbfe;
+    background: var(--kb-primary-soft);
+    border: 1px solid var(--kb-outline-strong);
+    color: var(--kb-accent-strong);
     font-size: 0.76rem;
 }
 
@@ -466,7 +474,7 @@
     min-height: 2.1rem;
     padding: 0.45rem 0.7rem;
     background: var(--kb-tone-soft, var(--kb-neutral-soft));
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--kb-outline);
     border-radius: 999px;
     color: var(--kb-tone-color, var(--kb-text-muted));
     font-size: 0.78rem;
@@ -485,7 +493,7 @@
     gap: 0.25rem;
     min-height: 4.2rem;
     padding: 0.8rem;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--kb-surface-subtle);
     border: 1px solid var(--kb-outline);
     border-radius: var(--kb-radius-sm);
 }
@@ -541,7 +549,7 @@
 }
 
 .kb-empty-state .material-symbols-outlined {
-    color: #64748b;
+    color: var(--kb-text-muted);
     font-size: 1.35rem;
 }
 
@@ -558,7 +566,7 @@
 }
 
 .kb-tone-primary {
-    --kb-tone-color: #93c5fd;
+    --kb-tone-color: var(--kb-accent);
     --kb-tone-soft: var(--kb-primary-soft);
 }
 
@@ -579,17 +587,17 @@
 
 .kb-metric-card.kb-tone-danger,
 .kb-system-card.kb-tone-danger {
-    border-color: rgba(239, 68, 68, 0.42);
+    border-color: #fecaca;
 }
 
 .kb-metric-card.kb-tone-warning,
 .kb-system-card.kb-tone-warning {
-    border-color: rgba(245, 158, 11, 0.36);
+    border-color: #fed7aa;
 }
 
 .kb-metric-card.kb-tone-success,
 .kb-system-card.kb-tone-success {
-    border-color: rgba(34, 197, 94, 0.28);
+    border-color: #bbf7d0;
 }
 
 @media (max-width: 1200px) {

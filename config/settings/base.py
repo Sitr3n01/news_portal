@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import environ
-from django.urls import reverse_lazy
 
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -236,267 +235,85 @@ TASKS = {
 
 
 # ── Django Unfold Admin Configuration ──────────────────────────────────────
-def _admin_has_any(request, *permissions):
-    return request.user.is_superuser or any(request.user.has_perm(permission) for permission in permissions)
+# O /admin/ faz parte do painel unificado (apps/common/newsroom): a sidebar e o
+# cabeçalho do Unfold foram trocados pelos do painel (templates/admin/nav_sidebar.html
+# e templates/unfold/helpers/header.html), e a navegação inteira — com as
+# checagens de permissão — mora em apps/common/newsroom/navigation.py. Por isso
+# SIDEBAR['navigation'] fica vazio: manter um segundo menu aqui seria uma
+# segunda fonte de verdade.
+#
+# A página inicial do /admin/ redireciona para a visão geral (/painel/); o
+# antigo DASHBOARD_CALLBACK saiu junto com ela (as peças operacionais que ele
+# montava estão em apps/common/dashboard.py e aparecem na visão geral).
+def _static(path):
+    """URL de estático resolvida por requisição (respeita o manifesto do
+    whitenoise). Import tardio: settings não pode puxar o sistema de templates."""
 
+    def resolve(request):
+        from django.templatetags.static import static
 
-def _admin_is_superuser(request):
-    return request.user.is_superuser
+        return static(path)
+
+    return resolve
 
 
 UNFOLD = {
-    'SITE_TITLE': 'Olá!',
-    'SITE_HEADER': 'Olá!',
-    'SITE_URL': None,  # Removido — links de portal estão na sidebar (Visualizar Portais)
-    'SITE_ICON': None,  # Deixar None ou apontar para um favicon estático
-    # Força o tema escuro de fato (antes só o seletor era escondido via CSS, mas o
-    # tema caía em 'auto' e seguia o SO). Com THEME='dark', o Unfold aplica
-    # class="dark" sempre e esconde o seletor — mantém o design system kb- consistente.
-    'THEME': 'dark',
+    'SITE_TITLE': 'Newsroom',
+    'SITE_HEADER': 'Newsroom',
+    'SITE_URL': None,
+    'SITE_ICON': None,
+    # Tema claro forçado: é o tema da referência aprovada do painel e o mesmo
+    # aplicado ao Wagtail (static/newsroom/css/newsroom-wagtail.css). Com THEME
+    # definido, o Unfold aplica a classe sempre e esconde o seletor de tema.
+    'THEME': 'light',
     'SHOW_HISTORY': True,
     'SHOW_VIEW_ON_SITE': True,
     'STYLES': [
-        lambda request: '/static/admin/css/overrides.css',
-        lambda request: '/static/admin/css/dashboard.css',
-        lambda request: '/static/admin/css/admin_ux.css',
+        _static('newsroom/css/newsroom.css'),
+        _static('admin/css/dashboard.css'),
+        _static('admin/css/admin_ux.css'),
+        _static('newsroom/css/newsroom-unfold.css'),
     ],
+    'SCRIPTS': [
+        _static('newsroom/js/newsroom.js'),
+    ],
+    # Paleta do painel (tokens em static/newsroom/css/newsroom.css): cinzas
+    # neutros e "primária" na tinta #171717 — botões primários pretos, como na
+    # referência. O azul de destaque (#2563eb) entra pelo CSS do painel.
     'COLORS': {
+        'base': {
+            '50': '#fafafa',
+            '100': '#f5f5f5',
+            '200': '#eaeaea',
+            '300': '#d4d4d4',
+            '400': '#a3a3a3',
+            '500': '#737373',
+            '600': '#525252',
+            '700': '#404040',
+            '800': '#262626',
+            '900': '#171717',
+            '950': '#0a0a0a',
+        },
         'primary': {
-            '50': '239 246 255',
-            '100': '219 234 254',
-            '200': '191 219 254',
-            '300': '147 197 253',
-            '400': '96 165 250',
-            '500': '59 130 246',
-            '600': '17 82 212',   # #1152d4 — cor primária do projeto
-            '700': '29 78 216',
-            '800': '30 64 175',
-            '900': '30 58 138',
-            '950': '23 37 84',
+            '50': '#f5f5f5',
+            '100': '#eaeaea',
+            '200': '#d4d4d4',
+            '300': '#a3a3a3',
+            '400': '#737373',
+            '500': '#404040',
+            '600': '#171717',
+            '700': '#343434',
+            '800': '#0a0a0a',
+            '900': '#0a0a0a',
+            '950': '#000000',
         },
     },
+    'BORDER_RADIUS': '8px',
     'SIDEBAR': {
-        'show_search': True,
+        'show_search': False,
         'show_all_applications': False,
-        'navigation': [
-            {
-                'title': 'Guias de Operação',
-                'separator': False,
-                'items': [
-                    {
-                        'title': 'Guia Komuniki',
-                        'icon': 'school',
-                        'link': reverse_lazy('admin_school_guide'),
-                        'permission': lambda request: _admin_has_any(
-                            request,
-                            'school.view_page',
-                            'school.view_schoolhomeconfig',
-                            'school.view_schoolfeature',
-                            'school.view_testimonial',
-                            'contact.view_contactinquiry',
-                        ),
-                        'active': lambda request: request.path.startswith('/admin/guias/escola/'),
-                    },
-                    {
-                        'title': 'Guia de Gerenciamento',
-                        'icon': 'admin_panel_settings',
-                        'link': reverse_lazy('admin_management_guide'),
-                        'permission': lambda request: _admin_has_any(
-                            request,
-                            'accounts.view_customuser',
-                            'auth.view_group',
-                            'sites.view_site',
-                            'common.view_siteextension',
-                            'media_library.view_mediafile',
-                            'media_library.view_mediafolder',
-                        ),
-                        'active': lambda request: request.path.startswith('/admin/guias/gerenciamento/'),
-                    },
-                ],
-            },
-            {
-                'title': 'Visualizar Portais',
-                'separator': False,
-                'items': [
-                    {
-                        'title': 'Blog da Kelly',
-                        'icon': 'newspaper',
-                        'link': '/news/',
-                        'active': lambda request: False,  # Links externos — nunca marcar como ativo no admin
-                    },
-                    {
-                        'title': 'Komuniki',
-                        'icon': 'school',
-                        'link': '/',  # Escola está montada no prefixo raiz (path('', include(school.urls)))
-                        'active': lambda request: False,  # '/' seria substring de qualquer URL → sempre falso
-                    },
-                ],
-            },
-            {
-                'title': 'Komuniki',
-                'separator': True,
-                'items': [
-                    {
-                        'title': 'Página Cursos',
-                        'icon': 'article',
-                        'link': reverse_lazy('admin:school_page_changelist'),
-                        'permission': lambda request: request.user.has_perm('school.view_page'),
-                    },
-                    {
-                        'title': 'Home Komuniki',
-                        'icon': 'home',
-                        'link': reverse_lazy('admin:school_schoolhomeconfig_changelist'),
-                        'permission': lambda request: request.user.has_perm('school.view_schoolhomeconfig'),
-                    },
-                    {
-                        'title': 'Blocos da Home',
-                        'icon': 'auto_awesome',
-                        'link': reverse_lazy('admin:school_schoolfeature_changelist'),
-                        'permission': lambda request: request.user.has_perm('school.view_schoolfeature'),
-                    },
-                    {
-                        'title': 'Contas de Redes Sociais',
-                        'icon': 'share',
-                        'link': reverse_lazy('admin:social_socialaccount_changelist'),
-                        'permission': lambda request: request.user.has_perm('social.view_socialaccount'),
-                    },
-                    {
-                        'title': 'Posts de Redes Sociais',
-                        'icon': 'dynamic_feed',
-                        'link': reverse_lazy('admin:social_socialpost_changelist'),
-                        'permission': lambda request: request.user.has_perm('social.view_socialpost'),
-                    },
-                    {
-                        'title': 'Mensagens',
-                        'icon': 'contact_mail',
-                        'link': reverse_lazy('admin:contact_contactinquiry_changelist'),
-                        'permission': lambda request: request.user.has_perm('contact.view_contactinquiry'),
-                    },
-                ],
-            },
-            {
-                'title': 'Blog da Kelly',
-                'separator': True,
-                'items': [
-                    {
-                        'title': 'Artigos',
-                        'icon': 'newspaper',
-                        'link': reverse_lazy('wagtailsnippets_news_article:list'),
-                        'permission': lambda request: request.user.has_perm('news.view_article'),
-                    },
-                    {
-                        'title': 'Categorias',
-                        'icon': 'category',
-                        'link': reverse_lazy('wagtailsnippets_news_category:list'),
-                        'permission': lambda request: request.user.has_perm('news.view_category'),
-                    },
-                    {
-                        'title': 'Tags',
-                        'icon': 'label',
-                        'link': reverse_lazy('wagtailsnippets_news_tag:list'),
-                        'permission': lambda request: request.user.has_perm('news.view_tag'),
-                    },
-                    {
-                        'title': 'Comentários',
-                        'icon': 'chat',
-                        'link': reverse_lazy('admin:news_comment_changelist'),
-                        'permission': lambda request: request.user.has_perm('news.view_comment'),
-                    },
-                    {
-                        'title': 'Newsletter',
-                        'icon': 'mail',
-                        'link': reverse_lazy('admin:news_newslettersubscription_changelist'),
-                        'permission': lambda request: request.user.has_perm('news.view_newslettersubscription'),
-                    },
-                    {
-                        'title': 'Entregas de Newsletter',
-                        'icon': 'mark_email_read',
-                        'link': reverse_lazy('admin:news_newsletterdelivery_changelist'),
-                        'permission': lambda request: request.user.has_perm('news.view_newsletterdelivery'),
-                    },
-                ],
-            },
-            {
-                'title': 'Recursos guardados',
-                'separator': True,
-                'items': [
-                    {
-                        'title': 'Depoimentos',
-                        'icon': 'format_quote',
-                        'link': reverse_lazy('admin:school_testimonial_changelist'),
-                        'permission': _admin_is_superuser,
-                    },
-                    {
-                        'title': 'Equipe',
-                        'icon': 'group',
-                        'link': reverse_lazy('admin:school_teammember_changelist'),
-                        'permission': _admin_is_superuser,
-                    },
-                    {
-                        'title': 'Vagas',
-                        'icon': 'work',
-                        'link': reverse_lazy('admin:hiring_jobposting_changelist'),
-                        'permission': _admin_is_superuser,
-                    },
-                    {
-                        'title': 'Departamentos',
-                        'icon': 'business',
-                        'link': reverse_lazy('admin:hiring_department_changelist'),
-                        'permission': _admin_is_superuser,
-                    },
-                    {
-                        'title': 'Candidaturas',
-                        'icon': 'description',
-                        'link': reverse_lazy('admin:hiring_application_changelist'),
-                        'permission': _admin_is_superuser,
-                    },
-                    {
-                        'title': 'Curtidas',
-                        'icon': 'favorite',
-                        'link': reverse_lazy('admin:news_articlelike_changelist'),
-                        'permission': _admin_is_superuser,
-                    },
-                    {
-                        'title': 'Favoritos',
-                        'icon': 'bookmark',
-                        'link': reverse_lazy('admin:news_articlebookmark_changelist'),
-                        'permission': _admin_is_superuser,
-                    },
-                ],
-            },
-            {
-                'title': 'Sistema',
-                'separator': True,
-                'items': [
-                    {
-                        'title': 'Usuários',
-                        'icon': 'manage_accounts',
-                        'link': reverse_lazy('admin:accounts_customuser_changelist'),
-                        'permission': lambda request: _admin_has_any(request, 'accounts.view_customuser'),
-                    },
-                    {
-                        'title': 'Grupos e Permissões',
-                        'icon': 'badge',
-                        'link': reverse_lazy('admin:auth_group_changelist'),
-                        'permission': lambda request: _admin_has_any(request, 'auth.view_group'),
-                    },
-                    {
-                        'title': 'Configurações do Site',
-                        'icon': 'settings',
-                        'link': reverse_lazy('wagtailsnippets_common_siteextension:list'),
-                        'permission': lambda request: _admin_has_any(request, 'common.view_siteextension'),
-                    },
-                    {
-                        'title': 'Biblioteca de Mídia',
-                        'icon': 'perm_media',
-                        'link': reverse_lazy('admin:media_library_mediafile_changelist'),
-                        'permission': lambda request: _admin_has_any(request, 'media_library.view_mediafile'),
-                    },
-                ],
-            },
-        ],
+        'navigation': [],
     },
-    'DASHBOARD_CALLBACK': 'apps.common.dashboard.dashboard_callback',
 }
 
 # ── Upload Limits ──────────────────────────────────────────────────────────

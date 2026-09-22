@@ -1,0 +1,55 @@
+/*
+ * Newsroom × Django Unfold 0.87 — integração da casca e do tema.
+ *
+ * Carregado por UNFOLD['STYLES'] (config/settings/base.py), depois do CSS do
+ * Unfold. As cores do Unfold já vêm da paleta do painel via UNFOLD['COLORS']
+ * (mecanismo oficial); aqui fica só o encaixe da sidebar e da topbar do painel
+ * (templates/admin/nav_sidebar.html e templates/unfold/helpers/header.html),
+ * a fonte e o anel de foco azul.
+ */
+
+:root {
+    --font-sans: var(--nr-font);
+    color-scheme: light;
+}
+
+/* A sidebar do painel é fixa; o conteúdo do Unfold abre espaço para ela. */
+@media (min-width: 1024px) {
+    #page > .nr-sidebar ~ #main {
+        margin-left: var(--nr-sidebar-w);
+    }
+}
+
+#page > .nr-sidebar ~ #main {
+    min-width: 0;
+    background: var(--nr-white);
+}
+
+/* A topbar do painel substitui o cabeçalho do Unfold, que tinha mb-6. */
+#main > .nr-topbar {
+    margin-bottom: 24px;
+}
+
+#main,
+#main input,
+#main select,
+#main textarea,
+#main button {
+    letter-spacing: -.006em;
+}
+
+#main :focus-visible {
+    outline-color: var(--nr-blue);
+}
+
+/* Botão "Ler" das mensagens de contato (apps/contact/admin.py) segue o botão
+   primário do painel. */
+#main .kb-read-btn:hover {
+    background: var(--nr-primary-hover) !important;
+}
+
+@media (max-width: 1023.98px) {
+    #main > .nr-topbar {
+        margin-bottom: 18px;
+    }
+}

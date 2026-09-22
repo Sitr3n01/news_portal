@@ -1,0 +1,77 @@
+{% load newsroom %}
+<div id="nr-results" class="nr-results" aria-live="polite" aria-busy="false">
+    {% if listing.rows %}
+        <ul class="nr-article-list{% if listing.view == 'grid' %} is-grid{% endif %}" data-nr-list aria-label="{{ listing.noun_plural|capfirst }}">
+            {% for row in listing.rows %}
+                <li class="nr-article">
+                    <div class="nr-thumb nr-thumb--{{ row.tone }}">
+                        {% if row.image_url %}
+                            <img src="{{ row.image_url }}" alt="" loading="lazy" decoding="async">
+                        {% elif row.initial %}
+                            <span class="nr-thumb__initial" aria-hidden="true">{{ row.initial }}</span>
+                        {% else %}
+                            {% nr_icon "news" %}
+                        {% endif %}
+                    </div>
+                    <div class="nr-article__main">
+                        <p class="nr-article__title">
+                            {% if row.edit_url %}<a href="{{ row.edit_url }}">{{ row.title }}</a>{% else %}{{ row.title }}{% endif %}
+                        </p>
+                        <p class="nr-article__path">{{ row.path }}</p>
+                        <p class="nr-article__info">
+                            <span>{{ row.category }}</span>
+                            {% if row.author %}<span class="nr-dot" aria-hidden="true"></span><span>{{ row.author }}</span>{% endif %}
+                            {% if row.unpublished_changes %}<span class="nr-dot" aria-hidden="true"></span><span class="nr-article__flag">Alterações não publicadas</span>{% endif %}
+                        </p>
+                    </div>
+                    <div class="nr-article__right">
+                        <span class="nr-status nr-status--{{ row.state }}">{{ row.state_label }}</span>
+                        <time class="nr-article__date" datetime="{{ row.updated_at|date:'c' }}" title="{{ row.updated_at|date:'d/m/Y H:i' }}">{{ row.updated_at|nr_relative }}</time>
+                        {% if row.actions %}
+                            <details class="nr-more" data-nr-dropdown>
+                                <summary class="nr-more__button" aria-label="Ações para “{{ row.title }}”">{% nr_icon "ellipsis" %}</summary>
+                                <div class="nr-menu nr-menu--right">
+                                    {% for action in row.actions %}
+                                        <a class="nr-menu__item{% if action.danger %} is-danger{% endif %}" href="{{ action.url }}"{% if action.external %} target="_blank" rel="noopener"{% endif %}>
+                                            {% nr_icon action.icon %}<span>{{ action.label }}</span>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </details>
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="nr-empty">
+            {% if listing.filtered %}
+                Nenhuma {{ listing.noun_singular }} encontrada para os filtros selecionados.
+            {% else %}
+                Ainda não há {{ listing.noun_plural }} por aqui.
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div class="nr-listfoot">
+        <span>
+            {% if listing.page.paginator.count %}
+                Exibindo {{ listing.page.start_index }}–{{ listing.page.end_index }} de {{ listing.page.paginator.count }}
+                {% if listing.page.paginator.count == 1 %}{{ listing.noun_singular }}{% else %}{{ listing.noun_plural }}{% endif %}
+            {% else %}
+                Nenhum resultado
+            {% endif %}
+        </span>
+        {% if listing.page.has_other_pages %}
+            <nav class="nr-pagination" aria-label="Paginação" hx-boost="true">
+                {% if listing.prev_url %}
+                    <a class="nr-toolbtn" href="{{ listing.prev_url }}" rel="prev">{% nr_icon "chevron-left" %}<span>Anterior</span></a>
+                {% endif %}
+                <span class="nr-pagination__current">Página {{ listing.page.number }} de {{ listing.page.paginator.num_pages }}</span>
+                {% if listing.next_url %}
+                    <a class="nr-toolbtn" href="{{ listing.next_url }}" rel="next"><span>Próxima</span>{% nr_icon "chevron" %}</a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    </div>
+</div>

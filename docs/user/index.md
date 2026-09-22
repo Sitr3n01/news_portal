@@ -20,9 +20,13 @@ duas:
 | **Publicação de matérias** | Escrever, revisar e publicar notícias, com imagens e categorias |
 | **Administração do sistema** | Usuários, permissões, páginas da Komuniki, mensagens e configurações |
 
-Se você tem acesso às duas, escolhe na hora de entrar (ou depois, em
-`seudominio.com.br/painel/`). **Não é preciso entrar de novo para trocar de
-área** — é a mesma sessão. E sair de uma área encerra o acesso às duas.
+Depois de entrar, você cai na **Visão geral** (`seudominio.com.br/painel/`):
+indicadores, as últimas notícias ou mensagens e atalhos. O menu à esquerda é o
+mesmo em todas as telas e mostra só o que o seu cargo permite. Quem cuida dos
+dois portais troca entre **Blog da Kelly** e **Komuniki** no seletor
+"Espaço de trabalho", no topo do menu. **Não é preciso entrar de novo para
+trocar de área** — é a mesma sessão. E sair (menu da conta, no rodapé do menu
+ou no avatar do topo) encerra o acesso a tudo.
 
 Esqueceu a senha? Use o link **Esqueci minha senha** na tela de acesso: você
 recebe por e-mail um link temporário para cadastrar uma nova.

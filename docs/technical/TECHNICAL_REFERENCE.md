@@ -319,17 +319,11 @@ def sanitize_html_filter(value):
 
 Uso: `{{ article.content|sanitize_html }}`
 
-#### Dashboard (`apps/common/dashboard.py`)
+#### Visão geral do painel (`apps/common/newsroom/`)
 
-Função `dashboard_callback(request, context)` chamada por `UNFOLD['DASHBOARD_CALLBACK']`.
+A página inicial administrativa é `/painel/` (`apps.common.newsroom.views.dashboard`); `/admin/` e `/cms/` redirecionam para ela, atrás das portas originais. Dados em `apps/common/newsroom/dashboard.py` (indicadores, listagem paginada no servidor, atividade a partir dos logs de auditoria do Wagtail e do Django admin); peças operacionais (saúde do envio, guias) em `apps/common/dashboard.py`. Referência completa: [PAINEL_UNIFICADO.md](PAINEL_UNIFICADO.md).
 
-Injeta no context do admin:
-- `open_jobs`, `pending_applications`, `unread_messages`
-- `published_articles`, `draft_articles`, `newsletter_subscribers`, `pending_comments`
-- `articles_this_month`, `articles_last_month`, `new_newsletter_today`
-- `recent_articles`, `recent_applications`, `recent_messages`
-
-**Ponto de atenção:** Se uma das queries falhar (ex: app não migrado), o dashboard inteiro quebra. Queries devem ser defensivas.
+**Ponto de atenção:** cada indicador só consulta o banco para quem pode ver o item correspondente da navegação (`navigation.is_item_visible`).
 
 ---
 
@@ -414,7 +408,7 @@ Administração do sistema (Django admin, `/admin/`). Uma conta, uma sessão.
 | `apps/accounts/panels.py` | **Fonte única** de quais áreas o usuário alcança |
 | `apps/accounts/panel_views.py` | Login, escolha de área, acesso negado, logout |
 | `apps/accounts/panel_forms.py` | `PanelLoginForm` — o campo `panel` é conselho, não autorização |
-| `apps/accounts/urls_panel.py` | `/entrar/`, `/sair/`, `/painel/`, `/sem-acesso/` |
+| `apps/accounts/urls_panel.py` | `/entrar/`, `/sair/`, `/painel/` (visão geral unificada; nomes `panel:dashboard` e `panel:picker`), `/painel/espaco/`, `/sem-acesso/` |
 
 Portões (idênticos ao que os frameworks aplicam):
 `can_access_admin` = `is_active and is_staff`;
@@ -1271,7 +1265,7 @@ location /media/ {
 
 ### Notas de Compatibilidade
 
-**django-unfold >= 0.40:** A configuração do dashboard usa `DASHBOARD_CALLBACK` (não `INDEX_DASHBOARD`). Versões antigas do Unfold usavam chave diferente. Verificar changelog em atualizações.
+**django-unfold (pinado em 0.87.0):** a sidebar e o cabeçalho do Unfold são substituídos pela casca do painel unificado (`templates/admin/nav_sidebar.html`, `templates/unfold/helpers/header.html`); não há mais `DASHBOARD_CALLBACK`. Ao atualizar, conferir `unfold/templates/admin/base.html`.
 
 **bleach:** Versão 6.x mudou a API de `css_sanitizer`. Não atualizar sem testar sanitização.
 
@@ -1352,11 +1346,11 @@ Variáveis disponíveis **apenas em `/news/**`**:
 3. Verificar configuração de email no settings ativo
 4. Verificar logs: `logging.getLogger('apps.news.signals')` e `apps.news.newsletter`
 
-#### Dashboard admin vazio/erro 500
+#### Visão geral (/painel/) vazia ou com erro 500
 
-1. Verificar `apps/common/dashboard.py` — queries podem falhar se models não migrados
-2. Verificar `UNFOLD['DASHBOARD_CALLBACK']` em settings — deve apontar para `apps.common.dashboard.dashboard_callback`
-3. **Não usar** `INDEX_DASHBOARD` — chave errada do Unfold
+1. Verificar `apps/common/newsroom/dashboard.py` — queries podem falhar se models não migrados
+2. Conferir se o usuário alcança alguma área (`apps/accounts/panels.available_panels`); sem área, `/painel/` manda para `/sem-acesso/`
+3. Itens ausentes no menu: a regra de visibilidade está em `apps/common/newsroom/navigation.py`
 
 #### Artigo aparece em portal errado
 

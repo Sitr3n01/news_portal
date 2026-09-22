@@ -1,4 +1,5 @@
-"""Registra SiteExtension como Wagtail Snippet — edição consolidada no /cms/.
+"""Registra SiteExtension como Wagtail Snippet — edição consolidada no /cms/ —
+e carrega a casca do painel unificado (apps/common/newsroom) em todo o Wagtail.
 
 Mantém o FK existente para ``django.contrib.sites.Site``, sem envolver
 ``wagtail.models.Site`` ou ``wagtail.contrib.settings`` em nenhum momento.
@@ -6,6 +7,9 @@ Sem RevisionMixin / DraftStateMixin / WorkflowMixin — mesma simplicidade
 que Category/Tag.
 """
 
+from django.templatetags.static import static
+from django.utils.html import format_html
+from wagtail import hooks
 from wagtail.admin.panels import FieldPanel, MultiFieldPanel
 from wagtail.snippets.models import register_snippet
 from wagtail.snippets.views.snippets import SnippetViewSet
@@ -82,3 +86,22 @@ class SiteExtensionSnippetViewSet(SnippetViewSet):
 
 
 register_snippet(SiteExtensionSnippetViewSet)
+
+
+# ── Painel unificado: design system e comportamento da casca ────────────────
+# Hooks oficiais do Wagtail para CSS/JS globais do admin. O CSS entra depois
+# do core.css do Wagtail, então os tokens --w-color-* definidos aqui prevalecem.
+
+
+@hooks.register('insert_global_admin_css')
+def newsroom_admin_css():
+    return format_html(
+        '<link rel="stylesheet" href="{}"><link rel="stylesheet" href="{}">',
+        static('newsroom/css/newsroom.css'),
+        static('newsroom/css/newsroom-wagtail.css'),
+    )
+
+
+@hooks.register('insert_global_admin_js')
+def newsroom_admin_js():
+    return format_html('<script src="{}" defer></script>', static('newsroom/js/newsroom.js'))

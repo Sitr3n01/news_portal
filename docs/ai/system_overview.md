@@ -12,7 +12,7 @@ Sistema Django 5.1+ monolítico. Um banco PostgreSQL 16 em produção. Dois port
 |------------|-------------|---------------|
 | Komuniki | `/` em `komuniki.com.br` | `apps.school` |
 | Blog da Kelly | `/news/` em `kellyfarias.com.br` | `apps.news` |
-| Admin | `/admin/` | Django Unfold |
+| Painel unificado | `/painel/` (visão geral), `/cms/` (Wagtail), `/admin/` (Django Unfold) | `apps.common.newsroom` — ver `docs/technical/PAINEL_UNIFICADO.md` |
 
 **Crítico:** `SITE_ID = 1` em `config/settings/base.py`. O `django.contrib.sites` está instalado e muitos models têm `CurrentSiteManager` (`on_site`), mas o isolamento multi-site real está dormente. Use `on_site` em views públicas para preservar a segurança futura.
 
@@ -30,7 +30,7 @@ Sistema Django 5.1+ monolítico. Um banco PostgreSQL 16 em produção. Dois port
 | Sanitização | `apps.common.sanitization` | Não usar `bleach` espalhado |
 | Deploy | Docker Compose + Nginx + GitHub tag aprovada | Ver `docs/technical/secure-deploy.md` |
 
-`requirements/base.txt` não pina a versão menor do Unfold. Ao atualizar dependências, valide o admin e o `DASHBOARD_CALLBACK`.
+`requirements/base.txt` pina o Unfold (0.87.0) e limita o Wagtail à série 7.4. Ao atualizar qualquer um dos dois, confira os overrides da casca do painel unificado (`templates/wagtailadmin/base.html`, `templates/admin/nav_sidebar.html`, `templates/unfold/helpers/header.html`) e os tokens de `static/newsroom/css/newsroom-wagtail.css`.
 
 ---
 

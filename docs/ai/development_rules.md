@@ -44,7 +44,18 @@ O sistema está em produção. Aplique mudanças pequenas, verificáveis e alinh
 - Admins devem herdar de `unfold.admin.ModelAdmin`.
 - Textos visíveis no admin devem estar em PT-BR claro.
 - `help_text`, `verbose_name`, `fieldsets` e mensagens precisam ser legíveis por pessoas não técnicas.
-- Não use `INDEX_DASHBOARD`; o Unfold atual usa `DASHBOARD_CALLBACK`.
+- Painel unificado (`docs/technical/PAINEL_UNIFICADO.md`): a navegação das
+  três superfícies administrativas (`/painel/`, `/cms/`, `/admin/`) mora em
+  `apps/common/newsroom/navigation.py`. Tela administrativa nova entra lá, com
+  a visibilidade delegada à mesma checagem da tela de destino. Não recrie menu
+  em `UNFOLD['SIDEBAR']` nem em hooks de menu do Wagtail: seria uma segunda
+  fonte de verdade.
+- A página inicial do `/admin/` e a do `/cms/` redirecionam para a visão geral
+  (`/painel/`); não há mais `DASHBOARD_CALLBACK`. Indicadores novos vão para
+  `apps/common/newsroom/dashboard.py`, sempre com dado real e filtrados por
+  permissão.
+- CSS administrativo usa os tokens `nr-` de `static/newsroom/css/newsroom.css`;
+  nunca é carregado pelos portais públicos.
 
 ## 6. Frontend Público
 

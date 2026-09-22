@@ -2057,7 +2057,11 @@ def test_image_block_renders_nothing_when_no_image():
     assert 'src="' not in html or html.strip() == ''
 
 
-# ── Round 7: Wagtail dashboard "Painel da Redação" ──────────────────────────
+# ── Visão geral editorial (antigo "Painel da Redação" do /cms/) ─────────────
+#
+# Os painéis que viviam na página inicial do Wagtail foram absorvidos pela
+# visão geral do painel unificado (/painel/). Os testes abaixo cobrem as mesmas
+# garantias, agora no endereço novo; /cms/ redireciona para lá.
 
 
 def _make_wagtail_editor(django_user_model, username='editor-dashboard', role='news_editor'):
@@ -2077,20 +2081,31 @@ def _make_wagtail_editor(django_user_model, username='editor-dashboard', role='n
 
 
 @pytest.mark.django_db
-def test_wagtail_dashboard_redacao_panels_render(client, django_user_model):
-    """Editor de Notícias vê os painéis do Painel da Redação no dashboard Wagtail (/cms/)."""
-    site = make_site()
+def test_wagtail_home_redirects_to_unified_overview(client, django_user_model):
     user = _make_wagtail_editor(django_user_model)
-    # "Notícias recentes" só renderiza quando existe pelo menos 1 artigo (sem bloco vazio).
-    make_article_full(site, slug='dashboard-render-teste', status=Article.Status.PUBLISHED)
     client.force_login(user)
 
     response = client.get(reverse('wagtailadmin_home'))
 
+    assert response.status_code == 302
+    assert response.url == reverse('panel:dashboard')
+
+
+@pytest.mark.django_db
+def test_wagtail_dashboard_redacao_panels_render(client, django_user_model):
+    """Editor de Notícias vê a parte editorial da visão geral."""
+    site = make_site()
+    user = _make_wagtail_editor(django_user_model)
+    make_article_full(site, slug='dashboard-render-teste', status=Article.Status.PUBLISHED)
+    client.force_login(user)
+
+    response = client.get(reverse('panel:dashboard'))
+
     assert response.status_code == 200
     content = response.content.decode()
-    assert 'Painel da Redação' in content
-    assert 'Criar nova notícia' in content
+    assert 'Visão geral' in content
+    assert 'Nova notícia' in content
+    assert reverse('wagtailsnippets_news_article:add') in content
     assert 'Publicadas' in content
     assert 'Rascunhos' in content
     assert 'Em revisão' in content
@@ -2098,13 +2113,13 @@ def test_wagtail_dashboard_redacao_panels_render(client, django_user_model):
     assert 'Categorias' in content
     assert 'Tags' in content
     assert 'Home do portal' in content
-    assert 'Ver portal' in content
-    assert 'Notícias recentes' in content
+    assert 'Seus conteúdos' in content
+    assert 'Artigo dashboard-render-teste' in content
 
 
 @pytest.mark.django_db
 def test_wagtail_dashboard_panels_hidden_without_permission(client, django_user_model):
-    """Usuário sem news.view_article não vê os painéis do Painel da Redação."""
+    """Usuário sem news.view_article não vê a parte editorial da visão geral."""
     from django.contrib.auth.models import Permission
 
     user = django_user_model.objects.create_user(
@@ -2121,21 +2136,22 @@ def test_wagtail_dashboard_panels_hidden_without_permission(client, django_user_
     user.user_permissions.add(access_admin_perm)
     client.force_login(user)
 
-    response = client.get(reverse('wagtailadmin_home'))
+    response = client.get(reverse('panel:dashboard'))
 
     assert response.status_code == 200
     content = response.content.decode()
-    assert 'Painel da Redação' not in content
-    assert 'Criar nova notícia' not in content
+    assert 'Seus conteúdos' not in content
+    assert 'Nova notícia' not in content
+    assert 'nr-stat__value' not in content
 
 
 @pytest.mark.django_db
 def test_wagtail_dashboard_status_cards_visible_for_editor(client, django_user_model):
-    """Os 4 cards de status (publicadas/rascunhos/em revisão/agendadas) aparecem para o editor."""
+    """Indicadores e abas de estado (publicadas/rascunhos/em revisão/agendadas)."""
     user = _make_wagtail_editor(django_user_model)
     client.force_login(user)
 
-    response = client.get(reverse('wagtailadmin_home'))
+    response = client.get(reverse('panel:dashboard'))
 
     assert response.status_code == 200
     content = response.content.decode()
@@ -2147,11 +2163,10 @@ def test_wagtail_dashboard_status_cards_visible_for_editor(client, django_user_m
 
 @pytest.mark.django_db
 def test_wagtail_dashboard_panel_shows_article_counts(client, django_user_model):
-    """Painel editorial exibe contagem correta de artigos publicados e rascunhos."""
+    """Os indicadores mostram as contagens reais do banco."""
     site = make_site()
     user = _make_wagtail_editor(django_user_model)
 
-    # Cria artigos publicados e rascunhos
     Article.objects.create(
         title='Publicado 1', slug='pub-1', content='.', site=site,
         status=Article.Status.PUBLISHED,
@@ -2166,16 +2181,19 @@ def test_wagtail_dashboard_panel_shows_article_counts(client, django_user_model)
     )
 
     client.force_login(user)
-    response = client.get(reverse('wagtailadmin_home'))
+    response = client.get(reverse('panel:dashboard'))
 
     assert response.status_code == 200
-    content = response.content.decode()
-    assert '2' in content  # publicados count
+    values = response.context['stats']
+    assert [(stat['label'], stat['value']) for stat in values][:3] == [
+        ('Publicadas', 2), ('Rascunhos', 1), ('Em revisão', 0),
+    ]
+    assert '<span class="nr-stat__value">02</span>' in response.content.decode()
 
 
 @pytest.mark.django_db
 def test_wagtail_dashboard_panel_recent_articles(client, django_user_model):
-    """Painel editorial mostra lista de artigos recentes com links de edição."""
+    """A visão geral lista as notícias com o link oficial de edição do snippet."""
     site = make_site()
     user = _make_wagtail_editor(django_user_model)
 
@@ -2185,12 +2203,11 @@ def test_wagtail_dashboard_panel_recent_articles(client, django_user_model):
     )
 
     client.force_login(user)
-    response = client.get(reverse('wagtailadmin_home'))
+    response = client.get(reverse('panel:dashboard'))
 
     assert response.status_code == 200
     content = response.content.decode()
     assert 'Artigo Recente Teste' in content
-    # Verifica que o link de edição aponta para o snippet correto
     edit_url = reverse('wagtailsnippets_news_article:edit', args=[article.pk])
     assert edit_url in content
 
@@ -2224,7 +2241,8 @@ def test_article_status_counts_all_categories(django_user_model):
 
 @pytest.mark.django_db
 def test_continue_working_panel_scoped_to_editing_user(client, django_user_model):
-    """"Continue trabalhando" só aparece para quem editou o próprio rascunho por último."""
+    """"Continuar editando seu último rascunho" só aparece para quem editou o
+    próprio rascunho por último."""
     site = make_site()
     user_a = _make_wagtail_editor(django_user_model, username='editor-continue-a')
     user_b = _make_wagtail_editor(django_user_model, username='editor-continue-b')
@@ -2235,12 +2253,14 @@ def test_continue_working_panel_scoped_to_editing_user(client, django_user_model
     article.save_revision(user=user_a)
 
     client.force_login(user_a)
-    response = client.get(reverse('wagtailadmin_home'))
-    assert 'Continuar edição' in response.content.decode()
+    response = client.get(reverse('panel:dashboard'))
+    assert 'Continuar editando seu último rascunho' in response.content.decode()
 
     client.force_login(user_b)
-    response = client.get(reverse('wagtailadmin_home'))
-    assert 'Continuar edição' not in response.content.decode()
+    response = client.get(reverse('panel:dashboard'))
+    content = response.content.decode()
+    assert 'Continuar editando seu último rascunho' not in content
+    assert 'Continuar editando rascunhos' in content
 
 
 # ── Wagtail publish/unpublish → status sync ──────────────────────────────────

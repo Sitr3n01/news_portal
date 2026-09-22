@@ -1,0 +1,207 @@
+/*
+ * Newsroom × Wagtail 7.4 — integração da casca e do tema.
+ *
+ * Carregado pelo hook oficial `insert_global_admin_css`
+ * (apps/common/wagtail_hooks.py), DEPOIS de wagtailadmin/css/core.css.
+ *
+ * 1. Tema: o Wagtail expõe as cores como custom properties (--w-color-*), que
+ *    é o mecanismo documentado de personalização de marca. Aqui elas recebem a
+ *    paleta do painel. O mesmo bloco vale para .w-theme-dark e .w-theme-system
+ *    porque o painel adota UM tema (claro), como o projeto já fazia ao forçar o
+ *    tema do Unfold: sem isso, quem tem o sistema operacional escuro veria o
+ *    Wagtail escuro e a visão geral clara — dois produtos. A lista cobre todos
+ *    os 68 tokens que o tema escuro do Wagtail 7.4 redefine; ao atualizar o
+ *    Wagtail, confira se o bloco escuro de core.css ganhou tokens novos.
+ *
+ * 2. Layout: a sidebar React do Wagtail foi trocada pela sidebar do painel
+ *    (templates/wagtailadmin/base.html). O Wagtail reserva 200px para a dele
+ *    em `.wrapper`; aqui essa reserva passa a ser a largura da nossa.
+ *
+ * 3. Acabamento: raio de botões e campos e a fonte. Nada além disso é
+ *    sobrescrito — editor de blocos, seletores de mídia, painéis de publicação
+ *    e fluxos de revisão continuam com o CSS nativo.
+ */
+
+:root,
+.w-theme-light,
+.w-theme-dark,
+.w-theme-system {
+    color-scheme: light;
+    --w-font-sans: var(--nr-font);
+
+    /* Primitivos de marca: tinta neutra no lugar do roxo/verde-azulado. */
+    --w-color-primary-hue: 0;
+    --w-color-primary-saturation: 0%;
+    --w-color-primary-lightness: 9%;
+    --w-color-secondary-hue: 0;
+    --w-color-secondary-saturation: 0%;
+    --w-color-secondary-lightness: 9%;
+
+    /* Primitivos que o tema escuro remapeia — de volta aos valores claros. */
+    --w-color-white-80: #fffc;
+    --w-color-black-50: #00000080;
+    --w-color-grey-50: hsl(var(--w-color-grey-50-hue) var(--w-color-grey-50-saturation) var(--w-color-grey-50-lightness));
+    --w-color-grey-150: hsl(var(--w-color-grey-150-hue) var(--w-color-grey-150-saturation) var(--w-color-grey-150-lightness));
+    --w-color-grey-200: hsl(var(--w-color-grey-200-hue) var(--w-color-grey-200-saturation) var(--w-color-grey-200-lightness));
+    --w-color-grey-400: hsl(var(--w-color-grey-400-hue) var(--w-color-grey-400-saturation) var(--w-color-grey-400-lightness));
+    --w-color-grey-500: hsl(var(--w-color-grey-500-hue) var(--w-color-grey-500-saturation) var(--w-color-grey-500-lightness));
+    --w-color-grey-600: hsl(var(--w-color-grey-600-hue) var(--w-color-grey-600-saturation) var(--w-color-grey-600-lightness));
+    --w-color-grey-700: hsl(var(--w-color-grey-700-hue) var(--w-color-grey-700-saturation) var(--w-color-grey-700-lightness));
+    --w-color-grey-800: hsl(var(--w-color-grey-800-hue) var(--w-color-grey-800-saturation) var(--w-color-grey-800-lightness));
+    --w-color-white: hsl(var(--w-color-white-hue) var(--w-color-white-saturation) var(--w-color-white-lightness));
+    --w-color-secondary-75: hsl(var(--w-color-secondary-75-hue) var(--w-color-secondary-75-saturation) var(--w-color-secondary-75-lightness));
+    --w-color-secondary-100: hsl(var(--w-color-secondary-100-hue) var(--w-color-secondary-100-saturation) var(--w-color-secondary-100-lightness));
+    --w-color-secondary-400: hsl(var(--w-color-secondary-400-hue) var(--w-color-secondary-400-saturation) var(--w-color-secondary-400-lightness));
+    --w-color-secondary: hsl(var(--w-color-secondary-hue) var(--w-color-secondary-saturation) var(--w-color-secondary-lightness));
+    --w-color-info-75: hsl(var(--w-color-info-75-hue) var(--w-color-info-75-saturation) var(--w-color-info-75-lightness));
+    --w-color-info-100: hsl(var(--w-color-info-100-hue) var(--w-color-info-100-saturation) var(--w-color-info-100-lightness));
+    --w-color-critical-50: hsl(var(--w-color-critical-50-hue) var(--w-color-critical-50-saturation) var(--w-color-critical-50-lightness));
+    --w-color-critical-100: hsl(var(--w-color-critical-100-hue) var(--w-color-critical-100-saturation) var(--w-color-critical-100-lightness));
+
+    /* Tokens semânticos → paleta do painel. */
+    --w-color-surface-page: var(--nr-white);
+    --w-color-surface-field: var(--nr-white);
+    --w-color-surface-field-inactive: var(--nr-surface-subtle);
+    --w-color-surface-header: var(--nr-white);
+    /* O Wagtail usa estas três como superfície ESCURA (menus suspensos,
+       cabeçalho de modais, barra de ações do editor), com texto claro por
+       cima. Ficam na tinta do painel — o mesmo preto do botão primário. */
+    --w-color-surface-menus: var(--nr-ink);
+    --w-color-surface-menu-item-active: #2b2b2b;
+    --w-color-surface-tooltip: var(--nr-ink);
+    --w-color-surface-button-default: var(--nr-primary);
+    --w-color-surface-button-hover: var(--nr-primary-hover);
+    --w-color-surface-button-inactive: var(--nr-line-strong);
+    --w-color-surface-button-outline-hover: var(--nr-surface-subtle);
+    --w-color-surface-button-critical-hover: var(--nr-red-soft);
+    --w-color-surface-status-label: var(--nr-blue-soft);
+    --w-color-surface-info-panel: var(--nr-blue-soft);
+    --w-color-surface-dashboard-panel: var(--nr-white);
+
+    --w-color-text-button: var(--nr-white);
+    --w-color-text-label-menus-default: #d4d4d4;
+    --w-color-text-label-menus-active: var(--nr-white);
+    --w-color-text-label: var(--nr-ink);
+    --w-color-text-context: var(--nr-ink-2);
+    --w-color-text-meta: var(--nr-muted);
+    --w-color-text-placeholder: var(--nr-muted);
+    --w-color-text-link-default: var(--nr-blue);
+    --w-color-text-link-hover: var(--nr-blue-strong);
+    --w-color-text-button-outline-default: var(--nr-ink);
+    --w-color-text-button-outline-hover: var(--nr-ink);
+    --w-color-text-highlight: var(--nr-blue-line);
+    --w-color-text-error: var(--nr-red);
+    --w-color-text-button-critical-outline-hover: var(--nr-red);
+    --w-color-text-status-label: var(--nr-blue-strong);
+    --w-color-text-link-info: var(--nr-blue-strong);
+
+    --w-color-icon-primary: var(--nr-ink-4);
+    --w-color-icon-primary-hover: var(--nr-ink);
+    --w-color-icon-secondary: var(--nr-icon);
+    --w-color-icon-secondary-hover: var(--nr-ink);
+
+    --w-color-border-furniture: var(--nr-line);
+    --w-color-border-button-small-outline-default: var(--nr-line-2);
+    --w-color-border-field-default: var(--nr-line-2);
+    --w-color-border-field-inactive: var(--nr-line-2);
+    --w-color-border-field-hover: var(--nr-line-strong);
+    --w-color-border-button-outline-default: var(--nr-line-2);
+    --w-color-border-button-outline-hover: var(--nr-line-strong);
+    --w-color-border-interactive-more-contrast: var(--nr-muted);
+    --w-color-border-interactive-more-contrast-hover: var(--nr-ink);
+    --w-color-border-interactive-more-contrast-dark-bg: var(--nr-line-strong);
+    --w-color-border-interactive-more-contrast-dark-bg-hover: var(--nr-white);
+    --w-color-border-furniture-more-contrast: var(--nr-line-strong);
+
+    --w-color-focus: var(--nr-blue);
+    --w-color-box-shadow-md: rgba(23, 23, 23, .1);
+}
+
+body#wagtail {
+    background: var(--nr-white);
+    letter-spacing: -.011em;
+}
+
+/* ── Casca ──────────────────────────────────────────────────────────────── */
+
+@media (min-width: 1024px) {
+    body#wagtail .wrapper,
+    body#wagtail.sidebar-collapsed .wrapper {
+        padding-inline-start: var(--nr-sidebar-w);
+    }
+}
+
+@media (max-width: 1023.98px) {
+    body#wagtail .wrapper,
+    body#wagtail.sidebar-collapsed .wrapper {
+        padding-inline-start: 0;
+    }
+
+    /* Espaço para o botão de menu no canto do cabeçalho do Wagtail — o mesmo
+       lugar em que ficava o botão da sidebar original. */
+    body#wagtail .w-slim-header .w-pl-slim-header {
+        padding-inline-start: 56px;
+    }
+}
+
+.nr-menu-toggle.nr-wagtail-menu-toggle {
+    position: fixed;
+    top: 7px;
+    left: 10px;
+    z-index: 150;
+    margin: 0;
+    background: var(--nr-white);
+}
+
+@media (min-width: 1024px) {
+    .nr-menu-toggle.nr-wagtail-menu-toggle {
+        display: none;
+    }
+}
+
+/* ── Acabamento dos componentes nativos ─────────────────────────────────── */
+
+body#wagtail .button {
+    border-radius: var(--nr-radius-sm);
+    font-weight: 600;
+}
+
+body#wagtail .button.button-small {
+    border-radius: 6px;
+}
+
+body#wagtail input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+body#wagtail textarea,
+body#wagtail select,
+body#wagtail .w-field__input > .choices,
+body#wagtail .w-slim-header__search-form input {
+    border-radius: var(--nr-radius-sm);
+}
+
+body#wagtail .w-panel__header,
+body#wagtail .w-slim-header {
+    font-family: var(--nr-font);
+}
+
+body#wagtail .w-slim-header h1,
+body#wagtail .w-header__title {
+    letter-spacing: -.03em;
+}
+
+body#wagtail .tippy-box[data-theme="dropdown"] {
+    border-radius: var(--nr-radius-card);
+}
+
+/* Listagens no celular: a tabela nativa rola dentro da própria área, com
+   largura mínima legível, em vez de espremer o título letra por letra. A
+   página em si continua sem rolagem horizontal. */
+@media (max-width: 799.98px) {
+    body#wagtail #listing-results {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    body#wagtail #listing-results table {
+        min-width: 680px;
+    }
+}

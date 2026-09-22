@@ -1,0 +1,130 @@
+{% load newsroom %}
+{% comment %}
+    Sidebar única do painel — a mesma marcação na visão geral, no Wagtail e no
+    Unfold. Itens chegam já filtrados por permissão (apps/common/newsroom/navigation.py).
+{% endcomment %}
+<aside class="nr-sidebar" id="nr-sidebar" aria-label="Navegação do painel" data-nr-sidebar>
+    <div class="nr-sidebar__top">
+        <a class="nr-logo" href="{{ dashboard_url }}">
+            <span class="nr-logo__mark" aria-hidden="true">{{ nav.branding.MARK }}</span>
+            <span class="nr-logo__name">{{ nav.branding.NAME }}<span>{{ nav.branding.NAME_SUFFIX }}</span></span>
+            <span class="nr-sr-only">— ir para a visão geral</span>
+        </a>
+        <button type="button" class="nr-sidebar__close" data-nr-menu-close aria-label="Fechar menu">
+            {% nr_icon "close" %}
+        </button>
+    </div>
+
+    {% if nav.workspace %}
+        <details class="nr-workspace" data-nr-dropdown>
+            <summary class="nr-workspace__button" aria-label="Espaço de trabalho: {{ nav.workspace.label }}. Abrir opções">
+                <span class="nr-ws-avatar nr-ws-avatar--{{ nav.workspace.tone }}" aria-hidden="true">{{ nav.workspace.initial }}</span>
+                <span class="nr-workspace__copy">
+                    <span class="nr-workspace__title">{{ nav.workspace.label }}</span>
+                    <span class="nr-workspace__caption">Espaço de trabalho</span>
+                </span>
+                {% nr_icon "chevrons" "nr-workspace__chevron" %}
+            </summary>
+            <div class="nr-menu nr-menu--workspace">
+                {% if nav.workspaces|length > 1 %}
+                    <p class="nr-menu__label">Trocar espaço de trabalho</p>
+                    {% for ws in nav.workspaces %}
+                        <form method="post" action="{{ workspace_switch_url }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="workspace" value="{{ ws.key }}">
+                            <button type="submit" class="nr-menu__item{% if ws.key == nav.workspace.key %} is-current{% endif %}"{% if ws.key == nav.workspace.key %} aria-current="true"{% endif %}>
+                                <span class="nr-ws-avatar nr-ws-avatar--{{ ws.tone }} nr-ws-avatar--sm" aria-hidden="true">{{ ws.initial }}</span>
+                                <span>{{ ws.label }}</span>
+                                {% if ws.key == nav.workspace.key %}{% nr_icon "check" "nr-menu__check" %}{% endif %}
+                            </button>
+                        </form>
+                    {% endfor %}
+                {% endif %}
+                {% if nav.workspace.public_url %}
+                    {% if nav.workspaces|length > 1 %}<hr class="nr-menu__divider">{% endif %}
+                    <a class="nr-menu__item" href="{{ nav.workspace.public_url }}" target="_blank" rel="noopener">
+                        {% nr_icon "external" %}<span>Ver {{ nav.workspace.label }} no ar</span>
+                    </a>
+                {% endif %}
+            </div>
+        </details>
+    {% endif %}
+
+    <div class="nr-sidebar__scroll">
+        <nav class="nr-nav" aria-label="Menu principal">
+            {% for group in nav.groups %}
+                <p class="nr-nav__label" id="nr-nav-group-{{ group.key }}">{{ group.label }}</p>
+                <ul class="nr-nav__list" aria-labelledby="nr-nav-group-{{ group.key }}">
+                    {% for item in group.items %}
+                        <li>
+                            <a class="nr-nav__item{% if item.active %} is-active{% endif %}" href="{{ item.url }}"{% if item.active %} aria-current="page"{% endif %}>
+                                {% nr_icon item.icon %}
+                                <span class="nr-nav__text">{{ item.label }}</span>
+                                {% if item.badge %}
+                                    <span class="nr-navbadge{% if item.badge.tone == 'alert' %} nr-navbadge--alert{% endif %}">
+                                        {{ item.badge.count }}<span class="nr-sr-only">{% if item.badge.tone == 'alert' %} pendentes{% else %} no total{% endif %}</span>
+                                    </span>
+                                {% endif %}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endfor %}
+
+            {% for section in nav.sections %}
+                <details class="nr-nav__section"{% if section.open %} open{% endif %}>
+                    <summary class="nr-nav__label nr-nav__label--toggle">
+                        <span>{{ section.label }}</span>
+                        {% nr_icon "down" "nr-nav__section-chevron" %}
+                    </summary>
+                    <ul class="nr-nav__list">
+                        {% for item in section.items %}
+                            <li>
+                                <a class="nr-nav__item{% if item.active %} is-active{% endif %}" href="{{ item.url }}"{% if item.active %} aria-current="page"{% endif %}>
+                                    {% nr_icon item.icon %}
+                                    <span class="nr-nav__text">{{ item.label }}</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </details>
+            {% endfor %}
+        </nav>
+
+        {% if help %}
+            <div class="nr-helpbox">
+                <p class="nr-helpbox__title">Precisa de ajuda?</p>
+                <p class="nr-helpbox__desc">Acesse os guias de operação e conheça os recursos do portal.</p>
+                <a class="nr-helpbox__link" href="{{ help.url }}">{{ help.label }} {% nr_icon "arrow" %}</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="nr-sidebar__bottom">
+        <details class="nr-account" data-nr-dropdown>
+            <summary class="nr-account__button" aria-label="Conta de {{ account.name }}: abrir opções">
+                {% if account.avatar_url %}
+                    <img class="nr-account__avatar" src="{{ account.avatar_url }}" alt="" width="29" height="29">
+                {% else %}
+                    <span class="nr-account__avatar" aria-hidden="true">{{ account.initial }}</span>
+                {% endif %}
+                <span class="nr-account__text">
+                    <span class="nr-account__name">{{ account.name }}</span>
+                    <span class="nr-account__role">{{ account.role|default:"Minha conta" }}</span>
+                </span>
+                {% nr_icon "chevrons" "nr-account__chevron" %}
+            </summary>
+            <div class="nr-menu nr-menu--up">
+                {% if account.url %}
+                    <a class="nr-menu__item" href="{{ account.url }}">{% nr_icon "settings" %}<span>Configurações da conta</span></a>
+                {% endif %}
+                <form method="post" action="{{ logout_url }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ login_url }}">
+                    <button type="submit" class="nr-menu__item">{% nr_icon "logout" %}<span>Sair</span></button>
+                </form>
+            </div>
+        </details>
+    </div>
+</aside>
+<div class="nr-backdrop" data-nr-backdrop hidden></div>

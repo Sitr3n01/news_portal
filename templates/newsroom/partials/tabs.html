@@ -1,0 +1,8 @@
+<div class="nr-toolbar" id="nr-tabs">
+    <nav class="nr-tabs" aria-label="Filtrar {{ listing.noun_plural }} por estado" hx-boost="true">
+        {% for tab in listing.tabs %}
+            <a class="nr-tab{% if tab.active %} is-active{% endif %}" href="{{ tab.url }}"{% if tab.active %} aria-current="true"{% endif %}>{{ tab.label }}</a>
+        {% endfor %}
+    </nav>
+    <input type="hidden" name="status" value="{{ listing.status }}" form="nr-filters">
+</div>

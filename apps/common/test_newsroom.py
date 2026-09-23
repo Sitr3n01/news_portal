@@ -174,7 +174,8 @@ def test_editor_reaches_comments_and_newsletter_through_wagtail(client, editor):
 
     assert {'comments', 'newsletter', 'newsletter_deliveries', 'categories', 'tags', 'news_home'} <= set(keys)
     # Nada do /admin/, cuja porta exige is_staff.
-    for hidden in ('users', 'groups', 'messages', 'school_pages', 'newsletter_legacy'):
+    for hidden in ('users', 'groups', 'messages', 'school_pages', 'newsletter_legacy',
+                   'access_lockouts', 'wagtail-redirects'):
         assert hidden not in keys
     assert client.get(reverse('wagtailsnippets_news_comment:list')).status_code == 200
 
@@ -200,6 +201,9 @@ def test_superuser_sees_administration_and_stored_resources(client, root):
     keys = _nav_keys(client.get(reverse('panel:dashboard')))
 
     assert {'users', 'groups', 'site_settings', 'testimonials', 'jobs', 'newsletter_legacy'} <= set(keys)
+    # Telas do django-axes (desbloquear conta) e redirecionamentos do Wagtail,
+    # antes alcançáveis só digitando a URL.
+    assert {'access_lockouts', 'access_log', 'access_failures', 'wagtail-redirects'} <= set(keys)
     # Ferramentas de revisão do Wagtail vêm do próprio menu do Wagtail.
     assert 'wagtail-site-history' in keys
     # Telas de páginas do Wagtail (não usadas pelo projeto) ficam fora do menu.
@@ -415,9 +419,14 @@ def test_row_actions_follow_permissions(client, reporter, editor, site):
     article = _article(site, 'Acoes da linha')
     article.save_revision().publish()
     client.force_login(reporter)
-    actions = {a['label']: a['url'] for a in client.get(reverse('panel:dashboard')).context['listing']['rows'][0]['actions']}
+    row = client.get(reverse('panel:dashboard')).context['listing']['rows'][0]
+    actions = {a['label']: a['url'] for a in row['actions']}
 
-    assert actions['Editar'] == reverse('wagtailsnippets_news_article:edit', args=[article.pk])
+    # Notícia PUBLICADA de um colega: o repórter só vê a ficha, não edita.
+    inspect_url = reverse('wagtailsnippets_news_article:inspect', args=[article.pk])
+    assert 'Editar' not in actions
+    assert actions['Ver'] == inspect_url
+    assert row['edit_url'] == inspect_url
     assert actions['Histórico'] == reverse('wagtailsnippets_news_article:history', args=[article.pk])
     # Repórter não publica nem exclui: as ações nem aparecem.
     assert 'Despublicar' not in actions
@@ -425,6 +434,7 @@ def test_row_actions_follow_permissions(client, reporter, editor, site):
 
     client.force_login(editor)
     actions = {a['label']: a['url'] for a in client.get(reverse('panel:dashboard')).context['listing']['rows'][0]['actions']}
+    assert actions['Editar'] == reverse('wagtailsnippets_news_article:edit', args=[article.pk])
     assert actions['Despublicar'] == reverse('wagtailsnippets_news_article:unpublish', args=[article.pk])
     assert actions['Excluir'] == reverse('wagtailsnippets_news_article:delete', args=[article.pk])
 

@@ -1,7 +1,10 @@
 import logging
 
-from django.db.models.signals import post_save
+from django.db import transaction
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
+from django.urls import reverse
+from wagtail.contrib.redirects.models import Redirect
 from wagtail.signals import published, unpublished
 
 from .models import Article
@@ -48,3 +51,67 @@ def mark_newsletter_pending_on_publish(sender, instance, **kwargs):
         instance.pk,
         instance.title,
     )
+
+
+# Estados em que o endereço da notícia já foi público: publicada, ou retirada
+# do ar depois de publicada. Rascunho nunca teve endereço público.
+_PUBLIC_STATUSES = (Article.Status.PUBLISHED, Article.Status.ARCHIVED)
+
+
+def _article_path(slug):
+    return reverse('news:article_detail', kwargs={'slug': slug})
+
+
+def redirect_article_path(old_path, new_path):
+    """301 de ``old_path`` para ``new_path``, sem cadeias nem laços.
+
+    * redirecionamentos que levavam ao endereço antigo passam a levar direto
+      ao novo (a -> b -> c vira a -> c e b -> c);
+    * um redirecionamento automático que partia do NOVO endereço é removido —
+      o endereço voltou a ser de uma notícia (trocar b de volta para a).
+    """
+    old_key = Redirect.normalise_path(old_path)
+    new_key = Redirect.normalise_path(new_path)
+    if old_key == new_key:
+        return
+    with transaction.atomic():
+        Redirect.objects.filter(old_path=new_key, automatically_created=True).delete()
+        Redirect.objects.filter(redirect_link=old_path).update(redirect_link=new_path)
+        Redirect.objects.update_or_create(
+            old_path=old_key, site=None,
+            defaults={
+                'redirect_link': new_path,
+                'redirect_page': None,
+                'is_permanent': True,
+                'automatically_created': True,
+            },
+        )
+
+
+@receiver(pre_save, sender=Article)
+def remember_public_path_before_slug_change(sender, instance, raw=False, update_fields=None, **kwargs):
+    """Guarda o endereço antigo quando o slug de uma notícia já pública muda.
+
+    Numa notícia no ar, editar só gera revisão: a linha (e o slug público) só
+    muda quando a revisão é PUBLICADA — é nesse save que o redirecionamento
+    nasce, nunca num rascunho.
+    """
+    instance._previous_public_path = None
+    if raw or instance.pk is None:
+        return
+    if update_fields is not None and 'slug' not in update_fields:
+        return
+    previous = sender._base_manager.filter(pk=instance.pk).values('slug', 'status').first()
+    if previous and previous['status'] in _PUBLIC_STATUSES and previous['slug'] != instance.slug:
+        instance._previous_public_path = _article_path(previous['slug'])
+
+
+@receiver(post_save, sender=Article)
+def redirect_old_public_path(sender, instance, raw=False, **kwargs):
+    old_path = getattr(instance, '_previous_public_path', None)
+    instance._previous_public_path = None
+    if raw or not old_path:
+        return
+    new_path = instance.get_absolute_url()
+    redirect_article_path(old_path, new_path)
+    logger.info('Endereço da notícia pk=%s mudou: %s agora redireciona para %s.', instance.pk, old_path, new_path)

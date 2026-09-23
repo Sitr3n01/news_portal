@@ -20,10 +20,16 @@ Article. Os painéis "Redação" da página inicial do /cms/ migraram para a vis
 geral unificada (/painel/).
 """
 
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import redirect
 from django.urls import path, reverse
+from django.utils.functional import cached_property
 from wagtail import hooks
+from wagtail.admin import messages
+from wagtail.admin.auth import permission_denied
 from wagtail.admin.menu import MenuItem
-from wagtail.admin.panels import FieldPanel, MultiFieldPanel, PublishingPanel
+from wagtail.admin.panels import FieldPanel, MultiFieldPanel, ObjectList
+from wagtail.admin.ui.tables import Column
 from wagtail.admin.views.reports.workflows import WorkflowView as BaseWorkflowView
 from wagtail.permission_policies.base import ModelPermissionPolicy
 from wagtail.snippets.models import register_snippet
@@ -31,6 +37,20 @@ from wagtail.snippets.views.snippets import SnippetViewSet
 
 from apps.news.editorial import article_status_counts
 from apps.news.models import Article, Category, NewsHomeConfig, Tag
+from apps.news.permissions import (
+    CHANGE_PERMISSION,
+    PUBLISH_PERMISSION,
+    ArticlePermissionPolicy,
+    can_edit_article,
+)
+from apps.news.wagtail_article import (
+    ArticleAdminForm,
+    ArticleCopyView,
+    ArticleCreateView,
+    ArticleIndexView,
+    ArticlePreviewOnCreateView,
+    RestrictedPublishingPanel,
+)
 from apps.news.wagtail_moderation import (
     BULK_ACTIONS,
     CommentSnippetViewSet,
@@ -49,9 +69,30 @@ class ArticleSnippetViewSet(SnippetViewSet):
     menu_name = 'article-snippets'
     menu_order = 100
     add_to_admin_menu = True
-    list_display = ('title', 'category', 'status', 'published_at', 'is_featured')
+    list_display = (
+        'title', 'category', 'status', 'published_at',
+        # Só marca o que está em destaque; antes a coluna exibia "True/False" cru.
+        Column(
+            'is_featured', label='Destaque', sort_key='is_featured',
+            accessor=lambda article: 'Em destaque' if article.is_featured else '',
+        ),
+    )
     list_filter = ('status', 'category', 'site', 'is_featured')
     search_fields = ('title', 'excerpt')
+
+    # Regra editorial por notícia (apps/news/permissions.py): quem não publica
+    # altera as próprias notícias e as dos colegas só enquanto forem rascunho.
+    index_view_class = ArticleIndexView
+    add_view_class = ArticleCreateView
+    copy_view_class = ArticleCopyView
+    preview_on_add_view_class = ArticlePreviewOnCreateView
+    # Ficha somente leitura: é para onde a listagem leva quem não pode editar.
+    inspect_view_enabled = True
+    inspect_view_fields = ['title', 'excerpt', 'category', 'tags', 'author', 'status', 'published_at']
+
+    @cached_property
+    def permission_policy(self):
+        return ArticlePermissionPolicy(self.model)
 
     # Todo campo editável do modelo precisa aparecer aqui: o Article deixou de ser
     # registrado no admin do Django (apps/news/admin.py), então este formulário é a
@@ -60,9 +101,19 @@ class ArticleSnippetViewSet(SnippetViewSet):
     # meta_description, todos consumidos pelo site público mas sem onde preencher.
     # Exceção deliberada: `status`, controlado só pelos botões nativos de
     # publicação (ver o docstring do módulo).
+    #
+    # Campos com `permission=PUBLISH_PERMISSION` só existem no formulário de
+    # quem publica — o Wagtail os remove no servidor para os demais: destaque na
+    # home, portal, autor (a notícia nasce assinada por quem cria) e agendamento.
     panels = [
         FieldPanel('title'),
-        FieldPanel('slug'),
+        FieldPanel(
+            'slug',
+            help_text=(
+                'Endereço da notícia. Pode mudar depois de publicada: o endereço antigo '
+                'passa a levar automaticamente ao novo.'
+            ),
+        ),
         FieldPanel('excerpt'),
         MultiFieldPanel(
             [
@@ -74,8 +125,8 @@ class ArticleSnippetViewSet(SnippetViewSet):
         FieldPanel('category'),
         FieldPanel('tags'),
         FieldPanel('body'),
-        FieldPanel('site'),
-        FieldPanel('author'),
+        FieldPanel('site', permission=PUBLISH_PERMISSION),
+        FieldPanel('author', permission=PUBLISH_PERMISSION),
         MultiFieldPanel(
             [
                 FieldPanel('meta_title'),
@@ -92,9 +143,10 @@ class ArticleSnippetViewSet(SnippetViewSet):
         # (apps/news/views.py::_resolve_home_highlights) quando não há
         # NewsHomeConfig com hero manual. Fica junto da publicação porque é
         # decisão editorial do mesmo momento.
-        FieldPanel('is_featured'),
-        PublishingPanel(),
+        FieldPanel('is_featured', permission=PUBLISH_PERMISSION),
+        RestrictedPublishingPanel(permission=PUBLISH_PERMISSION),
     ]
+    edit_handler = ObjectList(panels, base_form_class=ArticleAdminForm)
 
 
 register_snippet(ArticleSnippetViewSet)
@@ -133,6 +185,39 @@ register_snippet(NewsletterDeliverySnippetViewSet)
 
 for _bulk_action in BULK_ACTIONS:
     hooks.register('register_bulk_action', _bulk_action)
+
+
+# ── Porta da edição por notícia ──────────────────────────────────────────────
+#
+# A edição do Wagtail 7.4 confere só a permissão de modelo. Este hook oficial
+# roda antes da view de edição E da de restaurar revisão (que herda dela) —
+# GET e POST —, aplicando a regra de apps/news/permissions.py no servidor.
+#
+# A view entrega ao hook a ÚLTIMA REVISÃO como objeto, e o ``status`` guardado
+# numa revisão é o do momento em que ela foi salva (uma notícia retirada do ar
+# volta a aparecer como rascunho). A regra olha a linha gravada no banco, que é
+# o estado real da notícia.
+
+
+@hooks.register('before_edit_snippet')
+def enforce_article_edit_rule(request, instance):
+    if not isinstance(instance, Article):
+        return None
+    stored = Article._default_manager.filter(pk=instance.pk).only('status', 'author_id').first()
+    if stored is None or not request.user.has_perm(CHANGE_PERMISSION):
+        return permission_denied(request)
+    if can_edit_article(request.user, stored):
+        return None
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        raise PermissionDenied
+    # Em vez do "sem permissão" genérico, explica a regra e leva à ficha
+    # somente leitura da notícia, de onde dá para copiá-la como rascunho novo.
+    messages.error(
+        request,
+        'Esta notícia é de outra pessoa e já esteve no ar: só quem publica pode alterá-la. '
+        'Você pode consultá-la aqui ou copiá-la como um novo rascunho.',
+    )
+    return redirect('wagtailsnippets_news_article:inspect', stored.pk)
 
 
 # ── Contagens editoriais ─────────────────────────────────────────────────────

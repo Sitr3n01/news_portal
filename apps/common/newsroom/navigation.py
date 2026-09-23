@@ -216,6 +216,15 @@ NAV_ITEMS = (
             _admin_model('auth', 'group')),
     NavItem('site_settings', 'Configurações', 'settings', 'wagtailsnippets_common_siteextension:list', GROUP_ADMIN,
             _snippet('common', 'siteextension')),
+    # Proteção contra força bruta (django-axes): desbloquear alguém é apagar a
+    # tentativa em "Bloqueios de acesso". Sem entrada no menu, a tela só era
+    # alcançável digitando a URL. Permissões do app axes: só superusuário.
+    NavItem('access_lockouts', 'Bloqueios de acesso', 'shield', 'admin:axes_accessattempt_changelist', GROUP_ADMIN,
+            _admin_model('axes', 'accessattempt')),
+    NavItem('access_log', 'Histórico de acessos', 'clock', 'admin:axes_accesslog_changelist', GROUP_ADMIN,
+            _admin_model('axes', 'accesslog')),
+    NavItem('access_failures', 'Falhas de login', 'key', 'admin:axes_accessfailurelog_changelist', GROUP_ADMIN,
+            _admin_model('axes', 'accessfailurelog')),
 
     # Recursos guardados — fora do front atual, só superusuário (como no menu anterior)
     NavItem('testimonials', 'Depoimentos', 'quote', 'admin:school_testimonial_changelist', GROUP_ADMIN,
@@ -269,6 +278,7 @@ _WAGTAIL_SETTINGS = {
     'workflow-tasks': 'Tarefas de revisão',
     'collections': 'Coleções de mídia',
     'groups': 'Grupos e coleções (CMS)',
+    'redirects': 'Redirecionamentos',
     'users': None,
     'sites': None,
 }

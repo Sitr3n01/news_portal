@@ -56,6 +56,16 @@ O sistema está em produção. Aplique mudanças pequenas, verificáveis e alinh
   permissão.
 - CSS administrativo usa os tokens `nr-` de `static/newsroom/css/newsroom.css`;
   nunca é carregado pelos portais públicos.
+- Quem altera QUAL notícia é decidido em `apps/news/permissions.py`
+  (`can_edit_article`). Nunca decida "pode editar esta notícia" só pela
+  permissão de modelo (`news.change_article`): use
+  `permission_policy.user_has_permission_for_instance(user, 'change', article)`.
+  Campo do editor de notícias que só quem publica pode mexer leva
+  `FieldPanel(..., permission='news.publish_article')`. Isso remove o campo do
+  formulário no servidor; esconder com CSS ou JS não conta.
+- Não mude o `slug` de notícia publicada por `QuerySet.update()`: o
+  redirecionamento automático do endereço antigo depende dos sinais de
+  `save()` (`apps/news/signals.py`).
 
 ## 6. Frontend Público
 

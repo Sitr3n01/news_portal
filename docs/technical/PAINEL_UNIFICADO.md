@@ -31,6 +31,8 @@ As três usam as mesmas inclusion tags (`apps/common/templatetags/newsroom.py`):
 | `apps/common/newsroom/views.py` | FBVs: visão geral, troca de espaço e os redirecionamentos de `/cms/` e `/admin/` |
 | `apps/news/editorial.py` | Regras editoriais compartilhadas (contagens, estado de cada notícia, filtros). Antes viviam só no dashboard do Wagtail |
 | `apps/news/wagtail_moderation.py` | Comentários e newsletter no Wagtail (ver §6) |
+| `apps/news/permissions.py` | Regra editorial por notícia: quem altera qual notícia, e equipe que pode assinar (ver §9) |
+| `apps/news/wagtail_article.py` | Formulário, painéis e views do editor de notícias que aplicam essa regra (ver §9) |
 | `apps/common/dashboard.py` | Saúde do envio de e-mails/newsletter e guias de operação (antes era o `DASHBOARD_CALLBACK`) |
 
 ### Identidade configurável
@@ -89,6 +91,7 @@ Assim o menu nunca promete uma tela que a tela recusa. E esconder um item não p
 
 - `UNFOLD['SIDEBAR']['navigation']` ficou vazio: um segundo menu seria uma segunda fonte de verdade.
 - Selos: total de notícias (neutro), e em revisão, comentários pendentes e mensagens novas (alerta, só com contagem > 0). Uma consulta `COUNT` por selo, e só para quem vê o item.
+- "Bloqueios de acesso", "Histórico de acessos" e "Falhas de login" (django-axes) entram em Administração com a checagem do `ModelAdmin`. Como nenhum cargo recebe permissões do app `axes`, na prática só o superusuário os vê. Desbloquear alguém é apagar a tentativa em "Bloqueios de acesso". "Redirecionamentos" vem do `settings_menu` do Wagtail (ver §9).
 - Ocultos do menu, mas acessíveis por URL a quem tem permissão: relatórios e sites de **páginas** do Wagtail (o projeto não usa a árvore de páginas) e a tela de **Usuários do Wagtail**. Esta última porque editar conta por ela pularia a sincronização cargo → grupo feita em `apps/accounts/admin.py::save_related`.
 
 ---
@@ -107,7 +110,7 @@ A composição segue a referência: cabeçalho e ação principal, indicadores n
 | Atividade (Komuniki) | `django.contrib.admin.models.LogEntry` dos modelos que a pessoa pode ver + mensagens recebidas |
 | Saúde do envio | `apps.common.dashboard.build_system_health` (detalhes técnicos só para superusuário) |
 
-**Nenhum número é inventado.** O "↗ 12,8%" da prévia não tem fonte no sistema e não foi reproduzido. "Analytics" e o sino de notificações também ficaram de fora, porque não existe funcionalidade real correspondente (ver §10).
+**Nenhum número é inventado.** O "↗ 12,8%" da prévia não tem fonte no sistema e não foi reproduzido. "Analytics" e o sino de notificações também ficaram de fora, porque não existe funcionalidade real correspondente (ver §12).
 
 ### Listagem
 
@@ -119,7 +122,7 @@ A composição segue a referência: cabeçalho e ação principal, indicadores n
 
 ### Ações: sempre as nativas
 
-Criar, editar, revisar, despublicar, histórico e excluir são **links para as views oficiais** do `ArticleSnippetViewSet` (`wagtailsnippets_news_article:add/edit/history/unpublish/delete`). Publicar e aprovar/rejeitar revisões acontecem no editor do Wagtail (menu de ações e fluxo de trabalho). A visão geral nunca altera `status`, `live` ou revisões. Cada ação só aparece para quem tem a permissão correspondente, e a view de destino confere de novo.
+Criar, editar, revisar, despublicar, histórico e excluir são **links para as views oficiais** do `ArticleSnippetViewSet` (`wagtailsnippets_news_article:add/edit/history/unpublish/delete`). Publicar e aprovar/rejeitar revisões acontecem no editor do Wagtail (menu de ações e fluxo de trabalho). A visão geral nunca altera `status`, `live` ou revisões. Cada ação só aparece para quem tem a permissão correspondente, e a view de destino confere de novo. "Editar" segue a regra **por notícia** (§9): quando a pessoa não pode alterar aquela notícia, a linha oferece "Ver" (ficha somente leitura do Wagtail).
 
 ---
 
@@ -182,9 +185,33 @@ O Unfold **não foi removido**: seus formulários, filtros, ações e abas conti
 
 ---
 
-## 9. Segurança e compatibilidade
+## 9. Governança editorial: quem altera o quê
 
-- Nenhum novo sistema de login, modelo de usuário, backend, grupo ou permissão. **Sem migrations.**
+O painel do Wagtail deixava qualquer pessoa com `news.change_article` alterar **qualquer** notícia, inclusive publicadas de colegas, e escolher destaque, portal, autor e agendamento. A regra abaixo foi decidida com a redação e é aplicada no servidor. Esconder botões é só consequência.
+
+| Cargo | Próprias notícias | Notícias de colegas |
+|---|---|---|
+| Repórter (sem `news.publish_article`) | altera em qualquer estado | altera só enquanto forem **rascunho**; publicadas e retiradas do ar abrem a ficha somente leitura |
+| Editor de Notícias, Administrador Geral, superusuário | altera | altera |
+
+- **Fonte única:** `apps/news/permissions.py` (`can_edit_article`, `ArticlePermissionPolicy`). Ela é usada pela política de permissão do snippet (listagem, link do título, botão "Editar", cópia), pelo hook `before_edit_snippet` (edição e restauração de revisão, GET e POST) e pela visão geral. "Rascunho" é o `status` da linha no banco. O hook não confia no objeto que a view entrega, porque é a última revisão e ela guarda o `status` antigo.
+- **Recusa:** quem tenta editar sem poder volta para a ficha da notícia (`inspect`), com uma mensagem que explica a regra e sugere copiar como rascunho novo.
+- **Em revisão:** o próprio Wagtail continua travando a edição para quem não aprova a etapa (`WorkflowLock`); a regra não afrouxa isso.
+- **Aprovação:** a etapa "Aprovação Editorial" passa a aceitar o grupo **Editor de Notícias**, além do Administrador Geral (`apps/news/migrations/0027`). Antes, o editor, que tem permissão de publicar, não conseguia aprovar o que o repórter enviava.
+- **Campos sensíveis:** destaque na home (`is_featured`), portal (`site`), autor e agendamento (`go_live_at`/`expire_at`) usam `FieldPanel(permission='news.publish_article')`. O Wagtail **remove esses campos do formulário** de quem não publica: se forem enviados à mão, são ignorados. `RestrictedPublishingPanel` repassa a permissão aos campos do agendamento, porque a permissão de um grupo de painéis só esconde o grupo.
+- **Autoria:** notícia nova nasce assinada por quem cria e no portal atual. Quem publica pode trocar o autor, mas a lista só mostra a equipe editorial (contas ativas com permissão de escrever notícias). Antes ela listava todas as contas, inclusive leitores do portal.
+- **Copiar:** a cópia é enviada para a view de adição e vira um **rascunho novo**, assinado por quem copia (repórter). O Wagtail 7.4 aceitaria um POST direto no endereço de cópia e o gravaria **sobre a notícia original**, bastando permissão de "ver". Esse POST agora é recusado (405).
+- **Endereço (slug) depois de publicar:** pode mudar. Quando o slug de uma notícia que já esteve no ar muda, `apps/news/signals.py` cria um redirecionamento permanente (301) do endereço antigo para o novo (`wagtail.contrib.redirects`). Isso acontece na publicação da revisão, nunca num rascunho. Cadeias são encurtadas (a→b→c vira a→c e b→c), e voltar ao slug antigo remove o redirecionamento que partia dele. O `RedirectMiddleware` só age em respostas 404, então um endereço que existe nunca é desviado. A gestão manual fica em "Redirecionamentos" e, hoje, só o superusuário tem as permissões `wagtailredirects`.
+- **Corpo da notícia:** nenhum bloco do StreamField nem recurso do editor de texto foi cortado (decisão da redação).
+
+---
+
+## 10. Segurança e compatibilidade
+
+- Nenhum novo sistema de login, modelo de usuário, backend, grupo ou permissão. Os grupos e as permissões por cargo (`apps/accounts/admin_roles.py`) não mudaram.
+- **Migrações (governança, §9):**
+  - `news/0027_editor_approves_editorial_workflow` é **só de dados**: acrescenta o grupo "Editor de Notícias" aos aprovadores da tarefa "Aprovação Editorial". É idempotente e não recria a tarefa se ela tiver sido removida. O reverso retira apenas esse grupo.
+  - `wagtail.contrib.redirects` traz as migrações do próprio Wagtail, que criam a tabela `wagtailredirects_redirect`. Nenhuma tabela existente é alterada.
 - Autenticação ≠ autorização: `/painel/` exige área administrativa. Leitor autenticado vai para "sem acesso". Os redirecionamentos de `/cms/` e `/admin/` estão atrás das portas originais de cada framework.
 - Troca de espaço de trabalho: só `POST` com CSRF, só para espaços visíveis, e o redirecionamento é para um destino fixo (sem `next` arbitrário).
 - "Sair" envia `POST` para `panel:logout` com `next` fixo em `panel:login`: encerra a sessão das três áreas.
@@ -193,29 +220,35 @@ O Unfold **não foi removido**: seus formulários, filtros, ações e abas conti
 
 ---
 
-## 10. Testes
+## 11. Testes
 
+- `apps/news/test_governance.py` (43 testes): matriz cargo × dono × estado (rascunho, publicada, retirada) conferida na regra, na política do snippet e na porta da edição; POST de edição recusado sem alterar nada; restauração de revisão; links da listagem; campos sensíveis ausentes e ignorados mesmo se forjados; lista de autores sem leitores; cópia que nunca grava sobre a original; editor aprovando e publicando o envio do repórter; redirecionamentos (301 real, rascunho não gera, cadeias e volta ao slug antigo).
 - `apps/common/test_newsroom.py` (45 testes): login e redirecionamento, acesso e recusa, portas de `/cms/` e `/admin/`, navegação por cargo, isolamento entre espaços, busca, filtros e paginação no servidor, número de consultas constante, lista × grade, links de criação/edição, ações por permissão, reflexo de rascunho/revisão/publicação/arquivamento, agendamento, casca nas telas do Wagtail e do admin (e ausência dela em popups), logout, moderação no Wagtail (inclusive recusas), dados reais nos indicadores, auditoria e rotas preservadas.
 - Testes existentes atualizados onde o comportamento mudou de propósito (destino pós-login, páginas iniciais antigas, painéis "Redação"). Cada um mantém a garantia original no endereço novo.
 - Validação visual com Chromium (Playwright) em 1440, 1280, 834 e 390px, com interação real: busca HTMX, abas, grade, paginação, menus, gaveta e troca de espaço.
 
 ---
 
-## 11. Limitações e pendências
+## 12. Limitações e pendências
 
 - **Cabeçalho do Wagtail:** as telas do Wagtail mantêm o cabeçalho nativo (trilha, ações, painéis laterais de status, pré-visualização e comentários), com a paleta do painel. Ele não mostra o espaço de trabalho na trilha, como a topbar da visão geral e do admin. Substituí-lo quebraria controles essenciais do editor.
 - **Preferência de tema do Wagtail:** a opção "Tema" em *Minha conta* fica sem efeito visual, porque o painel adota o tema claro. O Wagtail não oferece hook para retirar essa opção.
 - **Textos em inglês do Unfold** ("Type to search", "Filters") e alguns rótulos de campo em inglês ("Created at") são anteriores a esta mudança.
+- **"Artigo" × "Notícia":** a listagem do Wagtail usa o `verbose_name` do modelo ("Artigos", "Adicionar Artigo"), enquanto o menu diz "Notícias". Unificar exige alterar `Article.Meta`, o que gera uma migration sem efeito no banco. Ficou para a próxima fase, junto com as melhorias de experiência do editor.
+- **Gestão de redirecionamentos por cargo:** só o superusuário tem as permissões `wagtailredirects`. Dar ao Administrador Geral exige incluir o app em `GENERAL_ADMIN_APP_LABELS`, uma decisão de permissão que não foi tomada aqui.
 - **Analytics:** existe `Article.view_count`, mas não há tela de analytics. Uma seção "Mais lidas" seria o próximo passo natural, com dados reais.
 - **Notificações:** não há notificações dentro do sistema (as do Wagtail são por e-mail), por isso não há sino.
 - **Migrações futuras candidatas ao Wagtail** (`ModelViewSet`/`SnippetViewSet`): mensagens de contato e posts de redes sociais, preservando ações e campos sensíveis.
 
 ---
 
-## 12. Manutenção e reversão
+## 13. Manutenção e reversão
 
 - **Ao atualizar o Wagtail:** comparar `templates/wagtailadmin/base.html` com o `base.html` do Wagtail (o bloco `furniture` é cópia fiel) e conferir se o bloco escuro de `core.css` ganhou tokens novos.
 - **Ao atualizar o Unfold (pinado em 0.87.0):** conferir `admin/base.html` (inclusão de `admin/nav_sidebar.html` e `unfold/helpers/header.html`).
-- **Reversão:** toda a mudança está na branch da reformulação. Não há migration, então reverter o merge restaura o comportamento anterior sem tocar em dados.
+- **Reversão:** toda a mudança está na branch da reformulação.
+  - A casca visual não tem migration: reverter o merge restaura o comportamento anterior sem tocar em dados.
+  - Para a governança (§9), rode `manage.py migrate news 0026` **antes** de reverter o código, para tirar o Editor de Notícias dos aprovadores.
+  - A tabela de redirecionamentos pode ficar: sem o app instalado, ela só deixa de ser usada. Apagá-la (`migrate wagtailredirects zero`) descarta os redirecionamentos criados e é uma operação destrutiva.
 
 ![Visão geral no desktop](../assets/screenshots/painel-unificado/visao-geral-desktop.jpg)

@@ -57,6 +57,10 @@ INSTALLED_APPS = [
     # superusuário as enxerga.
     'wagtail.users',
     'wagtail.contrib.table_block',
+    # Redirecionamentos: trocar o endereço (slug) de uma notícia que já esteve
+    # no ar cria um 301 do endereço antigo para o novo (apps/news/signals.py),
+    # para não quebrar links compartilhados nem o que o Google já indexou.
+    'wagtail.contrib.redirects',
 
     # Third-party
     'django_htmx',
@@ -89,6 +93,9 @@ MIDDLEWARE = [
     'django_htmx.middleware.HtmxMiddleware',
     'axes.middleware.AxesMiddleware',
     'csp.middleware.CSPMiddleware',
+    # Só age em respostas 404: procura um redirecionamento para o caminho
+    # pedido. Endereço que existe nunca é desviado.
+    'wagtail.contrib.redirects.middleware.RedirectMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'

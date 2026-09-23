@@ -114,11 +114,17 @@ def _article_actions(request, article, state):
     policy = _article_policy()
     user = request.user
     actions = []
-    can_change = policy.user_has_permission(user, 'change')
+    # Por notícia, não por modelo: quem não publica só altera as próprias e
+    # os rascunhos dos colegas (apps/news/permissions.py). As demais abrem a
+    # ficha somente leitura — a mesma regra que a edição do Wagtail aplica.
+    can_change = policy.user_has_permission_for_instance(user, 'change', article)
     if can_change:
         label = 'Revisar' if state == 'review' else 'Editar'
         actions.append({'label': label, 'icon': 'edit',
                         'url': reverse('wagtailsnippets_news_article:edit', args=[article.pk])})
+    else:
+        actions.append({'label': 'Ver', 'icon': 'eye',
+                        'url': reverse('wagtailsnippets_news_article:inspect', args=[article.pk])})
     actions.append({'label': 'Histórico', 'icon': 'clock',
                     'url': reverse('wagtailsnippets_news_article:history', args=[article.pk])})
     if state == STATE_PUBLISHED or article.live:
@@ -130,7 +136,7 @@ def _article_actions(request, article, state):
     if policy.user_has_permission(user, 'delete'):
         actions.append({'label': 'Excluir', 'icon': 'trash', 'danger': True,
                         'url': reverse('wagtailsnippets_news_article:delete', args=[article.pk])})
-    return actions, can_change
+    return actions
 
 
 def kelly_articles(request):
@@ -163,7 +169,7 @@ def kelly_articles(request):
     rows = []
     for article in articles:
         state = editorial.editorial_state(article, review_ids, now)
-        actions, can_change = _article_actions(request, article, state)
+        actions = _article_actions(request, article, state)
         author = (article.author.get_full_name() or article.author.get_username()) if article.author else ''
         rows.append({
             'pk': article.pk,
@@ -177,7 +183,7 @@ def kelly_articles(request):
             'updated_at': article.updated_at,
             'image_url': article.card_image_url,
             'tone': THUMB_TONES[(article.category_id or 0) % len(THUMB_TONES)],
-            'edit_url': actions[0]['url'] if can_change else '',
+            'edit_url': actions[0]['url'],
             'actions': actions,
         })
 

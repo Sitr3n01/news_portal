@@ -173,7 +173,12 @@ O Unfold **não foi removido**: seus formulários, filtros, ações e abas conti
 ## 8. Tema, design system e acessibilidade
 
 - **Tokens:** `static/newsroom/css/newsroom.css` (prefixo `nr-`) é a fonte única de cor, raio, medida e fonte (Inter variável local, `static/fonts/editorial/`, sem CDN). Ícones: sprite local `static/newsroom/icons.svg`.
-- **Wagtail:** `static/newsroom/css/newsroom-wagtail.css`, via hook oficial `insert_global_admin_css`, mapeia os tokens `--w-color-*` (mecanismo documentado de marca do Wagtail) para a paleta. Só o raio de botões e campos é ajustado. Editor de blocos, seletores de mídia, painéis de publicação e fluxos de revisão continuam com o CSS nativo.
+- **Wagtail:** `static/newsroom/css/newsroom-wagtail.css`, via hook oficial `insert_global_admin_css`, mapeia os tokens `--w-color-*` (mecanismo documentado de marca do Wagtail) para a paleta. Só o raio de botões e campos é ajustado. Seletores de mídia, painéis de publicação e fluxos de revisão continuam com o CSS nativo. No editor de blocos, a única mudança é o arrastar para reordenar (abaixo).
+- **Arrastar blocos (StreamField):** o Wagtail 7.4 já cria um SortableJS em cada lista de blocos, mas só com a alça ⠿ como pega. `static/newsroom/js/newsroom-streamfield.js`, carregado pelo hook `insert_editor_js` (só formulários de criação e edição), ajusta essa mesma instância, sem biblioteca nova:
+  - **Pega:** com mouse, o bloco é arrastado pela barra de título inteira. Os demais botões do cabeçalho continuam só clicáveis e um clique simples ainda recolhe ou abre o bloco. Com dedo ou caneta, só pela alça, que recebe `touch-action: none`. Sem isso o celular trata o gesto como rolagem e cancela o arraste. O resto do cabeçalho continua rolando a página.
+  - **Ordem gravada:** corrige um defeito do próprio Wagtail 7.4.2. Os blocos excluídos ficam na página, ocultos, até salvar, e os índices do SortableJS os contam. Depois de excluir um bloco, arrastar outro gravava uma ordem diferente da que aparecia na tela. Agora os índices vêm da lista de blocos vivos, e o que se vê é o que se salva.
+  - **Durante o arraste:** o destino aparece com contorno azul tracejado. No celular, uma cópia do bloco, com altura limitada, acompanha o dedo. O conteúdo dos blocos (texto rico, tabela, campos) não recebe o ponteiro, então nada cai dentro de um editor. A rolagem automática perto da borda ficou mais sensível, e `prefers-reduced-motion` desliga a animação.
+  - Vale para todo StreamField editado no Wagtail: corpo da notícia e destaques da home. Os botões ↑/↓ continuam sendo o caminho pelo teclado.
 - **Unfold:** `UNFOLD['COLORS']` (cinzas neutros; "primária" em `#171717`, botões pretos como na referência), `THEME='light'` e `static/newsroom/css/newsroom-unfold.css`. Os tokens do design system `kb-` (guias e ajudas contextuais) foram convertidos do tema escuro para a paleta clara.
 - **Tema único (claro):** a referência é clara, e o projeto já forçava um tema só (o Unfold era forçado no escuro). No Wagtail, o bloco de tokens vale também para `.w-theme-dark`/`.w-theme-system`. Sem isso, quem usa o sistema operacional no modo escuro veria o Wagtail escuro e a visão geral clara.
 - **Contraste:** o texto mais claro é `#737373` (4,7:1 sobre branco). Os cinzas mais claros da prévia (`#a3a3a3`, `#929292`) ficaram só para ícones e divisórias.
@@ -223,7 +228,15 @@ O painel do Wagtail deixava qualquer pessoa com `news.change_article` alterar **
 ## 11. Testes
 
 - `apps/news/test_governance.py` (43 testes): matriz cargo × dono × estado (rascunho, publicada, retirada) conferida na regra, na política do snippet e na porta da edição; POST de edição recusado sem alterar nada; restauração de revisão; links da listagem; campos sensíveis ausentes e ignorados mesmo se forjados; lista de autores sem leitores; cópia que nunca grava sobre a original; editor aprovando e publicando o envio do repórter; redirecionamentos (301 real, rascunho não gera, cadeias e volta ao slug antigo).
-- `apps/common/test_newsroom.py` (45 testes): login e redirecionamento, acesso e recusa, portas de `/cms/` e `/admin/`, navegação por cargo, isolamento entre espaços, busca, filtros e paginação no servidor, número de consultas constante, lista × grade, links de criação/edição, ações por permissão, reflexo de rascunho/revisão/publicação/arquivamento, agendamento, casca nas telas do Wagtail e do admin (e ausência dela em popups), logout, moderação no Wagtail (inclusive recusas), dados reais nos indicadores, auditoria e rotas preservadas.
+- `apps/common/test_newsroom.py` (46 testes): login e redirecionamento, acesso e recusa, portas de `/cms/` e `/admin/`, navegação por cargo, isolamento entre espaços, busca, filtros e paginação no servidor, número de consultas constante, lista × grade, links de criação/edição, ações por permissão, reflexo de rascunho/revisão/publicação/arquivamento, agendamento, casca nas telas do Wagtail e do admin (e ausência dela em popups), script de arrastar blocos só nos formulários, logout, moderação no Wagtail (inclusive recusas), dados reais nos indicadores, auditoria e rotas preservadas.
+- Arrastar blocos: o projeto não tem ferramenta de teste de JavaScript, então foi validado no navegador, no editor de uma notícia de teste.
+  - Arraste real pela barra de título e pela alça.
+  - Clique simples ainda recolhendo o bloco.
+  - Botões do cabeçalho sem iniciar arraste.
+  - Toque na barra de título sem iniciar arraste; toque na alça iniciando.
+  - Arraste por toque a 384px no modo Android do SortableJS.
+  - Ordem gravada pelo salvamento automático igual à da tela.
+  - O defeito do Wagtail reproduzido com o código original e ausente com o ajuste.
 - Testes existentes atualizados onde o comportamento mudou de propósito (destino pós-login, páginas iniciais antigas, painéis "Redação"). Cada um mantém a garantia original no endereço novo.
 - Validação visual com Chromium (Playwright) em 1440, 1280, 834 e 390px, com interação real: busca HTMX, abas, grade, paginação, menus, gaveta e troca de espaço.
 
@@ -245,6 +258,7 @@ O painel do Wagtail deixava qualquer pessoa com `news.change_article` alterar **
 ## 13. Manutenção e reversão
 
 - **Ao atualizar o Wagtail:** comparar `templates/wagtailadmin/base.html` com o `base.html` do Wagtail (o bloco `furniture` é cópia fiel) e conferir se o bloco escuro de `core.css` ganhou tokens novos.
+- **Arrastar blocos, também ao atualizar o Wagtail:** `newsroom-streamfield.js` depende de internos do StreamField: `initDragNDrop`, `sortable`, `children`, `inserters`, `moveBlock` e o atributo `data-streamfield-action="DRAG"`. Se algum sumir, o script não faz nada e o arraste nativo continua. Confira no editor se a barra de título ainda arrasta. Se o Wagtail corrigir a contagem de blocos excluídos (§8), a função `reorder` pode sair.
 - **Ao atualizar o Unfold (pinado em 0.87.0):** conferir `admin/base.html` (inclusão de `admin/nav_sidebar.html` e `unfold/helpers/header.html`).
 - **Reversão:** toda a mudança está na branch da reformulação.
   - A casca visual não tem migration: reverter o merge restaura o comportamento anterior sem tocar em dados.

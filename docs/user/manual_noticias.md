@@ -33,15 +33,29 @@ Este manual cobre todas as operações que um **Editor de Notícias** precisa re
 
 ### 1.2 Adicionar blocos de conteúdo
 
-O corpo do artigo é formado por **blocos**, adicionados na seção "Blocos de conteúdo" dentro do formulário do artigo.
+O corpo do artigo é formado por **blocos**, adicionados na seção "Conteúdo (blocos)" do formulário. Use o botão **+** entre dois blocos para inserir um novo naquele ponto.
 
 | Tipo de bloco | Para que serve |
 |--------------|----------------|
-| **Texto** | Parágrafos, subtítulos, listas, links, negrito/itálico |
+| **Título / Subtítulo** | Intertítulo da matéria (nível H2, H3 ou H4) |
+| **Texto rico** | Parágrafos, listas, links, negrito/itálico |
+| **Citação** | Frase em destaque, com atribuição opcional |
+| **Separador** | Linha divisória entre trechos |
 | **Imagem** | Seleciona uma imagem da Biblioteca de Mídia, com legenda opcional |
 | **Vídeo / Post** | Cola o link de YouTube, Instagram ou TikTok; o embed é gerado automaticamente |
+| **Documento** | Anexa um arquivo da biblioteca de documentos |
+| **Box de destaque** | Caixa no estilo informativo, alerta ou destaque |
+| **Tabela** | Tabela editável linha a linha |
+| **Fonte / Referência** | Link para a fonte consultada |
 
-Para cada bloco, defina **Ordem**. Blocos aparecem em ordem crescente. Para reordenar, altere os números e salve.
+**Para mudar a ordem dos blocos:**
+
+- **No computador:** clique na barra de título do bloco (onde aparece o nome dele) e arraste para cima ou para baixo. Um contorno azul tracejado mostra onde ele vai ficar. Um clique simples na barra, sem arrastar, continua abrindo e fechando o bloco.
+- **No celular:** toque e arraste pela alça **⠿**, no canto direito do cabeçalho do bloco. No resto do cabeçalho o toque rola a página normalmente.
+- **Pelos botões:** as setas **↑** e **↓** do cabeçalho movem o bloco uma posição por vez (também pelo teclado).
+- Em matérias longas, use **Colapsar tudo** antes de arrastar: com os blocos fechados, fica mais fácil levar um bloco de uma ponta à outra.
+
+A ordem na tela é a ordem que será salva.
 
 > O campo **Conteúdo** do artigo é gerado automaticamente a partir dos blocos. Não é necessário preenchê-lo manualmente.
 

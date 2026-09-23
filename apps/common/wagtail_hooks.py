@@ -105,3 +105,11 @@ def newsroom_admin_css():
 @hooks.register('insert_global_admin_js')
 def newsroom_admin_js():
     return format_html('<script src="{}" defer></script>', static('newsroom/js/newsroom.js'))
+
+
+# Só nos formulários de criação e edição: ajusta o arrastar dos blocos do
+# StreamField (pega pela barra de título, alça no celular e posição correta
+# depois de excluir um bloco). Detalhes no cabeçalho do próprio arquivo.
+@hooks.register('insert_editor_js')
+def newsroom_streamfield_js():
+    return format_html('<script src="{}" defer></script>', static('newsroom/js/newsroom-streamfield.js'))

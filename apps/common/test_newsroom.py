@@ -498,6 +498,22 @@ def test_wagtail_screens_use_the_unified_sidebar(client, editor, settings):
 
 
 @pytest.mark.django_db
+def test_block_editor_loads_drag_to_reorder_script_only_on_forms(client, editor, site):
+    article = _article(site, 'Blocos para arrastar')
+    client.force_login(editor)
+
+    edit = client.get(reverse('wagtailsnippets_news_article:edit', args=[article.pk]))
+    add = client.get(reverse('wagtailsnippets_news_article:add'))
+    listing = client.get(reverse('wagtailsnippets_news_article:list'))
+
+    # Hook insert_editor_js: formulários de criação e edição, nunca listagens.
+    assert edit.status_code == 200
+    assert 'newsroom/js/newsroom-streamfield.js' in edit.content.decode()
+    assert 'newsroom/js/newsroom-streamfield.js' in add.content.decode()
+    assert 'newsroom/js/newsroom-streamfield.js' not in listing.content.decode()
+
+
+@pytest.mark.django_db
 def test_admin_screens_use_the_unified_sidebar_and_topbar(client, root):
     client.force_login(root)
 

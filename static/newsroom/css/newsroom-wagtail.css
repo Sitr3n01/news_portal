@@ -18,8 +18,11 @@
  *    em `.wrapper`; aqui essa reserva passa a ser a largura da nossa.
  *
  * 3. Acabamento: raio de botões e campos e a fonte. Nada além disso é
- *    sobrescrito — editor de blocos, seletores de mídia, painéis de publicação
- *    e fluxos de revisão continuam com o CSS nativo.
+ *    sobrescrito — seletores de mídia, painéis de publicação e fluxos de
+ *    revisão continuam com o CSS nativo.
+ *
+ * 4. Editor de blocos: só o arrastar para reordenar (pega, lugar de destino e
+ *    cópia que acompanha o dedo), junto com static/newsroom/js/newsroom-streamfield.js.
  */
 
 :root,
@@ -190,6 +193,68 @@ body#wagtail .w-header__title {
 
 body#wagtail .tippy-box[data-theme="dropdown"] {
     border-radius: var(--nr-radius-card);
+}
+
+/* ── Editor de blocos: arrastar para reordenar ──────────────────────────── */
+
+/* Alça ⠿ de cada bloco. `touch-action: none` faz o toque nela virar arraste:
+   sem isso o navegador do celular assume o gesto como rolagem, cancela o
+   ponteiro e o bloco não sai do lugar. */
+body#wagtail [data-streamfield-action="DRAG"] {
+    cursor: grab;
+    touch-action: none;
+}
+
+@media (pointer: coarse) {
+    body#wagtail [data-streamfield-action="DRAG"] {
+        color: var(--nr-ink-3);
+    }
+}
+
+/* Com mouse, o bloco é arrastado pela barra de título inteira. */
+@media (hover: hover) and (pointer: fine) {
+    body#wagtail [data-streamfield-child] > section > .w-panel__header,
+    body#wagtail [data-streamfield-child] > section > .w-panel__header [data-panel-heading] {
+        cursor: grab;
+    }
+
+    body#wagtail [data-streamfield-child] > section > .w-panel__header:hover [data-streamfield-action="DRAG"] {
+        color: var(--nr-ink);
+    }
+}
+
+/* Lugar em que o bloco vai cair. */
+body#wagtail [data-streamfield-child].sortable-ghost {
+    border-radius: var(--nr-radius);
+    background: var(--nr-blue-soft);
+    outline: 2px dashed var(--nr-blue);
+    outline-offset: 4px;
+}
+
+body#wagtail [data-streamfield-child].sortable-ghost > section {
+    opacity: .4;
+}
+
+/* Cópia que acompanha o dedo (modo de toque do SortableJS). Ele fixa a altura
+   inline; o limite evita que um texto longo cubra a tela inteira. */
+body#wagtail [data-streamfield-child].sortable-fallback {
+    max-height: 160px !important;
+    overflow: hidden !important;
+    border-radius: var(--nr-radius);
+    background: var(--nr-white);
+    box-shadow: var(--nr-shadow-menu);
+    outline: 1px solid var(--nr-line-strong);
+}
+
+/* Durante o arraste o conteúdo dos blocos (texto rico, tabela, campos) não
+   recebe o ponteiro: o bloco só cai ENTRE blocos, nunca dentro de um editor. */
+html.nr-sf-dragging body#wagtail {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+html.nr-sf-dragging body#wagtail [data-streamfield-child] .w-panel__content {
+    pointer-events: none;
 }
 
 /* Listagens no celular: a tabela nativa rola dentro da própria área, com

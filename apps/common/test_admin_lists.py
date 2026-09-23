@@ -44,7 +44,7 @@ def test_list_header_has_title_count_actions_and_tabs(client, root, inquiries):
     client.force_login(root)
 
     content = client.get(reverse(CHANGELIST)).content.decode()
-    header = _section(content, '<header class="nr-listhead"', '</header>')
+    header = _section(content, '<div class="nr-listhead"', 'data-nr-list-toolbar')
 
     assert 'Mensagens de contato' in header
     assert re.search(r'nr-listhead__count">\s*3\s*<', header)

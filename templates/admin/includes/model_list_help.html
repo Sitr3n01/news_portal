@@ -10,7 +10,7 @@
 {% endcomment %}
 {% nr_admin_list_header as head %}
 {% if head %}
-    <header class="nr-listhead">
+    <div class="nr-listhead">
         <div class="nr-listhead__main">
             <div class="nr-listhead__heading">
                 <h1 class="nr-listhead__title">
@@ -45,7 +45,7 @@
                 {% endfor %}
             </nav>
         {% endif %}
-    </header>
+    </div>
 
     {% if cl.result_count == 0 and head.empty_message %}
         <div class="nr-listhead__empty">

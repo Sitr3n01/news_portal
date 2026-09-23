@@ -53,6 +53,9 @@ class SocialAccountAdmin(AdminUXMixin, ModelAdmin):
     readonly_fields = ['last_sync_status', 'last_sync_at', 'last_sync_error', 'created_at', 'updated_at']
     actions = ['activate_accounts', 'deactivate_accounts']
     ux_list_title = 'Contas de redes sociais'
+    ux_status_field = 'is_active'
+    ux_status_labels = {True: 'Ativa', False: 'Inativa'}
+    ux_status_tones = {True: 'success', False: 'archived'}
     ux_list_description = 'Cadastre os perfis oficiais de Instagram e TikTok e acompanhe o status da sincronização.'
     ux_list_icon = 'share'
     ux_empty_message = 'Nenhuma conta cadastrada. Adicione o Instagram e o TikTok oficiais para alimentar a home.'
@@ -112,6 +115,9 @@ class SocialPostAdmin(AdminUXMixin, ModelAdmin):
     readonly_fields = ['platform', 'thumbnail_preview', 'sync_payload', 'created_at', 'updated_at']
     actions = ['make_visible', 'make_hidden']
     ux_list_title = 'Posts de redes sociais'
+    ux_status_field = 'is_visible'
+    ux_status_labels = {True: 'Visível no site', False: 'Oculto'}
+    ux_status_tones = {True: 'success', False: 'warning'}
     ux_list_description = 'Cadastre posts manualmente (fallback) ou revise os que vieram da sincronização. Só os visíveis aparecem na home.'
     ux_list_icon = 'dynamic_feed'
     ux_empty_message = 'Nenhum post cadastrado. Adicione um post manual ou rode a sincronização para popular a home.'

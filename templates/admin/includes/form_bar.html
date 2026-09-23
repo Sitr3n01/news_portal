@@ -1,0 +1,133 @@
+{% load newsroom %}
+{% comment %}
+    Barra dos formulários do Django admin (apps/common/newsroom/admin_forms.py),
+    com as mesmas classes da barra do editor do Wagtail (templates/newsroom/editor/,
+    CSS comum em newsroom.css). Entra logo abaixo da topbar, fica presa ao
+    rolar (newsroom-unfold.css) e substitui o cartão "Edição orientada", o
+    cartão "Próximos passos" e a faixa de botões do rodapé do Unfold.
+
+    Os botões de salvar são os do Django (type="submit", mesmo name) ligados ao
+    formulário pelo atributo form, como os do rodapé do Unfold. O primeiro
+    botão ligado ao formulário é o que o Enter aciona: por isso a barra começa
+    com um "Salvar" invisível, e Enter continua salvando e voltando para a
+    lista, como antes.
+{% endcomment %}
+{% nr_admin_form_bar as bar %}
+{% if bar.enabled %}
+    <section class="nr-editorbar nr-formbar" aria-label="Barra do formulário" data-nr-formbar data-nr-form="{{ bar.form_id }}">
+        <div class="nr-editorbar__start">
+            {% if bar.back %}
+                <a class="nr-editorbar__back" href="{{ bar.back.url }}" aria-label="Voltar para {{ bar.back.label }}" title="Voltar para {{ bar.back.label }}">
+                    {% nr_icon "chevron-left" %}
+                </a>
+            {% endif %}
+            <div class="nr-editorbar__heading">
+                <div class="nr-editorbar__crumbs">
+                    <h1 class="nr-editorbar__title">{{ bar.title }}</h1>
+                </div>
+                <div class="nr-editorbar__meta">
+                    <span class="nr-editorbar__state" role="status">
+                        {% if bar.status %}
+                            <span class="nr-status nr-status--{{ bar.status.tone }} nr-editorbar__status">{{ bar.status.label }}</span>
+                        {% endif %}
+                        {% if bar.readonly %}
+                            <span class="nr-status nr-status--neutral nr-editorbar__status nr-formbar__readonly">{% nr_icon "lock" %}Somente leitura</span>
+                        {% endif %}
+                        <span class="nr-editorbar__note nr-formbar__dirty" data-nr-formbar-dirty{% if not errors %} hidden{% endif %}>Alterações não salvas</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="nr-editorbar__end">
+            {% if bar.guide or bar.history_url or bar.site_url %}
+                <div class="nr-editorbar__tools" role="group" aria-label="Ferramentas do formulário">
+                    {% if bar.guide %}
+                        <details class="nr-formbar__guide" data-nr-dropdown>
+                            <summary class="nr-editorbar__tool" aria-label="Guia desta tela" title="Guia desta tela">
+                                {% nr_icon "book" %}<span class="nr-editorbar__tool-label">Guia</span>
+                            </summary>
+                            <div class="nr-menu nr-menu--right nr-formbar__guide-panel">
+                                {% if bar.guide.title %}<p class="nr-formbar__guide-title">{{ bar.guide.title }}</p>{% endif %}
+                                {% if bar.guide.description %}<p class="nr-formbar__guide-text">{{ bar.guide.description }}</p>{% endif %}
+                                {% if bar.guide.steps %}
+                                    <ol class="nr-formbar__guide-steps">
+                                        {% for step in bar.guide.steps %}<li>{{ step }}</li>{% endfor %}
+                                    </ol>
+                                {% endif %}
+                                {% if bar.guide.links %}
+                                    <hr class="nr-menu__divider">
+                                    <p class="nr-menu__label">{{ bar.guide.links_title }}</p>
+                                    {% if bar.guide.links_description %}<p class="nr-formbar__guide-text nr-formbar__guide-text--small">{{ bar.guide.links_description }}</p>{% endif %}
+                                    {% for link in bar.guide.links %}
+                                        <a class="nr-menu__item" href="{{ link.url }}">{% nr_icon "arrow" %}<span>{{ link.label }}</span></a>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </details>
+                    {% endif %}
+                    {% if bar.history_url %}
+                        <a class="nr-editorbar__tool" href="{{ bar.history_url }}" aria-label="Histórico" title="Histórico">
+                            {% nr_icon "history" %}<span class="nr-editorbar__tool-label">Histórico</span>
+                        </a>
+                    {% endif %}
+                    {% if bar.site_url %}
+                        <a class="nr-editorbar__tool" href="{{ bar.site_url }}" target="_blank" rel="noopener" aria-label="Ver no site (abre em nova aba)" title="Ver no site">
+                            {% nr_icon "external" %}<span class="nr-editorbar__tool-label">Ver no site</span>
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% with primary=bar.actions.primary secondary=bar.actions.secondary menu=bar.actions.menu %}
+                {% if primary %}
+                    <div class="nr-editorbar__actions">
+                        {% if primary.name == "_save" %}
+                            <button type="submit" form="{{ bar.form_id }}" name="_save" class="nr-sr-only" tabindex="-1" aria-hidden="true">Salvar</button>
+                        {% endif %}
+                        {% if secondary %}
+                            <button type="submit" form="{{ bar.form_id }}" name="{{ secondary.name }}" class="nr-btn nr-btn--secondary nr-editorbar__save" title="{{ secondary.label }} (Ctrl+S)" aria-keyshortcuts="Control+S Meta+S">
+                                <span class="nr-editorbar__label nr-editorbar__label--full">{{ secondary.label }}</span>
+                                <span class="nr-editorbar__label nr-editorbar__label--short" aria-hidden="true">{{ secondary.short }}</span>
+                            </button>
+                        {% endif %}
+                        <div class="nr-editorbar__split">
+                            <button type="submit" form="{{ bar.form_id }}" name="{{ primary.name }}" class="nr-btn nr-btn--primary nr-editorbar__primary">
+                                {% nr_icon "save" %}<span>{{ primary.label }}</span>
+                            </button>
+                            {% if menu or secondary %}
+                                <details class="nr-editorbar__menu{% if not menu %} is-narrow-only{% endif %}" data-nr-dropdown>
+                                    <summary class="nr-btn nr-btn--primary nr-editorbar__caret" aria-label="Mais opções de salvar">{% nr_icon "down" %}</summary>
+                                    <div class="nr-menu nr-menu--right">
+                                        {% if secondary %}
+                                            <button type="submit" form="{{ bar.form_id }}" name="{{ secondary.name }}" class="nr-menu__item nr-editorbar__menu-save">{% nr_icon "save" %}<span>{{ secondary.label }}</span></button>
+                                            {% if menu %}<hr class="nr-menu__divider nr-editorbar__menu-save">{% endif %}
+                                        {% endif %}
+                                        {% for item in menu %}
+                                            <button type="submit" form="{{ bar.form_id }}" name="{{ item.name }}" class="nr-menu__item">{% nr_icon item.icon %}<span>{{ item.label }}</span></button>
+                                        {% endfor %}
+                                    </div>
+                                </details>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% if bar.links or bar.delete_url %}
+                <details class="nr-more nr-editorbar__more" data-nr-dropdown>
+                    <summary class="nr-more__button" aria-label="Mais opções">{% nr_icon "ellipsis" %}</summary>
+                    <div class="nr-menu nr-menu--right">
+                        {% for link in bar.links %}
+                            <a class="nr-menu__item" href="{{ link.url }}">{% nr_icon link.icon|default:"arrow" %}<span>{{ link.label }}</span></a>
+                        {% endfor %}
+                        {% if bar.delete_url %}
+                            {% if bar.links %}<hr class="nr-menu__divider">{% endif %}
+                            <a class="nr-menu__item is-danger" href="{{ bar.delete_url }}">{% nr_icon "trash" %}<span>Remover</span></a>
+                        {% endif %}
+                    </div>
+                </details>
+            {% endif %}
+        </div>
+    </section>
+{% endif %}

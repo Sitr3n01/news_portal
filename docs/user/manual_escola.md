@@ -4,6 +4,20 @@ Este manual cobre todas as operações que um **Administrador Komuniki** precisa
 
 ---
 
+## Antes de começar: a barra dos formulários
+
+Todo formulário tem uma barra no alto, que acompanha a rolagem:
+
+- **À esquerda:** a seta ‹ volta para a lista. Ao lado ficam o nome do registro e a situação dele (por exemplo, *Nova*, *Ativa* ou *Publicada*). Depois da primeira alteração aparece **Alterações não salvas**.
+- **Guia:** explica a tela e traz atalhos para as telas relacionadas.
+- **Histórico:** mostra quem alterou o registro e quando.
+- **Salvar:** grava e volta para a lista. **Salvar e continuar editando** (ou Ctrl+S) grava e continua no formulário. A seta ao lado de **Salvar** tem **Salvar e adicionar outro**.
+- **⋯:** guarda **Remover**, que ainda pede confirmação.
+
+No celular, **Salvar e continuar editando** fica na seta ao lado de **Salvar**.
+
+---
+
 ## 1. Textos da Página Inicial (Home da Escola)
 
 A home da Komuniki é configurada por um registro único chamado **"Configuração da Home Escolar"** (`Home Komuniki` na barra lateral).

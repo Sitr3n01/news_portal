@@ -395,6 +395,74 @@
         }, {passive: true, capture: true});
     });
 
+    // ── Barra dos formulários do Django admin ─────────────────────────────
+    // templates/admin/includes/form_bar.html. "Alterações não salvas" aparece
+    // na primeira edição, e Ctrl+S (Cmd+S no Mac) salva e continua na tela,
+    // como a barra do editor do Wagtail; sem esse botão, só salva.
+    function formBar() {
+        return document.querySelector('[data-nr-formbar]');
+    }
+
+    function markDirty(event) {
+        var bar = formBar();
+        var field = event.target;
+        if (!bar || !field || !field.form || field.form.id !== bar.getAttribute('data-nr-form')) {
+            return;
+        }
+        // Campos sem nome (a busca do seletor de grupos) e a lista "disponíveis"
+        // do SelectFilter (id terminado em _from) não vão para o servidor.
+        if (!field.name || /_from$/.test(field.id || '')) {
+            return;
+        }
+        var note = bar.querySelector('[data-nr-formbar-dirty]');
+        if (note) {
+            note.hidden = false;
+        }
+    }
+
+    document.addEventListener('input', markDirty, true);
+    document.addEventListener('change', markDirty, true);
+    // O select2 do autocompletar e a janela de registro relacionado mudam o
+    // campo com o jQuery do Django (.trigger), que não chega ao addEventListener.
+    // Só depois do carregamento: ao montar os campos, o próprio admin dispara
+    // "change" pelo jQuery, sem que nada tenha sido alterado.
+    window.addEventListener('load', function () {
+        window.setTimeout(function () {
+            if (formBar() && window.django && window.django.jQuery) {
+                window.django.jQuery(document).on('change', markDirty);
+            }
+        }, 0);
+    });
+
+    // Um envio por vez: segurar Ctrl+S (repetição da tecla) ou apertar de novo
+    // enquanto o servidor responde criaria registros repetidos na tela de adicionar.
+    var formSubmitting = false;
+    document.addEventListener('submit', function (event) {
+        var bar = formBar();
+        if (bar && event.target && event.target.id === bar.getAttribute('data-nr-form') && !event.defaultPrevented) {
+            formSubmitting = true;
+        }
+    });
+    window.addEventListener('pageshow', function () {
+        formSubmitting = false;
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey || (event.key || '').toLowerCase() !== 's') {
+            return;
+        }
+        var bar = formBar();
+        var button = bar && (bar.querySelector('button[name="_continue"]') || bar.querySelector('button[name="_save"]'));
+        if (!button) {
+            return;
+        }
+        event.preventDefault();
+        if (event.repeat || formSubmitting) {
+            return;
+        }
+        button.click();
+    });
+
     // O menu ⋯ recebe as ações da barra (exceto remover, que já é um link
     // para a tela de confirmação) na primeira vez em que abre.
     document.addEventListener('toggle', function (event) {

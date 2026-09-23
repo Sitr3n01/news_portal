@@ -343,8 +343,125 @@
     }
 }
 
+/* ── Formulários: barra no topo (templates/admin/includes/form_bar.html) ──
+   O layout da barra é o da barra do editor do Wagtail (newsroom.css). Aqui
+   ela fica presa logo abaixo da topbar, por cima do formulário e abaixo dos
+   menus da topbar. */
+#main > .nr-topbar:has(+ .nr-formbar) {
+    margin-bottom: 0;
+}
+
+#main > .nr-formbar {
+    position: sticky;
+    top: var(--nr-topbar-h);
+    z-index: 90;
+    box-sizing: border-box;
+    margin-bottom: 24px;
+}
+
+/* Calendário e relógio dos campos de data do Django (anexados ao body, fixos
+   no centro da tela, z-index 70 no Unfold) e o fundo escurecido (60) ficam
+   por cima da barra presa (90). */
+body > :is(.calendarbox, .clockbox) {
+    z-index: 100 !important;
+}
+
+#modal-overlay {
+    z-index: 95;
+}
+
+/* O cadeado faz o papel do ponto do selo. */
+.nr-formbar__readonly::before {
+    content: none;
+}
+
+.nr-formbar__readonly .nr-icon {
+    width: 12px;
+    height: 12px;
+}
+
+/* Sem botões depois (somente leitura), o divisor das ferramentas sobra. */
+.nr-formbar .nr-editorbar__tools:last-child {
+    margin-right: 0;
+    padding-right: 0;
+    border-right: 0;
+}
+
+.nr-formbar__dirty {
+    color: var(--nr-orange);
+    font-weight: 500;
+}
+
+/* O Guia se alinha à barra (presa, portanto posicionada), e não ao botão:
+   no celular o botão fica à esquerda e o painel sairia da tela. */
+.nr-formbar__guide {
+    position: static;
+}
+
+.nr-formbar__guide-panel {
+    right: 12px;
+    width: min(380px, calc(100vw - 32px));
+    padding: 14px 8px 8px;
+    white-space: normal;
+}
+
+.nr-formbar__guide-title,
+.nr-formbar__guide-text,
+.nr-formbar__guide-steps {
+    margin: 0 8px 10px;
+}
+
+.nr-formbar__guide-title {
+    color: var(--nr-ink);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.nr-formbar__guide-text {
+    color: var(--nr-ink-4);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.nr-formbar__guide-text--small {
+    font-size: 12.5px;
+}
+
+.nr-formbar__guide-steps {
+    padding-left: 20px;
+    color: var(--nr-ink-4);
+    font-size: 13px;
+    line-height: 1.5;
+    list-style: decimal;
+}
+
+.nr-formbar__guide-steps li + li {
+    margin-top: 4px;
+}
+
+/* Abas do formulário (fieldsets com classe "tab", unfold/helpers/fieldsets_tabs.html):
+   no celular o Unfold as empilhava, uma por linha; aqui ficam numa linha que
+   rola de lado. */
+@media (max-width: 767.98px) {
+    #main [x-data^="{ activeFieldsetTab"] > div > nav {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    #main [x-data^="{ activeFieldsetTab"] > div > nav > a {
+        flex: none;
+        white-space: nowrap;
+    }
+}
+
 @media (max-width: 1023.98px) {
     #main > .nr-topbar {
+        margin-bottom: 18px;
+    }
+
+    #main > .nr-formbar {
         margin-bottom: 18px;
     }
 }

@@ -26,6 +26,9 @@ class NewsletterSubscriptionAdmin(AdminUXMixin, ModelAdmin):
     readonly_fields = ['email', 'site', 'created_at']
     list_per_page = 25
     ux_list_title = 'Assinantes da newsletter'
+    ux_status_field = 'is_active'
+    ux_status_labels = {True: 'Ativa', False: 'Inativa'}
+    ux_status_tones = {True: 'success', False: 'archived'}
     ux_list_description = 'Acompanhe inscrições por site. Exportação de e-mails é restrita a superusuários.'
     ux_list_icon = 'mail'
     ux_list_actions = [
@@ -100,6 +103,8 @@ class NewsletterDeliveryAdmin(AdminUXMixin, ModelAdmin):
     list_per_page = 50
     ux_list_title = 'Entregas de newsletter'
     ux_list_all_label = 'Todas'
+    ux_status_field = 'status'
+    ux_status_tones = {'pending': 'info', 'sent': 'success', 'failed': 'danger', 'skipped': 'neutral'}
     ux_list_description = 'Monitore envios processados, pendentes e com falha para agir antes que a comunicação se perca.'
     ux_list_icon = 'mark_email_read'
     ux_list_actions = [
@@ -150,6 +155,9 @@ class CommentAdmin(AdminUXMixin, ModelAdmin):
     readonly_fields = ['user', 'article', 'content', 'created_at']
     list_per_page = 25
     ux_list_title = 'Moderação de comentários'
+    ux_status_field = 'is_active'
+    ux_status_labels = {True: 'Visível', False: 'Oculto'}
+    ux_status_tones = {True: 'success', False: 'warning'}
     ux_list_description = 'Revise comentários ocultos ou pendentes e mantenha visível apenas o que pode permanecer no portal.'
     ux_list_icon = 'forum'
     ux_list_actions = [

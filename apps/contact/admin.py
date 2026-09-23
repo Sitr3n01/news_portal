@@ -20,6 +20,13 @@ class ContactInquiryAdmin(AdminUXMixin, ModelAdmin):
     radio_fields = {'status': admin.HORIZONTAL}
     ux_list_title = 'Mensagens de contato'
     ux_list_all_label = 'Todas'
+    ux_status_field = 'status'
+    ux_status_tones = {
+        ContactInquiry.Status.NEW: 'info',
+        ContactInquiry.Status.READ: 'neutral',
+        ContactInquiry.Status.REPLIED: 'success',
+        ContactInquiry.Status.ARCHIVED: 'archived',
+    }
     ux_list_description = 'Use esta tela como uma fila de atendimento: responda mensagens novas, marque como lidas e arquive o que já foi tratado.'
     ux_list_icon = 'contact_mail'
     ux_list_actions = [
@@ -55,20 +62,10 @@ class ContactInquiryAdmin(AdminUXMixin, ModelAdmin):
     ]
     actions = ['mark_resolved']
 
-    STATUS_TONES = {
-        ContactInquiry.Status.NEW: 'info',
-        ContactInquiry.Status.READ: 'neutral',
-        ContactInquiry.Status.REPLIED: 'success',
-        ContactInquiry.Status.ARCHIVED: 'archived',
-    }
-
     @admin.display(description='Status', ordering='status')
     def status_chip(self, obj):
-        return format_html(
-            '<span class="nr-status nr-status--{}">{}</span>',
-            self.STATUS_TONES.get(obj.status, 'neutral'),
-            obj.get_status_display(),
-        )
+        status = self.nr_status(obj)
+        return format_html('<span class="nr-status nr-status--{}">{}</span>', status['tone'], status['label'])
 
     @admin.display(description='Recebida em', ordering='created_at')
     def received_at(self, obj):

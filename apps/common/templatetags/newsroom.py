@@ -18,6 +18,7 @@ from django.utils.html import format_html
 from apps.accounts import panels
 from apps.common.admin_nav import MANAGEMENT_PERMISSIONS, SCHOOL_PERMISSIONS, can_any
 from apps.common.newsroom import workspaces
+from apps.common.newsroom.admin_forms import form_bar
 from apps.common.newsroom.admin_lists import list_header
 from apps.common.newsroom.branding import get_branding
 from apps.common.newsroom.editor import editor_bar
@@ -176,6 +177,9 @@ def _admin_crumbs(context):
             url = reverse(changelist)
         except NoReverseMatch:
             url = ''
+        # Nos formulários, quem só pode adicionar não abre a lista (403).
+        if not context.get('has_view_permission', True):
+            url = ''
         crumbs.append({'label': str(opts.verbose_name_plural).capitalize(), 'url': url})
         if obj is not None and not isinstance(obj, str):
             crumbs.append({'label': str(obj), 'url': ''})
@@ -207,6 +211,12 @@ def nr_editor_bar(context):
 def nr_admin_list_header(context):
     """Dados do cabeçalho das listas do Django admin (templates/admin/includes/model_list_help.html)."""
     return list_header(context)
+
+
+@register.simple_tag(takes_context=True)
+def nr_admin_form_bar(context):
+    """Dados da barra dos formulários do Django admin (templates/admin/includes/form_bar.html)."""
+    return form_bar(context)
 
 
 @register.filter

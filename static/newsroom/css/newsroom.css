@@ -2022,6 +2022,356 @@
     }
 }
 
+/* ── Barra do editor (Wagtail e Django admin) ──────────────────────────── */
+
+/* Uma barra só no topo dos formulários: voltar, título, selo de estado,
+   ferramentas e ações. No Wagtail: templates/newsroom/editor/ (o que é só
+   dele fica em newsroom-wagtail.css); no Django admin:
+   templates/admin/includes/form_bar.html (encaixe em newsroom-unfold.css). */
+
+:is(body#wagtail, #main) .nr-editorbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 64px;
+    padding: 9px 20px 9px 16px;
+    border-bottom: 1px solid var(--nr-line);
+    background: var(--nr-white);
+    color: var(--nr-ink);
+    font-family: var(--nr-font);
+}
+
+.nr-editorbar__start {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.nr-editorbar__back {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--nr-radius);
+    color: var(--nr-muted);
+}
+
+.nr-editorbar__back:hover {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+.nr-editorbar__back .nr-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.nr-editorbar__heading {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.nr-editorbar__crumbs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    font-size: 13px;
+}
+
+:is(body#wagtail, #main) .nr-editorbar__parent {
+    flex: none;
+    color: var(--nr-muted);
+    text-decoration: none;
+}
+
+:is(body#wagtail, #main) .nr-editorbar__parent:hover {
+    color: var(--nr-ink);
+}
+
+.nr-editorbar__sep {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    color: var(--nr-icon-faint);
+}
+
+:is(body#wagtail, #main) .nr-editorbar__title {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    color: var(--nr-ink);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -.015em;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Sem altura mínima: em cadastros sem rascunho (categorias, tags) a linha
+   fica vazia e colapsa, e o título se centraliza sozinho. */
+.nr-editorbar__meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    color: var(--nr-muted);
+    font-size: 12px;
+}
+
+/* O selo nunca encolhe; só a observação ao lado dele é cortada com "…". */
+.nr-editorbar__state {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nr-editorbar__status {
+    flex: none;
+    padding: 2px 8px;
+    font-family: inherit;
+}
+
+button.nr-editorbar__status {
+    cursor: pointer;
+}
+
+button.nr-editorbar__status:hover,
+.nr-editorbar:has([data-side-panel-toggle="status"][aria-expanded="true"]) button.nr-editorbar__status {
+    box-shadow: 0 0 0 3px var(--nr-hover);
+}
+
+.nr-editorbar__status .nr-icon {
+    width: 12px;
+    height: 12px;
+}
+
+.nr-editorbar__note {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nr-editorbar__end {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Ferramentas: os botões de painel lateral do próprio Wagtail. */
+.nr-editorbar__tools {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-right: 2px;
+    padding-right: 10px;
+    border-right: 1px solid var(--nr-line);
+}
+
+/* Ações de publicação (montadas por newsroom-editor.js). */
+.nr-editorbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nr-editorbar__actions:empty {
+    display: none;
+}
+
+:is(body#wagtail, #main) .nr-editorbar .nr-btn {
+    box-sizing: border-box;
+    height: 36px;
+    min-height: 36px;
+    padding: 0 14px;
+    font-family: inherit;
+}
+
+:is(body#wagtail, #main) .nr-editorbar .nr-btn:disabled {
+    cursor: not-allowed;
+    opacity: .55;
+}
+
+:is(body#wagtail, #main) .nr-editorbar .nr-btn.is-loading {
+    cursor: progress;
+    opacity: .75;
+}
+
+.nr-editorbar__split {
+    display: flex;
+    align-items: center;
+}
+
+:is(body#wagtail, #main) .nr-editorbar__split > .nr-editorbar__primary:not(:only-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* A seta que só existe no celular (is-narrow-only) fica oculta a partir de
+   640px: o botão principal volta a ter os cantos arredondados. */
+@media (min-width: 640px) {
+    :is(body#wagtail, #main) .nr-editorbar__split > .nr-editorbar__primary:has(+ .nr-editorbar__menu.is-narrow-only) {
+        border-top-right-radius: var(--nr-radius);
+        border-bottom-right-radius: var(--nr-radius);
+    }
+}
+
+/* <details> não vira flex no Chrome: a seta tem medida própria. */
+.nr-editorbar__menu {
+    position: relative;
+}
+
+:is(body#wagtail, #main) .nr-editorbar__caret {
+    width: 34px;
+    min-width: 0;
+    padding: 0;
+    border-left-color: rgba(255, 255, 255, .22);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    list-style: none;
+}
+
+.nr-editorbar__caret::-webkit-details-marker {
+    display: none;
+}
+
+.nr-editorbar__menu[open] .nr-editorbar__caret .nr-icon {
+    transform: rotate(180deg);
+}
+
+.nr-editorbar__menu .nr-menu {
+    min-width: 250px;
+}
+
+.nr-editorbar__menu.is-narrow-only,
+.nr-editorbar__menu-save {
+    display: none;
+}
+
+.nr-editorbar__label--short {
+    display: none;
+}
+
+.nr-editorbar__more .nr-more__button {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--nr-radius);
+}
+
+@media (max-width: 767.98px) {
+    :is(body#wagtail, #main) .nr-editorbar {
+        flex-wrap: wrap;
+        row-gap: 8px;
+        min-height: 0;
+        padding: 8px 12px;
+    }
+
+    .nr-editorbar__start {
+        flex-basis: 100%;
+    }
+
+    .nr-editorbar__end {
+        flex: 1 1 100%;
+        justify-content: space-between;
+    }
+
+    .nr-editorbar__parent,
+    .nr-editorbar__sep {
+        display: none;
+    }
+
+    .nr-editorbar__tools {
+        padding-right: 0;
+        border-right: 0;
+    }
+
+    .nr-editorbar__actions {
+        margin-left: auto;
+    }
+}
+
+@media (max-width: 639.98px) {
+    .nr-editorbar__save {
+        display: none !important;
+    }
+
+    .nr-editorbar__menu.is-narrow-only {
+        display: block;
+    }
+
+    .nr-editorbar__menu-save {
+        display: flex;
+    }
+
+    hr.nr-editorbar__menu-save {
+        display: block;
+    }
+
+    .nr-editorbar__label--full {
+        display: none;
+    }
+
+    .nr-editorbar__label--short {
+        display: inline;
+    }
+}
+
+/* Ferramentas próprias (Django admin: Guia, Histórico, Ver no site), com o
+   mesmo desenho dos botões de painel lateral do Wagtail. */
+.nr-editorbar__tool {
+    display: inline-flex;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    box-sizing: border-box;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: var(--nr-radius);
+    background: transparent;
+    color: var(--nr-ink-4);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    list-style: none;
+}
+
+.nr-editorbar__tool::-webkit-details-marker {
+    display: none;
+}
+
+.nr-editorbar__tool:hover,
+details[open] > .nr-editorbar__tool {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+.nr-editorbar__tool .nr-icon {
+    width: 17px;
+    height: 17px;
+}
+
+.nr-editorbar__tool-label {
+    display: none;
+}
+
+@media (min-width: 1440px) {
+    .nr-editorbar__tool-label {
+        display: inline;
+    }
+}
+
 /* ── Barra de seleção das listas (Django admin e Wagtail) ───────────────── */
 
 /* Aparece no topo da lista quando há itens marcados, no lugar da barra de

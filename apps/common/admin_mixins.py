@@ -14,8 +14,6 @@ _list_request = ContextVar('nr_list_request', default=None)
 
 class AdminUXMixin:
     list_before_template = 'admin/includes/model_list_help.html'
-    change_form_before_template = 'admin/includes/model_form_help.html'
-    change_form_after_template = 'admin/includes/model_form_next_steps.html'
     warn_unsaved_form = True
 
     ux_list_title = ''
@@ -27,18 +25,59 @@ class AdminUXMixin:
     ux_list_all_label = 'Todos'
     ux_empty_message = ''
 
+    # Formulário: o texto do "Guia" da barra (templates/admin/includes/form_bar.html)
+    # e os atalhos que aparecem nele. ux_form_new_title troca o título da
+    # tela de adicionar ("Adicionar {verbose_name}").
     ux_form_title = ''
     ux_form_description = ''
     ux_form_icon = 'edit_note'
     ux_form_steps = []
-    ux_after_save_title = 'Depois de salvar'
+    ux_form_new_title = ''
+    ux_after_save_title = 'Atalhos'
     ux_after_save_description = ''
     ux_after_save_actions = []
+
+    # Selo de estado na barra do formulário (e na coluna de status das listas
+    # que quiserem): o campo do modelo, o tom do nr-status para cada valor
+    # (info, success, warning, neutral, archived, danger) e, para campos
+    # booleanos, o rótulo de cada valor.
+    ux_status_field = ''
+    ux_status_tones = {}
+    ux_status_labels = {}
 
     # Menu ⋯ ao fim de cada linha da lista: abrir/editar, as ações em massa
     # aplicadas só àquela linha (preenchidas por newsroom.js a partir da barra
     # de seleção) e remover, cada item só para quem tem a permissão.
     ux_row_menu = True
+
+    def nr_status(self, obj):
+        field = self.ux_status_field
+        if not field or obj is None:
+            return None
+        value = getattr(obj, field, None)
+        label = self.ux_status_labels.get(value)
+        if label is None:
+            display = getattr(obj, f'get_{field}_display', None)
+            label = display() if callable(display) else str(value)
+        return {'label': str(label), 'tone': self.ux_status_tones.get(value, 'neutral')}
+
+    # O Unfold 0.87 não tem tradução pt-BR e põe "Select value" como primeira
+    # opção das listas de escolha e de registros relacionados.
+    def formfield_for_choice_field(self, db_field, request, **kwargs):
+        if 'choices' not in kwargs:
+            kwargs['choices'] = db_field.get_choices(include_blank=db_field.blank, blank_choice=[('', 'Selecione')])
+        return super().formfield_for_choice_field(db_field, request, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        field = super().formfield_for_foreignkey(db_field, request, **kwargs)
+        if field is not None and 'empty_label' not in kwargs and getattr(field, 'empty_label', None) is not None:
+            field.empty_label = 'Selecione'
+        return field
+
+    def nr_form_links(self, request, obj):
+        """Links extras do menu ⋯ da barra do formulário, antes de Remover:
+        [{'label', 'url', 'icon'}]. Cada tela confere a própria permissão."""
+        return []
 
     def get_list_display(self, request):
         list_display = list(super().get_list_display(request))

@@ -99,6 +99,7 @@ class NewsletterDeliveryAdmin(AdminUXMixin, ModelAdmin):
     readonly_fields = ['article', 'subscription', 'email', 'status', 'attempts', 'last_error', 'sent_at', 'created_at', 'updated_at']
     list_per_page = 50
     ux_list_title = 'Entregas de newsletter'
+    ux_list_all_label = 'Todas'
     ux_list_description = 'Monitore envios processados, pendentes e com falha para agir antes que a comunicação se perca.'
     ux_list_icon = 'mark_email_read'
     ux_list_actions = [

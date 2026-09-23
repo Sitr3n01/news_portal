@@ -251,4 +251,173 @@
             }));
         }
     });
+
+    // ── Barra de seleção (Django admin e Wagtail) e menu ⋯ das linhas ─────
+    // A barra do Django admin fica em templates/admin/includes/selection_bar.html
+    // e a do Wagtail em templates/wagtailadmin/bulk_actions/footer.html. O
+    // actions.js do Django e o bulk-actions.js do Wagtail continuam donos da
+    // seleção; aqui só entram o texto "N selecionados", o botão de limpar, o
+    // nome da ação nos botões do Django e o menu ⋯ de cada linha.
+    function adminBar() {
+        return document.querySelector('.nr-selectionbar--admin');
+    }
+
+    // Wagtail: a barra vem no fim da página (era o rodapé fixo). Ela passa para
+    // dentro do cabeçalho fixo da listagem e cobre título e busca enquanto há
+    // seleção. O bulk-actions.js a acha pelo atributo, em qualquer lugar.
+    function dockWagtailBar() {
+        var bar = document.querySelector('.nr-selectionbar--wagtail');
+        var header = bar && document.querySelector('main .w-slim-header');
+        if (bar && header && bar.parentElement !== header) {
+            header.appendChild(bar);
+            bar.classList.add('is-docked');
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', dockWagtailBar);
+    } else {
+        dockWagtailBar();
+    }
+
+    function adminBoxes() {
+        return Array.prototype.slice.call(document.querySelectorAll('#result_list input.action-select'));
+    }
+
+    function updateAdminCount() {
+        var bar = adminBar();
+        var out = bar && bar.querySelector('[data-nr-selection-count]');
+        if (!out) {
+            return;
+        }
+        var count = adminBoxes().filter(function (box) {
+            return box.checked;
+        }).length;
+        out.textContent = count === 1 ? '1 selecionado' : count + ' selecionados';
+    }
+
+    // Os scripts do Django marcam várias caixas de uma vez (Shift, "todos")
+    // sem disparar eventos nelas: a contagem é refeita depois deles.
+    ['change', 'click'].forEach(function (type) {
+        document.addEventListener(type, function (event) {
+            if (event.target.closest && event.target.closest('#result_list, [data-nr-selectionbar]')) {
+                window.setTimeout(updateAdminCount, 0);
+            }
+        });
+    });
+    document.addEventListener('DOMContentLoaded', updateAdminCount);
+    window.addEventListener('pageshow', function () {
+        window.setTimeout(updateAdminCount, 0);
+    });
+
+    function clearSelection() {
+        // Desmarca pelo clique em cada caixa, para que os scripts do Django e
+        // do Wagtail atualizem contagem, rodapé e "selecionar todos".
+        var checked = document.querySelectorAll(
+            '#result_list input.action-select:checked, input[data-bulk-action-checkbox]:checked'
+        );
+        Array.prototype.forEach.call(checked, function (box) {
+            box.click();
+        });
+    }
+
+    document.addEventListener('click', function (event) {
+        var action = event.target.closest('[data-nr-selectionbar] [data-nr-action]');
+        if (action) {
+            // Botão de ação do Django: envia o formulário com `index` e o nome
+            // da ação no campo oculto, como o seletor do Unfold fazia.
+            var input = action.closest('[data-nr-selectionbar]').querySelector('[data-nr-action-input]');
+            if (input) {
+                input.value = action.getAttribute('data-nr-action');
+            }
+            return;
+        }
+        if (event.target.closest('[data-nr-selection-clear]')) {
+            event.preventDefault();
+            clearSelection();
+            return;
+        }
+        var rowAction = event.target.closest('[data-nr-row-action]');
+        if (rowAction) {
+            // Ação do menu ⋯: só esta linha marcada, depois o mesmo botão da barra.
+            event.preventDefault();
+            var bar = adminBar();
+            var row = rowAction.closest('tr');
+            var box = row && row.querySelector('input.action-select');
+            var source = bar && bar.querySelector('[data-nr-action="' + rowAction.getAttribute('data-nr-row-action') + '"]');
+            if (!box || !source) {
+                return;
+            }
+            adminBoxes().forEach(function (other) {
+                if (other !== box && other.checked) {
+                    other.click();
+                }
+            });
+            if (!box.checked) {
+                box.click();
+            }
+            var across = bar.querySelector('input.select-across');
+            if (across) {
+                across.value = '0';
+            }
+            source.click();
+        }
+    });
+
+    // As células da tabela do Unfold cortam o que passa da borda (overflow:
+    // hidden): o menu ⋯ se posiciona na tela, alinhado ao botão, e abre para
+    // cima quando não cabe embaixo. Rolar a página fecha o menu.
+    function placeRowMenu(menu) {
+        var panel = menu.querySelector('.nr-menu');
+        var anchor = menu.querySelector('summary');
+        if (!panel || !anchor) {
+            return;
+        }
+        panel.style.position = 'fixed';
+        panel.style.right = 'auto';
+        var box = anchor.getBoundingClientRect();
+        var width = panel.offsetWidth;
+        var height = panel.offsetHeight;
+        var left = Math.min(Math.max(8, box.right - width), window.innerWidth - width - 8);
+        var top = box.bottom + 6;
+        if (top + height > window.innerHeight - 8 && box.top - height - 6 > 8) {
+            top = box.top - height - 6;
+        }
+        panel.style.left = left + 'px';
+        panel.style.top = top + 'px';
+    }
+
+    ['scroll', 'resize'].forEach(function (type) {
+        window.addEventListener(type, function () {
+            document.querySelectorAll('details[data-nr-row-menu][open]').forEach(function (menu) {
+                menu.open = false;
+            });
+        }, {passive: true, capture: true});
+    });
+
+    // O menu ⋯ recebe as ações da barra (exceto remover, que já é um link
+    // para a tela de confirmação) na primeira vez em que abre.
+    document.addEventListener('toggle', function (event) {
+        var menu = event.target;
+        if (!menu.matches || !menu.matches('details[data-nr-row-menu]') || !menu.open) {
+            return;
+        }
+        var slot = menu.querySelector('[data-nr-row-actions]');
+        var bar = adminBar();
+        if (slot && bar && !slot.childElementCount) {
+            bar.querySelectorAll('[data-nr-action]').forEach(function (source) {
+                var name = source.getAttribute('data-nr-action');
+                if (name === 'delete_selected') {
+                    return;
+                }
+                var item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'nr-menu__item';
+                item.setAttribute('data-nr-row-action', name);
+                item.textContent = source.textContent.replace(/\s+/g, ' ').trim();
+                slot.appendChild(item);
+            });
+        }
+        placeRowMenu(menu);
+    }, true);
 })();

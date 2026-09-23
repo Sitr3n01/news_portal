@@ -30,6 +30,7 @@ class PageAdmin(AdminUXMixin, ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     readonly_fields = ['created_at', 'updated_at']
     ux_list_title = 'Página Cursos'
+    ux_list_all_label = 'Todas'
     ux_list_description = 'Gerencie a publicação e SEO da página Cursos exibida no front da Komuniki. O conteúdo visual dos cursos é mantido no código atual.'
     ux_list_icon = 'article'
     ux_list_actions = [
@@ -183,6 +184,7 @@ class SchoolHomeConfigAdmin(AdminUXMixin, ModelAdmin):
     ]
     readonly_fields = ['created_at', 'updated_at']
     ux_list_title = 'Home Komuniki'
+    ux_list_all_label = 'Todas'
     ux_list_description = 'A home é o centro da presença da Komuniki: hero, bloco Komuniki, cursos, depoimentos e chamadas finais.'
     ux_list_icon = 'home'
     ux_list_actions = [

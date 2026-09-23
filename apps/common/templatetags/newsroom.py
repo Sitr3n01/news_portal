@@ -6,6 +6,7 @@ As inclusion tags recalculam a navegação a partir de ``request``, então
 funcionam em qualquer um dos três contextos sem depender de context processor.
 """
 
+import re
 from datetime import timedelta
 
 from django import template
@@ -17,6 +18,7 @@ from django.utils.html import format_html
 from apps.accounts import panels
 from apps.common.admin_nav import MANAGEMENT_PERMISSIONS, SCHOOL_PERMISSIONS, can_any
 from apps.common.newsroom import workspaces
+from apps.common.newsroom.admin_lists import list_header
 from apps.common.newsroom.branding import get_branding
 from apps.common.newsroom.editor import editor_bar
 from apps.common.newsroom.navigation import build_navigation
@@ -24,6 +26,7 @@ from apps.common.newsroom.navigation import build_navigation
 register = template.Library()
 
 ICON_SPRITE = 'newsroom/icons.svg'
+SELECTED_WORD = re.compile(r'\s+selecionad[oa]s?\b', re.IGNORECASE)
 
 
 @register.simple_tag
@@ -198,3 +201,17 @@ def newsroom_menu_toggle(classname=''):
 def nr_editor_bar(context):
     """Dados da barra única do editor (templates/newsroom/editor/header.html)."""
     return editor_bar(context)
+
+
+@register.simple_tag(takes_context=True)
+def nr_admin_list_header(context):
+    """Dados do cabeçalho das listas do Django admin (templates/admin/includes/model_list_help.html)."""
+    return list_header(context)
+
+
+@register.filter
+def nr_action_label(label):
+    """Rótulo curto de uma ação em massa na barra de seleção: sem o
+    "selecionadas" da descrição do Django, que a barra já diz ("Arquivar
+    mensagens selecionadas" vira "Arquivar mensagens")."""
+    return SELECTED_WORD.sub('', str(label)).strip()

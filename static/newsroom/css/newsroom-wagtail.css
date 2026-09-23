@@ -29,8 +29,8 @@
  *    ações de publicação num só lugar, no lugar do cabeçalho e do rodapé.
  *
  * 6. Caixas de seleção: borda e visto legíveis, sempre visíveis nas listagens,
- *    linha selecionada destacada e rodapé de ações em massa sem a caixa
- *    "Selecionar todos" (templates/wagtailadmin/bulk_actions/footer.html).
+ *    linha selecionada destacada e as ações em massa na barra de seleção do
+ *    painel, no topo da listagem (templates/wagtailadmin/bulk_actions/footer.html).
  */
 
 :root,
@@ -261,16 +261,101 @@ body#wagtail .listing.images > li:has(.bulk-action-checkbox:checked) {
     outline-offset: 2px;
 }
 
-/* Rodapé de ações em massa, agora sem a caixa "Selecionar todos": as ações
-   abrem a barra, sem o divisor que as separava da caixa. */
-body#wagtail .bulk-actions-choices .footer__container {
-    justify-content: flex-start;
-    gap: 16px;
+/* Barra de seleção (templates/wagtailadmin/bulk_actions/footer.html), a
+   mesma .nr-selectionbar das listas do Django admin (newsroom.css). Com
+   seleção, fica por cima do cabeçalho da listagem: newsroom.js a coloca dentro
+   dele e marca .is-docked. Sem cabeçalho, flutua no pé da tela. */
+body#wagtail .nr-selectionbar--wagtail.hidden {
+    display: none;
 }
 
-body#wagtail .bulk-actions-choices .footer__container .bulk-actions-buttons {
-    padding-inline-start: 0;
-    border-inline-start: 0;
+body#wagtail .nr-selectionbar--wagtail {
+    position: sticky;
+    bottom: 16px;
+    z-index: 30;
+    margin: 16px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
+}
+
+body#wagtail .nr-selectionbar--wagtail.is-docked {
+    position: absolute;
+    top: 7px;
+    right: 16px;
+    bottom: auto;
+    left: 16px;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* Enquanto a barra aparece, o título, a busca e os filtros do cabeçalho
+   somem sem mudar a altura dele (no celular são duas linhas). */
+body#wagtail .w-slim-header:has(> .nr-selectionbar--wagtail.is-docked:not(.hidden)) > :not(.nr-selectionbar) {
+    visibility: hidden;
+}
+
+/* Até 800 px o botão do menu lateral fica fixo no canto do cabeçalho: a
+   barra começa depois dele e fica numa linha só (as ações rolam de lado). */
+@media (max-width: 799.98px) {
+    body#wagtail .nr-selectionbar--wagtail.is-docked {
+        left: 60px;
+        right: 12px;
+    }
+}
+
+@media (max-width: 639.98px) {
+    body#wagtail .nr-selectionbar--wagtail {
+        flex-wrap: nowrap;
+        padding: 6px 8px 6px 4px;
+    }
+
+    body#wagtail .nr-selectionbar--wagtail .nr-selectionbar__actions {
+        flex: 0 1 auto;
+        order: 0;
+    }
+}
+
+body#wagtail .nr-selectionbar--wagtail .bulk-actions-buttons > li {
+    display: flex;
+}
+
+body#wagtail .nr-selectionbar--wagtail .bulk-action-btn,
+body#wagtail .nr-selectionbar--wagtail .w-dropdown__toggle {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 6px;
+    height: auto;
+    min-height: 34px;
+    margin: 0;
+    padding: 6px 12px;
+    border: 1px solid var(--nr-line-2);
+    border-radius: var(--nr-radius);
+    background: var(--nr-white);
+    color: var(--nr-ink-4);
+    font-family: var(--nr-font);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+body#wagtail .nr-selectionbar--wagtail .bulk-action-btn:hover,
+body#wagtail .nr-selectionbar--wagtail .w-dropdown__toggle:hover {
+    background: var(--nr-surface-subtle);
+}
+
+body#wagtail .nr-selectionbar--wagtail .bulk-action-btn.serious {
+    border-color: var(--nr-red-line);
+    color: var(--nr-red);
+}
+
+body#wagtail .nr-selectionbar--wagtail .bulk-action-btn.serious:hover {
+    background: var(--nr-red-soft);
+}
+
+body#wagtail .nr-selectionbar--wagtail .nr-selectionbar__across .w-hidden {
+    display: none;
 }
 
 /* ── Editor de blocos: arrastar para reordenar ──────────────────────────── */

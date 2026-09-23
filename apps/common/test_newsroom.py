@@ -505,20 +505,26 @@ def test_wagtail_screens_use_the_unified_sidebar(client, editor, settings):
 
 
 @pytest.mark.django_db
-def test_bulk_actions_footer_has_no_select_all_checkbox(client, editor, site):
-    """A caixa "Selecionar todos" fica só no cabeçalho da tabela; o rodapé de
-    ações em massa mostra apenas as ações e a contagem."""
+def test_bulk_actions_are_the_panel_selection_bar(client, editor, site):
+    """As ações em massa do Wagtail usam a barra de seleção do painel (limpar,
+    contagem, ações), sem a caixa "Selecionar todos", que fica só no cabeçalho
+    da tabela. Os atributos que o bulk-actions.js procura continuam lá."""
     _article(site, 'Para selecionar')
     client.force_login(editor)
 
     content = client.get(reverse('wagtailsnippets_news_article:list')).content.decode()
-    footer = content[content.index('data-bulk-action-footer'):]
-    footer = footer[:footer.index('</section>')]
+    start = content.index('<section class="nr-selectionbar nr-selectionbar--wagtail')
+    footer = content[start:content.index('</section>', start)]
 
     assert 'data-bulk-action-select-all-checkbox' in content  # cabeçalho
     assert 'data-bulk-action-select-all-checkbox' not in footer
+    assert 'data-bulk-action-footer="SNIPPET"' in footer
+    assert ' hidden"' in footer.split('>', 1)[0]
+    assert 'data-nr-selection-clear' in footer
     assert 'bulk-actions-buttons' in footer
+    assert 'data-bulk-action-button' in footer
     assert 'data-bulk-action-num-objects' in footer
+    assert 'class="footer' not in footer
 
 
 @pytest.mark.django_db

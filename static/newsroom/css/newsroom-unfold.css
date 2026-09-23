@@ -65,14 +65,282 @@
     cursor: pointer;
 }
 
-#result_list tr.selected > td {
+/* O Django marca a coluna-link como <th>, que o Unfold pintava de amarelo. */
+#result_list tr.selected > td,
+#result_list tr.selected > th {
     background-color: var(--nr-blue-soft);
 }
 
-/* Botão "Ler" das mensagens de contato (apps/contact/admin.py) segue o botão
-   primário do painel. */
-#main .kb-read-btn:hover {
-    background: var(--nr-primary-hover) !important;
+/* ── Listas: cabeçalho, abas, barra de seleção e menu ⋯ ──────────────────
+   templates/admin/change_list.html e templates/admin/includes/. */
+.nr-listhead {
+    margin: 0 0 18px;
+    font-family: var(--nr-font);
+}
+
+.nr-listhead__main {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 10px;
+}
+
+.nr-listhead__heading {
+    min-width: 0;
+}
+
+#main .nr-listhead__title {
+    margin: 0;
+    color: var(--nr-ink);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    line-height: 1.25;
+}
+
+.nr-listhead__count {
+    margin-left: 6px;
+    color: var(--nr-muted);
+    font-size: 15px;
+    font-weight: 450;
+}
+
+#main .nr-listhead__desc {
+    max-width: 72ch;
+    margin: 4px 0 0;
+    color: var(--nr-muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.nr-listhead__actions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+}
+
+#main .nr-listhead .nr-btn {
+    min-height: 38px;
+    font-family: inherit;
+}
+
+.nr-listhead__tabs {
+    margin-top: 6px;
+}
+
+.nr-tab__count {
+    margin-left: 6px;
+    color: var(--nr-icon);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.nr-tab.is-active .nr-tab__count {
+    color: var(--nr-ink-4);
+}
+
+.nr-listhead__empty {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 16px;
+    padding: 14px 16px;
+    border: 1px dashed var(--nr-line-strong);
+    border-radius: var(--nr-radius-card);
+    color: var(--nr-muted);
+    font-size: 13px;
+}
+
+/* Barra de seleção: escondida sem seleção; com seleção, ocupa o lugar da
+   barra de busca e fica presa logo abaixo da topbar ao rolar. */
+#changelist-form .nr-selectionbar--admin {
+    display: none;
+    position: sticky;
+    top: calc(var(--nr-topbar-h) + 8px);
+    z-index: 40;
+    margin: 0 0 12px;
+}
+
+#changelist-form:has(input.action-select:checked) .nr-selectionbar--admin {
+    display: flex;
+}
+
+/* Presa, a barra cobre a faixa entre ela e a topbar, para as linhas não
+   aparecerem passando por ali. */
+#changelist-form .nr-selectionbar--admin::before {
+    content: "";
+    position: absolute;
+    right: -1px;
+    bottom: 100%;
+    left: -1px;
+    height: 9px;
+    background: var(--nr-white);
+}
+
+#changelist:has(#changelist-form input.action-select:checked) [data-nr-list-toolbar] {
+    display: none;
+}
+
+/* Menu ⋯ da linha: ícone discreto no fim da linha, menu por cima da tabela. */
+#result_list td:has(> .nr-rowmenu) {
+    width: 1%;
+    white-space: nowrap;
+}
+
+.nr-rowmenu .nr-menu {
+    min-width: 210px;
+    text-align: left;
+}
+
+.nr-rowmenu .nr-menu__item {
+    font-family: var(--nr-font);
+}
+
+/* Ordenação (templates/unfold/helpers/change_list_headers.html): uma seta
+   com a direção atual; o "x" de tirar da ordenação só aparece no hover. */
+.nr-sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 6px;
+}
+
+.nr-sort__toggle,
+.nr-sort__remove {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    color: var(--nr-icon);
+}
+
+.nr-sort__toggle:hover,
+.nr-sort__remove:hover {
+    background: var(--nr-surface-subtle);
+    color: var(--nr-ink);
+}
+
+.nr-sort__toggle .nr-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.nr-sort__toggle.ascending .nr-icon {
+    transform: rotate(180deg);
+}
+
+.nr-sort__remove {
+    opacity: 0;
+}
+
+.nr-sort__remove .nr-icon {
+    width: 12px;
+    height: 12px;
+}
+
+#result_list th:hover .nr-sort__remove,
+.nr-sort__remove:focus-visible {
+    opacity: 1;
+}
+
+.nr-sort__priority {
+    color: var(--nr-muted);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* Celular e tablet (<1024 px): o Unfold mostra cada linha como um cartão com
+   todos os campos em linhas de rótulo e valor, separados por bordas. Aqui o
+   cartão fica compacto: na primeira linha a caixa, o título (a coluna-link, um
+   <th>) e o menu ⋯; embaixo, os campos sem bordas, com o rótulo discreto. */
+@media (max-width: 1023.98px) {
+    #result_list tbody {
+        background: transparent;
+    }
+
+    #result_list tr.data-row {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 4px 0 10px;
+        background: var(--nr-white);
+    }
+
+    #result_list tr.data-row.selected {
+        border-color: var(--nr-blue-line);
+        background: var(--nr-blue-soft);
+    }
+
+    #result_list tr.data-row > td,
+    #result_list tr.data-row > th {
+        grid-column: 1 / -1;
+        gap: 12px;
+        min-width: 0;
+        height: auto;
+        padding: 3px 14px;
+        border: 0;
+        background: transparent !important;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    #result_list tr.data-row > td::before,
+    #result_list tr.data-row > th::before {
+        flex: none;
+        color: var(--nr-muted);
+        font-weight: 450;
+        text-transform: none;
+    }
+
+    #result_list tr.data-row > td.action-checkbox {
+        grid-row: 1;
+        grid-column: 1;
+        padding: 10px 2px 8px 14px;
+    }
+
+    #result_list tr.data-row > th {
+        grid-row: 1;
+        grid-column: 2;
+        padding: 10px 8px 8px;
+        font-size: 14.5px;
+        font-weight: 600;
+    }
+
+    #result_list tr.data-row > td:has(> .nr-rowmenu) {
+        grid-row: 1;
+        grid-column: 3;
+        width: auto;
+        padding: 6px 8px 0 0;
+        overflow: visible;
+    }
+
+    #result_list tr.data-row > td.action-checkbox::before,
+    #result_list tr.data-row > th::before,
+    #result_list tr.data-row > td:has(> .nr-rowmenu)::before {
+        content: none;
+    }
+}
+
+@media (max-width: 639.98px) {
+    .nr-listhead__guide span,
+    .nr-listhead__primary span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+
+    #main .nr-listhead .nr-listhead__guide,
+    #main .nr-listhead .nr-listhead__primary {
+        width: 40px;
+        padding: 0;
+    }
 }
 
 @media (max-width: 1023.98px) {

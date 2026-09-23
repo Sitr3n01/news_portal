@@ -54,6 +54,7 @@ class JobPostingAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
     radio_fields = {'status': admin.HORIZONTAL, 'employment_type': admin.HORIZONTAL}
     date_hierarchy = 'published_at'
     ux_list_title = 'Vagas (registro interno)'
+    ux_list_all_label = 'Todas'
     ux_list_description = 'As vagas não são mais publicadas no site da escola. Use este cadastro como registro interno das oportunidades e das candidaturas já recebidas.'
     ux_list_icon = 'work'
     ux_list_actions = [
@@ -120,6 +121,7 @@ class ApplicationAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
     readonly_fields = ['first_name', 'last_name', 'email', 'phone', 'cover_letter', 'resume_link', 'created_at', 'updated_at']
     radio_fields = {'status': admin.HORIZONTAL}
     ux_list_title = 'Candidaturas'
+    ux_list_all_label = 'Todas'
     ux_list_description = 'Revise primeiro as candidaturas recebidas, registre notas internas e mova o status conforme a triagem avança.'
     ux_list_icon = 'description'
     ux_list_actions = [

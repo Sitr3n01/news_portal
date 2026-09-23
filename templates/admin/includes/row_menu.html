@@ -1,0 +1,21 @@
+{% load newsroom %}
+{% comment %}
+    Menu ⋯ de cada linha das listas do Django admin (AdminUXMixin.nr_row_menu).
+    Abrir/editar e remover são links para as telas do próprio admin, que
+    conferem a permissão de novo. As ações em massa (ex.: "Marcar como
+    resolvida") são copiadas da barra de seleção por newsroom.js e aplicadas
+    só a esta linha, pelo mesmo formulário e com a mesma confirmação do Django.
+{% endcomment %}
+<details class="nr-more nr-rowmenu" data-nr-dropdown data-nr-row-menu>
+    <summary class="nr-more__button" aria-label="Mais ações: {{ label }}">{% nr_icon "ellipsis" %}</summary>
+    <div class="nr-menu nr-menu--right">
+        {% if change_url %}
+            <a class="nr-menu__item" href="{{ change_url }}">{% nr_icon "edit" %}<span>{{ change_label }}</span></a>
+        {% endif %}
+        <div class="nr-rowmenu__actions" data-nr-row-actions></div>
+        {% if delete_url %}
+            <hr class="nr-menu__divider">
+            <a class="nr-menu__item is-danger" href="{{ delete_url }}">{% nr_icon "trash" %}<span>Remover</span></a>
+        {% endif %}
+    </div>
+</details>

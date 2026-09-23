@@ -44,7 +44,7 @@ class AdminRoleGroupAdmin(AdminUXMixin, ModelAdmin, DjangoGroupAdmin):
 class CustomUserAdmin(AdminUXMixin, ModelAdmin, UserAdmin):
     STAFF_ADMIN_ROLES = {CustomUser.Role.SCHOOL_ADMIN, CustomUser.Role.SUPER_ADMIN}
 
-    list_display = ['username', 'email', 'get_role_display', 'is_active', 'is_staff', 'date_joined']
+    list_display = ['username', 'email', 'role', 'is_active', 'is_staff', 'date_joined']
     list_filter = ['role', 'is_active', 'is_staff', 'email_verified', 'date_joined']
     list_filter_submit = True
     search_fields = ['username', 'email', 'first_name', 'last_name']

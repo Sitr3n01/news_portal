@@ -505,6 +505,23 @@ def test_wagtail_screens_use_the_unified_sidebar(client, editor, settings):
 
 
 @pytest.mark.django_db
+def test_bulk_actions_footer_has_no_select_all_checkbox(client, editor, site):
+    """A caixa "Selecionar todos" fica só no cabeçalho da tabela; o rodapé de
+    ações em massa mostra apenas as ações e a contagem."""
+    _article(site, 'Para selecionar')
+    client.force_login(editor)
+
+    content = client.get(reverse('wagtailsnippets_news_article:list')).content.decode()
+    footer = content[content.index('data-bulk-action-footer'):]
+    footer = footer[:footer.index('</section>')]
+
+    assert 'data-bulk-action-select-all-checkbox' in content  # cabeçalho
+    assert 'data-bulk-action-select-all-checkbox' not in footer
+    assert 'bulk-actions-buttons' in footer
+    assert 'data-bulk-action-num-objects' in footer
+
+
+@pytest.mark.django_db
 def test_block_editor_loads_drag_to_reorder_script_only_on_forms(client, editor, site):
     article = _article(site, 'Blocos para arrastar')
     client.force_login(editor)

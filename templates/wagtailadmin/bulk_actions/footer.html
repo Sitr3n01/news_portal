@@ -1,0 +1,20 @@
+{% load i18n wagtailadmin_tags %}
+{% comment %}
+    Override do projeto: o rodapé de ações em massa do Wagtail 7.4
+    (wagtailadmin/bulk_actions/footer.html) sem a caixa "Selecionar todos". A
+    mesma caixa já fica no cabeçalho da tabela, e no rodapé ela competia com as
+    ações. O script do Wagtail (bulk-actions.js) trata qualquer quantidade
+    dessas caixas, então nada mais muda. Vale para todas as listagens com
+    seleção (notícias, categorias, imagens, documentos, usuários…). Ao
+    atualizar o Wagtail, compare.
+{% endcomment %}
+<section class="footer bulk-actions-choices hidden" data-bulk-action-footer="{% if item_type %}{{ item_type }}{% else %}{{ model_name|upper }}{% endif %}" aria-labelledby="bulk-actions-heading">
+    <h2 id="bulk-actions-heading" class="w-sr-only">{% trans "Bulk actions" %}</h2>
+    <div class="footer__container">
+        <ul class="bulk-actions-buttons">{% bulk_action_choices app_label model_name %}</ul>
+        <span data-bulk-action-num-objects class="num-objects"></span>
+        {% if objects.has_other_pages %}
+            <button type="button" data-bulk-action-num-objects-in-listing class="num-objects-in-listing w-hidden">{{ select_all_obj_text }}</button>
+        {% endif %}
+    </div>
+</section>

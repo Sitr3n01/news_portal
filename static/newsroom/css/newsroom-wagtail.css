@@ -27,6 +27,10 @@
  * 5. Barra única do editor (templates/newsroom/editor/header.html e
  *    static/newsroom/js/newsroom-editor.js): título, status, ferramentas e
  *    ações de publicação num só lugar, no lugar do cabeçalho e do rodapé.
+ *
+ * 6. Caixas de seleção: borda e visto legíveis, sempre visíveis nas listagens,
+ *    linha selecionada destacada e rodapé de ações em massa sem a caixa
+ *    "Selecionar todos" (templates/wagtailadmin/bulk_actions/footer.html).
  */
 
 :root,
@@ -197,6 +201,76 @@ body#wagtail .w-header__title {
 
 body#wagtail .tippy-box[data-theme="dropdown"] {
     border-radius: var(--nr-radius-card);
+}
+
+/* ── Caixas de seleção ──────────────────────────────────────────────────── */
+
+/* O Wagtail desenha a borda e o visto com tokens que aqui viram o cinza claro
+   das linhas do painel (#e5e5e5): a caixa ficava com contraste 1,2:1 e o visto
+   quase branco sobre branco. Borda com contraste de 3,7:1 (o mínimo para
+   controles é 3:1) e, marcada, a tinta dos botões principais com visto branco,
+   igual ao Unfold. Os interruptores (.switch) têm desenho próprio. */
+body#wagtail input[type="checkbox"]:not(.switch *) {
+    border: 1.5px solid var(--nr-icon);
+    border-radius: 6px;
+    background-color: var(--nr-white);
+}
+
+body#wagtail input[type="checkbox"]:not(.switch *):hover {
+    border-color: var(--nr-ink-4);
+}
+
+body#wagtail input[type="checkbox"]:not(.switch *):checked {
+    border-color: var(--nr-ink);
+    background-color: var(--nr-ink);
+}
+
+body#wagtail input[type="checkbox"]:not(.switch *):checked::before {
+    background: var(--nr-white);
+}
+
+body#wagtail input[type="checkbox"]:not(.switch *):focus-visible {
+    outline: 2px solid var(--nr-blue);
+    outline-offset: 2px;
+}
+
+body#wagtail input[type="checkbox"]:not(.switch *)[disabled] {
+    border-color: var(--nr-line-strong);
+    background-color: var(--nr-surface-subtle);
+}
+
+/* Listagens: o Wagtail só mostrava a caixa de cada linha ao passar o mouse
+   (opacity: 0). Fica sempre à vista, e a célula inteira marca e desmarca
+   (newsroom.js). */
+body#wagtail .listing .bulk-action-checkbox {
+    opacity: 1;
+}
+
+body#wagtail .bulk-action-checkbox-cell,
+body#wagtail .bulk-actions-filter-checkbox {
+    cursor: pointer;
+}
+
+body#wagtail .listing tr:has(> .bulk-action-checkbox-cell .bulk-action-checkbox:checked) > td {
+    background-color: var(--nr-blue-soft);
+}
+
+body#wagtail .listing.images > li:has(.bulk-action-checkbox:checked) {
+    border-radius: var(--nr-radius);
+    outline: 2px solid var(--nr-blue);
+    outline-offset: 2px;
+}
+
+/* Rodapé de ações em massa, agora sem a caixa "Selecionar todos": as ações
+   abrem a barra, sem o divisor que as separava da caixa. */
+body#wagtail .bulk-actions-choices .footer__container {
+    justify-content: flex-start;
+    gap: 16px;
+}
+
+body#wagtail .bulk-actions-choices .footer__container .bulk-actions-buttons {
+    padding-inline-start: 0;
+    border-inline-start: 0;
 }
 
 /* ── Editor de blocos: arrastar para reordenar ──────────────────────────── */

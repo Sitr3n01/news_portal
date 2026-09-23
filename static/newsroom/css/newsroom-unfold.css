@@ -42,6 +42,33 @@
     outline-color: var(--nr-blue);
 }
 
+/* Caixas de seleção: a mesma leitura do Wagtail (newsroom-wagtail.css). A
+   borda do Unfold (base-300, #d4d4d4) tinha contraste 1,5:1; aqui fica 3,7:1.
+   Marcada, a tinta primária do Unfold (#171717) com visto branco já é a do
+   painel. A linha selecionada (classe "selected" do actions.js do Django)
+   ganha o fundo azul-claro, e a célula inteira marca e desmarca (newsroom.js). */
+#main input[type="checkbox"].appearance-none {
+    border-width: 1.5px;
+    border-color: var(--nr-icon);
+}
+
+#main input[type="checkbox"].appearance-none:hover {
+    border-color: var(--nr-ink-4);
+}
+
+#main input[type="checkbox"].appearance-none:checked {
+    border-color: var(--nr-ink);
+}
+
+#result_list td.action-checkbox,
+#result_list th:has(> div #action-toggle) {
+    cursor: pointer;
+}
+
+#result_list tr.selected > td {
+    background-color: var(--nr-blue-soft);
+}
+
 /* Botão "Ler" das mensagens de contato (apps/contact/admin.py) segue o botão
    primário do painel. */
 #main .kb-read-btn:hover {

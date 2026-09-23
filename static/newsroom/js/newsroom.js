@@ -2,7 +2,8 @@
  * Newsroom — comportamento da casca do painel unificado.
  *
  * JavaScript simples, sem framework: gaveta da sidebar em telas pequenas,
- * menus suspensos (<details>) e a alternância lista/grade. Carregado na visão
+ * menus suspensos (<details>), a alternância lista/grade e o clique na célula
+ * inteira das caixas de seleção das listagens. Carregado na visão
  * geral, no Wagtail (insert_global_admin_js) e no Unfold (UNFOLD['SCRIPTS']).
  * Tudo funciona sem ele: a sidebar fica acessível pelo teclado, os <details>
  * abrem nativamente e a alternância de visualização cai para envio de formulário.
@@ -221,5 +222,33 @@
             applyView(input.value || 'list', false);
         }
         closeDropdowns(null);
+    });
+
+    // ── Seleção nas listagens ──────────────────────────────────────────────
+    // A caixa de seleção ocupa só 16–24px de uma célula bem maior: um clique
+    // em qualquer ponto da célula marca e desmarca, como na própria caixa.
+    // Wagtail (bulk-action-checkbox-cell / cabeçalho) e Django admin (Unfold).
+    var CHECKBOX_CELLS = [
+        'td.bulk-action-checkbox-cell',
+        'th.bulk-actions-filter-checkbox',
+        '#result_list td.action-checkbox',
+        '#result_list th',
+    ].join(', ');
+
+    document.addEventListener('click', function (event) {
+        var cell = event.target.closest(CHECKBOX_CELLS);
+        if (!cell || event.target.closest('input, label, a, button, select')) {
+            return;
+        }
+        var boxes = cell.querySelectorAll('input[type="checkbox"]');
+        if (boxes.length === 1 && !boxes[0].disabled) {
+            // Repassa o Shift: Wagtail e Django marcam um intervalo com Shift+clique.
+            boxes[0].dispatchEvent(new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                view: window,
+                shiftKey: event.shiftKey,
+            }));
+        }
     });
 })();

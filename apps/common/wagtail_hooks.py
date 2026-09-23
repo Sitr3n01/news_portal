@@ -107,9 +107,17 @@ def newsroom_admin_js():
     return format_html('<script src="{}" defer></script>', static('newsroom/js/newsroom.js'))
 
 
-# Só nos formulários de criação e edição: ajusta o arrastar dos blocos do
-# StreamField (pega pela barra de título, alça no celular e posição correta
-# depois de excluir um bloco). Detalhes no cabeçalho do próprio arquivo.
+# Só nos formulários de criação e edição:
+# - newsroom-editor.js monta os botões de salvar/publicar na barra única do
+#   editor (templates/newsroom/editor/header.html);
+# - newsroom-streamfield.js ajusta o arrastar dos blocos do StreamField (pega
+#   pela barra de título, alça no celular e posição correta depois de excluir
+#   um bloco).
+# Detalhes no cabeçalho de cada arquivo.
 @hooks.register('insert_editor_js')
-def newsroom_streamfield_js():
-    return format_html('<script src="{}" defer></script>', static('newsroom/js/newsroom-streamfield.js'))
+def newsroom_editor_js():
+    return format_html(
+        '<script src="{}" defer></script><script src="{}" defer></script>',
+        static('newsroom/js/newsroom-editor.js'),
+        static('newsroom/js/newsroom-streamfield.js'),
+    )

@@ -18,6 +18,7 @@ from apps.accounts import panels
 from apps.common.admin_nav import MANAGEMENT_PERMISSIONS, SCHOOL_PERMISSIONS, can_any
 from apps.common.newsroom import workspaces
 from apps.common.newsroom.branding import get_branding
+from apps.common.newsroom.editor import editor_bar
 from apps.common.newsroom.navigation import build_navigation
 
 register = template.Library()
@@ -191,3 +192,9 @@ def newsroom_admin_topbar(context):
 @register.inclusion_tag('newsroom/partials/menu_toggle.html')
 def newsroom_menu_toggle(classname=''):
     return {'classname': classname}
+
+
+@register.simple_tag(takes_context=True)
+def nr_editor_bar(context):
+    """Dados da barra única do editor (templates/newsroom/editor/header.html)."""
+    return editor_bar(context)

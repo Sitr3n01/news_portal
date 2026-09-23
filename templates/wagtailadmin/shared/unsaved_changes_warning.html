@@ -1,0 +1,20 @@
+{% extends "wagtailadmin/shared/unsaved_changes_warning.html" %}
+{% load i18n %}
+{% comment %}
+    Override do projeto: só o aviso do salvamento automático em português
+    ("Autosave is paused" não tem tradução pt-BR no Wagtail 7.4). O resto é o
+    bloco original. Se a tradução chegar ao Wagtail, apague este arquivo.
+{% endcomment %}
+
+{% block message_templates %}
+    {% if autosave_enabled %}
+        <template data-w-messages-target="template" data-selector="p">
+            <div>
+                <b>Salvamento automático <span>pausado</span></b>
+                <p></p>
+            </div>
+        </template>
+    {% else %}
+        {{ block.super }}
+    {% endif %}
+{% endblock %}

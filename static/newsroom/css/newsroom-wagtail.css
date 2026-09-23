@@ -23,6 +23,10 @@
  *
  * 4. Editor de blocos: só o arrastar para reordenar (pega, lugar de destino e
  *    cópia que acompanha o dedo), junto com static/newsroom/js/newsroom-streamfield.js.
+ *
+ * 5. Barra única do editor (templates/newsroom/editor/header.html e
+ *    static/newsroom/js/newsroom-editor.js): título, status, ferramentas e
+ *    ações de publicação num só lugar, no lugar do cabeçalho e do rodapé.
  */
 
 :root,
@@ -255,6 +259,402 @@ html.nr-sf-dragging body#wagtail {
 
 html.nr-sf-dragging body#wagtail [data-streamfield-child] .w-panel__content {
     pointer-events: none;
+}
+
+/* ── Barra única do editor ──────────────────────────────────────────────── */
+
+body#wagtail .nr-editorbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 64px;
+    padding: 9px 20px 9px 16px;
+    border-bottom: 1px solid var(--nr-line);
+    background: var(--nr-white);
+    color: var(--nr-ink);
+    font-family: var(--nr-font);
+}
+
+.nr-editorbar__start {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.nr-editorbar__back {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--nr-radius);
+    color: var(--nr-muted);
+}
+
+.nr-editorbar__back:hover {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+.nr-editorbar__back .nr-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.nr-editorbar__heading {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.nr-editorbar__crumbs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    font-size: 13px;
+}
+
+body#wagtail .nr-editorbar__parent {
+    flex: none;
+    color: var(--nr-muted);
+    text-decoration: none;
+}
+
+body#wagtail .nr-editorbar__parent:hover {
+    color: var(--nr-ink);
+}
+
+.nr-editorbar__sep {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    color: var(--nr-icon-faint);
+}
+
+body#wagtail .nr-editorbar__title {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    color: var(--nr-ink);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -.015em;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Sem altura mínima: em cadastros sem rascunho (categorias, tags) a linha
+   fica vazia e colapsa, e o título se centraliza sozinho. */
+.nr-editorbar__meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    color: var(--nr-muted);
+    font-size: 12px;
+}
+
+/* O selo nunca encolhe; só a observação ao lado dele é cortada com "…". */
+.nr-editorbar__state {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nr-editorbar__status {
+    flex: none;
+    padding: 2px 8px;
+    font-family: inherit;
+}
+
+button.nr-editorbar__status {
+    cursor: pointer;
+}
+
+button.nr-editorbar__status:hover,
+.nr-editorbar:has([data-side-panel-toggle="status"][aria-expanded="true"]) button.nr-editorbar__status {
+    box-shadow: 0 0 0 3px var(--nr-hover);
+}
+
+.nr-editorbar__status .nr-icon {
+    width: 12px;
+    height: 12px;
+}
+
+.nr-editorbar__note {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body#wagtail .nr-editorbar .w-autosave-indicator {
+    min-width: 0;
+    margin: 0;
+    font-size: 12px;
+}
+
+/* No Wagtail os estados ocultos têm altura zero mas ocupam a largura do texto
+   mais longo ("Salvamento automático pausado"). Na barra, só o estado atual
+   ocupa espaço. */
+body#wagtail .nr-editorbar .w-autosave-indicator__state {
+    display: none;
+}
+
+body#wagtail .nr-editorbar [data-w-autosave-state-value="saving"] .w-autosave-indicator__state--saving,
+body#wagtail .nr-editorbar [data-w-autosave-state-value="saved"] .w-autosave-indicator__state--saved,
+body#wagtail .nr-editorbar [data-w-autosave-state-value="paused"] .w-autosave-indicator__state--paused {
+    display: flex;
+    gap: 5px;
+}
+
+body#wagtail .nr-editorbar .w-autosave-indicator__state .icon {
+    width: 13px;
+    height: 13px;
+}
+
+body#wagtail .nr-editorbar .w-editing-sessions {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+body#wagtail .nr-editorbar .w-editing-sessions__avatar {
+    width: 22px;
+    height: 22px;
+}
+
+.nr-editorbar__end {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Ferramentas: os botões de painel lateral do próprio Wagtail. */
+.nr-editorbar__tools {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-right: 2px;
+    padding-right: 10px;
+    border-right: 1px solid var(--nr-line);
+}
+
+body#wagtail .nr-editorbar .w-side-panel-toggle {
+    position: relative;
+    gap: 7px;
+    width: auto;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: var(--nr-radius);
+    color: var(--nr-ink-4);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    outline-offset: 2px;
+}
+
+body#wagtail .nr-editorbar .w-side-panel-toggle:hover {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+body#wagtail .nr-editorbar .w-side-panel-toggle[aria-expanded="true"] {
+    background: var(--nr-blue-soft);
+    color: var(--nr-blue-strong);
+}
+
+body#wagtail .nr-editorbar .w-side-panel-toggle__icon {
+    width: 17px;
+    height: 17px;
+    transform: none;
+}
+
+body#wagtail .nr-editorbar .w-side-panel-toggle__counter {
+    position: absolute;
+    top: 1px;
+    right: -2px;
+    margin: 0;
+    transform: none;
+}
+
+/* O rótulo só aparece na barra, e só quando há espaço. */
+.w-side-panel-toggle__label {
+    display: none;
+}
+
+@media (min-width: 1440px) {
+    .nr-editorbar .w-side-panel-toggle__label {
+        display: inline;
+    }
+}
+
+/* Ações de publicação (montadas por newsroom-editor.js). */
+.nr-editorbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nr-editorbar__actions:empty {
+    display: none;
+}
+
+body#wagtail .nr-editorbar .nr-btn {
+    box-sizing: border-box;
+    height: 36px;
+    min-height: 36px;
+    padding: 0 14px;
+    font-family: inherit;
+}
+
+body#wagtail .nr-editorbar .nr-btn:disabled {
+    cursor: not-allowed;
+    opacity: .55;
+}
+
+body#wagtail .nr-editorbar .nr-btn.is-loading {
+    cursor: progress;
+    opacity: .75;
+}
+
+.nr-editorbar__split {
+    display: flex;
+    align-items: center;
+}
+
+body#wagtail .nr-editorbar__split > .nr-editorbar__primary:not(:only-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* <details> não vira flex no Chrome: a seta tem medida própria. */
+.nr-editorbar__menu {
+    position: relative;
+}
+
+body#wagtail .nr-editorbar__caret {
+    width: 34px;
+    min-width: 0;
+    padding: 0;
+    border-left-color: rgba(255, 255, 255, .22);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    list-style: none;
+}
+
+.nr-editorbar__caret::-webkit-details-marker {
+    display: none;
+}
+
+.nr-editorbar__menu[open] .nr-editorbar__caret .nr-icon {
+    transform: rotate(180deg);
+}
+
+.nr-editorbar__menu .nr-menu {
+    min-width: 250px;
+}
+
+.nr-editorbar__menu.is-narrow-only,
+.nr-editorbar__menu-save {
+    display: none;
+}
+
+.nr-editorbar__label--short {
+    display: none;
+}
+
+.nr-editorbar__more .nr-more__button {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--nr-radius);
+}
+
+/* O rodapé nativo some quando a barra assume as ações. Continua na página,
+   dentro do formulário: é nele que a barra clica. */
+html.nr-editorbar-ready body#wagtail form[data-edit-form] > footer .actions--primary {
+    display: none;
+}
+
+@media (max-width: 1023.98px) {
+    /* Espaço para o botão de menu fixo no canto (.nr-wagtail-menu-toggle). */
+    .nr-editorbar__start {
+        padding-left: 44px;
+    }
+
+    body#wagtail:has(.nr-editorbar) .nr-menu-toggle.nr-wagtail-menu-toggle {
+        top: 15px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    body#wagtail .nr-editorbar {
+        flex-wrap: wrap;
+        row-gap: 8px;
+        min-height: 0;
+        padding: 8px 12px;
+    }
+
+    .nr-editorbar__start {
+        flex-basis: 100%;
+    }
+
+    .nr-editorbar__end {
+        flex: 1 1 100%;
+        justify-content: space-between;
+    }
+
+    .nr-editorbar__parent,
+    .nr-editorbar__sep {
+        display: none;
+    }
+
+    .nr-editorbar__tools {
+        padding-right: 0;
+        border-right: 0;
+    }
+
+    .nr-editorbar__actions {
+        margin-left: auto;
+    }
+}
+
+@media (max-width: 639.98px) {
+    .nr-editorbar__save {
+        display: none !important;
+    }
+
+    .nr-editorbar__menu.is-narrow-only {
+        display: block;
+    }
+
+    .nr-editorbar__menu-save {
+        display: flex;
+    }
+
+    hr.nr-editorbar__menu-save {
+        display: block;
+    }
+
+    .nr-editorbar__label--full {
+        display: none;
+    }
+
+    .nr-editorbar__label--short {
+        display: inline;
+    }
+
+    body#wagtail .nr-editorbar .w-side-panel-toggle {
+        min-width: 32px;
+        padding: 0 7px;
+    }
 }
 
 /* Listagens no celular: a tabela nativa rola dentro da própria área, com

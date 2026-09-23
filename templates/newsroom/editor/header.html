@@ -1,0 +1,90 @@
+{% load wagtailadmin_tags newsroom %}
+{% comment %}
+    Barra única do editor: substitui o cabeçalho do Wagtail (slim_header) nos
+    formulários de criação e edição de snippets. Reúne num só lugar o título,
+    o status, o salvamento automático, quem mais está editando, os painéis
+    laterais (status, pré-visualização, verificações), o histórico, as ações de
+    publicação e o menu "Mais opções".
+
+    Continua sendo o Wagtail que faz tudo:
+    - os botões de painel são os componentes nativos (`panel.toggle`);
+    - o selo de status também abre o painel "Status" (via newsroom-editor.js);
+    - salvar, publicar e enviar para moderação continuam DENTRO do formulário,
+      no rodapé nativo, que some quando newsroom-editor.js monta os botões da
+      barra em [data-nr-editor-actions]. Os botões da barra só clicam nos
+      nativos, e a proteção de edição simultânea do Wagtail, que só vigia
+      botões dentro do formulário, continua valendo.
+
+    O salvamento automático reenvia o título (#nr-editorbar-title), o status
+    (#nr-editorbar-state) e o menu (#nr-editorbar-more); ver
+    templates/wagtailadmin/generic/edit_partials.html. A trilha nativa não é
+    exibida, mas fica oculta em [data-w-breadcrumbs] porque o Wagtail também a
+    reenvia.
+
+    Estrutura externa (div sticky + side_panels) igual à de
+    wagtailadmin/shared/headers/slim_header.html do Wagtail 7.4: o painel
+    lateral se posiciona logo abaixo dela. Ao atualizar o Wagtail, compare.
+{% endcomment %}
+{% nr_editor_bar as bar %}
+<div class="w-sticky w-top-0 w-z-header">
+    <header class="nr-editorbar" data-nr-editorbar>
+        <div class="nr-editorbar__start">
+            {% if bar.back %}
+                <a class="nr-editorbar__back" href="{{ bar.back.url }}" aria-label="Voltar para {{ bar.back.label }}">
+                    {% nr_icon "chevron-left" %}
+                </a>
+            {% endif %}
+            <div class="nr-editorbar__heading">
+                <div class="nr-editorbar__crumbs">
+                    {% if bar.back %}
+                        <a class="nr-editorbar__parent" href="{{ bar.back.url }}">{{ bar.back.label }}</a>
+                        {% nr_icon "chevron" "nr-editorbar__sep" %}
+                    {% endif %}
+                    <h1 class="nr-editorbar__title" id="nr-editorbar-title">{{ bar.title }}</h1>
+                </div>
+                <div class="nr-editorbar__meta">
+                    {% include "newsroom/editor/_state.html" %}
+                    {% if autosave_indicator %}
+                        {% component autosave_indicator %}
+                    {% endif %}
+                    {% if editing_sessions %}
+                        {% component editing_sessions %}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="nr-editorbar__native" hidden>
+                <div data-w-breadcrumbs></div>
+            </div>
+        </div>
+
+        <div class="nr-editorbar__end">
+            {% if side_panels or bar.history_url %}
+                <div class="nr-editorbar__tools" role="group" aria-label="Ferramentas do editor">
+                    {% for panel in side_panels %}
+                        {% component panel.toggle %}
+                    {% endfor %}
+                    {% if bar.history_url %}
+                        <a href="{{ bar.history_url }}"
+                           class="w-side-panel-toggle"
+                           aria-label="Histórico"
+                           data-controller="w-tooltip"
+                           data-w-tooltip-content-value="Histórico"
+                           data-w-tooltip-offset-value="[0, 0]">
+                            {% nr_icon "history" "w-side-panel-toggle__icon" %}
+                            <span class="w-side-panel-toggle__label">Histórico</span>
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {# Preenchido por newsroom-editor.js a partir dos botões nativos do rodapé. #}
+            <div class="nr-editorbar__actions" data-nr-editor-actions></div>
+
+            {% include "newsroom/editor/_more.html" %}
+        </div>
+    </header>
+
+    {% if side_panels %}
+        {% include "wagtailadmin/shared/side_panels.html" %}
+    {% endif %}
+</div>

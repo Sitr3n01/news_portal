@@ -1,0 +1,10 @@
+{% extends "wagtailsnippets/snippets/edit.html" %}
+{% comment %}
+    Override do projeto: mesmo template do Wagtail 7.4, só com o cabeçalho
+    trocado pela barra única do editor (templates/newsroom/editor/header.html).
+    O rodapé com salvar/publicar continua o nativo, dentro do formulário.
+{% endcomment %}
+
+{% block slim_header %}
+    {% include "newsroom/editor/header.html" %}
+{% endblock %}

@@ -69,7 +69,7 @@ Tudo o que você faz com a matéria fica numa barra só, no alto da tela, que ac
 
 | Onde | O que tem |
 |------|-----------|
-| **Esquerda** | **‹** volta para a lista de notícias. Ao lado ficam o título da matéria, o **selo de status** (Rascunho, Publicada, Em revisão, Agendada ou Arquivada) e o aviso **✓ Salvo** do salvamento automático. Quando há algo a observar, aparece junto do selo: "Alterações não publicadas", a etapa da revisão ou a data agendada. |
+| **Esquerda** | **‹** volta para a lista de notícias. Ao lado ficam o título da matéria, o **selo de status** (Rascunho, Publicada, Em revisão, Agendada ou Arquivada) e o aviso **✓ Salvo** do salvamento automático. Quando há algo a observar, aparece junto do selo: "Alterações não publicadas", a etapa da revisão ou a data agendada. Se aparecer **"ainda não agendada"**, a data foi escolhida mas falta clicar em **Agendar publicação**: sem isso a matéria não vai ao ar sozinha. |
 | **Ferramentas** | **Status** (ⓘ): detalhes da publicação, agendamento e trava de edição; clicar no selo abre o mesmo painel. **Pré-visualizar** (olho): mostra a matéria como vai ficar no site; atalho Ctrl+P. **Verificações** (escudo): acessibilidade e qualidade do texto. **Histórico** (relógio): todas as versões salvas. |
 | **Ações** | O botão preto é o próximo passo: **Publicar** (ou **Aprovar**, quando você revisa a matéria de alguém, ou **Enviar para Moderação Editorial**, se você não publica). **Salvar rascunho** fica ao lado; atalho Ctrl+S. A **seta** ao lado do botão preto guarda as demais ações, como **Retirar do ar**. |
 | **⋯** | **Copiar** (cria um rascunho novo a partir desta matéria), **Inspecionar** (ficha somente leitura) e **Remover**. |

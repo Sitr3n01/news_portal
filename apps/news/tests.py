@@ -2221,10 +2221,18 @@ def test_article_status_counts_all_categories(django_user_model):
     make_article_full(site, slug='status-pub', status=Article.Status.PUBLISHED)
     make_article_full(site, slug='status-draft', status=Article.Status.DRAFT)
 
+    # Agendar = publicar uma revisão com data futura (o Wagtail guarda a data
+    # aprovada na revisão). O sinal de publicação já marca status=PUBLISHED.
     scheduled = make_article_full(site, slug='status-scheduled', status=Article.Status.DRAFT)
     scheduled.live = False
     scheduled.go_live_at = timezone.now() + timezone.timedelta(days=1)
     scheduled.save()
+    scheduled.save_revision().publish()
+    # Data preenchida sem agendar: continua rascunho e não conta como agendada.
+    dated = make_article_full(site, slug='status-dated', status=Article.Status.DRAFT)
+    dated.live = False
+    dated.go_live_at = timezone.now() + timezone.timedelta(days=1)
+    dated.save()
 
     in_review = make_article_full(site, slug='status-review', status=Article.Status.DRAFT)
     in_review.save_revision()
@@ -2233,8 +2241,8 @@ def test_article_status_counts_all_categories(django_user_model):
     workflow.start(in_review, reviewer)
 
     counts = _article_status_counts()
-    assert counts['published'] == 1
-    assert counts['draft'] == 3  # status-draft + status-scheduled + status-review (todos com status DRAFT)
+    assert counts['published'] == 2  # status-pub + status-scheduled (o sinal marca PUBLISHED ao agendar)
+    assert counts['draft'] == 3  # status-draft + status-dated + status-review (todos com status DRAFT)
     assert counts['scheduled'] == 1
     assert counts['in_review'] == 1
 

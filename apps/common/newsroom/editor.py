@@ -77,16 +77,29 @@ def _article_status(obj):
     )
     if stored is None:
         return None
-    state = editorial.editorial_state(stored, editorial.in_review_ids([stored.pk]))
+    scheduled = stored.scheduled_revision
+    state = editorial.editorial_state(
+        stored, editorial.in_review_ids([stored.pk]), {str(stored.pk)} if scheduled else set(),
+    )
     note = ''
     if state == editorial.STATE_REVIEW:
         task = stored.current_workflow_task
         note = f'Etapa: {task.name}' if task else ''
-    elif state == editorial.STATE_SCHEDULED and stored.go_live_at:
-        note = timezone.localtime(stored.go_live_at).strftime('Publica em %d/%m às %H:%M')
+    elif scheduled:
+        # Agendada (fora do ar) ou nova versão agendada de uma notícia no ar.
+        when = _when(scheduled.approved_go_live_at)
+        note = f'Publica em {when}' if not stored.live else f'Nova versão agendada para {when}'
     elif stored.live and stored.has_unpublished_changes:
         note = 'Alterações não publicadas'
+    elif not stored.live and stored.go_live_at and stored.go_live_at > timezone.now():
+        # Data preenchida e rascunho salvo, mas ninguém clicou em "Agendar
+        # publicação": o Wagtail não vai publicar sozinho.
+        note = f'Data marcada para {_when(stored.go_live_at)}, ainda não agendada'
     return {'key': state, 'label': editorial.STATE_LABELS[state], 'note': note}
+
+
+def _when(value):
+    return timezone.localtime(value).strftime('%d/%m às %H:%M')
 
 
 def _generic_status(model, obj):

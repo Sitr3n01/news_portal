@@ -470,13 +470,20 @@ def test_listing_reflects_native_draft_review_and_publish_flows(client, editor, 
 
 @pytest.mark.django_db
 def test_scheduled_article_is_flagged(client, editor, site):
-    _article(site, 'Agendada', live=False, go_live_at=timezone.now() + timezone.timedelta(days=1))
+    # "Agendar publicação" no Wagtail = publicar uma revisão com data futura.
+    scheduled = _article(site, 'Agendada', live=False, go_live_at=timezone.now() + timezone.timedelta(days=1))
+    scheduled.save_revision().publish()
+    # Só a data preenchida e o rascunho salvo não agendam nada.
+    _article(site, 'Com data sem agendar', live=False, go_live_at=timezone.now() + timezone.timedelta(days=1)).save_revision()
     client.force_login(editor)
 
     response = client.get(reverse('panel:dashboard'), {'status': 'scheduled'})
+    everything = client.get(reverse('panel:dashboard'), {'status': 'all'})
 
     assert _row_titles(response) == ['Agendada']
     assert response.context['listing']['rows'][0]['state_label'] == 'Agendada'
+    labels = {row['title']: row['state_label'] for row in everything.context['listing']['rows']}
+    assert labels['Com data sem agendar'] == 'Rascunho'
 
 
 # ── Casca única nas telas dos dois frameworks ──────────────────────────────

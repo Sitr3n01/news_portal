@@ -7,7 +7,8 @@
     geral e do /admin/. O script sidebar.js do Wagtail não faz nada quando o
     elemento #wagtail-sidebar não existe.
 
-    Todo o resto do bloco `furniture` é cópia fiel do Wagtail 7.4 — área de
+    Todo o resto do bloco `furniture` é cópia fiel do Wagtail 7.4 (exceto o
+    texto "Ir para o primeiro erro", fixo em português) — área de
     mensagens (com os controladores Stimulus), atalhos de teclado e <main>. Ao
     atualizar o Wagtail, compare com wagtail/admin/templates/wagtailadmin/base.html.
 {% endcomment %}
@@ -47,7 +48,8 @@
                                         data-w-count-find-value=":not([hidden]):is(.error-message,.help-critical)"
                                         data-w-focus-target-value=":not([hidden]):is(.error-message,.help-critical)"
                                     >
-                                        {% trans 'Go to the first error' %}
+                                        {# Texto fixo: o catálogo pt-BR do Wagtail 7.4.2 não traduz 'Go to the first error'. #}
+                                        Ir para o primeiro erro
                                     </button>
                                 {% endif %}
                             </li>

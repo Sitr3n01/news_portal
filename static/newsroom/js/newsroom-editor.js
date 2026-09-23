@@ -93,9 +93,11 @@
         return (target.textContent || '').replace(/\s+/g, ' ').trim();
     }
 
+    // Calculado uma vez, com o rótulo em repouso: durante o envio o nativo vira
+    // "Agendando…"/"Publicando…", e o rótulo curto não pode trocar de sentido.
     function shortLabel(kind, label) {
         if (kind === 'action-publish') {
-            return /^agendar/i.test(label) ? 'Agendar' : 'Publicar';
+            return /^(agend|schedul)/i.test(label) ? 'Agendar' : 'Publicar';
         }
         return SHORT[kind] || '';
     }
@@ -116,7 +118,7 @@
     function paint(proxy, control) {
         var real = control.element;
         var label = labelOf(real);
-        var short = shortLabel(control.kind, label);
+        var short = control.short;
         while (proxy.firstChild) {
             proxy.removeChild(proxy.firstChild);
         }
@@ -198,7 +200,8 @@
         var controls = Array.prototype.filter.call(nav.querySelectorAll('button, a'), function (element) {
             return !element.classList.contains('w-dropdown__toggle');
         }).map(function (element) {
-            return {element: element, kind: kindOf(element)};
+            var kind = kindOf(element);
+            return {element: element, kind: kind, short: shortLabel(kind, labelOf(element))};
         });
         if (!controls.length) {
             return;

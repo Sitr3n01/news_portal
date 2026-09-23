@@ -1,0 +1,23 @@
+{% load i18n wagtailadmin_tags %}
+{% comment %}
+    Override do projeto: o botão "Publicar" do Wagtail 7.4
+    (wagtailsnippets/snippets/action_menu/publish.html), com "Agendar
+    publicação" e "Agendando…" em português. O catálogo pt-BR do Wagtail 7.4.2
+    não traz "Schedule to publish" nem "Scheduling…", e a barra única do editor
+    exibe esse rótulo no botão principal. Os demais textos continuam vindo da
+    tradução do Wagtail. Ao atualizar o Wagtail, compare; se a tradução chegar,
+    apague este arquivo.
+{% endcomment %}
+<button
+    type="submit"
+    name="{{ name }}"
+    value="{{ name }}"
+    class="button action-save button-longrunning"
+    data-controller="w-progress"
+    data-action="w-progress#activate"
+    data-w-progress-active-value="{% if is_scheduled %}Agendando…{% else %}{% trans 'Publishing…' %}{% endif %}"
+>
+    {% icon name=icon_name classname="button-longrunning__icon" %}
+    {% icon name="spinner" %}
+    <em data-w-progress-target="label">{% if is_scheduled %}Agendar publicação{% elif is_revision %}{% trans 'Publish this version' %}{% else %}{% trans 'Publish' %}{% endif %}</em>
+</button>

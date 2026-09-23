@@ -13,8 +13,7 @@ WorkflowMixin), sincronizados com ``status`` por apps/news/signals.py.
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import BigIntegerField, Q
 from django.db.models.functions import Cast
-from django.utils import timezone
-from wagtail.models import WorkflowState
+from wagtail.models import Revision, WorkflowState
 
 from apps.news.models import Article
 
@@ -75,10 +74,35 @@ def in_review_ids(article_pks):
     )
 
 
-def scheduled_q(now=None):
-    """Agendada = ainda não está no ar e tem data de entrada no futuro."""
-    now = now or timezone.now()
-    return Q(live=False, go_live_at__isnull=False, go_live_at__gt=now)
+def _scheduled_revisions():
+    """Revisões aprovadas para entrar no ar numa data: é isso que agenda no
+    Wagtail ("Agendar publicação"), e o ``publish_scheduled`` as publica na
+    hora marcada. Só preencher a data no formulário (``go_live_at``) e salvar
+    o rascunho NÃO agenda nada."""
+    return Revision.objects.filter(base_content_type=article_content_type(), approved_go_live_at__isnull=False)
+
+
+def scheduled_article_pks():
+    """Subquery de PKs (inteiros) de artigos com uma revisão agendada."""
+    return _scheduled_revisions().annotate(
+        article_pk=Cast('object_id', output_field=BigIntegerField()),
+    ).values('article_pk')
+
+
+def scheduled_ids(article_pks):
+    """Conjunto de PKs (como texto) com revisão agendada entre os artigos informados."""
+    if not article_pks:
+        return set()
+    return set(
+        _scheduled_revisions()
+        .filter(object_id__in=[str(pk) for pk in article_pks])
+        .values_list('object_id', flat=True)
+    )
+
+
+def scheduled_q():
+    """Agendada = ainda não está no ar e tem uma revisão agendada no Wagtail."""
+    return Q(live=False, pk__in=scheduled_article_pks())
 
 
 def in_review_count():
@@ -86,12 +110,11 @@ def in_review_count():
 
 
 def article_status_counts():
-    now = timezone.now()
     return {
         'published': Article.objects.filter(status=Article.Status.PUBLISHED).count(),
         'draft': Article.objects.filter(status=Article.Status.DRAFT).count(),
         'in_review': in_review_count(),
-        'scheduled': Article.objects.filter(scheduled_q(now)).count(),
+        'scheduled': Article.objects.filter(scheduled_q()).count(),
     }
 
 
@@ -115,12 +138,15 @@ def filter_articles(queryset, state):
     return queryset
 
 
-def editorial_state(article, review_ids, now=None):
-    """Estado mais específico de um artigo, para o selo da listagem."""
-    now = now or timezone.now()
+def editorial_state(article, review_ids, scheduled=frozenset()):
+    """Estado mais específico de um artigo, para o selo da listagem.
+
+    ``review_ids`` e ``scheduled`` vêm de ``in_review_ids`` e ``scheduled_ids``
+    (uma consulta para a página inteira, em vez de uma por artigo).
+    """
     if str(article.pk) in review_ids:
         return STATE_REVIEW
-    if not article.live and article.go_live_at and article.go_live_at > now:
+    if not article.live and str(article.pk) in scheduled:
         return STATE_SCHEDULED
     if article.status == Article.Status.PUBLISHED:
         return STATE_PUBLISHED

@@ -20,7 +20,8 @@
  *
  * 3. Arraste em andamento: `html.nr-sf-dragging` desliga o ponteiro no
  *    conteúdo dos blocos (texto rico, tabela, campos), para o bloco só cair
- *    ENTRE blocos. A rolagem automática perto da borda fica mais generosa.
+ *    ENTRE blocos. A faixa de rolagem automática começa abaixo da barra fixa
+ *    do editor, na velocidade padrão do SortableJS.
  *
  * Depende de detalhes internos do Wagtail (`initDragNDrop`, `sortable`,
  * `children`, `inserters`, `moveBlock`). Se algum sumir numa atualização, o
@@ -47,6 +48,17 @@
     var NOT_A_HANDLE = '[data-streamfield-action]:not(' + GRIP + '), .w-panel__anchor';
 
     var sortables = [];
+
+    // Faixa da borda em que o arraste rola a página. A área rolável começa
+    // atrás da barra fixa do editor (64px no computador, ~106px no celular):
+    // com os 30px do SortableJS, subir a página exigia arrastar o bloco por
+    // cima da barra, onde ele não acha lugar para cair. A faixa passa a ir até
+    // 40px abaixo da barra (a mesma medida vale para a borda de baixo).
+    function scrollZone() {
+        var bar = document.querySelector('[data-nr-editorbar]');
+        var bottom = bar ? bar.getBoundingClientRect().bottom : 0;
+        return Math.max(80, Math.round(bottom) + 40);
+    }
 
     function prefersReducedMotion() {
         return Boolean(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -102,13 +114,12 @@
         sortable.option('filter', NOT_A_HANDLE);
         // Sem isto o SortableJS cancelaria o clique nos botões filtrados.
         sortable.option('preventOnFilter', false);
-        sortable.option('scrollSensitivity', 80);
-        sortable.option('scrollSpeed', 16);
         if (prefersReducedMotion()) {
             sortable.option('animation', 0);
         }
         sortable.option('onStart', function () {
             document.documentElement.classList.add(DRAGGING_CLASS);
+            sortable.option('scrollSensitivity', scrollZone());
         });
         sortable.option('onEnd', function (event) {
             document.documentElement.classList.remove(DRAGGING_CLASS);

@@ -163,12 +163,13 @@ def kelly_articles(request):
 
     page = Paginator(queryset, PER_PAGE).get_page(request.GET.get('page'))
     articles = list(page.object_list)
-    review_ids = editorial.in_review_ids([article.pk for article in articles])
-    now = timezone.now()
+    pks = [article.pk for article in articles]
+    review_ids = editorial.in_review_ids(pks)
+    scheduled = editorial.scheduled_ids(pks)
 
     rows = []
     for article in articles:
-        state = editorial.editorial_state(article, review_ids, now)
+        state = editorial.editorial_state(article, review_ids, scheduled)
         actions = _article_actions(request, article, state)
         author = (article.author.get_full_name() or article.author.get_username()) if article.author else ''
         rows.append({

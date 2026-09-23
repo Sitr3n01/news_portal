@@ -148,15 +148,70 @@ def test_status_of_a_published_article_with_pending_edits(editor, site, category
     assert status['note'] == 'Alterações não publicadas'
 
 
+def _when(value):
+    return timezone.localtime(value).strftime('%d/%m às %H:%M')
+
+
 @pytest.mark.django_db
 def test_status_of_a_scheduled_article(editor, site, category):
+    """Agendar = "Agendar publicação": publicar uma revisão com data futura."""
     go_live = timezone.now() + timezone.timedelta(days=2)
     article = _article(site, category, editor, 'agendada', live=False, go_live_at=go_live)
+    article.save_revision(user=editor).publish(user=editor)
+    article.refresh_from_db()
 
     status = _status(article)
 
+    assert article.live is False
     assert status['key'] == 'scheduled'
-    assert status['note'] == timezone.localtime(go_live).strftime('Publica em %d/%m às %H:%M')
+    assert status['note'] == f'Publica em {_when(go_live)}'
+
+
+@pytest.mark.django_db
+def test_date_without_scheduling_is_still_a_draft(editor, site, category):
+    """Preencher a data e salvar o rascunho não agenda: o Wagtail não vai publicar."""
+    go_live = timezone.now() + timezone.timedelta(days=2)
+    article = _article(site, category, editor, 'so-data', live=False, go_live_at=go_live)
+    article.save_revision(user=editor)
+
+    status = _status(article)
+
+    assert status['key'] == 'draft'
+    assert status['label'] == 'Rascunho'
+    assert status['note'] == f'Data marcada para {_when(go_live)}, ainda não agendada'
+
+
+@pytest.mark.django_db
+def test_live_article_with_a_scheduled_new_version(editor, site, category):
+    article = _article(site, category, editor, 'no-ar-com-agenda')
+    article.save_revision(user=editor).publish(user=editor)
+    article.refresh_from_db()
+    go_live = timezone.now() + timezone.timedelta(days=5)
+    article.title = 'Versão nova agendada'
+    article.go_live_at = go_live
+    article.save_revision(user=editor).publish(user=editor)
+    article.refresh_from_db()
+
+    status = _status(article)
+
+    assert article.live is True
+    assert status['key'] == 'published'
+    assert status['note'] == f'Nova versão agendada para {_when(go_live)}'
+
+
+@pytest.mark.django_db
+def test_schedule_button_is_in_portuguese(client, editor, site, category):
+    """O catálogo pt-BR do Wagtail 7.4.2 não traduz "Schedule to publish"."""
+    go_live = timezone.now() + timezone.timedelta(days=2)
+    article = _article(site, category, editor, 'botao-agendar', live=False, go_live_at=go_live)
+    article.save_revision(user=editor)
+    client.force_login(editor)
+
+    form = _form(client.get(_edit_url(article)).content.decode())
+
+    assert 'Agendar publicação' in form
+    assert 'data-w-progress-active-value="Agendando…"' in form
+    assert 'Schedule to publish' not in form
 
 
 @pytest.mark.django_db
@@ -227,3 +282,18 @@ def test_autosave_response_refreshes_the_bar(client, editor, site, category):
     assert 'data-w-teleport-target-value="#nr-editorbar-state"' in partials
     assert 'Alterações não publicadas' in partials
     assert 'data-w-teleport-target-value="#nr-editorbar-more"' in partials
+
+
+@pytest.mark.django_db
+def test_validation_error_button_is_in_portuguese(client, editor, site, category):
+    """O catálogo pt-BR do Wagtail 7.4.2 não traduz "Go to the first error"."""
+    article = _article(site, category, editor, 'erro')
+    article.save_revision(user=editor)
+    client.force_login(editor)
+    url = _edit_url(article)
+    data = _form_data(client.get(url), title='', **{'action-publish': 'action-publish'})
+
+    html = client.post(url, data).content.decode()
+
+    assert 'Ir para o primeiro erro' in html
+    assert 'Go to the first error' not in html

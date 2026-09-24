@@ -124,7 +124,10 @@ class NewsletterDeliveryAdmin(AdminUXMixin, ModelAdmin):
     ]
     ux_after_save_actions = [
         {'label': 'Falhas', 'icon': 'error', 'url': format_lazy('{}?status__exact=failed', reverse_lazy('admin:news_newsletterdelivery_changelist'))},
-        {'label': 'Configurações dos sites', 'icon': 'settings', 'url': reverse_lazy('wagtailsnippets_common_siteextension:list')},
+        {
+            'label': 'Configurações dos sites', 'icon': 'settings', 'url': reverse_lazy('wagtailsnippets_common_siteextension:list'),
+            'permissions': ['common.add_siteextension', 'common.change_siteextension', 'common.delete_siteextension', 'common.view_siteextension'],
+        },
     ]
 
     fieldsets = [

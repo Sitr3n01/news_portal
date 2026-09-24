@@ -23,6 +23,8 @@ from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.admin.utils import quote
 from django.urls import NoReverseMatch, reverse
 
+from apps.common.newsroom.admin_links import link_allowed
+
 
 def _url(name, *args):
     try:
@@ -37,12 +39,12 @@ def _preserved(context, opts, url):
     return add_preserved_filters({'preserved_filters': context.get('preserved_filters'), 'opts': opts}, url)
 
 
-def _guide(model_admin):
+def _guide(model_admin, request):
     steps = [str(step) for step in getattr(model_admin, 'ux_form_steps', None) or []]
     links = [
         {'label': str(item.get('label', '')), 'url': str(item.get('url', ''))}
         for item in getattr(model_admin, 'ux_after_save_actions', None) or []
-        if item.get('url')
+        if item.get('url') and link_allowed(request, item)
     ]
     title = str(getattr(model_admin, 'ux_form_title', '') or '')
     description = str(getattr(model_admin, 'ux_form_description', '') or '')
@@ -134,7 +136,7 @@ def form_bar(context):
         'title': title,
         'status': status,
         'readonly': readonly,
-        'guide': _guide(model_admin),
+        'guide': _guide(model_admin, request),
         'history_url': history_url,
         'site_url': site_url,
         'actions': _actions(context, flags),

@@ -92,6 +92,13 @@ class PageAdmin(AdminUXMixin, ModelAdmin):
             readonly_fields.extend(['site', 'slug'])
         return readonly_fields
 
+    def get_prepopulated_fields(self, request, obj=None):
+        # Com o slug somente leitura, o Django ainda procuraria o campo no
+        # formulário para preenchê-lo pelo título (KeyError 'slug', erro 500).
+        if not request.user.is_superuser:
+            return {}
+        return super().get_prepopulated_fields(request, obj)
+
     def get_fieldsets(self, request, obj=None):
         if request.user.is_superuser:
             return super().get_fieldsets(request, obj)

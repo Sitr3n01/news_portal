@@ -439,6 +439,35 @@ body > :is(.calendarbox, .clockbox) {
     margin-top: 4px;
 }
 
+/* Campos que empurravam a página para o lado entre 980 e 1024 px (com a
+   sidebar fixa sobram ~800 px): as duas listas do seletor de grupos e
+   permissões (filter_horizontal) não encolhiam abaixo de ~384 px cada, e as
+   opções em linha de radio_fields (o Cargo do usuário) não quebravam. O
+   <fieldset> tem min-width: min-content por padrão do navegador e crescia
+   até caber o seletor inteiro. */
+#main fieldset.module,
+#main .selector {
+    min-width: 0;
+}
+
+#main .selector > .selector-available,
+#main .selector > .selector-chosen {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+#main .selector select,
+#main .selector .selector-filter input {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+}
+
+#main .field-line div.flex-row:has(> div > label > input[type="radio"]) {
+    flex-wrap: wrap;
+    row-gap: 8px;
+}
+
 /* Abas do formulário (fieldsets com classe "tab", unfold/helpers/fieldsets_tabs.html):
    no celular o Unfold as empilhava, uma por linha; aqui ficam numa linha que
    rola de lado. */

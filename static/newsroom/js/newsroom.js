@@ -111,13 +111,24 @@
         var open = document.querySelector('details[data-nr-dropdown][open]');
         if (open) {
             open.open = false;
+            // O foco só volta para o botão do menu se estava dentro dele: com o
+            // foco num campo do formulário, o Esc fecha o menu e o foco fica.
             var summary = open.querySelector('summary');
-            if (summary) {
+            if (summary && open.contains(document.activeElement)) {
                 summary.focus();
             }
             return;
         }
         closeMenu();
+    });
+
+    // Menu aberto pelo teclado fecha quando o foco sai dele (Tab adiante).
+    document.addEventListener('focusin', function (event) {
+        document.querySelectorAll('details[data-nr-dropdown][open]').forEach(function (details) {
+            if (!details.contains(event.target)) {
+                details.open = false;
+            }
+        });
     });
 
     // Em telas largas a gaveta não existe: se a janela crescer com ela aberta,
@@ -397,54 +408,172 @@
 
     // ── Barra dos formulários do Django admin ─────────────────────────────
     // templates/admin/includes/form_bar.html. "Alterações não salvas" aparece
-    // na primeira edição, e Ctrl+S (Cmd+S no Mac) salva e continua na tela,
-    // como a barra do editor do Wagtail; sem esse botão, só salva.
+    // assim que algo muda no formulário, e sair da página com ela à vista pede
+    // confirmação. Ctrl+S (Cmd+S no Mac) salva e continua na tela, como a
+    // barra do editor do Wagtail; sem esse botão, só salva. E o formulário é
+    // enviado uma vez só.
     function formBar() {
         return document.querySelector('[data-nr-formbar]');
     }
 
-    function markDirty(event) {
+    function barForm() {
         var bar = formBar();
-        var field = event.target;
-        if (!bar || !field || !field.form || field.form.id !== bar.getAttribute('data-nr-form')) {
-            return;
-        }
-        // Campos sem nome (a busca do seletor de grupos) e a lista "disponíveis"
-        // do SelectFilter (id terminado em _from) não vão para o servidor.
-        if (!field.name || /_from$/.test(field.id || '')) {
-            return;
-        }
-        var note = bar.querySelector('[data-nr-formbar-dirty]');
+        return bar ? document.getElementById(bar.getAttribute('data-nr-form')) : null;
+    }
+
+    function dirtyNote() {
+        var bar = formBar();
+        return bar ? bar.querySelector('[data-nr-formbar-dirty]') : null;
+    }
+
+    function showDirty() {
+        var note = dirtyNote();
         if (note) {
             note.hidden = false;
         }
     }
 
+    function markDirty(event) {
+        var form = barForm();
+        var field = event.target;
+        if (!form || !field || field.form !== form) {
+            return;
+        }
+        // Campos sem nome (as buscas do seletor de grupos) não vão para o
+        // servidor. As duas listas do seletor (select.filtered) mudam de seleção
+        // só com o clique num item; o que conta é mover itens (mais abaixo).
+        if (!field.name || (field.tagName === 'SELECT' && field.classList.contains('filtered'))) {
+            return;
+        }
+        showDirty();
+    }
+
     document.addEventListener('input', markDirty, true);
     document.addEventListener('change', markDirty, true);
-    // O select2 do autocompletar e a janela de registro relacionado mudam o
-    // campo com o jQuery do Django (.trigger), que não chega ao addEventListener.
-    // Só depois do carregamento: ao montar os campos, o próprio admin dispara
-    // "change" pelo jQuery, sem que nada tenha sido alterado.
+
+    // Algo mudou em relação ao que veio do servidor? Para o que muda sem
+    // evento: calendário e relógio dos campos de data (DateTimeShortcuts) e o
+    // texto que o navegador devolve ao voltar para a página.
+    function formChanged(form) {
+        return Array.prototype.some.call(form.elements, function (field) {
+            if (!field.name || field.disabled || /^(hidden|file|submit|button|reset)$/.test(field.type)) {
+                return false;
+            }
+            if (field.tagName === 'SELECT') {
+                if (field.classList.contains('filtered')) {
+                    return false;
+                }
+                var options = Array.prototype.slice.call(field.options);
+                if (field.type === 'select-one') {
+                    // Sem opção marcada no HTML, o navegador mostra a primeira.
+                    var initial = options.findIndex(function (option) { return option.defaultSelected; });
+                    return field.selectedIndex !== Math.max(initial, 0);
+                }
+                return options.some(function (option) { return option.selected !== option.defaultSelected; });
+            }
+            if (field.type === 'checkbox' || field.type === 'radio') {
+                return field.checked !== field.defaultChecked;
+            }
+            return field.value !== field.defaultValue;
+        });
+    }
+
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest('.calendarbox, .clockbox, .datetimeshortcuts')) {
+            return;
+        }
+        window.setTimeout(function () {
+            var form = barForm();
+            if (form && formChanged(form)) {
+                showDirty();
+            }
+        }, 0);
+    }, true);
+
+    window.addEventListener('pageshow', function () {
+        var entry = window.performance && performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+        var form = barForm();
+        if (form && entry && entry.type === 'back_forward' && formChanged(form)) {
+            showDirty();
+        }
+    });
+
+    // Depois do carregamento (ao montar os campos o próprio admin dispara
+    // "change" pelo jQuery e o seletor de grupos preenche as listas):
+    // - o select2 do autocompletar muda o campo com o jQuery do Django
+    //   (.trigger), que não chega ao addEventListener;
+    // - o seletor de grupos e permissões move os itens entre as listas sem
+    //   evento nenhum: compara os itens escolhidos (SelectBox.cache, que não
+    //   muda ao filtrar) com os do carregamento.
     window.addEventListener('load', function () {
         window.setTimeout(function () {
-            if (formBar() && window.django && window.django.jQuery) {
+            var form = barForm();
+            if (!form) {
+                return;
+            }
+            if (window.django && window.django.jQuery) {
                 window.django.jQuery(document).on('change', markDirty);
             }
+            form.querySelectorAll('select.filtered[id$="_to"]').forEach(function (chosen) {
+                var values = function () {
+                    var cache = window.SelectBox && window.SelectBox.cache && window.SelectBox.cache[chosen.id];
+                    var items = cache ? cache.map(function (item) { return String(item.value); }) :
+                        Array.prototype.map.call(chosen.options, function (option) { return option.value; });
+                    return items.sort().join('\n');
+                };
+                var initial = values();
+                new MutationObserver(function () {
+                    if (values() !== initial) {
+                        showDirty();
+                    }
+                }).observe(chosen, {childList: true});
+            });
         }, 0);
     });
 
-    // Um envio por vez: segurar Ctrl+S (repetição da tecla) ou apertar de novo
-    // enquanto o servidor responde criaria registros repetidos na tela de adicionar.
-    var formSubmitting = false;
+    // Um envio por vez. Duplo clique, Enter duas vezes ou Ctrl+S repetido
+    // enquanto o servidor responde criariam registros repetidos na tela de
+    // adicionar. Se o envio for interrompido (botão Parar ou Esc do
+    // navegador), a Navigation API avisa (navigateerror) e um novo envio vale
+    // na hora; sem ela, depois de 10 s.
+    var lastSubmit = 0;
+
+    if (window.navigation && window.navigation.addEventListener) {
+        window.navigation.addEventListener('navigateerror', function () {
+            lastSubmit = 0;
+        });
+    }
+
+    function submitting() {
+        return lastSubmit && Date.now() - lastSubmit < 10000;
+    }
+
     document.addEventListener('submit', function (event) {
-        var bar = formBar();
-        if (bar && event.target && event.target.id === bar.getAttribute('data-nr-form') && !event.defaultPrevented) {
-            formSubmitting = true;
+        var form = barForm();
+        if (!form || event.target !== form || event.defaultPrevented) {
+            return;
         }
+        if (submitting()) {
+            event.preventDefault();
+            return;
+        }
+        lastSubmit = Date.now();
     });
+
     window.addEventListener('pageshow', function () {
-        formSubmitting = false;
+        lastSubmit = 0;
+    });
+
+    // Sair com "Alterações não salvas" à vista pede confirmação. O aviso do
+    // Unfold só percebe digitação; este cobre também data escolhida no
+    // calendário, autocompletar, seletor de grupos e a volta de um erro de
+    // validação (a página chega com o que foi digitado e não salvo).
+    window.addEventListener('beforeunload', function (event) {
+        var note = dirtyNote();
+        if (note && !note.hidden && !submitting()) {
+            event.preventDefault();
+            event.returnValue = '';
+        }
     });
 
     document.addEventListener('keydown', function (event) {
@@ -457,7 +586,7 @@
             return;
         }
         event.preventDefault();
-        if (event.repeat || formSubmitting) {
+        if (event.repeat || submitting()) {
             return;
         }
         button.click();

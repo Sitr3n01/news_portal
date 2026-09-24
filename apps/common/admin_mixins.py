@@ -14,7 +14,11 @@ _list_request = ContextVar('nr_list_request', default=None)
 
 class AdminUXMixin:
     list_before_template = 'admin/includes/model_list_help.html'
-    warn_unsaved_form = True
+    # O aviso de sair com alterações é o da barra do formulário (newsroom.js,
+    # "Alterações não salvas"). O do Unfold contava qualquer digitação, até nas
+    # buscas do seletor de grupos, e não via data escolhida no calendário,
+    # autocompletar nem itens movidos no seletor.
+    warn_unsaved_form = False
 
     ux_list_title = ''
     ux_list_description = ''

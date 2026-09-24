@@ -222,3 +222,62 @@ def test_unsaved_note_is_announced_and_shown_after_a_failed_save(client, root, i
     assert 'class="nr-editorbar__state" role="status"' in fresh
     assert 'data-nr-formbar-dirty hidden' in fresh
     assert 'data-nr-formbar-dirty>' in failed
+
+
+@pytest.mark.django_db
+def test_komuniki_admin_opens_the_courses_page_form(client, make_panel_user, current_site):
+    from apps.school.models import Page
+
+    page, _ = Page.objects.get_or_create(site=current_site, slug='cursos', defaults={'title': 'Cursos'})
+    komuniki = make_panel_user('af_komuniki', role=CustomUser.Role.SCHOOL_ADMIN, is_staff=True)
+    client.force_login(komuniki)
+
+    # O slug é somente leitura para quem não é superusuário: antes, o
+    # preenchimento automático pelo título procurava o campo e dava erro 500.
+    response = client.get(reverse('admin:school_page_change', args=[page.pk]))
+
+    assert response.status_code == 200
+    assert 'Somente leitura' not in _bar(response.content.decode())
+
+
+@pytest.mark.django_db
+def test_view_only_user_never_sees_social_tokens(client, make_panel_user, current_site):
+    from apps.social.models import SocialAccount
+
+    account = SocialAccount.objects.create(
+        site=current_site, platform='instagram', display_name='Oficial', username='oficial',
+        access_token='SEGREDO-ACESSO', refresh_token='SEGREDO-ATUALIZA',
+    )
+    viewer = make_panel_user('af_social_viewer', role=CustomUser.Role.READER, is_staff=True)
+    viewer.user_permissions.add(Permission.objects.get(codename='view_socialaccount'))
+    client.force_login(viewer)
+
+    content = client.get(reverse('admin:social_socialaccount_change', args=[account.pk])).content.decode()
+
+    assert 'SEGREDO-ACESSO' not in content
+    assert 'SEGREDO-ATUALIZA' not in content
+    assert 'Configurado (oculto)' in content
+
+
+@pytest.mark.django_db
+def test_guide_and_list_shortcuts_follow_permissions(client, make_panel_user, root, current_site):
+    config, _ = SchoolHomeConfig.objects.get_or_create(site=current_site)
+    url = reverse('admin:school_schoolhomeconfig_change', args=[config.pk])
+    testimonials = reverse('admin:school_testimonial_changelist')
+
+    client.force_login(root)
+    assert testimonials in _bar(client.get(url).content.decode())
+
+    # "Depoimentos" é só de superusuário: o atalho daria 403.
+    komuniki = make_panel_user('af_komuniki_guide', role=CustomUser.Role.SCHOOL_ADMIN, is_staff=True)
+    client.force_login(komuniki)
+    bar = _bar(client.get(url).content.decode())
+    assert testimonials not in bar
+    assert reverse('admin_school_guide') in bar
+
+    # Cabeçalho da lista: "Novo grupo" só para quem pode adicionar grupos.
+    viewer = make_panel_user('af_group_viewer', role=CustomUser.Role.READER, is_staff=True)
+    viewer.user_permissions.add(Permission.objects.get(codename='view_group'))
+    client.force_login(viewer)
+    content = client.get(reverse('admin:auth_group_changelist')).content.decode()
+    assert reverse('admin:auth_group_add') not in content

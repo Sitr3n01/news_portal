@@ -17,6 +17,8 @@ from django.contrib.admin.views.main import ORDER_VAR, PAGE_VAR, SEARCH_VAR
 from django.core.exceptions import FieldError, ValidationError
 from django.urls import NoReverseMatch, reverse
 
+from apps.common.newsroom.admin_links import link_allowed
+
 # Parâmetros da lista que não são filtro: não contam para decidir a aba ativa.
 NOT_FILTERS = {ORDER_VAR, PAGE_VAR, SEARCH_VAR, '_changelist_filters', 'e'}
 
@@ -62,6 +64,8 @@ def _actions(model_admin, request, cl, has_add_permission):
     primary = None
     secondary = []
     for item in getattr(model_admin, 'ux_list_actions', None) or []:
+        if not link_allowed(request, item):
+            continue
         action = {'label': item.get('label', ''), 'url': str(item.get('url', ''))}
         if item.get('kind') == 'primary' and primary is None:
             primary = action

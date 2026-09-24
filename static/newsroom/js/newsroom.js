@@ -17,6 +17,7 @@
     window.__newsroomShell = true;
 
     var VIEW_KEY = 'nr-view';
+    var SIDEBAR_SCROLL_KEY = 'nr-sidebar-scroll';
     var lastToggle = null;
 
     function sidebar() {
@@ -103,6 +104,18 @@
             closeDropdowns(details);
         }
     }, true);
+
+    // Guarda a rolagem da sidebar ao sair da página; o script inline de
+    // newsroom/partials/sidebar.html a devolve na página seguinte.
+    window.addEventListener('pagehide', function () {
+        var box = document.querySelector('[data-nr-sidebar-scroll]');
+        if (!box) {
+            return;
+        }
+        try {
+            sessionStorage.setItem(SIDEBAR_SCROLL_KEY, String(Math.round(box.scrollTop)));
+        } catch (error) {}
+    });
 
     document.addEventListener('keydown', function (event) {
         if (event.key !== 'Escape') {

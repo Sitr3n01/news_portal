@@ -50,7 +50,7 @@
         </details>
     {% endif %}
 
-    <div class="nr-sidebar__scroll">
+    <div class="nr-sidebar__scroll" data-nr-sidebar-scroll>
         <nav class="nr-nav" aria-label="Menu principal">
             {% for group in nav.groups %}
                 <p class="nr-nav__label" id="nr-nav-group-{{ group.key }}">{{ group.label }}</p>
@@ -128,3 +128,58 @@
     </div>
 </aside>
 <div class="nr-backdrop" data-nr-backdrop hidden></div>
+{% comment %}
+    Cada item da sidebar é uma navegação completa, e a rolagem voltaria ao
+    topo a cada clique. newsroom.js guarda a posição ao sair da página; este
+    script a devolve aqui, antes da primeira pintura, para a lista não pular.
+    Se o item ativo ficar fora da área visível (outra sidebar, janela menor),
+    ele é trazido para dentro dela. No Unfold o <html> nasce com x-cloak
+    (display: none) até o Alpine iniciar; sem layout não há como rolar, então
+    a restauração espera a sidebar ganhar tamanho (o ResizeObserver dispara
+    antes da pintura desse quadro).
+{% endcomment %}
+<script>
+    (function () {
+        var box = document.querySelector('[data-nr-sidebar-scroll]');
+        if (!box) {
+            return;
+        }
+
+        function restore() {
+            try {
+                var saved = parseInt(sessionStorage.getItem('nr-sidebar-scroll'), 10);
+                if (saved > 0) {
+                    box.scrollTop = saved;
+                }
+            } catch (error) {}
+            var active = box.querySelector('.nr-nav__item.is-active');
+            if (!active) {
+                return;
+            }
+            var item = active.getBoundingClientRect();
+            var area = box.getBoundingClientRect();
+            // Rolagem mínima para o item caber, com uma folga de 8 px. Subindo,
+            // o rótulo do grupo do item também entra na área visível.
+            if (item.top < area.top) {
+                var list = active.closest('.nr-nav__list');
+                var label = list && list.previousElementSibling;
+                var top = label ? label.getBoundingClientRect().top : item.top;
+                box.scrollTop -= area.top - top + 8;
+            } else if (item.bottom > area.bottom) {
+                box.scrollTop += item.bottom - area.bottom + 8;
+            }
+        }
+
+        if (box.clientHeight > 0 || !window.ResizeObserver) {
+            restore();
+            return;
+        }
+        var observer = new ResizeObserver(function () {
+            if (box.clientHeight > 0) {
+                observer.disconnect();
+                restore();
+            }
+        });
+        observer.observe(box);
+    }());
+</script>

@@ -18,7 +18,16 @@ def sync_article_status_on_wagtail_publish(sender, instance, **kwargs):
     que é o único campo que as queries públicas (views, sitemap, feed,
     newsletter) realmente usam para decidir visibilidade — `live` do Wagtail
     é interno ao painel administrativo e não é lido em nenhum lugar do site
-    público."""
+    público.
+
+    O Wagtail 7.4 manda `published` também ao AGENDAR ("Agendar publicação":
+    PublishRevisionAction._after_publish roda mesmo com go_live_at no futuro),
+    com a notícia ainda fora do ar. Marcar `status` nesse momento punha a
+    notícia agendada no site (e na fila da newsletter) antes da hora. Só conta
+    quando ela entra no ar de fato; na hora marcada, o `publish_scheduled`
+    publica a revisão e o sinal chega de novo, já com `live=True`."""
+    if not instance.live:
+        return
     if instance.status != Article.Status.PUBLISHED:
         instance.status = Article.Status.PUBLISHED
         instance.save(update_fields=['status', 'published_at'])

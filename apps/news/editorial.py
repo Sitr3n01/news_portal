@@ -112,7 +112,7 @@ def in_review_count():
 def article_status_counts():
     return {
         'published': Article.objects.filter(status=Article.Status.PUBLISHED).count(),
-        'draft': Article.objects.filter(status=Article.Status.DRAFT).count(),
+        'draft': Article.objects.filter(status=Article.Status.DRAFT).exclude(scheduled_q()).count(),
         'in_review': in_review_count(),
         'scheduled': Article.objects.filter(scheduled_q()).count(),
     }
@@ -122,13 +122,15 @@ def filter_articles(queryset, state):
     """Aplica o filtro de aba. Filtros desconhecidos equivalem a "Todas".
 
     "Rascunhos" inclui os rascunhos em revisão — continuam sendo rascunhos, e é
-    a mesma regra da contagem acima. O selo de cada linha mostra o estado mais
-    específico (ver ``editorial_state``).
+    a mesma regra da contagem acima —, mas não os agendados: esses ficam com
+    ``status`` de rascunho até entrar no ar (apps/news/signals.py) e têm a aba
+    própria. O selo de cada linha mostra o estado mais específico (ver
+    ``editorial_state``).
     """
     if state == STATE_PUBLISHED:
         return queryset.filter(status=Article.Status.PUBLISHED)
     if state == STATE_DRAFT:
-        return queryset.filter(status=Article.Status.DRAFT)
+        return queryset.filter(status=Article.Status.DRAFT).exclude(scheduled_q())
     if state == STATE_ARCHIVED:
         return queryset.filter(status=Article.Status.ARCHIVED)
     if state == STATE_REVIEW:

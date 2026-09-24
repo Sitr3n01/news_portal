@@ -1,4 +1,5 @@
 {% load static %}
+<!DOCTYPE html>
 <html class="scroll-smooth">
 
 <head>
@@ -146,6 +147,9 @@
             width: 100%;
             max-width: 100%;
             min-height: 65px;
+            /* O iframe do Turnstile fica num shadow root, fora do alcance do display:block abaixo. Sem isto ele
+               senta na linha de base e ganha a folga dos descendentes. */
+            line-height: 0;
         }
 
         .news-turnstile-compact [data-turnstile-widget] {

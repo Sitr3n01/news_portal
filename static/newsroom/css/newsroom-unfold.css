@@ -396,3 +396,188 @@ body > :is(.calendarbox, .clockbox) {
         margin-bottom: 18px;
     }
 }
+
+/* ── Corpo dos formulários, no desenho do editor do Wagtail ───────────────
+   O Unfold punha os campos num cartão com borda, as abas em pílulas cinzas e
+   o título de cada grupo numa faixa cinza. Aqui o formulário fica aberto
+   como o editor de notícias: abas sublinhadas (as mesmas das listas),
+   títulos de grupo em negrito, grupo recolhível com o botão redondo do
+   Wagtail à esquerda, rótulos de 16 px e campos de 43 px com texto de 16 px.
+   Só CSS: os templates do Unfold continuam os mesmos. */
+
+body.change-form #main .form-rows.border {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+body.change-form #main .field-line {
+    padding: 0 0 24px;
+}
+
+body.change-form #main .form-row.last .field-line,
+body.change-form #main .form-rows > .form-row:last-child .field-line {
+    padding-bottom: 8px;
+}
+
+/* Abas: o nav em pílula do Unfold vira o sublinhado das abas do painel. */
+body.change-form #main [x-data^="{ activeFieldsetTab"] > div > nav {
+    display: flex;
+    flex-direction: row;
+    gap: 18px;
+    margin: 0 0 24px;
+    padding: 0;
+    border-bottom: 1px solid var(--nr-line);
+    border-radius: 0;
+    background: transparent;
+}
+
+body.change-form #main [x-data^="{ activeFieldsetTab"] > div > nav > a {
+    margin-bottom: -1px;
+    padding: 10px 1px 11px;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: var(--nr-muted);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+body.change-form #main [x-data^="{ activeFieldsetTab"] > div > nav > a:hover {
+    background: transparent;
+    color: var(--nr-ink);
+}
+
+body.change-form #main [x-data^="{ activeFieldsetTab"] > div > nav > a.active {
+    border-bottom-color: var(--nr-ink);
+    background: transparent;
+    box-shadow: none;
+    color: var(--nr-ink);
+    font-weight: 600;
+}
+
+/* Título de grupo: sem a faixa cinza, em negrito, e uma linha entre grupos. */
+body.change-form #main fieldset.module > h2,
+body.change-form #main fieldset.module > details > summary > h2 {
+    height: auto;
+    margin: 0 0 20px;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--nr-ink);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+}
+
+body.change-form #main fieldset.module + fieldset.module:has(> h2, > details) {
+    margin-top: 12px;
+    padding-top: 28px;
+    border-top: 1px solid var(--nr-line);
+}
+
+/* Grupo recolhível: o botão redondo com a seta do editor do Wagtail, à
+   esquerda do título, girado enquanto está fechado. */
+body.change-form #main fieldset.module > details > summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+body.change-form #main fieldset.module > details > summary::-webkit-details-marker {
+    display: none;
+}
+
+body.change-form #main fieldset.module > details > summary > h2 {
+    gap: 12px;
+}
+
+body.change-form #main fieldset.module > details > summary > h2::before {
+    content: "";
+    flex: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--nr-ink-2, #262626) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E") center / 16px no-repeat;
+    transform: rotate(-90deg);
+    transition: transform .15s ease;
+}
+
+body.change-form #main fieldset.module > details[open] > summary > h2::before {
+    transform: none;
+}
+
+/* A seta do Unfold (summary::after, ícone "expand_more") dá lugar ao botão acima. */
+body.change-form #main fieldset.module > details > summary::after {
+    content: none;
+    display: none;
+}
+
+/* Rótulos e campos com as medidas do editor do Wagtail. */
+body.change-form #main .field-line label.block.font-semibold {
+    margin-bottom: 8px;
+    color: var(--nr-ink);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+body.change-form #main .field-line label.block.font-semibold > .text-red-600 {
+    margin-left: 4px;
+}
+
+body.change-form #main .field-line .max-w-2xl {
+    max-width: 840px;
+}
+
+body.change-form #main .field-line :is(
+    input[type="text"], input[type="email"], input[type="url"], input[type="number"],
+    input[type="password"], input[type="search"], input[type="tel"], input[type="date"],
+    input[type="time"], input[type="datetime-local"], select:not([multiple]), textarea
+) {
+    min-height: 43px;
+    padding: 8px 16px;
+    border-color: var(--nr-line-2);
+    border-radius: 7px;
+    box-shadow: none;
+    color: var(--nr-ink-2, #262626);
+    font-size: 16px;
+    font-weight: 400;
+}
+
+body.change-form #main .field-line select:not([multiple]) {
+    padding-right: 40px;
+}
+
+body.change-form #main .field-line textarea {
+    line-height: 1.5;
+}
+
+/* Ajuda do campo: o texto cinza do editor, não o azul miúdo do Unfold. */
+body.change-form #main .field-line .help,
+body.change-form #main .field-line .leading-relaxed.mt-2 {
+    color: var(--nr-muted);
+    font-size: 13.5px;
+}
+
+/* Seletor de grupos e permissões (filter_horizontal): o filtro com o mesmo
+   campo branco dos outros, não o cinza do Django. */
+body.change-form #main .selector .selector-filter input {
+    border: 1px solid var(--nr-line-2);
+    background: var(--nr-white);
+}
+
+/* Lista: a faixa da busca e a tabela num cartão só, como nas listas do
+   Wagtail. O Unfold desenhava duas caixas separadas por 16 px (e nenhuma no
+   celular). */
+body.change-list #changelist .grow > div:has(> #toolbar) {
+    margin-bottom: 0;
+    border: 1px solid var(--nr-line);
+    border-radius: var(--nr-radius-card) var(--nr-radius-card) 0 0;
+}
+
+body.change-list #changelist-form > div:has(#result_list) {
+    border: 1px solid var(--nr-line);
+    border-top: 0;
+    border-radius: 0 0 var(--nr-radius-card) var(--nr-radius-card);
+}

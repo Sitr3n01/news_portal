@@ -182,3 +182,15 @@ def test_django_history_uses_the_list_header(client, root):
 
     assert re.search(r'<h1 class="nr-listhead__title">\s*Histórico de modificações', html)
     assert 'Nenhuma alteração registrada.' in html
+
+
+def test_panel_dates_are_short():
+    """config/formats/pt_BR: "24/07/2026 18:27", não "24 de Julho de 2026 às 18:27"."""
+    from datetime import datetime
+
+    from django.utils import formats, translation
+
+    with translation.override('pt-br'):
+        moment = datetime(2026, 7, 24, 18, 27)
+        assert formats.date_format(moment, 'DATETIME_FORMAT') == '24/07/2026 18:27'
+        assert formats.date_format(moment.date(), 'DATE_FORMAT') == '24/07/2026'

@@ -168,6 +168,8 @@ LANGUAGES = [
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_TZ = True
+# Datas curtas no painel ("24/07/2026 18:27"); ver config/formats/pt_BR/formats.py.
+FORMAT_MODULE_PATH = ['config.formats']
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']

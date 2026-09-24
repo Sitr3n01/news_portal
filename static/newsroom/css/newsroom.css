@@ -1988,11 +1988,20 @@
     font-weight: 600;
 }
 
-.nr-empty .nr-icon {
+/* Com ícone (histórico do Django admin): ícone e texto na mesma linha. O
+   reset do Tailwind no Unfold deixa todo svg como bloco. */
+.nr-empty:has(> .nr-icon) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.nr-empty > .nr-icon {
+    display: inline-block;
+    flex: none;
     width: 18px;
     height: 18px;
-    margin-right: 8px;
-    vertical-align: -4px;
 }
 
 /* ── Cartões inferiores ─────────────────────────────────────────────────── */

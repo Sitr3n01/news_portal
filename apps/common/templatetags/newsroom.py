@@ -25,6 +25,7 @@ from apps.common.newsroom.editor import editor_bar
 from apps.common.newsroom.navigation import build_navigation
 from apps.common.newsroom.wagtail_lists import empty_message as wagtail_empty_message
 from apps.common.newsroom.wagtail_lists import list_header as wagtail_list_header
+from apps.common.newsroom.wagtail_lists import page_header as wagtail_page_header
 
 register = template.Library()
 
@@ -213,6 +214,12 @@ def nr_editor_bar(context):
 def nr_wagtail_list_header(context):
     """Dados do cabeçalho das listagens do Wagtail (templates/newsroom/wagtail/list_header.html)."""
     return wagtail_list_header(context)
+
+
+@register.simple_tag(takes_context=True)
+def nr_page_header(context):
+    """Voltar e título das telas avulsas do Wagtail (templates/newsroom/wagtail/page_header.html)."""
+    return wagtail_page_header(context)
 
 
 @register.simple_tag(takes_context=True)

@@ -399,7 +399,14 @@
         if (!slot || !nav) {
             return;
         }
+        // O "Excluir" que alguns formulários do Wagtail põem no rodapé já está
+        // na barra como "Remover" (_danger.html): não entra duas vezes.
+        var removeLink = bar.querySelector('#nr-editorbar-danger a');
+        var removeHref = removeLink && removeLink.getAttribute('href');
         var controls = Array.prototype.filter.call(nav.querySelectorAll('button, a'), function (element) {
+            if (removeHref && element.tagName === 'A' && element.getAttribute('href') === removeHref) {
+                return false;
+            }
             return !element.classList.contains('w-dropdown__toggle');
         }).map(function (element) {
             var kind = kindOf(element);

@@ -14,6 +14,7 @@ abas de estado), que vale no lugar deste.
 
 import re
 
+from django.utils.text import capfirst
 from wagtail.admin.widgets.button import BaseDropdownMenuButton
 
 # Por nome de rota (request.resolver_match.view_name). `add`: rótulo do botão
@@ -174,3 +175,43 @@ def empty_message(context):
     if context.get('is_searching') or context.get('is_filtering'):
         return 'Nada encontrado com essa busca ou esses filtros.'
     return config['empty']
+
+
+def page_header(context):
+    """Voltar e título das telas avulsas (templates/newsroom/wagtail/page_header.html).
+
+    "Voltar" é o último item da trilha do Wagtail que tem endereço e não é a
+    própria página; o título é o do Wagtail ("Remover: Educação",
+    "Inspecionar: ...").
+    """
+    request = context.get('request')
+    here = getattr(request, 'path', None)
+    items = [
+        item for item in context.get('breadcrumbs_items') or []
+        if item.get('url') and item.get('url') != here
+    ]
+    back = {'url': items[-1]['url'], 'label': str(items[-1]['label'])} if items else None
+    if back is None:
+        # Confirmações sem trilha (remover, despublicar): volta para a lista.
+        back = _index_of(context.get('view'), here)
+    title = context.get('header_title') or context.get('page_title') or ''
+    return {'back': back, 'title': str(title)}
+
+
+def _index_of(view, here):
+    # As confirmações do Wagtail sabem para onde voltar (get_success_url); as
+    # outras telas, a lista (index_url). Views sem esses nomes levantam
+    # ImproperlyConfigured ou NoReverseMatch.
+    url = None
+    for name in ('get_success_url', 'index_url'):
+        try:
+            candidate = getattr(view, name, None)
+            url = candidate() if callable(candidate) else candidate
+        except Exception:  # noqa: BLE001
+            url = None
+        if url:
+            break
+    model = getattr(view, 'model', None)
+    if not url or url == here or model is None:
+        return None
+    return {'url': url, 'label': capfirst(model._meta.verbose_name_plural)}

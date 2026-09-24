@@ -1,0 +1,12 @@
+{% comment %}
+    Override do projeto: o aviso de uso das telas de remover e despublicar, em
+    português (o catálogo pt-BR do Wagtail 7.4 deixa "This Categoria is
+    referenced 8 times." em inglês). Mesmas variáveis do original: usage_url,
+    usage_count, is_protected.
+{% endcomment %}
+<p class="nr-confirm__usage">
+    <a href="{{ usage_url }}">{% if usage_count == 1 %}Usado em 1 lugar do site{% else %}Usado em {{ usage_count }} lugares do site{% endif %}</a>.
+    {% if is_protected %}
+        Alguma dessas referências impede a remoção.
+    {% endif %}
+</p>

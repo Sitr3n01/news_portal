@@ -108,3 +108,46 @@ def test_empty_search_says_nothing_was_found(client, root):
     html = client.get(reverse('wagtaildocs:index_results'), {'q': 'nada-com-isso'}).content.decode()
 
     assert 'Nada encontrado com essa busca ou esses filtros.' in html
+
+
+# ── Formulários e telas avulsas ────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('url', ['/cms/account/', '/cms/redirects/add/', '/cms/collections/add/', '/cms/groups/new/'])
+def test_wagtail_forms_use_the_editor_bar(client, root, url):
+    client.force_login(root)
+
+    html = client.get(url).content.decode()
+
+    assert '<header class="nr-editorbar" data-nr-editorbar>' in html
+    assert '<header class="w-slim-header' not in html
+    # O rodapé nativo continua no formulário: é nele que a barra clica.
+    assert 'data-edit-form' in html
+    assert 'newsroom/js/newsroom-editor.js' in html
+
+
+@pytest.mark.django_db
+def test_delete_confirmation_is_a_panel_card(client, root):
+    from apps.news.models import Category
+
+    category = Category.objects.create(name='Para remover', slug='para-remover')
+    client.force_login(root)
+
+    html = client.get(reverse('wagtailsnippets_news_category:delete', args=[category.pk])).content.decode()
+
+    assert '<header class="nr-editorbar nr-pagebar">' in html
+    assert 'Remover “Para remover”?' in html
+    assert 'class="nr-btn nr-btn--danger">Remover</button>' in html
+    assert re.search(r'class="nr-editorbar__parent" href="[^"]+">Categorias</a>', html)
+    assert 'is referenced' not in html
+
+
+@pytest.mark.django_db
+def test_multiple_image_upload_uses_the_page_header(client, root):
+    client.force_login(root)
+
+    html = client.get(reverse('wagtailimages:add_multiple')).content.decode()
+
+    assert '<header class="nr-editorbar nr-pagebar">' in html
+    assert '<header class="w-slim-header' not in html

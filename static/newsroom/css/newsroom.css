@@ -1141,6 +1141,17 @@
     background: var(--nr-surface-subtle);
 }
 
+.nr-btn--danger {
+    border-color: var(--nr-red);
+    background: var(--nr-red);
+    color: var(--nr-white) !important;
+}
+
+.nr-btn--danger:hover {
+    border-color: #991b1b;
+    background: #991b1b;
+}
+
 .nr-toolbtn {
     display: inline-flex;
     align-items: center;

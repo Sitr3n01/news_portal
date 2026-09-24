@@ -1,0 +1,63 @@
+{% load newsroom %}
+<header class="nr-topbar">
+    <div class="nr-topbar__start">
+        {% newsroom_menu_toggle "nr-topbar__menu" %}
+        <nav class="nr-breadcrumbs" aria-label="Trilha de navegação">
+            {% if nav.workspace %}
+                <a href="{{ dashboard_url }}">{{ nav.workspace.label }}</a>
+            {% else %}
+                <a href="{{ dashboard_url }}">Painel</a>
+            {% endif %}
+            {% if crumbs %}
+                {% for crumb in crumbs %}
+                    {% nr_icon "chevron" "nr-breadcrumbs__sep" %}
+                    {% if forloop.last %}
+                        <strong aria-current="page">{{ crumb.label }}</strong>
+                    {% elif crumb.url %}
+                        <a href="{{ crumb.url }}">{{ crumb.label }}</a>
+                    {% else %}
+                        <span>{{ crumb.label }}</span>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                {% nr_icon "chevron" "nr-breadcrumbs__sep" %}
+                <strong aria-current="page">{{ page_title }}</strong>
+            {% endif %}
+        </nav>
+    </div>
+    <div class="nr-topbar__actions">
+        {% if help %}
+            <a class="nr-icon-button" href="{{ help.url }}" title="Central de ajuda">
+                {% nr_icon "help" %}<span class="nr-sr-only">Central de ajuda</span>
+            </a>
+        {% endif %}
+        {% if nav.workspace.public_url %}
+            <a class="nr-icon-button" href="{{ nav.workspace.public_url }}" target="_blank" rel="noopener" title="Ver {{ nav.workspace.label }} no ar">
+                {% nr_icon "external" %}<span class="nr-sr-only">Ver {{ nav.workspace.label }} no ar (abre em nova aba)</span>
+            </a>
+        {% endif %}
+        <details class="nr-topbar__account" data-nr-dropdown>
+            <summary class="nr-top-avatar" aria-label="Conta de {{ account.name }}: abrir opções">
+                {% if account.avatar_url %}
+                    <img src="{{ account.avatar_url }}" alt="" width="25" height="25">
+                {% else %}
+                    <span aria-hidden="true">{{ account.initial }}</span>
+                {% endif %}
+            </summary>
+            <div class="nr-menu nr-menu--right">
+                <div class="nr-menu__header">
+                    <span class="nr-menu__name">{{ account.name }}</span>
+                    {% if account.email %}<span class="nr-menu__email">{{ account.email }}</span>{% endif %}
+                </div>
+                {% if account.url %}
+                    <a class="nr-menu__item" href="{{ account.url }}">{% nr_icon "settings" %}<span>Configurações da conta</span></a>
+                {% endif %}
+                <form method="post" action="{{ logout_url }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ login_url }}">
+                    <button type="submit" class="nr-menu__item">{% nr_icon "logout" %}<span>Sair</span></button>
+                </form>
+            </div>
+        </details>
+    </div>
+</header>

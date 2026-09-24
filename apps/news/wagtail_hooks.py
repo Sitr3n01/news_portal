@@ -14,30 +14,53 @@ Despublicar/Salvar rascunho), sincronizados via signals em
 apps/news/signals.py. Editar o dropdown manualmente ao lado desses botões
 era uma fonte de confusão (dois controles para o mesmo estado).
 
-Round 7 — "Redação": dashboard do Wagtail (/cms/) reformulado com 4
-componentes dedicados (cabeçalho, cartões de status, "continuar de onde
-parou" e artigos recentes), relatório dedicado de artigos em revisão
-(reaproveitando WorkflowView nativo) e microcopy em PT-BR nas ações de
-publicação do snippet Article.
+Round 7 — relatório dedicado de artigos em revisão (reaproveitando
+WorkflowView nativo) e microcopy em PT-BR nas ações de publicação do snippet
+Article. Os painéis "Redação" da página inicial do /cms/ migraram para a visão
+geral unificada (/painel/).
 """
 
-from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q
-from django.templatetags.static import static
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import redirect
 from django.urls import path, reverse
 from django.utils import timezone
-from django.utils.html import format_html
+from django.utils.functional import cached_property
 from wagtail import hooks
+from wagtail.admin import messages
+from wagtail.admin.auth import permission_denied
 from wagtail.admin.menu import MenuItem
-from wagtail.admin.panels import FieldPanel, MultiFieldPanel, PublishingPanel
-from wagtail.admin.ui.components import Component
+from wagtail.admin.panels import FieldPanel, MultiFieldPanel, ObjectList
+from wagtail.admin.ui.tables import Column
 from wagtail.admin.views.reports.workflows import WorkflowView as BaseWorkflowView
-from wagtail.models import WorkflowState
 from wagtail.permission_policies.base import ModelPermissionPolicy
 from wagtail.snippets.models import register_snippet
 from wagtail.snippets.views.snippets import SnippetViewSet
 
+from apps.news.editorial import article_status_counts
 from apps.news.models import Article, Category, NewsHomeConfig, Tag
+from apps.news.permissions import (
+    CHANGE_PERMISSION,
+    PUBLISH_PERMISSION,
+    ArticlePermissionPolicy,
+    can_edit_article,
+)
+from apps.news.wagtail_article import (
+    ArticleAdminForm,
+    ArticleCopyView,
+    ArticleCreateView,
+    ArticleDeleteView,
+    ArticleEditView,
+    ArticleIndexView,
+    ArticlePreviewOnCreateView,
+    RestrictedPublishingPanel,
+    editorial_badge,
+)
+from apps.news.wagtail_moderation import (
+    BULK_ACTIONS,
+    CommentSnippetViewSet,
+    NewsletterDeliverySnippetViewSet,
+    NewsletterSubscriptionSnippetViewSet,
+)
 
 register_snippet(Category)
 register_snippet(Tag)
@@ -50,9 +73,42 @@ class ArticleSnippetViewSet(SnippetViewSet):
     menu_name = 'article-snippets'
     menu_order = 100
     add_to_admin_menu = True
-    list_display = ('title', 'category', 'status', 'published_at', 'is_featured')
+    list_display = (
+        'title', 'category',
+        # Estado editorial (publicada, rascunho, em revisão, agendada, arquivada)
+        # como selo, o mesmo da visão geral; ordena pelo campo `status`.
+        Column('status', label='Estado', sort_key='status', accessor=editorial_badge),
+        Column(
+            'published_at', label='Publicada em', sort_key='published_at', classname='nr-cell-nowrap',
+            accessor=lambda article: (
+                timezone.localtime(article.published_at).strftime('%d/%m/%Y %H:%M') if article.published_at else '—'
+            ),
+        ),
+        # Só marca o que está em destaque; antes a coluna exibia "True/False" cru.
+        Column(
+            'is_featured', label='Destaque', sort_key='is_featured', classname='nr-cell-nowrap',
+            accessor=lambda article: 'Em destaque' if article.is_featured else '',
+        ),
+    )
     list_filter = ('status', 'category', 'site', 'is_featured')
     search_fields = ('title', 'excerpt')
+
+    # Regra editorial por notícia (apps/news/permissions.py): quem não publica
+    # altera as próprias notícias e as dos colegas só enquanto forem rascunho.
+    index_view_class = ArticleIndexView
+    index_results_template_name = 'news/wagtail/article_index_results.html'
+    add_view_class = ArticleCreateView
+    edit_view_class = ArticleEditView
+    delete_view_class = ArticleDeleteView
+    copy_view_class = ArticleCopyView
+    preview_on_add_view_class = ArticlePreviewOnCreateView
+    # Ficha somente leitura: é para onde a listagem leva quem não pode editar.
+    inspect_view_enabled = True
+    inspect_view_fields = ['title', 'excerpt', 'category', 'tags', 'author', 'status', 'published_at']
+
+    @cached_property
+    def permission_policy(self):
+        return ArticlePermissionPolicy(self.model)
 
     # Todo campo editável do modelo precisa aparecer aqui: o Article deixou de ser
     # registrado no admin do Django (apps/news/admin.py), então este formulário é a
@@ -61,9 +117,19 @@ class ArticleSnippetViewSet(SnippetViewSet):
     # meta_description, todos consumidos pelo site público mas sem onde preencher.
     # Exceção deliberada: `status`, controlado só pelos botões nativos de
     # publicação (ver o docstring do módulo).
+    #
+    # Campos com `permission=PUBLISH_PERMISSION` só existem no formulário de
+    # quem publica — o Wagtail os remove no servidor para os demais: destaque na
+    # home, portal, autor (a notícia nasce assinada por quem cria) e agendamento.
     panels = [
         FieldPanel('title'),
-        FieldPanel('slug'),
+        FieldPanel(
+            'slug',
+            help_text=(
+                'Endereço da notícia. Pode mudar depois de publicada: o endereço antigo '
+                'passa a levar automaticamente ao novo.'
+            ),
+        ),
         FieldPanel('excerpt'),
         MultiFieldPanel(
             [
@@ -75,8 +141,8 @@ class ArticleSnippetViewSet(SnippetViewSet):
         FieldPanel('category'),
         FieldPanel('tags'),
         FieldPanel('body'),
-        FieldPanel('site'),
-        FieldPanel('author'),
+        FieldPanel('site', permission=PUBLISH_PERMISSION),
+        FieldPanel('author', permission=PUBLISH_PERMISSION),
         MultiFieldPanel(
             [
                 FieldPanel('meta_title'),
@@ -93,9 +159,10 @@ class ArticleSnippetViewSet(SnippetViewSet):
         # (apps/news/views.py::_resolve_home_highlights) quando não há
         # NewsHomeConfig com hero manual. Fica junto da publicação porque é
         # decisão editorial do mesmo momento.
-        FieldPanel('is_featured'),
-        PublishingPanel(),
+        FieldPanel('is_featured', permission=PUBLISH_PERMISSION),
+        RestrictedPublishingPanel(permission=PUBLISH_PERMISSION),
     ]
+    edit_handler = ObjectList(panels, base_form_class=ArticleAdminForm)
 
 
 register_snippet(ArticleSnippetViewSet)
@@ -125,168 +192,61 @@ class NewsHomeConfigSnippetViewSet(SnippetViewSet):
 register_snippet(NewsHomeConfigSnippetViewSet)
 
 
-# ── Round 7: dashboard "Redação" (/cms/) ─────────────────────────────────────
+# ── Comentários e newsletter (migrados do Django admin) ──────────────────────
+# Ver apps/news/wagtail_moderation.py para o motivo e a paridade de recursos.
+
+register_snippet(CommentSnippetViewSet)
+register_snippet(NewsletterSubscriptionSnippetViewSet)
+register_snippet(NewsletterDeliverySnippetViewSet)
+
+for _bulk_action in BULK_ACTIONS:
+    hooks.register('register_bulk_action', _bulk_action)
+
+
+# ── Porta da edição por notícia ──────────────────────────────────────────────
+#
+# A edição do Wagtail 7.4 confere só a permissão de modelo. Este hook oficial
+# roda antes da view de edição E da de restaurar revisão (que herda dela) —
+# GET e POST —, aplicando a regra de apps/news/permissions.py no servidor.
+#
+# A view entrega ao hook a ÚLTIMA REVISÃO como objeto, e o ``status`` guardado
+# numa revisão é o do momento em que ela foi salva (uma notícia retirada do ar
+# volta a aparecer como rascunho). A regra olha a linha gravada no banco, que é
+# o estado real da notícia.
+
+
+@hooks.register('before_edit_snippet')
+def enforce_article_edit_rule(request, instance):
+    if not isinstance(instance, Article):
+        return None
+    stored = Article._default_manager.filter(pk=instance.pk).only('status', 'author_id').first()
+    if stored is None or not request.user.has_perm(CHANGE_PERMISSION):
+        return permission_denied(request)
+    if can_edit_article(request.user, stored):
+        return None
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        raise PermissionDenied
+    # Em vez do "sem permissão" genérico, explica a regra e leva à ficha
+    # somente leitura da notícia, de onde dá para copiá-la como rascunho novo.
+    messages.error(
+        request,
+        'Esta notícia é de outra pessoa e já esteve no ar: só quem publica pode alterá-la. '
+        'Você pode consultá-la aqui ou copiá-la como um novo rascunho.',
+    )
+    return redirect('wagtailsnippets_news_article:inspect', stored.pk)
+
+
+# ── Contagens editoriais ─────────────────────────────────────────────────────
+#
+# O dashboard "Redação" que vivia na página inicial do /cms/ foi absorvido pela
+# visão geral do painel unificado (/painel/, apps/common/newsroom): mesmos
+# números, mesma fonte (apps/news/editorial.py). A página inicial do /cms/
+# agora redireciona para lá (config/urls.py).
 
 
 def _article_status_counts():
-    now = timezone.now()
-    article_ct = ContentType.objects.get_for_model(Article, for_concrete_model=False)
-    return {
-        'published': Article.objects.filter(status=Article.Status.PUBLISHED).count(),
-        'draft': Article.objects.filter(status=Article.Status.DRAFT).count(),
-        'in_review': WorkflowState.objects.active().filter(base_content_type=article_ct).count(),
-        'scheduled': Article.objects.filter(live=False, go_live_at__isnull=False, go_live_at__gt=now).count(),
-    }
-
-
-class RedacaoHeaderPanel(Component):
-    """Cabeçalho do dashboard "Redação": saudação, botão de criar notícia e
-    links de navegação rápida (categorias, tags, home do portal e site
-    público) — estes últimos substituem os "links rápidos" do antigo
-    EditorialDashboardPanel."""
-
-    order = 90
-    template_name = 'news/wagtail/redacao_header_panel.html'
-
-    def get_context_data(self, parent_context):
-        request = parent_context['request']
-        user = request.user
-        return {
-            'visible': user.has_perm('news.view_article'),
-            'display_name': user.first_name or user.get_username(),
-            'can_add_article': user.has_perm('news.add_article'),
-            'add_url': reverse('wagtailsnippets_news_article:add'),
-            'public_site_url': reverse('news:list'),
-            'can_view_categories': user.has_perm('news.view_category'),
-            'category_url': reverse('wagtailsnippets_news_category:list'),
-            'can_view_tags': user.has_perm('news.view_tag'),
-            'tag_url': reverse('wagtailsnippets_news_tag:list'),
-            'can_view_home_config': user.has_perm('news.view_newshomeconfig'),
-            'home_config_url': reverse('wagtailsnippets_news_newshomeconfig:list'),
-        }
-
-
-class ArticleStatusCardsPanel(Component):
-    """Cartões de contagem (publicadas/rascunhos/em revisão/agendadas), cada
-    um linkando para a listagem filtrada correspondente."""
-
-    order = 100
-    template_name = 'news/wagtail/status_cards_panel.html'
-
-    def get_context_data(self, parent_context):
-        request = parent_context['request']
-        user = request.user
-        if not user.has_perm('news.view_article'):
-            return {'visible': False}
-
-        counts = _article_status_counts()
-        list_url = reverse('wagtailsnippets_news_article:list')
-        cards = [
-            {
-                'label': 'Publicadas',
-                'count': counts['published'],
-                'icon': 'check',
-                'url': f'{list_url}?status={Article.Status.PUBLISHED}',
-            },
-            {
-                'label': 'Rascunhos',
-                'count': counts['draft'],
-                'icon': 'draft',
-                'url': f'{list_url}?status={Article.Status.DRAFT}',
-            },
-            {
-                'label': 'Em revisão',
-                'count': counts['in_review'],
-                'icon': 'resubmit',
-                'url': reverse('news_workflow_report'),
-            },
-            {
-                'label': 'Agendadas',
-                'count': counts['scheduled'],
-                'icon': 'time',
-                'url': list_url,
-            },
-        ]
-        return {
-            'visible': True,
-            'cards': cards,
-        }
-
-
-class ContinueWorkingPanel(Component):
-    """Atalho para o último artigo em que o usuário mexeu e que ainda não
-    está publicado (ou tem alterações não publicadas)."""
-
-    order = 110
-    template_name = 'news/wagtail/continue_working_panel.html'
-
-    def get_context_data(self, parent_context):
-        request = parent_context['request']
-        user = request.user
-        if not user.has_perm('news.view_article'):
-            return {'visible': False}
-
-        article = (
-            Article.objects.filter(latest_revision__user=user)
-            .filter(Q(live=False) | Q(has_unpublished_changes=True))
-            .select_related('category', 'latest_revision', 'featured_image_wagtail')
-            .order_by('-latest_revision__created_at')
-            .first()
-        )
-        if article is None:
-            return {'visible': False}
-
-        return {
-            'visible': True,
-            'article': article,
-            'edit_url': reverse('wagtailsnippets_news_article:edit', args=[article.pk]),
-        }
-
-
-class RecentArticlesPanel(Component):
-    """Tabela com os artigos mais recentemente atualizados, sinalizando quais
-    estão em revisão. Substitui o antigo painel de tabela do
-    EditorialDashboardPanel."""
-
-    order = 150
-    template_name = 'news/wagtail/recent_articles_panel.html'
-
-    def get_context_data(self, parent_context):
-        request = parent_context['request']
-        if not request.user.has_perm('news.view_article'):
-            return {'visible': False}
-
-        articles = list(
-            Article.objects.select_related('category', 'author', 'latest_revision', 'featured_image_wagtail')
-            .order_by('-updated_at')[:8]
-        )
-
-        if articles:
-            article_ct = ContentType.objects.get_for_model(Article, for_concrete_model=False)
-            in_review_ids = set(
-                WorkflowState.objects.active().filter(
-                    base_content_type=article_ct,
-                    object_id__in=[str(a.pk) for a in articles],
-                ).values_list('object_id', flat=True)
-            )
-            for article in articles:
-                article.is_in_review = str(article.pk) in in_review_ids
-
-        return {
-            'visible': bool(articles),
-            'articles': articles,
-            'list_url': reverse('wagtailsnippets_news_article:list'),
-        }
-
-
-@hooks.register('construct_homepage_panels')
-def add_redacao_panels(request, panels):
-    panels.extend([
-        RedacaoHeaderPanel(),
-        ArticleStatusCardsPanel(),
-        ContinueWorkingPanel(),
-        RecentArticlesPanel(),
-    ])
+    """Mantido por compatibilidade; a regra mora em apps.news.editorial."""
+    return article_status_counts()
 
 
 # ── Round 7: microcopy PT-BR nas ações do snippet Article ───────────────────
@@ -355,11 +315,3 @@ def register_article_workflow_report_menu_item():
         icon_name='resubmit',
         order=100,
     )
-
-
-# ── Round 7: CSS do dashboard "Redação" ──────────────────────────────────────
-
-
-@hooks.register('insert_global_admin_css')
-def redacao_dashboard_css():
-    return format_html('<link rel="stylesheet" href="{}">', static('wagtailadmin/css/redacao_dashboard.css'))

@@ -128,9 +128,9 @@ def test_existing_reporter_keeps_permissions_and_lands_on_cms(client, monkeypatc
     assert reporter.role == CustomUser.Role.REPORTER
     assert set(reporter.groups.values_list('name', flat=True)) == grupos_antes
     assert reporter.has_perm('wagtailadmin.access_admin') is True
-    # Cai na publicação de matérias, exatamente como no login por senha.
+    # Cai na visão geral do painel unificado, exatamente como no login por senha.
     assert response.status_code == 302
-    assert response.url == reverse('wagtailadmin_home')
+    assert response.url == reverse('panel:dashboard')
     # E nenhuma conta duplicada nasceu.
     assert CustomUser.objects.filter(email__iexact=reporter.email).count() == 1
 

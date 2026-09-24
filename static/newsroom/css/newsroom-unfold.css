@@ -1,0 +1,583 @@
+/*
+ * Newsroom × Django Unfold 0.87 — integração da casca e do tema.
+ *
+ * Carregado por UNFOLD['STYLES'] (config/settings/base.py), depois do CSS do
+ * Unfold. As cores do Unfold já vêm da paleta do painel via UNFOLD['COLORS']
+ * (mecanismo oficial); aqui fica só o encaixe da sidebar e da topbar do painel
+ * (templates/admin/nav_sidebar.html e templates/unfold/helpers/header.html),
+ * a fonte e o anel de foco azul.
+ */
+
+:root {
+    --font-sans: var(--nr-font);
+    color-scheme: light;
+}
+
+/* A sidebar do painel é fixa; o conteúdo do Unfold abre espaço para ela. */
+@media (min-width: 1024px) {
+    #page > .nr-sidebar ~ #main {
+        margin-left: var(--nr-sidebar-w);
+    }
+}
+
+#page > .nr-sidebar ~ #main {
+    min-width: 0;
+    background: var(--nr-white);
+}
+
+/* A topbar do painel substitui o cabeçalho do Unfold, que tinha mb-6. */
+#main > .nr-topbar {
+    margin-bottom: 24px;
+}
+
+#main,
+#main input,
+#main select,
+#main textarea,
+#main button {
+    letter-spacing: -.006em;
+}
+
+#main :focus-visible {
+    outline-color: var(--nr-blue);
+}
+
+/* Caixas de seleção: a mesma leitura do Wagtail (newsroom-wagtail.css). A
+   borda do Unfold (base-300, #d4d4d4) tinha contraste 1,5:1; aqui fica 3,7:1.
+   Marcada, a tinta primária do Unfold (#171717) com visto branco já é a do
+   painel. A linha selecionada (classe "selected" do actions.js do Django)
+   ganha o fundo azul-claro, e a célula inteira marca e desmarca (newsroom.js). */
+#main input[type="checkbox"].appearance-none {
+    border-width: 1.5px;
+    border-color: var(--nr-icon);
+}
+
+#main input[type="checkbox"].appearance-none:hover {
+    border-color: var(--nr-ink-4);
+}
+
+#main input[type="checkbox"].appearance-none:checked {
+    border-color: var(--nr-ink);
+}
+
+#result_list td.action-checkbox,
+#result_list th:has(> div #action-toggle) {
+    cursor: pointer;
+}
+
+/* O Django marca a coluna-link como <th>, que o Unfold pintava de amarelo. */
+#result_list tr.selected > td,
+#result_list tr.selected > th {
+    background-color: var(--nr-blue-soft);
+}
+
+/* ── Listas: cabeçalho, abas, barra de seleção e menu ⋯ ──────────────────
+   templates/admin/change_list.html e templates/admin/includes/. */
+/* Barra de seleção: escondida sem seleção; com seleção, ocupa o lugar da
+   barra de busca e fica presa logo abaixo da topbar ao rolar. */
+#changelist-form .nr-selectionbar--admin {
+    display: none;
+    position: sticky;
+    top: calc(var(--nr-topbar-h) + 8px);
+    z-index: 40;
+    margin: 0 0 12px;
+}
+
+#changelist-form:has(input.action-select:checked) .nr-selectionbar--admin {
+    display: flex;
+}
+
+/* Presa, a barra cobre a faixa entre ela e a topbar, para as linhas não
+   aparecerem passando por ali. */
+#changelist-form .nr-selectionbar--admin::before {
+    content: "";
+    position: absolute;
+    right: -1px;
+    bottom: 100%;
+    left: -1px;
+    height: 9px;
+    background: var(--nr-white);
+}
+
+#changelist:has(#changelist-form input.action-select:checked) [data-nr-list-toolbar] {
+    display: none;
+}
+
+/* Menu ⋯ da linha: ícone discreto no fim da linha, menu por cima da tabela. */
+#result_list td:has(> .nr-rowmenu) {
+    width: 1%;
+    white-space: nowrap;
+}
+
+.nr-rowmenu .nr-menu {
+    min-width: 210px;
+    text-align: left;
+}
+
+.nr-rowmenu .nr-menu__item {
+    font-family: var(--nr-font);
+}
+
+/* Ordenação (templates/unfold/helpers/change_list_headers.html): uma seta
+   com a direção atual; o "x" de tirar da ordenação só aparece no hover. */
+.nr-sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 6px;
+}
+
+.nr-sort__toggle,
+.nr-sort__remove {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    color: var(--nr-icon);
+}
+
+.nr-sort__toggle:hover,
+.nr-sort__remove:hover {
+    background: var(--nr-surface-subtle);
+    color: var(--nr-ink);
+}
+
+.nr-sort__toggle .nr-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.nr-sort__toggle.ascending .nr-icon {
+    transform: rotate(180deg);
+}
+
+.nr-sort__remove {
+    opacity: 0;
+}
+
+.nr-sort__remove .nr-icon {
+    width: 12px;
+    height: 12px;
+}
+
+#result_list th:hover .nr-sort__remove,
+.nr-sort__remove:focus-visible {
+    opacity: 1;
+}
+
+.nr-sort__priority {
+    color: var(--nr-muted);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* Celular e tablet (<1024 px): o Unfold mostra cada linha como um cartão com
+   todos os campos em linhas de rótulo e valor, separados por bordas. Aqui o
+   cartão fica compacto: na primeira linha a caixa, o título (a coluna-link, um
+   <th>) e o menu ⋯; embaixo, os campos sem bordas, com o rótulo discreto. */
+@media (max-width: 1023.98px) {
+    #result_list tbody {
+        background: transparent;
+    }
+
+    #result_list tr.data-row {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 4px 0 10px;
+        background: var(--nr-white);
+    }
+
+    #result_list tr.data-row.selected {
+        border-color: var(--nr-blue-line);
+        background: var(--nr-blue-soft);
+    }
+
+    #result_list tr.data-row > td,
+    #result_list tr.data-row > th {
+        grid-column: 1 / -1;
+        gap: 12px;
+        min-width: 0;
+        height: auto;
+        padding: 3px 14px;
+        border: 0;
+        background: transparent !important;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    #result_list tr.data-row > td::before,
+    #result_list tr.data-row > th::before {
+        flex: none;
+        color: var(--nr-muted);
+        font-weight: 450;
+        text-transform: none;
+    }
+
+    #result_list tr.data-row > td.action-checkbox {
+        grid-row: 1;
+        grid-column: 1;
+        padding: 10px 2px 8px 14px;
+    }
+
+    #result_list tr.data-row > th {
+        grid-row: 1;
+        grid-column: 2;
+        padding: 10px 8px 8px;
+        font-size: 14.5px;
+        font-weight: 600;
+    }
+
+    #result_list tr.data-row > td:has(> .nr-rowmenu) {
+        grid-row: 1;
+        grid-column: 3;
+        width: auto;
+        padding: 6px 8px 0 0;
+        overflow: visible;
+    }
+
+    #result_list tr.data-row > td.action-checkbox::before,
+    #result_list tr.data-row > th::before,
+    #result_list tr.data-row > td:has(> .nr-rowmenu)::before {
+        content: none;
+    }
+}
+
+/* ── Formulários: barra no topo (templates/admin/includes/form_bar.html) ──
+   O layout da barra é o da barra do editor do Wagtail (newsroom.css). Aqui
+   ela fica presa logo abaixo da topbar, por cima do formulário e abaixo dos
+   menus da topbar. */
+#main > .nr-topbar:has(+ .nr-formbar) {
+    margin-bottom: 0;
+}
+
+#main > .nr-formbar {
+    position: sticky;
+    top: var(--nr-topbar-h);
+    z-index: 90;
+    box-sizing: border-box;
+    margin-bottom: 24px;
+}
+
+/* Calendário e relógio dos campos de data do Django (anexados ao body, fixos
+   no centro da tela, z-index 70 no Unfold) e o fundo escurecido (60) ficam
+   por cima da barra presa (90). */
+body > :is(.calendarbox, .clockbox) {
+    z-index: 100 !important;
+}
+
+#modal-overlay {
+    z-index: 95;
+}
+
+/* O cadeado faz o papel do ponto do selo. */
+.nr-formbar__readonly::before {
+    content: none;
+}
+
+.nr-formbar__readonly .nr-icon {
+    width: 12px;
+    height: 12px;
+}
+
+/* Sem botões depois (somente leitura), o divisor das ferramentas sobra. */
+.nr-formbar .nr-editorbar__tools:last-child {
+    margin-right: 0;
+    padding-right: 0;
+    border-right: 0;
+}
+
+.nr-formbar__dirty {
+    color: var(--nr-orange);
+    font-weight: 500;
+}
+
+/* O Guia se alinha à barra (presa, portanto posicionada), e não ao botão:
+   no celular o botão fica à esquerda e o painel sairia da tela. */
+.nr-formbar__guide {
+    position: static;
+}
+
+.nr-formbar__guide-panel {
+    right: 12px;
+    width: min(380px, calc(100vw - 32px));
+    padding: 14px 8px 8px;
+    white-space: normal;
+}
+
+.nr-formbar__guide-title,
+.nr-formbar__guide-text,
+.nr-formbar__guide-steps {
+    margin: 0 8px 10px;
+}
+
+.nr-formbar__guide-title {
+    color: var(--nr-ink);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.nr-formbar__guide-text {
+    color: var(--nr-ink-4);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.nr-formbar__guide-text--small {
+    font-size: 12.5px;
+}
+
+.nr-formbar__guide-steps {
+    padding-left: 20px;
+    color: var(--nr-ink-4);
+    font-size: 13px;
+    line-height: 1.5;
+    list-style: decimal;
+}
+
+.nr-formbar__guide-steps li + li {
+    margin-top: 4px;
+}
+
+/* Campos que empurravam a página para o lado entre 980 e 1024 px (com a
+   sidebar fixa sobram ~800 px): as duas listas do seletor de grupos e
+   permissões (filter_horizontal) não encolhiam abaixo de ~384 px cada, e as
+   opções em linha de radio_fields (o Cargo do usuário) não quebravam. O
+   <fieldset> tem min-width: min-content por padrão do navegador e crescia
+   até caber o seletor inteiro. */
+#main fieldset.module,
+#main .selector {
+    min-width: 0;
+}
+
+#main .selector > .selector-available,
+#main .selector > .selector-chosen {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+#main .selector select,
+#main .selector .selector-filter input {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+}
+
+#main .field-line div.flex-row:has(> div > label > input[type="radio"]) {
+    flex-wrap: wrap;
+    row-gap: 8px;
+}
+
+/* Abas do formulário (fieldsets com classe "tab", unfold/helpers/fieldsets_tabs.html):
+   no celular o Unfold as empilhava, uma por linha; aqui ficam numa linha que
+   rola de lado. */
+@media (max-width: 767.98px) {
+    #main [x-data^="{ activeFieldsetTab"] > div > nav {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    #main [x-data^="{ activeFieldsetTab"] > div > nav > a {
+        flex: none;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 1023.98px) {
+    #main > .nr-topbar {
+        margin-bottom: 18px;
+    }
+
+    #main > .nr-formbar {
+        margin-bottom: 18px;
+    }
+}
+
+/* ── Corpo dos formulários, no desenho do editor do Wagtail ───────────────
+   O Unfold punha os campos num cartão com borda, as abas em pílulas cinzas e
+   o título de cada grupo numa faixa cinza. Aqui o formulário fica aberto
+   como o editor de notícias: abas sublinhadas (as mesmas das listas),
+   títulos de grupo em negrito, grupo recolhível com o botão redondo do
+   Wagtail à esquerda, rótulos de 16 px e campos de 43 px com texto de 16 px.
+   Só CSS: os templates do Unfold continuam os mesmos. */
+
+body.change-form #main .form-rows.border {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+body.change-form #main .field-line {
+    padding: 0 0 24px;
+}
+
+body.change-form #main .form-row.last .field-line,
+body.change-form #main .form-rows > .form-row:last-child .field-line {
+    padding-bottom: 8px;
+}
+
+/* Abas: o nav em pílula do Unfold vira o sublinhado das abas do painel. */
+body.change-form #main [x-data^="{ activeFieldsetTab"] > div > nav {
+    display: flex;
+    flex-direction: row;
+    gap: 18px;
+    margin: 0 0 24px;
+    padding: 0;
+    border-bottom: 1px solid var(--nr-line);
+    border-radius: 0;
+    background: transparent;
+}
+
+body.change-form #main [x-data^="{ activeFieldsetTab"] > div > nav > a {
+    margin-bottom: -1px;
+    padding: 10px 1px 11px;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: var(--nr-muted);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+body.change-form #main [x-data^="{ activeFieldsetTab"] > div > nav > a:hover {
+    background: transparent;
+    color: var(--nr-ink);
+}
+
+body.change-form #main [x-data^="{ activeFieldsetTab"] > div > nav > a.active {
+    border-bottom-color: var(--nr-ink);
+    background: transparent;
+    box-shadow: none;
+    color: var(--nr-ink);
+    font-weight: 600;
+}
+
+/* Título de grupo: sem a faixa cinza, em negrito, e uma linha entre grupos. */
+body.change-form #main fieldset.module > h2,
+body.change-form #main fieldset.module > details > summary > h2 {
+    height: auto;
+    margin: 0 0 20px;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--nr-ink);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+}
+
+body.change-form #main fieldset.module + fieldset.module:has(> h2, > details) {
+    margin-top: 12px;
+    padding-top: 28px;
+    border-top: 1px solid var(--nr-line);
+}
+
+/* Grupo recolhível: o botão redondo com a seta do editor do Wagtail, à
+   esquerda do título, girado enquanto está fechado. */
+body.change-form #main fieldset.module > details > summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+body.change-form #main fieldset.module > details > summary::-webkit-details-marker {
+    display: none;
+}
+
+body.change-form #main fieldset.module > details > summary > h2 {
+    gap: 12px;
+}
+
+body.change-form #main fieldset.module > details > summary > h2::before {
+    content: "";
+    flex: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--nr-ink-2, #262626) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E") center / 16px no-repeat;
+    transform: rotate(-90deg);
+    transition: transform .15s ease;
+}
+
+body.change-form #main fieldset.module > details[open] > summary > h2::before {
+    transform: none;
+}
+
+/* A seta do Unfold (summary::after, ícone "expand_more") dá lugar ao botão acima. */
+body.change-form #main fieldset.module > details > summary::after {
+    content: none;
+    display: none;
+}
+
+/* Rótulos e campos com as medidas do editor do Wagtail. */
+body.change-form #main .field-line label.block.font-semibold {
+    margin-bottom: 8px;
+    color: var(--nr-ink);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+body.change-form #main .field-line label.block.font-semibold > .text-red-600 {
+    margin-left: 4px;
+}
+
+body.change-form #main .field-line .max-w-2xl {
+    max-width: 840px;
+}
+
+body.change-form #main .field-line :is(
+    input[type="text"], input[type="email"], input[type="url"], input[type="number"],
+    input[type="password"], input[type="search"], input[type="tel"], input[type="date"],
+    input[type="time"], input[type="datetime-local"], select:not([multiple]), textarea
+) {
+    min-height: 43px;
+    padding: 8px 16px;
+    border-color: var(--nr-line-2);
+    border-radius: 7px;
+    box-shadow: none;
+    color: var(--nr-ink-2, #262626);
+    font-size: 16px;
+    font-weight: 400;
+}
+
+body.change-form #main .field-line select:not([multiple]) {
+    padding-right: 40px;
+}
+
+body.change-form #main .field-line textarea {
+    line-height: 1.5;
+}
+
+/* Ajuda do campo: o texto cinza do editor, não o azul miúdo do Unfold. */
+body.change-form #main .field-line .help,
+body.change-form #main .field-line .leading-relaxed.mt-2 {
+    color: var(--nr-muted);
+    font-size: 13.5px;
+}
+
+/* Seletor de grupos e permissões (filter_horizontal): o filtro com o mesmo
+   campo branco dos outros, não o cinza do Django. */
+body.change-form #main .selector .selector-filter input {
+    border: 1px solid var(--nr-line-2);
+    background: var(--nr-white);
+}
+
+/* Lista: a faixa da busca e a tabela num cartão só, como nas listas do
+   Wagtail. O Unfold desenhava duas caixas separadas por 16 px (e nenhuma no
+   celular). */
+body.change-list #changelist .grow > div:has(> #toolbar) {
+    margin-bottom: 0;
+    border: 1px solid var(--nr-line);
+    border-radius: var(--nr-radius-card) var(--nr-radius-card) 0 0;
+}
+
+body.change-list #changelist-form > div:has(#result_list) {
+    border: 1px solid var(--nr-line);
+    border-top: 0;
+    border-radius: 0 0 var(--nr-radius-card) var(--nr-radius-card);
+}

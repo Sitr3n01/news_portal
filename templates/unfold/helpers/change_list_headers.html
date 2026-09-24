@@ -1,0 +1,62 @@
+{% load newsroom %}
+{% comment %}
+    Override de unfold/helpers/change_list_headers.html (Unfold 0.87), que não
+    tem tradução pt-BR. Muda só o que se lê: "Selecionar todos" no cartão do
+    celular, os títulos da ordenação em português e um único indicador de
+    ordenação (seta da direção atual, que inverte ao clicar) no lugar dos dois
+    ícones de círculo; "tirar da ordenação" aparece ao passar o mouse.
+    Classes, links e a marcação que o actions.js do Django lê são os do Unfold.
+{% endcomment %}
+<thead>
+    <tr>
+        {% if cl.model_admin.ordering_field %}
+            <th></th>
+        {% endif %}
+
+        {% if cl.model_admin.list_sections|length > 0 %}
+            <th></th>
+        {% endif %}
+
+        {% for header in result_headers %}
+            <th class="align-middle font-semibold py-2 text-left text-font-important-light dark:text-font-important-dark whitespace-nowrap {{ header.class_attrib }} {% if "action-toggle" in header.text and forloop.counter == 1 %}lg:px-3 lg:w-10{% else %}hidden px-3 lg:table-cell{% endif %}" scope="col">
+                <div class="flex items-center">
+                    <div class="text">
+                        {% if header.sortable %}
+                            <a href="{{ header.url_primary }}">
+                                {{ header.text|capfirst }}
+                            </a>
+                        {% else %}
+                            {% if "action-toggle" in header.text and forloop.counter == 1 %}
+                                <label class="flex flex-row items-center gap-2">
+                                    {{ header.text|capfirst }}
+
+                                    <span class="block font-normal lg:hidden">Selecionar todos</span>
+                                </label>
+                            {% else %}
+                                <span>
+                                    {{ header.text|capfirst }}
+                                </span>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+
+                    {% if header.sortable and header.sort_priority > 0 %}
+                        <div class="sortoptions nr-sort">
+                            <a href="{{ header.url_toggle }}" class="toggle nr-sort__toggle {% if header.ascending %}ascending{% else %}descending{% endif %}" title="{% if header.ascending %}Ordem crescente: clique para inverter{% else %}Ordem decrescente: clique para inverter{% endif %}">
+                                {% nr_icon "down" %}
+                            </a>
+
+                            <a class="sortremove nr-sort__remove" href="{{ header.url_remove }}" title="Tirar da ordenação">
+                                {% nr_icon "close" %}
+                            </a>
+
+                            {% if num_sorted_fields > 1 %}
+                                <span class="sortpriority nr-sort__priority" title="Prioridade da ordenação: {{ header.sort_priority }}">{{ header.sort_priority }}</span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </th>
+        {% endfor %}
+    </tr>
+</thead>

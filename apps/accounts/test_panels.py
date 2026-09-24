@@ -173,7 +173,7 @@ def test_post_login_target_honors_public_next(make_panel_user, rf_request):
 def test_post_login_target_rejects_external_next(make_panel_user, rf_request):
     repórter = make_panel_user('alvo_externo', role=CustomUser.Role.REPORTER)
     destino = panels.post_login_target(repórter, rf_request, next_url='https://evil.com/')
-    assert destino == panels.panel_url(panels.PANEL_CMS)
+    assert destino == reverse('panel:dashboard')
 
 
 @pytest.mark.django_db
@@ -181,7 +181,7 @@ def test_post_login_target_ignores_auth_path_next(make_panel_user, rf_request):
     """`next=/entrar/` devolveria o usuário ao login — laço."""
     repórter = make_panel_user('alvo_laco', role=CustomUser.Role.REPORTER)
     destino = panels.post_login_target(repórter, rf_request, next_url='/entrar/')
-    assert destino == panels.panel_url(panels.PANEL_CMS)
+    assert destino == reverse('panel:dashboard')
 
 
 @pytest.mark.django_db
@@ -203,13 +203,26 @@ def test_post_login_target_downgrades_forbidden_chosen_panel(make_panel_user, rf
     """Escolher um painel proibido no formulário não autoriza nada."""
     repórter = make_panel_user('alvo_adultera', role=CustomUser.Role.REPORTER)
     destino = panels.post_login_target(repórter, rf_request, chosen_panel=panels.PANEL_ADMIN)
-    assert destino == panels.panel_url(panels.PANEL_CMS)
+    assert destino == reverse('panel:dashboard')
+    assert destino != panels.panel_url(panels.PANEL_ADMIN)
 
 
 @pytest.mark.django_db
-def test_post_login_target_picker_for_two_panels(make_panel_user, rf_request):
+def test_post_login_target_dashboard_for_two_panels(make_panel_user, rf_request):
     root = make_panel_user('alvo_dois', is_staff=True, is_superuser=True)
-    assert panels.post_login_target(root, rf_request) == reverse('panel:picker')
+    assert panels.post_login_target(root, rf_request) == reverse('panel:dashboard')
+    # O nome antigo continua resolvendo para o mesmo endereço.
+    assert reverse('panel:picker') == reverse('panel:dashboard')
+
+
+@pytest.mark.django_db
+def test_post_login_target_dashboard_for_single_panel(make_panel_user, rf_request):
+    """Com o painel unificado, quem alcança uma área só também cai na visão
+    geral — que já mostra só as ferramentas dessa área."""
+    repórter = make_panel_user('alvo_um', role=CustomUser.Role.REPORTER)
+    komuniki = make_panel_user('alvo_um_admin', role=CustomUser.Role.SCHOOL_ADMIN, is_staff=True)
+    assert panels.post_login_target(repórter, rf_request) == reverse('panel:dashboard')
+    assert panels.post_login_target(komuniki, rf_request) == reverse('panel:dashboard')
 
 
 @pytest.mark.django_db

@@ -30,6 +30,10 @@ class PageAdmin(AdminUXMixin, ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     readonly_fields = ['created_at', 'updated_at']
     ux_list_title = 'Página Cursos'
+    ux_list_all_label = 'Todas'
+    ux_status_field = 'is_published'
+    ux_status_labels = {True: 'Publicada', False: 'Não publicada'}
+    ux_status_tones = {True: 'success', False: 'neutral'}
     ux_list_description = 'Gerencie a publicação e SEO da página Cursos exibida no front da Komuniki. O conteúdo visual dos cursos é mantido no código atual.'
     ux_list_icon = 'article'
     ux_list_actions = [
@@ -87,6 +91,13 @@ class PageAdmin(AdminUXMixin, ModelAdmin):
         if not request.user.is_superuser:
             readonly_fields.extend(['site', 'slug'])
         return readonly_fields
+
+    def get_prepopulated_fields(self, request, obj=None):
+        # Com o slug somente leitura, o Django ainda procuraria o campo no
+        # formulário para preenchê-lo pelo título (KeyError 'slug', erro 500).
+        if not request.user.is_superuser:
+            return {}
+        return super().get_prepopulated_fields(request, obj)
 
     def get_fieldsets(self, request, obj=None):
         if request.user.is_superuser:
@@ -183,6 +194,10 @@ class SchoolHomeConfigAdmin(AdminUXMixin, ModelAdmin):
     ]
     readonly_fields = ['created_at', 'updated_at']
     ux_list_title = 'Home Komuniki'
+    ux_list_all_label = 'Todas'
+    ux_status_field = 'is_active'
+    ux_status_labels = {True: 'Ativa', False: 'Inativa'}
+    ux_status_tones = {True: 'success', False: 'archived'}
     ux_list_description = 'A home é o centro da presença da Komuniki: hero, bloco Komuniki, cursos, depoimentos e chamadas finais.'
     ux_list_icon = 'home'
     ux_list_actions = [
@@ -240,6 +255,9 @@ class SchoolFeatureAdmin(AdminUXMixin, ModelAdmin):
     readonly_fields = ['created_at', 'updated_at']
     radio_fields = {'placement': admin.HORIZONTAL, 'tone': admin.HORIZONTAL}
     ux_list_title = 'Blocos da Home'
+    ux_status_field = 'is_active'
+    ux_status_labels = {True: 'Ativo', False: 'Inativo'}
+    ux_status_tones = {True: 'success', False: 'archived'}
     ux_list_description = 'Cadastre os blocos curtos da barra de confiança, a grade de cards logo abaixo da apresentação da Home.'
     ux_list_icon = 'auto_awesome'
     ux_list_actions = [
@@ -302,6 +320,9 @@ class TeamMemberAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
     ordering = ['site', 'order', 'name']
     readonly_fields = ['created_at', 'updated_at']
     ux_list_title = 'Equipe escolar'
+    ux_status_field = 'is_active'
+    ux_status_labels = {True: 'Ativo', False: 'Inativo'}
+    ux_status_tones = {True: 'success', False: 'archived'}
     ux_list_description = 'Os perfis de equipe não aparecem no site atual: a antiga página de equipe redireciona para Notícias. O cadastro fica guardado.'
     ux_list_icon = 'group'
     ux_list_actions = [
@@ -350,6 +371,9 @@ class TestimonialAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
     search_fields = ['name', 'relationship', 'relationship_en', 'quote', 'quote_en']
     readonly_fields = ['created_at', 'updated_at']
     ux_list_title = 'Depoimentos e prova social'
+    ux_status_field = 'is_featured'
+    ux_status_labels = {True: 'Destacado', False: 'Sem destaque'}
+    ux_status_tones = {True: 'info', False: 'neutral'}
     ux_list_description = 'Use relatos reais para mostrar confiança. A home exibe apenas depoimentos destacados.'
     ux_list_icon = 'format_quote'
     ux_list_actions = [
@@ -388,12 +412,12 @@ class TestimonialAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
     ]
     actions = ['feature_selected', 'unfeature_selected']
 
-    @admin.action(description='Destacar depoimentos selecionados')
+    @admin.action(description='Destacar depoimentos selecionados', permissions=['change'])
     def feature_selected(self, request, queryset):
         updated = queryset.update(is_featured=True)
         self.message_user(request, f'{updated} depoimento(s) destacado(s).')
 
-    @admin.action(description='Remover destaque dos depoimentos')
+    @admin.action(description='Remover destaque dos depoimentos', permissions=['change'])
     def unfeature_selected(self, request, queryset):
         updated = queryset.update(is_featured=False)
         self.message_user(request, f'{updated} destaque removido de depoimento(s).')

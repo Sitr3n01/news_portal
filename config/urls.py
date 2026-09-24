@@ -11,6 +11,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 
 from apps.accounts import panel_views
 from apps.common import admin_guides
+from apps.common.newsroom import views as newsroom_views
 from apps.common.views import health_check, robots_txt
 from apps.news.sitemaps import ArticleSitemap
 from apps.school.sitemaps import CourseSitemap, PageSitemap
@@ -93,6 +94,9 @@ urlpatterns += [
         admin.site.admin_view(admin_guides.management_guide),
         name='admin_management_guide',
     ),
+    # Página inicial do /admin/ -> visão geral unificada (/painel/), atrás da
+    # mesma porta do admin. Precisa vir antes do include, que também casa 'admin/'.
+    path('admin/', newsroom_views.admin_index_redirect),
     path('admin/', admin.site.urls),
     # Indice de sitemaps, e nao um XML unico: so assim o `limit` das classes vale.
     # O `name=` da rota de secao e obrigatorio — o index reverte exatamente esse
@@ -114,6 +118,10 @@ if settings.UNIFIED_LOGIN_ENABLED:
     urlpatterns += _unified_login_shadows('cms')
 
 urlpatterns += [
+    # Página inicial do /cms/ -> visão geral unificada, atrás da mesma porta do
+    # Wagtail (require_admin_access). SEM `name=`: `wagtailadmin_home` continua
+    # sendo o nome do Wagtail e resolvendo para /cms/ — ver _unified_login_shadows.
+    path('cms/', newsroom_views.cms_home_redirect),
     path('cms/', include(wagtailadmin_urls)),
     path('documents/', include(wagtaildocs_urls)),
     # Catch-all da escola: precisa continuar por último (development_rules §2).

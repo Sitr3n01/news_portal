@@ -117,34 +117,41 @@ def test_authenticated_user_revisiting_login_is_redirected(client, reporter):
     response = client.get(reverse('panel:login'))
 
     assert response.status_code == 302
-    assert response.url == panels.panel_url(panels.PANEL_CMS)
+    assert response.url == reverse('panel:dashboard')
 
 
 # ── Autorização por cargo ──────────────────────────────────────────────────
 
 @pytest.mark.django_db
-def test_reporter_lands_on_publishing_area(client, reporter):
+def test_reporter_lands_on_unified_dashboard(client, reporter):
     response = entrar(client, reporter)
 
-    assert response.url == panels.panel_url(panels.PANEL_CMS)
+    assert response.url == reverse('panel:dashboard')
+    pagina = client.get(response.url)
+    assert pagina.status_code == 200
+    assert 'Blog da Kelly' in pagina.content.decode()
 
 
 @pytest.mark.django_db
-def test_school_admin_lands_on_system_administration(client, admin_komuniki):
+def test_school_admin_lands_on_unified_dashboard(client, admin_komuniki):
     response = entrar(client, admin_komuniki)
 
-    assert response.url == panels.panel_url(panels.PANEL_ADMIN)
+    assert response.url == reverse('panel:dashboard')
+    pagina = client.get(response.url).content.decode()
+    # Só a Komuniki: o admin da escola não alcança a publicação de matérias.
+    assert 'Mensagens recebidas' in pagina
+    assert 'Seus conteúdos' not in pagina
 
 
 @pytest.mark.django_db
-def test_superuser_lands_on_panel_picker(client, superusuario):
+def test_superuser_lands_on_unified_dashboard(client, superusuario):
     response = entrar(client, superusuario)
 
-    assert response.url == reverse('panel:picker')
+    assert response.url == reverse('panel:dashboard')
 
-    picker = client.get(reverse('panel:picker'))
-    assert picker.status_code == 200
-    assert 'Para onde você quer ir?' in picker.content.decode()
+    visao_geral = client.get(response.url)
+    assert visao_geral.status_code == 200
+    assert 'Visão geral' in visao_geral.content.decode()
 
 
 @pytest.mark.django_db
@@ -207,7 +214,7 @@ def test_reporter_choosing_admin_is_downgraded_not_granted(client, reporter):
     """A escolha do formulário é conselho, nunca autorização."""
     response = entrar(client, reporter, panel=panels.PANEL_ADMIN)
 
-    assert response.url == panels.panel_url(panels.PANEL_CMS)
+    assert response.url == reverse('panel:dashboard')
 
     # E o painel negado continua fechado de verdade.
     admin_response = client.get(reverse('admin:index'))
@@ -235,7 +242,7 @@ def test_invalid_panel_value_does_not_authenticate(client, reporter):
 def test_external_next_is_ignored(client, reporter, malicioso):
     response = entrar(client, reporter, next=malicioso)
 
-    assert response.url == panels.panel_url(panels.PANEL_CMS)
+    assert response.url == reverse('panel:dashboard')
     assert 'evil.com' not in response.url
 
 
@@ -244,7 +251,7 @@ def test_next_to_login_page_is_ignored(client, reporter):
     """Sem o filtro de is_auth_path isto viraria laço de redirecionamento."""
     response = entrar(client, reporter, next=reverse('panel:login'))
 
-    assert response.url == panels.panel_url(panels.PANEL_CMS)
+    assert response.url == reverse('panel:dashboard')
 
 
 @pytest.mark.django_db
@@ -357,9 +364,12 @@ def test_admin_password_reset_redirects_to_single_flow(client):
 def test_single_login_grants_both_panels(client, superusuario):
     entrar(client, superusuario, panel=panels.PANEL_CMS)
 
-    assert client.get(reverse('wagtailadmin_home')).status_code == 200
+    assert client.get(reverse('wagtailsnippets_news_article:list')).status_code == 200
     # Nenhuma segunda autenticação: mesma sessão do Django nas duas áreas.
-    assert client.get(reverse('admin:index')).status_code == 200
+    assert client.get(reverse('admin:accounts_customuser_changelist')).status_code == 200
+    # E as duas páginas iniciais levam à mesma visão geral.
+    assert client.get(reverse('wagtailadmin_home')).url == reverse('panel:dashboard')
+    assert client.get(reverse('admin:index')).url == reverse('panel:dashboard')
 
 
 @pytest.mark.django_db
@@ -415,11 +425,14 @@ def test_legacy_logout_urls_end_session(client, superusuario, path):
 @pytest.mark.django_db
 def test_logout_from_one_area_ends_the_other(client, superusuario):
     client.force_login(superusuario)
-    assert client.get(reverse('admin:index')).status_code == 200
+    changelist = reverse('admin:accounts_customuser_changelist')
+    assert client.get(changelist).status_code == 200
 
     client.post('/cms/logout/')
 
-    assert client.get(reverse('admin:index')).status_code == 302
+    response = client.get(changelist)
+    assert response.status_code == 302
+    assert '/login/' in response.url
 
 
 @pytest.mark.django_db
@@ -468,13 +481,15 @@ def test_no_access_redirects_anonymous_to_login(client):
 
 
 @pytest.mark.django_db
-def test_picker_redirects_when_only_one_panel(client, reporter):
+def test_painel_serves_dashboard_even_with_one_panel(client, reporter):
+    """/painel/ deixou de ser a tela de escolha: é a visão geral, e continua
+    respondendo pelo nome antigo `panel:picker`."""
     client.force_login(reporter)
 
     response = client.get(reverse('panel:picker'))
 
-    assert response.status_code == 302
-    assert response.url == panels.panel_url(panels.PANEL_CMS)
+    assert response.status_code == 200
+    assert 'Visão geral' in response.content.decode()
 
 
 # ── Bloqueio por tentativas repetidas (django-axes) ────────────────────────

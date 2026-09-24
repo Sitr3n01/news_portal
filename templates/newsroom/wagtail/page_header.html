@@ -1,0 +1,37 @@
+{% load wagtailadmin_tags newsroom %}
+{% comment %}
+    Cabeçalho das telas avulsas do Wagtail (confirmações, ficha "Inspecionar",
+    envio de várias imagens e documentos, desativar fluxo...): o mesmo desenho
+    da barra do editor (.nr-editorbar), com voltar, a trilha, o título e os
+    botões que a própria view entrega (header_buttons, como o ⋯ da ficha).
+    Listagens e formulários têm cabeçalho próprio
+    (newsroom/wagtail/list_header.html e newsroom/editor/header.html).
+{% endcomment %}
+{% nr_page_header as page %}
+<div class="w-sticky w-top-0 w-z-header">
+    <header class="nr-editorbar nr-pagebar">
+        <div class="nr-editorbar__start">
+            {% if page.back %}
+                <a class="nr-editorbar__back" href="{{ page.back.url }}" aria-label="Voltar para {{ page.back.label }}">
+                    {% nr_icon "chevron-left" %}
+                </a>
+            {% endif %}
+            <div class="nr-editorbar__heading">
+                <div class="nr-editorbar__crumbs">
+                    {% if page.back %}
+                        <a class="nr-editorbar__parent" href="{{ page.back.url }}">{{ page.back.label }}</a>
+                        {% nr_icon "chevron" "nr-editorbar__sep" %}
+                    {% endif %}
+                    <h1 class="nr-editorbar__title">{{ page.title }}</h1>
+                </div>
+            </div>
+        </div>
+        {% if header_buttons %}
+            <div class="nr-editorbar__end nr-pagebar__actions">
+                {% for button in header_buttons %}
+                    <div class="nr-listhead__more">{% component button %}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </header>
+</div>

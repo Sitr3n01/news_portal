@@ -1,40 +1,55 @@
-{% with model_admin=cl.model_admin %}
-    {% if model_admin.ux_list_title %}
-        <section class="kb-model-guide kb-model-guide-list">
-            <div class="kb-model-guide-main">
-                <span class="kb-model-guide-icon" aria-hidden="true">
-                    <span class="material-symbols-outlined">{{ model_admin.ux_list_icon }}</span>
-                </span>
-                <div>
-                    <p class="kb-eyebrow">Rotina da tela</p>
-                    <h2>{{ model_admin.ux_list_title }}</h2>
-                    <p>{{ model_admin.ux_list_description }}</p>
-                </div>
+{% load newsroom %}
+{% comment %}
+    Cabeçalho das listas do Django admin, no padrão do painel (no lugar do
+    antigo cartão "Rotina da tela"): título com a contagem, uma linha de
+    descrição, a ação principal à direita, o guia como botão discreto e os
+    filtros rápidos como abas com contagem (o mesmo componente das abas da
+    visão geral). Dados: apps/common/newsroom/admin_lists.py, a partir do que
+    cada tela declara no AdminUXMixin. Incluído por templates/admin/change_list.html
+    em toda lista, com ou sem o mixin.
+{% endcomment %}
+{% nr_admin_list_header as head %}
+{% if head %}
+    <div class="nr-listhead">
+        <div class="nr-listhead__main">
+            <div class="nr-listhead__heading">
+                <h1 class="nr-listhead__title">
+                    {{ head.title }}
+                    <span class="nr-listhead__count">{% if head.total is not None %}{{ head.total }}{% else %}{{ head.count }}{% endif %}</span>
+                </h1>
+                {% if head.description %}
+                    <p class="nr-listhead__desc">{{ head.description }}</p>
+                {% endif %}
             </div>
-
-            {% if model_admin.ux_list_actions or model_admin.ux_list_filters %}
-                <div class="kb-model-guide-actions">
-                    {% for action in model_admin.ux_list_actions %}
-                        <a href="{{ action.url }}" class="kb-button {% if action.kind == 'primary' %}kb-button-primary{% endif %}">
-                            <span class="material-symbols-outlined" aria-hidden="true">{{ action.icon }}</span>
-                            <span>{{ action.label }}</span>
+            {% if head.secondary or head.primary %}
+                <div class="nr-listhead__actions">
+                    {% for action in head.secondary %}
+                        <a class="nr-btn nr-btn--secondary nr-listhead__guide" href="{{ action.url }}" aria-label="{{ action.label }}" title="{{ action.label }}">
+                            {% nr_icon "book" %}<span>{{ action.label }}</span>
                         </a>
                     {% endfor %}
-                    {% for filter in model_admin.ux_list_filters %}
-                        <a href="{{ filter.url }}" class="kb-chip">
-                            <span class="material-symbols-outlined" aria-hidden="true">{{ filter.icon }}</span>
-                            <span>{{ filter.label }}</span>
+                    {% if head.primary %}
+                        <a class="nr-btn nr-btn--primary nr-listhead__primary" href="{{ head.primary.url }}" aria-label="{{ head.primary.label }}">
+                            {% nr_icon "plus" %}<span>{{ head.primary.label }}</span>
                         </a>
-                    {% endfor %}
+                    {% endif %}
                 </div>
             {% endif %}
-        </section>
-    {% endif %}
+        </div>
+        {% if head.tabs %}
+            <nav class="nr-tabs nr-listhead__tabs" aria-label="Filtros rápidos">
+                {% for tab in head.tabs %}
+                    <a class="nr-tab{% if tab.active %} is-active{% endif %}" href="{{ tab.url }}"{% if tab.active %} aria-current="true"{% endif %}>
+                        {{ tab.label }}{% if tab.count is not None %}<span class="nr-tab__count">{{ tab.count }}</span>{% endif %}
+                    </a>
+                {% endfor %}
+            </nav>
+        {% endif %}
+    </div>
 
-    {% if cl.result_count == 0 and model_admin.ux_empty_message %}
-        <div class="kb-admin-empty-hint kb-admin-empty-wide">
-            <span class="material-symbols-outlined" aria-hidden="true">inbox</span>
-            <span>{{ model_admin.ux_empty_message }}</span>
+    {% if cl.result_count == 0 and head.empty_message %}
+        <div class="nr-listhead__empty">
+            {% nr_icon "inbox" %}<span>{{ head.empty_message }}</span>
         </div>
     {% endif %}
-{% endwith %}
+{% endif %}

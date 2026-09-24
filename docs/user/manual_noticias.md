@@ -24,24 +24,36 @@ Este manual cobre todas as operações que um **Editor de Notícias** precisa re
    - **Destaque** — marque para que este artigo apareça em posição de destaque na home do portal
    - **Título SEO** e **Descrição SEO** — como o artigo aparece no Google (até 70 e 160 caracteres respectivamente). Se vazios, o sistema usa o título e o resumo.
 
-5. Escolha o **Status**:
-   - **Rascunho** — o artigo fica salvo mas invisível no site
-   - **Publicado** — o artigo aparece no site; a data de publicação é marcada automaticamente no momento em que você salva com este status pela primeira vez
-   - **Arquivado** — remove o artigo do site sem excluir
-
-6. Clique em **Salvar**.
+5. Salve e publique pela **barra do topo** (seção 1.4). Enquanto você escreve, o sistema salva o rascunho sozinho.
+   - **Salvar rascunho** guarda a matéria sem colocá-la no ar.
+   - **Publicar** coloca no ar. A data de publicação é marcada automaticamente na primeira publicação.
+   - Quem não publica vê **Enviar para Moderação Editorial**: a matéria vai para a aprovação do editor.
 
 ### 1.2 Adicionar blocos de conteúdo
 
-O corpo do artigo é formado por **blocos**, adicionados na seção "Blocos de conteúdo" dentro do formulário do artigo.
+O corpo do artigo é formado por **blocos**, adicionados na seção "Conteúdo (blocos)" do formulário. Use o botão **+** entre dois blocos para inserir um novo naquele ponto.
 
 | Tipo de bloco | Para que serve |
 |--------------|----------------|
-| **Texto** | Parágrafos, subtítulos, listas, links, negrito/itálico |
+| **Título / Subtítulo** | Intertítulo da matéria (nível H2, H3 ou H4) |
+| **Texto rico** | Parágrafos, listas, links, negrito/itálico |
+| **Citação** | Frase em destaque, com atribuição opcional |
+| **Separador** | Linha divisória entre trechos |
 | **Imagem** | Seleciona uma imagem da Biblioteca de Mídia, com legenda opcional |
 | **Vídeo / Post** | Cola o link de YouTube, Instagram ou TikTok; o embed é gerado automaticamente |
+| **Documento** | Anexa um arquivo da biblioteca de documentos |
+| **Box de destaque** | Caixa no estilo informativo, alerta ou destaque |
+| **Tabela** | Tabela editável linha a linha |
+| **Fonte / Referência** | Link para a fonte consultada |
 
-Para cada bloco, defina **Ordem**. Blocos aparecem em ordem crescente. Para reordenar, altere os números e salve.
+**Para mudar a ordem dos blocos:**
+
+- **No computador:** clique na barra de título do bloco (onde aparece o nome dele) e arraste para cima ou para baixo. Um contorno azul tracejado mostra onde ele vai ficar. Um clique simples na barra, sem arrastar, continua abrindo e fechando o bloco.
+- **No celular:** toque e arraste pela alça **⠿**, no canto direito do cabeçalho do bloco. No resto do cabeçalho o toque rola a página normalmente.
+- **Pelos botões:** as setas **↑** e **↓** do cabeçalho movem o bloco uma posição por vez (também pelo teclado).
+- Em matérias longas, use **Colapsar tudo** antes de arrastar: com os blocos fechados, fica mais fácil levar um bloco de uma ponta à outra.
+
+A ordem na tela é a ordem que será salva.
 
 > O campo **Conteúdo** do artigo é gerado automaticamente a partir dos blocos. Não é necessário preenchê-lo manualmente.
 
@@ -50,6 +62,19 @@ Para cada bloco, defina **Ordem**. Blocos aparecem em ordem crescente. Para reor
 - Use negrito, itálico, listas, links e cabeçalhos normalmente.
 - O sistema sanitiza o HTML ao salvar, removendo scripts e atributos perigosos.
 - Embeds são montados de forma segura a partir da URL, sem colar HTML cru no artigo.
+
+### 1.4 A barra do topo
+
+Tudo o que você faz com a matéria fica numa barra só, no alto da tela, que acompanha a rolagem.
+
+| Onde | O que tem |
+|------|-----------|
+| **Esquerda** | **‹** volta para a lista de notícias. Ao lado ficam o título da matéria, o **selo de status** (Rascunho, Publicada, Em revisão, Agendada ou Arquivada) e o aviso **✓ Salvo** do salvamento automático. Quando há algo a observar, aparece junto do selo: "Alterações não publicadas", a etapa da revisão ou a data agendada. Se aparecer **"ainda não agendada"**, a data foi escolhida mas falta clicar em **Agendar publicação**: sem isso a matéria não vai ao ar sozinha. |
+| **Ferramentas** | **Status** (ⓘ): detalhes da publicação, agendamento e trava de edição; clicar no selo abre o mesmo painel. **Pré-visualizar** (olho): mostra a matéria como vai ficar no site; atalho Ctrl+P. **Verificações** (escudo): acessibilidade e qualidade do texto. **Histórico** (relógio): todas as versões salvas. |
+| **Ações** | O botão preto é o próximo passo: **Publicar** (ou **Aprovar**, quando você revisa a matéria de alguém, ou **Enviar para Moderação Editorial**, se você não publica). **Salvar rascunho** fica ao lado; atalho Ctrl+S. A **seta** ao lado do botão preto guarda as demais ações, como **Retirar do ar**. |
+| **⋯** | **Copiar** (cria um rascunho novo a partir desta matéria), **Inspecionar** (ficha somente leitura) e **Remover**. |
+
+No celular a barra ocupa duas linhas: título e status em cima, ferramentas e ações embaixo. **Salvar rascunho** passa para o menu da seta.
 
 ---
 

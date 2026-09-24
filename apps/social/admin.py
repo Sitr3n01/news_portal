@@ -50,9 +50,15 @@ class SocialAccountAdmin(AdminUXMixin, ModelAdmin):
     list_filter = ['platform', 'is_active', 'last_sync_status', 'site']
     list_filter_submit = True
     search_fields = ['display_name', 'username']
-    readonly_fields = ['last_sync_status', 'last_sync_at', 'last_sync_error', 'created_at', 'updated_at']
+    readonly_fields = [
+        'last_sync_status', 'last_sync_at', 'last_sync_error', 'created_at', 'updated_at',
+        'access_token_state', 'refresh_token_state',
+    ]
     actions = ['activate_accounts', 'deactivate_accounts']
     ux_list_title = 'Contas de redes sociais'
+    ux_status_field = 'is_active'
+    ux_status_labels = {True: 'Ativa', False: 'Inativa'}
+    ux_status_tones = {True: 'success', False: 'archived'}
     ux_list_description = 'Cadastre os perfis oficiais de Instagram e TikTok e acompanhe o status da sincronização.'
     ux_list_icon = 'share'
     ux_empty_message = 'Nenhuma conta cadastrada. Adicione o Instagram e o TikTok oficiais para alimentar a home.'
@@ -87,12 +93,33 @@ class SocialAccountAdmin(AdminUXMixin, ModelAdmin):
         }),
     ]
 
-    @admin.action(description='Ativar contas selecionadas')
+    # Quem só pode ver o cadastro vê se há token, nunca o valor: como campo
+    # somente leitura, o Django mostraria o token em texto no formulário.
+    TOKEN_STATES = {'access_token': 'access_token_state', 'refresh_token': 'refresh_token_state'}
+
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = super().get_fieldsets(request, obj)
+        if self.has_change_permission(request, obj):
+            return fieldsets
+        return [
+            (name, {**options, 'fields': tuple(self.TOKEN_STATES.get(field, field) for field in options['fields'])})
+            for name, options in fieldsets
+        ]
+
+    @admin.display(description='Token de acesso')
+    def access_token_state(self, obj):
+        return 'Configurado (oculto)' if obj and obj.access_token else 'Não configurado'
+
+    @admin.display(description='Token de atualização')
+    def refresh_token_state(self, obj):
+        return 'Configurado (oculto)' if obj and obj.refresh_token else 'Não configurado'
+
+    @admin.action(description='Ativar contas selecionadas', permissions=['change'])
     def activate_accounts(self, request, queryset):
         updated = queryset.update(is_active=True)
         self.message_user(request, f'{updated} conta(s) ativada(s).')
 
-    @admin.action(description='Desativar contas selecionadas')
+    @admin.action(description='Desativar contas selecionadas', permissions=['change'])
     def deactivate_accounts(self, request, queryset):
         updated = queryset.update(is_active=False)
         self.message_user(request, f'{updated} conta(s) desativada(s).')
@@ -112,6 +139,9 @@ class SocialPostAdmin(AdminUXMixin, ModelAdmin):
     readonly_fields = ['platform', 'thumbnail_preview', 'sync_payload', 'created_at', 'updated_at']
     actions = ['make_visible', 'make_hidden']
     ux_list_title = 'Posts de redes sociais'
+    ux_status_field = 'is_visible'
+    ux_status_labels = {True: 'Visível no site', False: 'Oculto'}
+    ux_status_tones = {True: 'success', False: 'warning'}
     ux_list_description = 'Cadastre posts manualmente (fallback) ou revise os que vieram da sincronização. Só os visíveis aparecem na home.'
     ux_list_icon = 'dynamic_feed'
     ux_empty_message = 'Nenhum post cadastrado. Adicione um post manual ou rode a sincronização para popular a home.'
@@ -162,12 +192,12 @@ class SocialPostAdmin(AdminUXMixin, ModelAdmin):
             return Truncator(text).chars(60)
         return f'(sem legenda) · {obj.external_id or obj.pk}'
 
-    @admin.action(description='Exibir posts selecionados no site')
+    @admin.action(description='Exibir posts selecionados no site', permissions=['change'])
     def make_visible(self, request, queryset):
         updated = queryset.update(is_visible=True)
         self.message_user(request, f'{updated} post(s) agora visível(is) na home.')
 
-    @admin.action(description='Ocultar posts selecionados do site')
+    @admin.action(description='Ocultar posts selecionados do site', permissions=['change'])
     def make_hidden(self, request, queryset):
         updated = queryset.update(is_visible=False)
         self.message_user(request, f'{updated} post(s) ocultado(s) da home.')

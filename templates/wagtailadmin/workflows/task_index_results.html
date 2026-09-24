@@ -1,0 +1,16 @@
+{% extends "wagtailadmin/workflows/task_index_results.html" %}
+{% load newsroom %}
+{% comment %}
+    Override do projeto: só a frase de lista vazia, no português das outras
+    telas do painel (apps/common/newsroom/wagtail_lists.py). Seção sem frase
+    própria mantém a do Wagtail.
+{% endcomment %}
+
+{% block no_results_message %}
+    {% nr_wagtail_empty_message as empty %}
+    {% if empty %}
+        {% include "newsroom/wagtail/empty.html" with message=empty %}
+    {% else %}
+        {{ block.super }}
+    {% endif %}
+{% endblock %}

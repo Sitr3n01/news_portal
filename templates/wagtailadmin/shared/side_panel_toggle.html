@@ -1,0 +1,37 @@
+{% load wagtailadmin_tags newsroom %}
+{% comment %}
+    Override do projeto: o mesmo botão do Wagtail 7.4
+    (wagtailadmin/shared/side_panel_toggle.html), com os ícones do painel e um
+    rótulo que a barra do editor mostra em telas largas (newsroom-wagtail.css).
+    Atributos, atalho (Ctrl/Cmd+P) e contador ficam idênticos: o Wagtail liga o
+    clique por `data-side-panel-toggle` e atualiza o contador das verificações
+    por `[data-side-panel-toggle-counter]`. Ao atualizar o Wagtail, compare.
+{% endcomment %}
+<button type="button"
+        class="w-side-panel-toggle"
+        aria-label="{{ toggle.aria_label }}"
+        aria-expanded="false"
+        data-controller="w-tooltip{% if toggle.keyboard_shortcut %} w-kbd{% endif %}"
+        data-side-panel-toggle="{{ panel.name }}"
+        {% if toggle.keyboard_shortcut %}data-w-kbd-key-value="{{ toggle.keyboard_shortcut }}" data-w-kbd-scope-value="global"{% endif %}
+        data-w-tooltip-content-value="{{ panel.title }}"
+        data-w-tooltip-offset-value="[0, 0]"
+>
+    {% if panel.name == "preview" %}
+        {% nr_icon "eye" "w-side-panel-toggle__icon" %}
+    {% elif panel.name == "checks" %}
+        {% nr_icon "shield" "w-side-panel-toggle__icon" %}
+    {% elif panel.name == "status" %}
+        {% nr_icon "info" "w-side-panel-toggle__icon" %}
+    {% elif panel.name == "comments" %}
+        {% nr_icon "comment" "w-side-panel-toggle__icon" %}
+    {% else %}
+        {% icon name=toggle.icon_name classname="w-side-panel-toggle__icon" %}
+    {% endif %}
+    <span class="w-side-panel-toggle__label">{{ panel.title }}</span>
+    {% if toggle.has_counter %}
+        <div data-side-panel-toggle-counter class="w-side-panel-toggle__counter {{ toggle.counter_classname|default:'w-bg-surface-button-default'}}" {% if not count %}hidden{% endif %}>
+            {{ count|intcomma }}
+        </div>
+    {% endif %}
+</button>

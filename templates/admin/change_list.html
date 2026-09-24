@@ -1,0 +1,84 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static admin_list unfold_list %}
+{% comment %}
+    Override do projeto sobre a lista do Unfold 0.87 (unfold/templates/admin/change_list.html):
+    - cabeçalho do painel (título, contagem, ação principal, abas) em toda
+      lista: admin/includes/model_list_help.html, ou o list_before_template
+      da tela quando ela tiver um próprio (que inclui o cabeçalho);
+    - barra de busca e filtros com os textos em português, marcada com
+      data-nr-list-toolbar para sumir enquanto há itens selecionados;
+    - barra de seleção no topo da tabela (admin/includes/selection_bar.html) no
+      lugar da barra do Unfold, que abria no rodapé com um seletor de ação.
+    O resto do bloco `content` é cópia fiel do Unfold. Ao atualizar o Unfold
+    (pinado em 0.87.0), compare.
+{% endcomment %}
+
+{% block content %}
+    <div id="content-main" x-data="{ filterOpen: false }">
+        {% if cl.formset and cl.formset.errors %}
+            {% include "unfold/helpers/messages/errornote.html" with errors=cl.formset.errors %}
+
+            {{ cl.formset.non_form_errors }}
+        {% endif %}
+
+        <div class="flex -mx-4 module{% if cl.has_filters %} filtered{% endif %}" id="changelist" x-data="{ changeListWidth: 0 }">
+            <div class="result-list-wrapper changelist-form-container flex flex-row grow gap-4 min-w-0 px-4">
+                <div class="grow min-w-0" x-resize="changeListWidth = $width">
+                    {% block date_hierarchy %}
+                        {% if cl.date_hierarchy %}
+                            {% date_hierarchy cl %}
+                        {% endif %}
+                    {% endblock %}
+
+                    {% if not is_popup %}
+                        {% if cl.model_admin.list_before_template %}
+                            {% include cl.model_admin.list_before_template %}
+                        {% else %}
+                            {% include "admin/includes/model_list_help.html" %}
+                        {% endif %}
+                    {% endif %}
+
+                    {% spaceless %}
+                        <div class="flex flex-col gap-4 mb-4 sm:flex-row empty:hidden lg:border lg:border-base-200 lg:dark:border-base-800 lg:-mb-8 lg:p-3 lg:pb-11 lg:rounded-t-default" data-nr-list-toolbar>
+                            {% block search %}
+                                {% search_form cl %}
+                            {% endblock %}
+
+                            {% block filters %}
+                                {% if cl.has_filters %}
+                                    <a class="{% if cl.has_active_filters %}bg-primary-600 border-primary-600 text-white{% else %}bg-white border-base-200 hover:text-primary-600 dark:bg-base-900 dark:border-base-700 dark:hover:text-primary-500{% endif %} border cursor-pointer flex font-medium gap-2 group items-center px-3 py-2 rounded-default shadow-xs text-sm lg:ml-auto md:mt-0 {% if not cl.model_admin.list_filter_sheet %}2xl:hidden{% endif %}" x-on:click="filterOpen = true" x-on:keydown.escape.window="filterOpen = false">
+                                        Filtros
+
+                                        <span class="material-symbols-outlined md-18 ml-auto">filter_list</span>
+                                    </a>
+                                {% endif %}
+                            {% endblock %}
+                        </div>
+                    {% endspaceless %}
+
+                    <form id="changelist-form" class="group" method="post"{% if cl.formset and cl.formset.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>
+                        {% csrf_token %}
+
+                        {% if cl.formset %}
+                            {{ cl.formset.management_form }}
+                        {% endif %}
+
+                        {% block result_list %}
+                            {% include "admin/includes/selection_bar.html" %}
+
+                            {% unfold_result_list cl %}
+                        {% endblock %}
+                    </form>
+
+                    {% if cl.model_admin.list_after_template and not is_popup %}
+                        {% include cl.model_admin.list_after_template %}
+                    {% endif %}
+                </div>
+
+                {% if cl.has_filters %}
+                    {% include "unfold/helpers/change_list_filter.html" %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

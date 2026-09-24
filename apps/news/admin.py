@@ -1,4 +1,4 @@
-from django.contrib import admin, messages
+from django.contrib import admin
 from django.urls import reverse_lazy
 from django.utils.text import format_lazy
 from unfold.admin import ModelAdmin
@@ -26,6 +26,9 @@ class NewsletterSubscriptionAdmin(AdminUXMixin, ModelAdmin):
     readonly_fields = ['email', 'site', 'created_at']
     list_per_page = 25
     ux_list_title = 'Assinantes da newsletter'
+    ux_status_field = 'is_active'
+    ux_status_labels = {True: 'Ativa', False: 'Inativa'}
+    ux_status_tones = {True: 'success', False: 'archived'}
     ux_list_description = 'Acompanhe inscrições por site. Exportação de e-mails é restrita a superusuários.'
     ux_list_icon = 'mail'
     ux_list_actions = [
@@ -58,26 +61,25 @@ class NewsletterSubscriptionAdmin(AdminUXMixin, ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-    @admin.action(description='Desativar inscrições selecionadas (spam/bots)')
+    @admin.action(description='Desativar inscrições selecionadas (spam/bots)', permissions=['change'])
     def deactivate_subscriptions(self, request, queryset):
         updated = queryset.update(is_active=False)
         self.message_user(request, f'{updated} inscrição(ões) desativada(s).')
 
-    @admin.action(description='Reativar inscrições selecionadas')
+    @admin.action(description='Reativar inscrições selecionadas', permissions=['change'])
     def activate_subscriptions(self, request, queryset):
         updated = queryset.update(is_active=True)
         self.message_user(request, f'{updated} inscrição(ões) reativada(s).')
 
-    @admin.action(description='Exportar emails como CSV')
-    def export_emails(self, request, queryset):
-        if not request.user.is_superuser:
-            self.message_user(
-                request,
-                'Apenas superusuários podem exportar emails.',
-                messages.ERROR,
-            )
-            return
+    def has_export_permission(self, request):
+        # Exportar tira do painel a lista inteira de e-mails (dado pessoal), o
+        # que pesa mais que editar uma inscrição: 'view' e 'change' não bastam,
+        # já que o Editor de Notícias tem os dois. Fica só com superusuários, e
+        # por ser permissão da ação o Django nem lista a ação nem aceita o POST.
+        return request.user.is_superuser
 
+    @admin.action(description='Exportar emails como CSV', permissions=['export'])
+    def export_emails(self, request, queryset):
         import csv
 
         from django.http import HttpResponse
@@ -99,6 +101,9 @@ class NewsletterDeliveryAdmin(AdminUXMixin, ModelAdmin):
     readonly_fields = ['article', 'subscription', 'email', 'status', 'attempts', 'last_error', 'sent_at', 'created_at', 'updated_at']
     list_per_page = 50
     ux_list_title = 'Entregas de newsletter'
+    ux_list_all_label = 'Todas'
+    ux_status_field = 'status'
+    ux_status_tones = {'pending': 'info', 'sent': 'success', 'failed': 'danger', 'skipped': 'neutral'}
     ux_list_description = 'Monitore envios processados, pendentes e com falha para agir antes que a comunicação se perca.'
     ux_list_icon = 'mark_email_read'
     ux_list_actions = [
@@ -113,13 +118,16 @@ class NewsletterDeliveryAdmin(AdminUXMixin, ModelAdmin):
     ux_form_description = 'Esta tela é de auditoria. Use as informações para entender falhas e reprocessar pelo fluxo adequado.'
     ux_form_icon = 'mark_email_read'
     ux_form_steps = [
-        'Confira artigo, destinatário e tentativas.',
+        'Confira notícia, destinatário e tentativas.',
         'Leia o erro apenas quando houver falha.',
         'Ajustes de envio devem ser feitos nas configurações do site ou no fluxo de newsletter.',
     ]
     ux_after_save_actions = [
         {'label': 'Falhas', 'icon': 'error', 'url': format_lazy('{}?status__exact=failed', reverse_lazy('admin:news_newsletterdelivery_changelist'))},
-        {'label': 'Configurações dos sites', 'icon': 'settings', 'url': reverse_lazy('wagtailsnippets_common_siteextension:list')},
+        {
+            'label': 'Configurações dos sites', 'icon': 'settings', 'url': reverse_lazy('wagtailsnippets_common_siteextension:list'),
+            'permissions': ['common.add_siteextension', 'common.change_siteextension', 'common.delete_siteextension', 'common.view_siteextension'],
+        },
     ]
 
     fieldsets = [
@@ -149,6 +157,9 @@ class CommentAdmin(AdminUXMixin, ModelAdmin):
     readonly_fields = ['user', 'article', 'content', 'created_at']
     list_per_page = 25
     ux_list_title = 'Moderação de comentários'
+    ux_status_field = 'is_active'
+    ux_status_labels = {True: 'Visível', False: 'Oculto'}
+    ux_status_tones = {True: 'success', False: 'warning'}
     ux_list_description = 'Revise comentários ocultos ou pendentes e mantenha visível apenas o que pode permanecer no portal.'
     ux_list_icon = 'forum'
     ux_list_actions = [
@@ -162,7 +173,7 @@ class CommentAdmin(AdminUXMixin, ModelAdmin):
     ux_form_description = 'O conteúdo do comentário não é editado no admin. Use a visibilidade para aprovar ou ocultar.'
     ux_form_icon = 'forum'
     ux_form_steps = [
-        'Leia o comentário no contexto do artigo.',
+        'Leia o comentário no contexto da notícia.',
         'Mantenha visível quando estiver adequado à conversa.',
         'Oculte quando precisar remover do portal sem perder registro.',
     ]
@@ -190,12 +201,12 @@ class CommentAdmin(AdminUXMixin, ModelAdmin):
     def short_content(self, obj):
         return obj.content[:80] + '...' if len(obj.content) > 80 else obj.content
 
-    @admin.action(description='Aprovar comentários selecionados')
+    @admin.action(description='Aprovar comentários selecionados', permissions=['change'])
     def approve_comments(self, request, queryset):
         updated = queryset.update(is_active=True)
         self.message_user(request, f'{updated} comentário(s) aprovado(s).')
 
-    @admin.action(description='Ocultar comentários selecionados')
+    @admin.action(description='Ocultar comentários selecionados', permissions=['change'])
     def hide_comments(self, request, queryset):
         updated = queryset.update(is_active=False)
         self.message_user(request, f'{updated} comentário(s) ocultado(s).')

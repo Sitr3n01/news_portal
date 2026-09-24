@@ -1,0 +1,196 @@
+"""Cabeçalho do painel em todas as listagens do Wagtail (apps/common/newsroom/wagtail_lists.py,
+templates/wagtailadmin/generic/listing.html e templates/newsroom/wagtail/).
+
+Cobrem: cada seção da sidebar com o cabeçalho do painel no lugar do
+slim_header, com o título da sidebar, a contagem e o botão principal no gênero
+certo; o menu ⋯ do Wagtail preservado; a busca da biblioteca de imagens com a
+ordenação; e as frases de lista vazia. O desenho foi validado no navegador.
+"""
+
+import re
+
+import pytest
+from django.urls import reverse
+
+from apps.accounts.models import CustomUser
+from apps.common.newsroom.wagtail_lists import LISTS
+
+SECTIONS = [
+    ('news_workflow_report', {}),
+    ('wagtailimages:index', {}),
+    ('wagtaildocs:index', {}),
+    ('wagtailsnippets_news_comment:list', {}),
+    ('wagtailsnippets_news_newslettersubscription:list', {}),
+    ('wagtailsnippets_news_newsletterdelivery:list', {}),
+    ('wagtailsnippets_news_category:list', {}),
+    ('wagtailsnippets_news_tag:list', {}),
+    ('wagtailsnippets_news_newshomeconfig:list', {}),
+    ('wagtailsnippets_common_siteextension:list', {}),
+    ('wagtailadmin_reports:workflow', {}),
+    ('wagtailadmin_reports:workflow_tasks', {}),
+    ('wagtailadmin_reports:site_history', {}),
+    ('wagtailadmin_workflows:index', {}),
+    ('wagtailadmin_workflows:task_index', {}),
+    ('wagtailusers_groups:index', {}),
+    ('wagtailadmin_collections:index', {}),
+    ('wagtailredirects:index', {}),
+]
+
+
+@pytest.fixture
+def root(make_panel_user):
+    return make_panel_user('wl_root', role=CustomUser.Role.SUPER_ADMIN, is_staff=True, is_superuser=True)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('name, kwargs', SECTIONS, ids=[name for name, _ in SECTIONS])
+def test_every_wagtail_listing_uses_the_panel_header(client, root, name, kwargs):
+    client.force_login(root)
+
+    response = client.get(reverse(name, kwargs=kwargs))
+    html = response.content.decode()
+    config = LISTS[name]
+
+    assert response.status_code == 200
+    assert '<header class="w-slim-header' not in html
+    assert re.search(r'<h1 class="nr-listhead__title">\s*' + re.escape(config['title']), html)
+    assert config['description'] in html
+    if 'add' in config:
+        assert f'<span>{config["add"]}</span>' in html
+
+
+@pytest.mark.django_db
+def test_header_keeps_the_wagtail_more_menu(client, root):
+    client.force_login(root)
+
+    html = client.get(reverse('wagtailadmin_reports:site_history')).content.decode()
+
+    # Exportar (XLSX/CSV) continua no ⋯ do Wagtail, agora dentro do cabeçalho.
+    head = re.search(r'<div class="nr-listhead__actions">.*?</div>\s*</div>\s*</div>', html, re.S).group(0)
+    assert 'class="nr-listhead__more"' in head
+    assert 'w-dropdown' in head
+
+
+@pytest.mark.django_db
+def test_image_library_keeps_ordering_and_layout(client, root):
+    client.force_login(root)
+
+    html = client.get(reverse('wagtailimages:index')).content.decode()
+    toolbar = re.search(r'<div class="nr-wlist__toolbar".*?</form>', html, re.S).group(0)
+
+    assert 'id="order_images_by"' in toolbar
+    assert 'w-layout-switch-control' in toolbar
+    assert 'data-controller="w-swap"' in toolbar
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('name', [
+    'wagtailsnippets_news_comment:list',
+    'wagtailadmin_reports:workflow',
+    'wagtailadmin_collections:index',
+    'wagtailredirects:index',
+    'wagtaildocs:index',
+])
+def test_empty_lists_speak_portuguese(client, root, name):
+    client.force_login(root)
+
+    html = client.get(reverse(name)).content.decode()
+
+    assert f'<span>{LISTS[name]["empty"]}</span>' in html
+    assert 'Por que não' not in html
+    assert 'Porque não' not in html
+
+
+@pytest.mark.django_db
+def test_empty_search_says_nothing_was_found(client, root):
+    client.force_login(root)
+
+    html = client.get(reverse('wagtaildocs:index_results'), {'q': 'nada-com-isso'}).content.decode()
+
+    assert 'Nada encontrado com essa busca ou esses filtros.' in html
+
+
+# ── Formulários e telas avulsas ────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('url', ['/cms/account/', '/cms/redirects/add/', '/cms/collections/add/', '/cms/groups/new/'])
+def test_wagtail_forms_use_the_editor_bar(client, root, url):
+    client.force_login(root)
+
+    html = client.get(url).content.decode()
+
+    assert '<header class="nr-editorbar" data-nr-editorbar>' in html
+    assert '<header class="w-slim-header' not in html
+    # O rodapé nativo continua no formulário: é nele que a barra clica.
+    assert 'data-edit-form' in html
+    assert 'newsroom/js/newsroom-editor.js' in html
+
+
+@pytest.mark.django_db
+def test_delete_confirmation_is_a_panel_card(client, root):
+    from apps.news.models import Category
+
+    category = Category.objects.create(name='Para remover', slug='para-remover')
+    client.force_login(root)
+
+    html = client.get(reverse('wagtailsnippets_news_category:delete', args=[category.pk])).content.decode()
+
+    assert '<header class="nr-editorbar nr-pagebar">' in html
+    assert 'Remover “Para remover”?' in html
+    assert 'class="nr-btn nr-btn--danger">Remover</button>' in html
+    assert re.search(r'class="nr-editorbar__parent" href="[^"]+">Categorias</a>', html)
+    assert 'is referenced' not in html
+
+
+@pytest.mark.django_db
+def test_multiple_image_upload_uses_the_page_header(client, root):
+    client.force_login(root)
+
+    html = client.get(reverse('wagtailimages:add_multiple')).content.decode()
+
+    assert '<header class="nr-editorbar nr-pagebar">' in html
+    assert '<header class="w-slim-header' not in html
+
+
+# ── Django admin: exclusão e histórico no desenho do painel ────────────────
+
+
+@pytest.mark.django_db
+def test_django_delete_confirmation_is_the_panel_card(client, root):
+    from django.contrib.auth.models import Group, Permission
+
+    group = Group.objects.create(name='Grupo de teste')
+    group.permissions.set(Permission.objects.all()[:30])
+    client.force_login(root)
+
+    html = client.get(reverse('admin:auth_group_delete', args=[group.pk])).content.decode()
+
+    assert 'Remover grupo “Grupo de teste”?' in html
+    assert 'class="nr-btn nr-btn--danger">Remover</button>' in html
+    # O resumo fica à vista; a lista de cada item afetado, recolhida.
+    assert re.search(r'Relacionamentos? group-permission: 30', html)
+    assert '<details class="nr-confirm__details">' in html
+    assert 'Are you sure' not in html
+
+
+@pytest.mark.django_db
+def test_django_history_uses_the_list_header(client, root):
+    client.force_login(root)
+
+    html = client.get(reverse('admin:accounts_customuser_history', args=[root.pk])).content.decode()
+
+    assert re.search(r'<h1 class="nr-listhead__title">\s*Histórico de modificações', html)
+    assert 'Nenhuma alteração registrada.' in html
+
+
+def test_panel_dates_are_short():
+    """config/formats/pt_BR: "24/07/2026 18:27", não "24 de Julho de 2026 às 18:27"."""
+    from datetime import datetime
+
+    from django.utils import formats, translation
+
+    with translation.override('pt-br'):
+        moment = datetime(2026, 7, 24, 18, 27)
+        assert formats.date_format(moment, 'DATETIME_FORMAT') == '24/07/2026 18:27'
+        assert formats.date_format(moment.date(), 'DATE_FORMAT') == '24/07/2026'

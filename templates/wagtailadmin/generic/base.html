@@ -1,0 +1,15 @@
+{% extends "wagtailadmin/generic/base.html" %}
+{% comment %}
+    Override do projeto (estende o próprio template do Wagtail 7.4): as telas
+    avulsas do Wagtail trocam o cabeçalho cru (slim_header com trilha, ou o
+    antigo, de título grande com ícone) pelo cabeçalho de página do painel
+    (templates/newsroom/wagtail/page_header.html). Listagens e formulários
+    sobrescrevem este bloco de novo com os seus
+    (wagtailadmin/generic/listing.html e form.html).
+{% endcomment %}
+
+{% block slim_header %}
+    {% include "newsroom/wagtail/page_header.html" %}
+{% endblock %}
+
+{% block main_header %}{% endblock %}

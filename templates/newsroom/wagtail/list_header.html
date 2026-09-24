@@ -1,0 +1,108 @@
+{% load wagtailadmin_tags newsroom %}
+{% comment %}
+    Cabeçalho de listagem do Wagtail no desenho do painel: o mesmo .nr-listhead
+    das listas do Django admin (templates/admin/includes/model_list_help.html),
+    com título, contagem, descrição, a ação principal e as abas, e abaixo a
+    busca e os filtros do Wagtail.
+
+    A busca é a do slim_header do Wagtail 7.4
+    (wagtailadmin/shared/headers/slim_header.html), com os mesmos controladores:
+    w-swap troca só #listing-results enquanto se digita, e a gaveta de filtros
+    é a nativa. A aba ativa vai junto num campo oculto. Ao atualizar o Wagtail,
+    compare.
+
+    A faixa da busca recebe a barra de seleção das ações em massa
+    (data-nr-selection-dock; newsroom.js a encaixa ali).
+
+    Variáveis: head (título, descrição, total, primary, secondary, tabs,
+    state, state_param; apps/common/newsroom/wagtail_lists.py ou, nas
+    notícias, a própria view), mais search_form, filters, index_results_url e,
+    nas imagens, extra_form_fields (ordenação e grade/lista), do contexto.
+{% endcomment %}
+<div class="nr-wlist">
+    <div class="nr-listhead nr-wlist__head">
+        <div class="nr-listhead__main">
+            <div class="nr-listhead__heading">
+                <h1 class="nr-listhead__title">
+                    {{ head.title }}
+                    {% if head.total is not None %}<span class="nr-listhead__count">{{ head.total }}</span>{% endif %}
+                </h1>
+                {% if head.description %}
+                    <p class="nr-listhead__desc">{{ head.description }}</p>
+                {% endif %}
+            </div>
+            {% if head.primary or head.secondary %}
+                <div class="nr-listhead__actions">
+                    {% for action in head.secondary %}
+                        {% if action.component %}
+                            <div class="nr-listhead__more">{% component action.component %}</div>
+                        {% else %}
+                            <a class="nr-btn nr-btn--secondary" href="{{ action.url }}">{{ action.label }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    {% if head.primary %}
+                        <a class="nr-btn nr-btn--primary nr-listhead__primary" href="{{ head.primary.url }}" aria-label="{{ head.primary.label }}">
+                            {% nr_icon "plus" %}<span>{{ head.primary.label }}</span>
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+        {% if head.tabs %}
+            <nav class="nr-tabs nr-listhead__tabs" aria-label="Filtros rápidos">
+                {% for tab in head.tabs %}
+                    <a class="nr-tab{% if tab.active %} is-active{% endif %}" href="{{ tab.url }}"{% if tab.active %} aria-current="true"{% endif %}>
+                        {{ tab.label }}<span class="nr-tab__count">{{ tab.count }}</span>
+                    </a>
+                {% endfor %}
+            </nav>
+        {% endif %}
+    </div>
+
+    {% if index_results_url and search_form or index_results_url and filters %}
+        <div class="nr-wlist__toolbar" data-nr-selection-dock>
+            <form
+                action="{{ index_results_url }}"
+                method="get"
+                class="nr-wlist__search"
+                novalidate
+                role="search"
+                data-search-form
+                data-controller="w-swap"
+                data-action="change->w-swap#submitLazy input->w-swap#submitLazy"
+                data-w-swap-src-value="{{ index_results_url }}"
+                data-w-swap-target-value="#listing-results"
+                data-w-swap-reflect-value="true"
+            >
+                {% if search_form %}
+                    {% for field in search_form %}
+                        {% formattedfield field=field sr_only_label=True icon="search" %}
+                    {% endfor %}
+                {% endif %}
+
+                {% if head.state %}
+                    <input type="hidden" name="{{ head.state_param }}" value="{{ head.state }}">
+                {% endif %}
+
+                {{ extra_form_fields }}
+
+                {% if filters %}
+                    <div
+                        id="filters-drilldown"
+                        class="w-drilldown"
+                        data-controller="w-drilldown"
+                        data-action="w-swap:success@document->w-drilldown#updateCount w-dropdown:hide->w-drilldown#delayedClose w-dropdown:clickaway->w-drilldown#preventOutletClickaway"
+                        data-w-drilldown-count-attr-value="data-w-active-filter-id"
+                        data-w-drilldown-w-action-outlet="[data-w-active-filter-id][data-controller='w-action']"
+                        data-w-drilldown-w-dropdown-outlet="#filters-drilldown [data-controller='w-dropdown']"
+                    >
+                        {% include "wagtailadmin/shared/headers/_filters.html" with filters=filters only %}
+                    </div>
+                {% endif %}
+
+                {# Enter não recarrega: os resultados já vêm pelo w-swap. #}
+                <input hidden disabled type="submit" />
+            </form>
+        </div>
+    {% endif %}
+</div>

@@ -1,0 +1,23 @@
+{% extends "wagtailadmin/generic/confirm_delete.html" %}
+{% comment %}
+    Override do projeto: a confirmação de remoção do Wagtail num cartão do
+    painel, com o texto em português. O formulário e os endereços são os
+    originais (view.get_delete_url, view.get_success_url).
+{% endcomment %}
+
+{% block main_content %}
+    <div class="nr-confirm">
+        <p class="nr-confirm__title">Remover “{{ view.object }}”?</p>
+        {% if usage_url %}
+            {% include "wagtailadmin/shared/usage_summary.html" %}
+        {% endif %}
+        {% if not is_protected %}
+            <p class="nr-confirm__text">Essa ação não pode ser desfeita.</p>
+            <form action="{{ view.get_delete_url }}" method="POST" class="nr-confirm__actions">
+                {% csrf_token %}
+                <a href="{{ view.get_success_url }}" class="nr-btn nr-btn--secondary">Cancelar</a>
+                <button type="submit" class="nr-btn nr-btn--danger">Remover</button>
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}

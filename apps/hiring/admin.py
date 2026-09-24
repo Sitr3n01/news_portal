@@ -54,6 +54,9 @@ class JobPostingAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
     radio_fields = {'status': admin.HORIZONTAL, 'employment_type': admin.HORIZONTAL}
     date_hierarchy = 'published_at'
     ux_list_title = 'Vagas (registro interno)'
+    ux_list_all_label = 'Todas'
+    ux_status_field = 'status'
+    ux_status_tones = {'draft': 'neutral', 'open': 'success', 'closed': 'archived'}
     ux_list_description = 'As vagas não são mais publicadas no site da escola. Use este cadastro como registro interno das oportunidades e das candidaturas já recebidas.'
     ux_list_icon = 'work'
     ux_list_actions = [
@@ -99,13 +102,13 @@ class JobPostingAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
     ]
     actions = ['open_postings', 'close_postings']
 
-    @admin.action(description='Abrir vagas selecionadas')
+    @admin.action(description='Abrir vagas selecionadas', permissions=['change'])
     def open_postings(self, request, queryset):
         from django.utils import timezone
         updated = queryset.update(status=JobPosting.Status.OPEN, published_at=timezone.now())
         self.message_user(request, f'{updated} vaga(s) aberta(s).')
 
-    @admin.action(description='Fechar vagas selecionadas')
+    @admin.action(description='Fechar vagas selecionadas', permissions=['change'])
     def close_postings(self, request, queryset):
         updated = queryset.update(status=JobPosting.Status.CLOSED)
         self.message_user(request, f'{updated} vaga(s) fechada(s).')
@@ -120,6 +123,12 @@ class ApplicationAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
     readonly_fields = ['first_name', 'last_name', 'email', 'phone', 'cover_letter', 'resume_link', 'created_at', 'updated_at']
     radio_fields = {'status': admin.HORIZONTAL}
     ux_list_title = 'Candidaturas'
+    ux_list_all_label = 'Todas'
+    ux_status_field = 'status'
+    ux_status_tones = {
+        'received': 'info', 'reviewing': 'warning', 'shortlisted': 'warning',
+        'interview': 'warning', 'rejected': 'archived', 'accepted': 'success',
+    }
     ux_list_description = 'Revise primeiro as candidaturas recebidas, registre notas internas e mova o status conforme a triagem avança.'
     ux_list_icon = 'description'
     ux_list_actions = [
@@ -172,17 +181,17 @@ class ApplicationAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
         url = reverse('hiring:download_resume', args=[obj.pk])
         return format_html('<a href="{}" target="_blank" rel="noopener">Baixar currículo</a>', url)
 
-    @admin.action(description='Marcar como Em Análise')
+    @admin.action(description='Marcar como Em Análise', permissions=['change'])
     def mark_reviewing(self, request, queryset):
         updated = queryset.update(status=Application.Status.REVIEWING)
         self.message_user(request, f'{updated} candidatura(s) marcada(s) como em análise.')
 
-    @admin.action(description='Marcar como Aceito')
+    @admin.action(description='Marcar como Aceito', permissions=['change'])
     def mark_accepted(self, request, queryset):
         updated = queryset.update(status=Application.Status.ACCEPTED)
         self.message_user(request, f'{updated} candidatura(s) aceita(s).')
 
-    @admin.action(description='Marcar como Rejeitado')
+    @admin.action(description='Marcar como Rejeitado', permissions=['change'])
     def mark_rejected(self, request, queryset):
         updated = queryset.update(status=Application.Status.REJECTED)
         self.message_user(request, f'{updated} candidatura(s) rejeitada(s).')

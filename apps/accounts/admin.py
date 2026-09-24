@@ -1,9 +1,12 @@
 from django.contrib import admin
 from django.contrib.auth.admin import GroupAdmin as DjangoGroupAdmin
 from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.forms import AdminUserCreationForm
 from django.contrib.auth.models import Group
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from unfold.admin import ModelAdmin
+from unfold.forms import AdminPasswordChangeForm
+from unfold.widgets import UnfoldAdminPasswordWidget, UnfoldAdminRadioSelectWidget
 
 from apps.accounts.admin_roles import sync_user_role_group
 from apps.common.admin_mixins import AdminUXMixin, SuperuserOnlyAdminMixin
@@ -40,17 +43,42 @@ class AdminRoleGroupAdmin(AdminUXMixin, ModelAdmin, DjangoGroupAdmin):
     ]
 
 
+class UserAdminCreationForm(AdminUserCreationForm):
+    """Criação de usuário no admin com os campos do Unfold.
+
+    O AdminUserCreationForm do Django usa widgets sem as classes do Unfold: no
+    tema claro as caixas de senha ficavam sem borda nem fundo, invisíveis. Os
+    campos, a validação e o "Autenticação baseada em senha" continuam os do
+    Django; só o desenho dos widgets muda, como no UserCreationForm do Unfold.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in ('password1', 'password2'):
+            self.fields[name].widget = UnfoldAdminPasswordWidget(attrs={'autocomplete': 'new-password'})
+        if 'usable_password' in self.fields:
+            self.fields['usable_password'].widget = UnfoldAdminRadioSelectWidget(
+                choices=self.fields['usable_password'].choices,
+            )
+
+
 @admin.register(CustomUser)
 class CustomUserAdmin(AdminUXMixin, ModelAdmin, UserAdmin):
     STAFF_ADMIN_ROLES = {CustomUser.Role.SCHOOL_ADMIN, CustomUser.Role.SUPER_ADMIN}
 
-    list_display = ['username', 'email', 'get_role_display', 'is_active', 'is_staff', 'date_joined']
+    add_form = UserAdminCreationForm
+    change_password_form = AdminPasswordChangeForm
+
+    list_display = ['username', 'email', 'role', 'is_active', 'is_staff', 'date_joined']
     list_filter = ['role', 'is_active', 'is_staff', 'email_verified', 'date_joined']
     list_filter_submit = True
     search_fields = ['username', 'email', 'first_name', 'last_name']
     ordering = ['-date_joined']
     radio_fields = {'role': admin.HORIZONTAL}
     ux_list_title = 'Usuários administrativos'
+    ux_status_field = 'is_active'
+    ux_status_labels = {True: 'Ativo', False: 'Inativo'}
+    ux_status_tones = {True: 'success', False: 'archived'}
     ux_list_description = 'Crie contas nominativas e use grupos de permissões por responsabilidade. Evite superusuários para rotinas diárias.'
     ux_list_icon = 'manage_accounts'
     ux_list_actions = [
@@ -110,10 +138,12 @@ class CustomUserAdmin(AdminUXMixin, ModelAdmin, UserAdmin):
             'all': [],
         }
 
-    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
-        extra_context = extra_context or {}
-        extra_context['kb_password_fix'] = True
-        return super().changeform_view(request, object_id, form_url, extra_context)
+    def nr_form_links(self, request, obj):
+        # A tela de senha do Django não tinha caminho a partir do usuário.
+        if obj is None or not self.has_change_permission(request, obj):
+            return []
+        url = reverse('admin:auth_user_password_change', args=[obj.pk])
+        return [{'label': 'Alterar senha', 'url': url, 'icon': 'key'}]
 
     def save_model(self, request, obj, form, change):
         if obj.role in self.STAFF_ADMIN_ROLES:

@@ -1,0 +1,150 @@
+{% extends "newsroom/base.html" %}
+{% load newsroom %}
+
+{% block content %}
+    <p class="nr-overline">Seu espaço de trabalho</p>
+    <div class="nr-hero">
+        <div>
+            <h1>Visão geral</h1>
+            <p>{{ subtitle }}</p>
+        </div>
+        {% if primary_action %}
+            <a class="nr-btn nr-btn--primary" href="{{ primary_action.url }}" aria-label="{{ primary_action.label }}">
+                {% nr_icon "plus" %}<span>{{ primary_action.label }}</span>
+            </a>
+        {% endif %}
+    </div>
+
+    {% if stats %}
+        <section class="nr-stats nr-stats--{{ stats|length }}" aria-label="Indicadores de {{ workspace.label|default:'administração' }}">
+            {% for stat in stats %}
+                <a class="nr-stat" href="{{ stat.url }}">
+                    <span class="nr-stat__label">{% nr_icon stat.icon %}{{ stat.label }}</span>
+                    <span class="nr-stat__value">{{ stat.value|stringformat:"02d" }}</span>
+                    <span class="nr-stat__note">{{ stat.note }}</span>
+                </a>
+            {% endfor %}
+        </section>
+    {% endif %}
+
+    {% if listing and section %}
+        <section class="nr-section"
+                 aria-labelledby="nr-contents-title"
+                 hx-target="#nr-results"
+                 hx-select="#nr-results"
+                 hx-select-oob="#nr-tabs"
+                 hx-swap="outerHTML"
+                 hx-indicator="#nr-results"
+                 hx-push-url="true">
+            <div class="nr-section-heading">
+                <div>
+                    <h2 id="nr-contents-title">{{ section.title }}</h2>
+                    <p>{{ section.subtitle }}</p>
+                </div>
+                {% if section.link_url %}
+                    <a class="nr-text-link" href="{{ section.link_url }}">{{ section.link_label }} {% nr_icon "arrow" %}</a>
+                {% endif %}
+            </div>
+
+            {% include "newsroom/partials/tabs.html" %}
+
+            <form id="nr-filters" class="nr-filter-row" method="get" action="{{ request.path }}" role="search"
+                  hx-get="{{ request.path }}"
+                  hx-trigger="input changed delay:350ms from:#nr-search, search from:#nr-search, change from:#nr-category, submit"
+                  hx-sync="this:replace">
+                <label class="nr-searchbox">
+                    {% nr_icon "search" %}
+                    <span class="nr-sr-only">{{ listing.search_label }}</span>
+                    <input id="nr-search" type="search" name="q" value="{{ listing.query }}" placeholder="{{ listing.search_placeholder }}" maxlength="100" autocomplete="off">
+                </label>
+                {% if listing.categories %}
+                    <label class="nr-select">
+                        <span class="nr-sr-only">Filtrar por categoria</span>
+                        {% nr_icon "folder" %}
+                        <select id="nr-category" name="categoria">
+                            <option value="">Todas as categorias</option>
+                            {% for category in listing.categories %}
+                                <option value="{{ category.pk }}"{% if listing.category_id == category.pk|stringformat:"s" %} selected{% endif %}>{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                {% endif %}
+                <noscript><button type="submit" class="nr-toolbtn">Filtrar</button></noscript>
+                <input type="hidden" name="view" value="{{ listing.view }}" data-nr-view-input>
+                <div class="nr-views" role="group" aria-label="Visualização da lista">
+                    <button class="nr-viewbtn{% if listing.view == 'list' %} is-active{% endif %}" type="submit" name="view" value="list" data-nr-view="list" aria-pressed="{% if listing.view == 'list' %}true{% else %}false{% endif %}" title="Visualização em lista">
+                        {% nr_icon "list" %}<span class="nr-sr-only">Visualização em lista</span>
+                    </button>
+                    <button class="nr-viewbtn{% if listing.view == 'grid' %} is-active{% endif %}" type="submit" name="view" value="grid" data-nr-view="grid" aria-pressed="{% if listing.view == 'grid' %}true{% else %}false{% endif %}" title="Visualização em grade">
+                        {% nr_icon "grid" %}<span class="nr-sr-only">Visualização em grade</span>
+                    </button>
+                </div>
+            </form>
+
+            {% include "newsroom/partials/results_region.html" %}
+        </section>
+    {% endif %}
+
+    <section class="nr-bottom-grid" aria-label="Acesso rápido e atividade recente">
+        <div class="nr-card">
+            <h2 class="nr-card__heading">Acesso rápido</h2>
+            <p class="nr-card__sub">Suas principais ferramentas{% if workspace %} em {{ workspace.label }}{% endif %}.</p>
+            {% for link in quick_links %}
+                <a class="nr-quicklink" href="{{ link.url }}">
+                    {% nr_icon link.icon %}<span>{{ link.label }}</span>{% nr_icon "arrow" "nr-quicklink__arrow" %}
+                </a>
+            {% empty %}
+                <p class="nr-card__empty">Nenhum atalho disponível para as suas permissões.</p>
+            {% endfor %}
+        </div>
+        <div class="nr-card">
+            <h2 class="nr-card__heading">Atividade recente</h2>
+            <p class="nr-card__sub">Últimas atualizações registradas pela equipe.</p>
+            <ul class="nr-activity-list">
+                {% for event in activity %}
+                    <li class="nr-activity">
+                        <span class="nr-activity__dot nr-activity__dot--{{ event.tone }}" aria-hidden="true"></span>
+                        <div>
+                            <p class="nr-activity__title">{{ event.title }}</p>
+                            <p class="nr-activity__caption">{{ event.caption }} · <time datetime="{{ event.when|date:'c' }}">{{ event.when|nr_relative }}</time></p>
+                        </div>
+                    </li>
+                {% empty %}
+                    <li class="nr-card__empty">Nenhuma atividade registrada ainda.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% if system_health %}
+            <div class="nr-card nr-card--wide">
+                <div class="nr-health__head">
+                    <div>
+                        <h2 class="nr-card__heading">Saúde do envio</h2>
+                        <p class="nr-card__sub">{{ system_health.hint }}</p>
+                    </div>
+                    <span class="nr-status nr-status--{{ system_health.tone }}">{{ system_health.status }}</span>
+                </div>
+                <dl class="nr-health__grid">
+                    {% for metric in system_health.metrics %}
+                        <div class="nr-health__metric nr-health__metric--{{ metric.tone }}">
+                            <dt>{{ metric.label }}</dt>
+                            <dd>{{ metric.value }}</dd>
+                        </div>
+                    {% endfor %}
+                </dl>
+                {% if system_health.can_view_details %}
+                    <dl class="nr-health__details">
+                        {% for detail in system_health.details %}
+                            <div><dt>{{ detail.label }}</dt><dd>{{ detail.value }}</dd></div>
+                        {% endfor %}
+                    </dl>
+                {% endif %}
+                {% if system_health.url or system_health.settings_url %}
+                    <div class="nr-health__links">
+                        {% if system_health.url %}<a class="nr-text-link" href="{{ system_health.url }}">Ver entregas {% nr_icon "arrow" %}</a>{% endif %}
+                        {% if system_health.settings_url %}<a class="nr-text-link" href="{{ system_health.settings_url }}">Ajustar remetentes {% nr_icon "arrow" %}</a>{% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}

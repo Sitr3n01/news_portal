@@ -1,0 +1,18 @@
+{% load newsroom %}
+{% comment %}
+    Linha sob o título da barra do editor. Reenviado pelo salvamento automático
+    (wagtailadmin/generic/edit_partials.html). O estado mora no controle
+    "Publicação" (_publication.html); o selo só aparece aqui quando não há esse
+    controle (formulário sem o painel "Status").
+{% endcomment %}
+<span class="nr-editorbar__state" id="nr-editorbar-state">
+    {% if bar.status and not bar.publication %}
+        <span class="nr-status nr-status--{{ bar.status.key }} nr-editorbar__status">{{ bar.status.label }}</span>
+    {% endif %}
+    {% if bar.locked %}
+        <span class="nr-status nr-status--warning nr-editorbar__status">{% nr_icon "lock" %}Bloqueada</span>
+    {% endif %}
+    {% if bar.status.note %}
+        <span class="nr-editorbar__note">{{ bar.status.note }}</span>
+    {% endif %}
+</span>

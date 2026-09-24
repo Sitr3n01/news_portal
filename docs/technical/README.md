@@ -11,6 +11,7 @@
 | [TECHNICAL_REFERENCE.md](TECHNICAL_REFERENCE.md) | Referência extensa para debugging sensível |
 | [SEGURANCA.md](SEGURANCA.md) | Ameaças, proteções ativas e checklist de segurança |
 | [FLUXO_NEWSLETTER.md](FLUXO_NEWSLETTER.md) | Fluxo real da newsletter, fila e entregas |
+| [PAINEL_UNIFICADO.md](PAINEL_UNIFICADO.md) | Painel administrativo unificado: visão geral, navegação única, espaços de trabalho, integração Wagtail/Unfold, exceções e reversão |
 | [APP_HIRING.md](APP_HIRING.md) | Vagas e candidaturas no admin, fora do site desde 14/09/2026, e download protegido de currículos |
 
 ## Operação

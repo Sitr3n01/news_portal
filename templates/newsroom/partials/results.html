@@ -1,0 +1,7 @@
+{% comment %}
+    Resposta das requisições HTMX da visão geral: só as abas (trocadas fora de
+    banda, via hx-select-oob) e a região de resultados. O campo de busca nunca é
+    substituído, para não roubar o foco nem apagar o que a pessoa está digitando.
+{% endcomment %}
+{% include "newsroom/partials/tabs.html" %}
+{% include "newsroom/partials/results_region.html" %}

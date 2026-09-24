@@ -1,0 +1,48 @@
+{% load newsroom %}
+{% comment %}
+    Barra de seleção das listas do Django admin (no lugar da barra do Unfold,
+    que abria no rodapé com um seletor de ação e um botão "Run"). Aparece no
+    topo da tabela quando alguma linha está marcada (CSS :has, newsroom-unfold.css)
+    e fica presa ao rolar. Cada ação é um botão.
+
+    O fluxo do Django não muda: o botão envia o mesmo formulário com
+    `index=0` e o nome da ação no campo oculto `action` (newsroom.js o
+    preenche no clique); permissões, "selecionar todos das outras páginas" e a
+    página de confirmação de remoção continuam os do Django. O actions.js do
+    Django procura aqui: div.actions, span.action-counter, input.select-across,
+    span.question/.clear/.all e button[name=index].
+{% endcomment %}
+{% if action_form and actions_on_top %}
+    <div class="actions nr-selectionbar nr-selectionbar--admin" data-nr-selectionbar role="region" aria-label="Itens selecionados">
+        <button type="button" class="nr-selectionbar__clear" data-nr-selection-clear aria-label="Limpar seleção" title="Limpar seleção">
+            {% nr_icon "close" %}
+        </button>
+        <span class="nr-selectionbar__count" data-nr-selection-count aria-live="polite"></span>
+        <span class="action-counter nr-sr-only" data-actions-icnt="{{ cl.result_list|length }}">{{ selection_note }}</span>
+        <span class="nr-selectionbar__divider" aria-hidden="true"></span>
+        <div class="nr-selectionbar__actions">
+            {% for value, label in action_form.fields.action.choices %}
+                {% if value and value != 'delete_selected' %}
+                    <button type="submit" name="index" value="0" class="nr-btn nr-btn--secondary" data-nr-action="{{ value }}" title="{{ label }}">{{ label|nr_action_label }}</button>
+                {% endif %}
+            {% endfor %}
+            {% for value, label in action_form.fields.action.choices %}
+                {% if value == 'delete_selected' %}
+                    <button type="submit" name="index" value="0" class="nr-btn nr-btn--secondary is-danger" data-nr-action="{{ value }}" title="{{ label }}">
+                        {% nr_icon "trash" %}<span>Remover</span>
+                    </button>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <input type="hidden" name="action" value="" data-nr-action-input>
+        {# O campo do Unfold traz x-model="selectAcross", que exige o x-data da barra dele. #}
+        <input type="hidden" name="select_across" value="0" class="select-across">
+        {% if cl.result_count != cl.result_list|length %}
+            <span class="nr-selectionbar__across">
+                <span class="question hidden"><a href="#">Selecionar os {{ cl.result_count }}</a></span>
+                <span class="all hidden">{{ selection_note_all }}</span>
+                <span class="clear hidden"><a href="#">Limpar seleção</a></span>
+            </span>
+        {% endif %}
+    </div>
+{% endif %}

@@ -1,0 +1,49 @@
+{% extends "admin/change_form.html" %}
+{% load unfold %}
+{% comment %}
+    Override do projeto sobre o formulário do Unfold 0.87 (unfold/templates/admin/change_form.html):
+    - a barra do formulário (admin/includes/form_bar.html) entra logo abaixo da
+      topbar, com título, estado, Guia, Histórico e os botões de salvar;
+    - a faixa de botões do rodapé do Unfold só continua nas janelas popup
+      (seleção de registro relacionado), que não têm a casca nem a barra;
+    - em formulários com abas, as seções recolhidas que não são abas
+      ("Datas", "Campos sem uso no site atual") vêm depois das abas, e não
+      antes delas. Sem abas, a ordem declarada não muda. O resto do bloco
+      `field_sets` é cópia fiel do Unfold.
+    Ao atualizar o Unfold (pinado em 0.87.0), compare.
+{% endcomment %}
+
+{% block header %}
+    {{ block.super }}
+    {% if not is_popup %}
+        {% include "admin/includes/form_bar.html" %}
+    {% endif %}
+{% endblock %}
+
+{% block field_sets %}
+    {% with has_conditional_display=adminform.model_admin.conditional_fields fieldset_tabs=adminform|tabs %}
+        {% for fieldset in adminform %}
+            {% if "tab" not in fieldset.classes %}
+                {% if not fieldset_tabs or "collapse" not in fieldset.classes %}
+                    {% include 'admin/includes/fieldset.html' %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        {% include "unfold/helpers/fieldsets_tabs.html" %}
+
+        {% if fieldset_tabs %}
+            {% for fieldset in adminform %}
+                {% if "tab" not in fieldset.classes and "collapse" in fieldset.classes %}
+                    {% include 'admin/includes/fieldset.html' %}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+{% endblock %}
+
+{% block submit_buttons_bottom %}
+    {% if is_popup %}
+        {{ block.super }}
+    {% endif %}
+{% endblock %}

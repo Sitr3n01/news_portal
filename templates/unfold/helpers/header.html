@@ -1,0 +1,9 @@
+{% load newsroom %}
+{% comment %}
+   Override do projeto: o cabeçalho do Unfold dá lugar à topbar do painel
+   unificado (trilha "Espaço de trabalho › tela", conta e saída). A trilha das
+   telas do admin é montada por newsroom_admin_topbar a partir de opts/original.
+   Em janelas popup (seleção de registro relacionado) não há casca, como a
+   sidebar, que o próprio Unfold já omite nesses casos.
+{% endcomment %}
+{% if not is_popup %}{% newsroom_admin_topbar %}{% endif %}

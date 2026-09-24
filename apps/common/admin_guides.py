@@ -345,7 +345,7 @@ def management_guide(request):
             _resource_group('Sites e configuração', 'Identidade e remetentes dos portais.', [
                 _action(user, 'Configurações dos sites', 'settings', 'wagtailsnippets_common_siteextension:list', 'common.view_siteextension'),
             ]),
-            _resource_group('Mídia compartilhada', 'Arquivos reutilizáveis em páginas e artigos.', [
+            _resource_group('Mídia compartilhada', 'Arquivos reutilizáveis em páginas e notícias.', [
                 _action(user, 'Arquivos', 'perm_media', 'admin:media_library_mediafile_changelist', 'media_library.view_mediafile'),
                 _action(user, 'Pastas', 'folder', 'admin:media_library_mediafolder_changelist', 'media_library.view_mediafolder'),
             ]),

@@ -1,0 +1,7 @@
+{% load newsroom %}
+{# Remover, ao lado de "Salvar rascunho". Reenviado pelo salvamento automático: na criação, só existe depois do primeiro salvamento. #}
+<span class="nr-editorbar__danger" id="nr-editorbar-danger">{% for item in bar.danger %}
+    <a class="nr-btn nr-btn--secondary nr-editorbar__remove" href="{{ item.url }}" aria-label="{{ item.label }}"{{ item.attrs }}>
+        {% nr_icon item.icon %}<span class="nr-editorbar__label">{{ item.label }}</span>
+    </a>
+{% endfor %}</span>

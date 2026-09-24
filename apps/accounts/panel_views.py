@@ -4,15 +4,18 @@ Sobre CBV: docs/ai/development_rules.md §2 manda usar Function-Based View. A
 exceção — registrada na própria regra — são as views de autenticação do Django,
 que já são CBV por natureza. Reescrever LoginView à mão significaria reimplantar
 o tratamento de sessão e o backend de autenticação, o que é regressão de
-segurança e não ganho de estilo. As três views que não vêm do Django
-(``panel_picker``, ``no_access``, ``panel_logout``) são FBV.
+segurança e não ganho de estilo. As views que não vêm do Django
+(``no_access``, ``panel_logout``) são FBV.
+
+A antiga tela de escolha de área (``panel_picker``, em /painel/) foi substituída
+pela visão geral do painel unificado (apps/common/newsroom/views.py), que
+reúne as duas áreas numa navegação só.
 """
 
 import logging
 
 from django.conf import settings
 from django.contrib.auth import logout
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render, resolve_url
@@ -68,27 +71,6 @@ class PanelLoginView(LoginView):
         context = super().get_context_data(**kwargs)
         context['panel_cards'] = panels.panel_cards(None)
         return context
-
-
-@login_required(login_url='panel:login')
-@require_http_methods(['GET'])
-def panel_picker(request):
-    """Escolha de área, para quem alcança as duas.
-
-    Também é o destino permanente do "trocar de área" a partir de qualquer
-    painel — por isso continua acessível mesmo com um só painel disponível
-    (nesse caso entra direto, para não virar uma tela de um botão só).
-    """
-    available = panels.available_panels(request.user)
-
-    if not available:
-        return redirect('panel:no_access')
-    if len(available) == 1:
-        return redirect(panels.panel_url(available[0]))
-
-    return render(request, 'auth/panel_picker.html', {
-        'panel_cards': [card for card in panels.panel_cards(request.user) if card['allowed']],
-    })
 
 
 @require_http_methods(['GET'])

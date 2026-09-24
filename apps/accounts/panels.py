@@ -208,7 +208,8 @@ def post_login_target(user, request, next_url='', chosen_panel=''):
          "sem acesso", nunca a um desvio silencioso: quem clicou num link
          precisa saber por que não chegou lá.
       2. o painel escolhido no formulário, se de fato permitido.
-      3. único painel disponível -> entra direto; dois -> escolhe na tela.
+      3. pelo menos um painel -> visão geral unificada (/painel/), que reúne
+         as ferramentas das duas áreas numa navegação só.
       4. nenhum painel -> portal público.
     """
     allowed = available_panels(user)
@@ -222,9 +223,7 @@ def post_login_target(user, request, next_url='', chosen_panel=''):
     if chosen_panel in allowed:
         return panel_url(chosen_panel)
 
-    if len(allowed) == 1:
-        return panel_url(allowed[0])
-    if len(allowed) > 1:
-        return reverse('panel:picker')
+    if allowed:
+        return reverse('panel:dashboard')
 
     return resolve_url(settings.LOGIN_REDIRECT_URL)

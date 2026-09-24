@@ -1,0 +1,29 @@
+{% load i18n wagtailadmin_tags newsroom %}
+{% comment %}
+    Override do projeto: as ações em massa do Wagtail 7.4
+    (wagtailadmin/bulk_actions/footer.html) viram a barra de seleção do painel,
+    a mesma das listas do Django admin (templates/admin/includes/selection_bar.html).
+    No lugar do rodapé escuro fixo embaixo, a barra aparece no topo, por cima
+    do cabeçalho da listagem (newsroom.js a coloca dentro dele), com o botão de
+    limpar, a contagem e as ações. Sem a caixa "Selecionar todos": a do
+    cabeçalho da tabela já faz isso.
+
+    O bulk-actions.js do Wagtail continua dono da seleção e só procura aqui
+    os atributos data-bulk-action-footer, data-bulk-action-num-objects,
+    data-bulk-action-num-objects-in-listing e data-bulk-action-button, além da
+    classe `hidden`. Ao atualizar o Wagtail, compare.
+{% endcomment %}
+<section class="nr-selectionbar nr-selectionbar--wagtail bulk-actions-choices hidden" data-bulk-action-footer="{% if item_type %}{{ item_type }}{% else %}{{ model_name|upper }}{% endif %}" data-nr-selectionbar aria-labelledby="bulk-actions-heading">
+    <h2 id="bulk-actions-heading" class="w-sr-only">{% trans "Bulk actions" %}</h2>
+    <button type="button" class="nr-selectionbar__clear" data-nr-selection-clear aria-label="Limpar seleção" title="Limpar seleção">
+        {% nr_icon "close" %}
+    </button>
+    <span data-bulk-action-num-objects class="nr-selectionbar__count num-objects" aria-live="polite"></span>
+    <span class="nr-selectionbar__divider" aria-hidden="true"></span>
+    <ul class="nr-selectionbar__actions bulk-actions-buttons">{% bulk_action_choices app_label model_name %}</ul>
+    {% if objects.has_other_pages %}
+        <span class="nr-selectionbar__across">
+            <button type="button" data-bulk-action-num-objects-in-listing class="num-objects-in-listing w-hidden">{{ select_all_obj_text }}</button>
+        </span>
+    {% endif %}
+</section>

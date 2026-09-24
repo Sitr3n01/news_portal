@@ -1,0 +1,1073 @@
+/*
+ * Newsroom × Wagtail 7.4 — integração da casca e do tema.
+ *
+ * Carregado pelo hook oficial `insert_global_admin_css`
+ * (apps/common/wagtail_hooks.py), DEPOIS de wagtailadmin/css/core.css.
+ *
+ * 1. Tema: o Wagtail expõe as cores como custom properties (--w-color-*), que
+ *    é o mecanismo documentado de personalização de marca. Aqui elas recebem a
+ *    paleta do painel. O mesmo bloco vale para .w-theme-dark e .w-theme-system
+ *    porque o painel adota UM tema (claro), como o projeto já fazia ao forçar o
+ *    tema do Unfold: sem isso, quem tem o sistema operacional escuro veria o
+ *    Wagtail escuro e a visão geral clara — dois produtos. A lista cobre todos
+ *    os 68 tokens que o tema escuro do Wagtail 7.4 redefine; ao atualizar o
+ *    Wagtail, confira se o bloco escuro de core.css ganhou tokens novos.
+ *
+ * 2. Layout: a sidebar React do Wagtail foi trocada pela sidebar do painel
+ *    (templates/wagtailadmin/base.html). O Wagtail reserva 200px para a dele
+ *    em `.wrapper`; aqui essa reserva passa a ser a largura da nossa.
+ *
+ * 3. Acabamento: raio de botões e campos e a fonte. Nada além disso é
+ *    sobrescrito — seletores de mídia, painéis de publicação e fluxos de
+ *    revisão continuam com o CSS nativo.
+ *
+ * 4. Editor de blocos: só o arrastar para reordenar (pega, lugar de destino e
+ *    cópia que acompanha o dedo), junto com static/newsroom/js/newsroom-streamfield.js.
+ *
+ * 5. Barra única do editor (templates/newsroom/editor/header.html e
+ *    static/newsroom/js/newsroom-editor.js): título, status, ferramentas e
+ *    ações de publicação num só lugar, no lugar do cabeçalho e do rodapé. O
+ *    minimapa vira o painel "Estrutura", aberto pela barra.
+ *
+ * 6. Caixas de seleção: borda e visto legíveis, sempre visíveis nas listagens,
+ *    linha selecionada destacada e as ações em massa na barra de seleção do
+ *    painel, no topo da listagem (templates/wagtailadmin/bulk_actions/footer.html).
+ */
+
+:root,
+.w-theme-light,
+.w-theme-dark,
+.w-theme-system {
+    color-scheme: light;
+    --w-font-sans: var(--nr-font);
+
+    /* Primitivos de marca: tinta neutra no lugar do roxo/verde-azulado. */
+    --w-color-primary-hue: 0;
+    --w-color-primary-saturation: 0%;
+    --w-color-primary-lightness: 9%;
+    --w-color-secondary-hue: 0;
+    --w-color-secondary-saturation: 0%;
+    --w-color-secondary-lightness: 9%;
+
+    /* Primitivos que o tema escuro remapeia — de volta aos valores claros. */
+    --w-color-white-80: #fffc;
+    --w-color-black-50: #00000080;
+    --w-color-grey-50: hsl(var(--w-color-grey-50-hue) var(--w-color-grey-50-saturation) var(--w-color-grey-50-lightness));
+    --w-color-grey-150: hsl(var(--w-color-grey-150-hue) var(--w-color-grey-150-saturation) var(--w-color-grey-150-lightness));
+    --w-color-grey-200: hsl(var(--w-color-grey-200-hue) var(--w-color-grey-200-saturation) var(--w-color-grey-200-lightness));
+    --w-color-grey-400: hsl(var(--w-color-grey-400-hue) var(--w-color-grey-400-saturation) var(--w-color-grey-400-lightness));
+    --w-color-grey-500: hsl(var(--w-color-grey-500-hue) var(--w-color-grey-500-saturation) var(--w-color-grey-500-lightness));
+    --w-color-grey-600: hsl(var(--w-color-grey-600-hue) var(--w-color-grey-600-saturation) var(--w-color-grey-600-lightness));
+    --w-color-grey-700: hsl(var(--w-color-grey-700-hue) var(--w-color-grey-700-saturation) var(--w-color-grey-700-lightness));
+    --w-color-grey-800: hsl(var(--w-color-grey-800-hue) var(--w-color-grey-800-saturation) var(--w-color-grey-800-lightness));
+    --w-color-white: hsl(var(--w-color-white-hue) var(--w-color-white-saturation) var(--w-color-white-lightness));
+    --w-color-secondary-75: hsl(var(--w-color-secondary-75-hue) var(--w-color-secondary-75-saturation) var(--w-color-secondary-75-lightness));
+    --w-color-secondary-100: hsl(var(--w-color-secondary-100-hue) var(--w-color-secondary-100-saturation) var(--w-color-secondary-100-lightness));
+    --w-color-secondary-400: hsl(var(--w-color-secondary-400-hue) var(--w-color-secondary-400-saturation) var(--w-color-secondary-400-lightness));
+    --w-color-secondary: hsl(var(--w-color-secondary-hue) var(--w-color-secondary-saturation) var(--w-color-secondary-lightness));
+    --w-color-info-75: hsl(var(--w-color-info-75-hue) var(--w-color-info-75-saturation) var(--w-color-info-75-lightness));
+    --w-color-info-100: hsl(var(--w-color-info-100-hue) var(--w-color-info-100-saturation) var(--w-color-info-100-lightness));
+    --w-color-critical-50: hsl(var(--w-color-critical-50-hue) var(--w-color-critical-50-saturation) var(--w-color-critical-50-lightness));
+    --w-color-critical-100: hsl(var(--w-color-critical-100-hue) var(--w-color-critical-100-saturation) var(--w-color-critical-100-lightness));
+
+    /* Tokens semânticos → paleta do painel. */
+    --w-color-surface-page: var(--nr-white);
+    --w-color-surface-field: var(--nr-white);
+    --w-color-surface-field-inactive: var(--nr-surface-subtle);
+    --w-color-surface-header: var(--nr-white);
+    /* O Wagtail usa estas três como superfície ESCURA (menus suspensos,
+       cabeçalho de modais, barra de ações do editor), com texto claro por
+       cima. Ficam na tinta do painel — o mesmo preto do botão primário. */
+    --w-color-surface-menus: var(--nr-ink);
+    --w-color-surface-menu-item-active: #2b2b2b;
+    --w-color-surface-tooltip: var(--nr-ink);
+    --w-color-surface-button-default: var(--nr-primary);
+    --w-color-surface-button-hover: var(--nr-primary-hover);
+    --w-color-surface-button-inactive: var(--nr-line-strong);
+    --w-color-surface-button-outline-hover: var(--nr-surface-subtle);
+    --w-color-surface-button-critical-hover: var(--nr-red-soft);
+    --w-color-surface-status-label: var(--nr-blue-soft);
+    --w-color-surface-info-panel: var(--nr-blue-soft);
+    --w-color-surface-dashboard-panel: var(--nr-white);
+
+    --w-color-text-button: var(--nr-white);
+    --w-color-text-label-menus-default: #d4d4d4;
+    --w-color-text-label-menus-active: var(--nr-white);
+    --w-color-text-label: var(--nr-ink);
+    --w-color-text-context: var(--nr-ink-2);
+    --w-color-text-meta: var(--nr-muted);
+    --w-color-text-placeholder: var(--nr-muted);
+    --w-color-text-link-default: var(--nr-blue);
+    --w-color-text-link-hover: var(--nr-blue-strong);
+    --w-color-text-button-outline-default: var(--nr-ink);
+    --w-color-text-button-outline-hover: var(--nr-ink);
+    --w-color-text-highlight: var(--nr-blue-line);
+    --w-color-text-error: var(--nr-red);
+    --w-color-text-button-critical-outline-hover: var(--nr-red);
+    --w-color-text-status-label: var(--nr-blue-strong);
+    --w-color-text-link-info: var(--nr-blue-strong);
+
+    --w-color-icon-primary: var(--nr-ink-4);
+    --w-color-icon-primary-hover: var(--nr-ink);
+    --w-color-icon-secondary: var(--nr-icon);
+    --w-color-icon-secondary-hover: var(--nr-ink);
+
+    --w-color-border-furniture: var(--nr-line);
+    --w-color-border-button-small-outline-default: var(--nr-line-2);
+    --w-color-border-field-default: var(--nr-line-2);
+    --w-color-border-field-inactive: var(--nr-line-2);
+    --w-color-border-field-hover: var(--nr-line-strong);
+    --w-color-border-button-outline-default: var(--nr-line-2);
+    --w-color-border-button-outline-hover: var(--nr-line-strong);
+    --w-color-border-interactive-more-contrast: var(--nr-muted);
+    --w-color-border-interactive-more-contrast-hover: var(--nr-ink);
+    --w-color-border-interactive-more-contrast-dark-bg: var(--nr-line-strong);
+    --w-color-border-interactive-more-contrast-dark-bg-hover: var(--nr-white);
+    --w-color-border-furniture-more-contrast: var(--nr-line-strong);
+
+    --w-color-focus: var(--nr-blue);
+    --w-color-box-shadow-md: rgba(23, 23, 23, .1);
+}
+
+body#wagtail {
+    background: var(--nr-white);
+    letter-spacing: -.011em;
+}
+
+/* ── Casca ──────────────────────────────────────────────────────────────── */
+
+@media (min-width: 1024px) {
+    body#wagtail .wrapper,
+    body#wagtail.sidebar-collapsed .wrapper {
+        padding-inline-start: var(--nr-sidebar-w);
+    }
+}
+
+@media (max-width: 1023.98px) {
+    body#wagtail .wrapper,
+    body#wagtail.sidebar-collapsed .wrapper {
+        padding-inline-start: 0;
+    }
+
+    /* Espaço para o botão de menu no canto do cabeçalho do Wagtail — o mesmo
+       lugar em que ficava o botão da sidebar original. */
+    body#wagtail .w-slim-header .w-pl-slim-header {
+        padding-inline-start: 56px;
+    }
+}
+
+.nr-menu-toggle.nr-wagtail-menu-toggle {
+    position: fixed;
+    top: 7px;
+    left: 10px;
+    z-index: 150;
+    margin: 0;
+    background: var(--nr-white);
+}
+
+@media (min-width: 1024px) {
+    .nr-menu-toggle.nr-wagtail-menu-toggle {
+        display: none;
+    }
+}
+
+/* ── Acabamento dos componentes nativos ─────────────────────────────────── */
+
+body#wagtail .button {
+    border-radius: var(--nr-radius-sm);
+    font-weight: 600;
+}
+
+body#wagtail .button.button-small {
+    border-radius: 6px;
+}
+
+body#wagtail input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+body#wagtail textarea,
+body#wagtail select,
+body#wagtail .w-field__input > .choices,
+body#wagtail .w-slim-header__search-form input {
+    border-radius: var(--nr-radius-sm);
+}
+
+body#wagtail .w-panel__header,
+body#wagtail .w-slim-header {
+    font-family: var(--nr-font);
+}
+
+body#wagtail .w-slim-header h1,
+body#wagtail .w-header__title {
+    letter-spacing: -.03em;
+}
+
+body#wagtail .tippy-box[data-theme="dropdown"] {
+    border-radius: var(--nr-radius-card);
+}
+
+/* ── Caixas de seleção ──────────────────────────────────────────────────── */
+
+/* O Wagtail desenha a borda e o visto com tokens que aqui viram o cinza claro
+   das linhas do painel (#e5e5e5): a caixa ficava com contraste 1,2:1 e o visto
+   quase branco sobre branco. Borda com contraste de 3,7:1 (o mínimo para
+   controles é 3:1) e, marcada, a tinta dos botões principais com visto branco,
+   igual ao Unfold. Os interruptores (.switch) têm desenho próprio. */
+body#wagtail input[type="checkbox"]:not(.switch *) {
+    border: 1.5px solid var(--nr-icon);
+    border-radius: 6px;
+    background-color: var(--nr-white);
+}
+
+body#wagtail input[type="checkbox"]:not(.switch *):hover {
+    border-color: var(--nr-ink-4);
+}
+
+body#wagtail input[type="checkbox"]:not(.switch *):checked {
+    border-color: var(--nr-ink);
+    background-color: var(--nr-ink);
+}
+
+body#wagtail input[type="checkbox"]:not(.switch *):checked::before {
+    background: var(--nr-white);
+}
+
+body#wagtail input[type="checkbox"]:not(.switch *):focus-visible {
+    outline: 2px solid var(--nr-blue);
+    outline-offset: 2px;
+}
+
+body#wagtail input[type="checkbox"]:not(.switch *)[disabled] {
+    border-color: var(--nr-line-strong);
+    background-color: var(--nr-surface-subtle);
+}
+
+/* Listagens: o Wagtail só mostrava a caixa de cada linha ao passar o mouse
+   (opacity: 0). Fica sempre à vista, e a célula inteira marca e desmarca
+   (newsroom.js). */
+body#wagtail .listing .bulk-action-checkbox {
+    opacity: 1;
+}
+
+body#wagtail .bulk-action-checkbox-cell,
+body#wagtail .bulk-actions-filter-checkbox {
+    cursor: pointer;
+}
+
+body#wagtail .listing tr:has(> .bulk-action-checkbox-cell .bulk-action-checkbox:checked) > td {
+    background-color: var(--nr-blue-soft);
+}
+
+body#wagtail .listing.images > li:has(.bulk-action-checkbox:checked) {
+    border-radius: var(--nr-radius);
+    outline: 2px solid var(--nr-blue);
+    outline-offset: 2px;
+}
+
+/* Barra de seleção (templates/wagtailadmin/bulk_actions/footer.html), a
+   mesma .nr-selectionbar das listas do Django admin (newsroom.css). Com
+   seleção, fica por cima do cabeçalho da listagem: newsroom.js a coloca dentro
+   dele e marca .is-docked. Sem cabeçalho, flutua no pé da tela. */
+body#wagtail .nr-selectionbar--wagtail.hidden {
+    display: none;
+}
+
+body#wagtail .nr-selectionbar--wagtail {
+    position: sticky;
+    bottom: 16px;
+    z-index: 30;
+    margin: 16px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
+}
+
+body#wagtail .nr-selectionbar--wagtail.is-docked {
+    position: absolute;
+    top: 7px;
+    right: 16px;
+    bottom: auto;
+    left: 16px;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* Enquanto a barra aparece, o título, a busca e os filtros do cabeçalho
+   somem sem mudar a altura dele (no celular são duas linhas). */
+body#wagtail :is(.w-slim-header, [data-nr-selection-dock]):has(> .nr-selectionbar--wagtail.is-docked:not(.hidden)) > :not(.nr-selectionbar) {
+    visibility: hidden;
+}
+
+/* Até 800 px o botão do menu lateral fica fixo no canto do cabeçalho: a
+   barra começa depois dele e fica numa linha só (as ações rolam de lado). */
+@media (max-width: 799.98px) {
+    body#wagtail .nr-selectionbar--wagtail.is-docked {
+        left: 60px;
+        right: 12px;
+    }
+}
+
+@media (max-width: 639.98px) {
+    body#wagtail .nr-selectionbar--wagtail {
+        flex-wrap: nowrap;
+        padding: 6px 8px 6px 4px;
+    }
+
+    body#wagtail .nr-selectionbar--wagtail .nr-selectionbar__actions {
+        flex: 0 1 auto;
+        order: 0;
+    }
+}
+
+body#wagtail .nr-selectionbar--wagtail .bulk-actions-buttons > li {
+    display: flex;
+}
+
+body#wagtail .nr-selectionbar--wagtail .bulk-action-btn,
+body#wagtail .nr-selectionbar--wagtail .w-dropdown__toggle {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 6px;
+    height: auto;
+    min-height: 34px;
+    margin: 0;
+    padding: 6px 12px;
+    border: 1px solid var(--nr-line-2);
+    border-radius: var(--nr-radius);
+    background: var(--nr-white);
+    color: var(--nr-ink-4);
+    font-family: var(--nr-font);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+body#wagtail .nr-selectionbar--wagtail .bulk-action-btn:hover,
+body#wagtail .nr-selectionbar--wagtail .w-dropdown__toggle:hover {
+    background: var(--nr-surface-subtle);
+}
+
+body#wagtail .nr-selectionbar--wagtail .bulk-action-btn.serious {
+    border-color: var(--nr-red-line);
+    color: var(--nr-red);
+}
+
+body#wagtail .nr-selectionbar--wagtail .bulk-action-btn.serious:hover {
+    background: var(--nr-red-soft);
+}
+
+body#wagtail .nr-selectionbar--wagtail .nr-selectionbar__across .w-hidden {
+    display: none;
+}
+
+/* ── Editor de blocos: arrastar para reordenar ──────────────────────────── */
+
+/* Alça ⠿ de cada bloco. `touch-action: none` faz o toque nela virar arraste:
+   sem isso o navegador do celular assume o gesto como rolagem, cancela o
+   ponteiro e o bloco não sai do lugar. */
+body#wagtail [data-streamfield-action="DRAG"] {
+    cursor: grab;
+    touch-action: none;
+}
+
+@media (pointer: coarse) {
+    body#wagtail [data-streamfield-action="DRAG"] {
+        color: var(--nr-ink-3);
+    }
+}
+
+/* Com mouse, o bloco é arrastado pela barra de título inteira. */
+@media (hover: hover) and (pointer: fine) {
+    body#wagtail [data-streamfield-child] > section > .w-panel__header,
+    body#wagtail [data-streamfield-child] > section > .w-panel__header [data-panel-heading] {
+        cursor: grab;
+    }
+
+    body#wagtail [data-streamfield-child] > section > .w-panel__header:hover [data-streamfield-action="DRAG"] {
+        color: var(--nr-ink);
+    }
+}
+
+/* Lugar em que o bloco vai cair. */
+body#wagtail [data-streamfield-child].sortable-ghost {
+    border-radius: var(--nr-radius);
+    background: var(--nr-blue-soft);
+    outline: 2px dashed var(--nr-blue);
+    outline-offset: 4px;
+}
+
+body#wagtail [data-streamfield-child].sortable-ghost > section {
+    opacity: .4;
+}
+
+/* Cópia que acompanha o dedo (modo de toque do SortableJS). Ele fixa a altura
+   inline; o limite evita que um texto longo cubra a tela inteira. */
+body#wagtail [data-streamfield-child].sortable-fallback {
+    max-height: 160px !important;
+    overflow: hidden !important;
+    border-radius: var(--nr-radius);
+    background: var(--nr-white);
+    box-shadow: var(--nr-shadow-menu);
+    outline: 1px solid var(--nr-line-strong);
+}
+
+/* Durante o arraste o conteúdo dos blocos (texto rico, tabela, campos) não
+   recebe o ponteiro: o bloco só cai ENTRE blocos, nunca dentro de um editor. */
+html.nr-sf-dragging body#wagtail {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+html.nr-sf-dragging body#wagtail [data-streamfield-child] .w-panel__content {
+    pointer-events: none;
+}
+
+/* ── Barra única do editor ──────────────────────────────────────────────── */
+
+/* O layout comum da barra (também usado nos formulários do Django admin)
+   está em newsroom.css. Aqui fica só o que depende do Wagtail: salvamento
+   automático, sessões de edição, botões de painel lateral, o rodapé nativo
+   e o botão de menu fixo no canto. */
+
+body#wagtail .nr-editorbar .w-autosave-indicator {
+    min-width: 0;
+    margin: 0;
+    font-size: 12px;
+}
+
+/* No Wagtail os estados ocultos têm altura zero mas ocupam a largura do texto
+   mais longo ("Salvamento automático pausado"). Na barra, só o estado atual
+   ocupa espaço. */
+body#wagtail .nr-editorbar .w-autosave-indicator__state {
+    display: none;
+}
+
+body#wagtail .nr-editorbar [data-w-autosave-state-value="saving"] .w-autosave-indicator__state--saving,
+body#wagtail .nr-editorbar [data-w-autosave-state-value="saved"] .w-autosave-indicator__state--saved,
+body#wagtail .nr-editorbar [data-w-autosave-state-value="paused"] .w-autosave-indicator__state--paused {
+    display: flex;
+    gap: 5px;
+}
+
+body#wagtail .nr-editorbar .w-autosave-indicator__state .icon {
+    width: 13px;
+    height: 13px;
+}
+
+body#wagtail .nr-editorbar .w-editing-sessions {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+body#wagtail .nr-editorbar .w-editing-sessions__avatar {
+    width: 22px;
+    height: 22px;
+}
+
+body#wagtail .nr-editorbar .w-side-panel-toggle {
+    position: relative;
+    gap: 7px;
+    width: auto;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: var(--nr-radius);
+    color: var(--nr-ink-4);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    outline-offset: 2px;
+}
+
+body#wagtail .nr-editorbar .w-side-panel-toggle:hover {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+body#wagtail .nr-editorbar .w-side-panel-toggle[aria-expanded="true"] {
+    background: var(--nr-blue-soft);
+    color: var(--nr-blue-strong);
+}
+
+body#wagtail .nr-editorbar .w-side-panel-toggle__icon {
+    width: 17px;
+    height: 17px;
+    transform: none;
+}
+
+body#wagtail .nr-editorbar .w-side-panel-toggle__counter {
+    position: absolute;
+    top: 1px;
+    right: -2px;
+    margin: 0;
+    transform: none;
+}
+
+/* O rótulo só aparece na barra, e só quando há espaço. */
+.w-side-panel-toggle__label {
+    display: none;
+}
+
+@media (min-width: 1440px) {
+    .nr-editorbar .w-side-panel-toggle__label {
+        display: inline;
+    }
+}
+
+/* Barra estreita (a sidebar ocupa parte da tela, então vale a largura da
+   própria barra, não a da janela): título e status numa linha, ferramentas e
+   ações na de baixo, como no celular. Com base 0, o título nunca força a
+   quebra sozinho; só a regra do contêiner a provoca. */
+body#wagtail .nr-editorbar {
+    container: nr-editorbar / inline-size;
+    flex-wrap: wrap;
+    row-gap: 8px;
+}
+
+body#wagtail .nr-editorbar__start {
+    flex: 1 1 0;
+}
+
+@container nr-editorbar (max-width: 979.98px) {
+    body#wagtail .nr-editorbar__start {
+        flex-basis: 100%;
+    }
+
+    /* Ferramentas à esquerda, o grupo remover/salvar/publicar à direita. Se não
+       couberem na mesma linha, o grupo desce inteiro, ainda à direita. */
+    body#wagtail .nr-editorbar__end {
+        flex: 1 1 100%;
+        flex-wrap: wrap;
+        row-gap: 8px;
+    }
+
+    body#wagtail .nr-editorbar__tools {
+        padding-right: 0;
+        border-right: 0;
+    }
+
+    body#wagtail .nr-editorbar__commit {
+        margin-left: auto;
+    }
+}
+
+/* Remover fica só com o ícone quando a linha aperta: na faixa de uma linha
+   até 1280px e, nas duas linhas, abaixo de 820px. */
+@container nr-editorbar (max-width: 819.98px) {
+    body#wagtail .nr-editorbar .nr-editorbar__remove {
+        width: 36px;
+        padding: 0;
+    }
+
+    body#wagtail .nr-editorbar__remove .nr-editorbar__label {
+        display: none;
+    }
+}
+
+@container nr-editorbar (min-width: 980px) and (max-width: 1279.98px) {
+    /* Uma linha só, mas apertada: remover fica só com o ícone. */
+    body#wagtail .nr-editorbar .nr-editorbar__remove {
+        width: 36px;
+        padding: 0;
+    }
+
+    body#wagtail .nr-editorbar__remove .nr-editorbar__label {
+        display: none;
+    }
+}
+
+/* ── Listagens com o cabeçalho do painel ────────────────────────────────
+   templates/newsroom/wagtail/list_header.html (hoje, a de notícias): o mesmo
+   desenho das listas do Django admin. Cabeçalho, abas e, num cartão, a faixa
+   da busca e dos filtros em cima da tabela (#listing-results). */
+
+body#wagtail .nr-wlist {
+    padding: 22px 24px 0;
+    font-family: var(--nr-font);
+}
+
+body#wagtail .nr-wlist__head {
+    margin-bottom: 16px;
+}
+
+body#wagtail .nr-wlist__toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    min-height: 56px;
+    padding: 9px 12px;
+    border: 1px solid var(--nr-line);
+    border-bottom: 0;
+    border-radius: var(--nr-radius-card) var(--nr-radius-card) 0 0;
+    background: var(--nr-white);
+}
+
+body#wagtail .nr-wlist__search {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+body#wagtail .nr-wlist__search .w-field__wrapper {
+    flex: 0 1 340px;
+    min-width: 0;
+    margin: 0;
+}
+
+body#wagtail .nr-wlist__search input[type="search"],
+body#wagtail .nr-wlist__search input[type="text"] {
+    height: 38px;
+    min-height: 0;
+    padding-block: 0;
+    font-size: 13px;
+}
+
+body#wagtail .nr-wlist__search .w-drilldown {
+    margin-left: auto;
+}
+
+/* Botão da gaveta de filtros como o "Filtros" das listas do Django admin. */
+body#wagtail .nr-wlist__search .w-drilldown .w-dropdown__toggle--icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: auto;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--nr-line-2);
+    border-radius: var(--nr-radius);
+    background: var(--nr-white);
+    color: var(--nr-ink-4);
+    font-family: var(--nr-font);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+body#wagtail .nr-wlist__search .w-drilldown .w-dropdown__toggle--icon::before {
+    content: "Filtros";
+}
+
+body#wagtail .nr-wlist__search .w-drilldown .w-dropdown__toggle--icon:hover,
+body#wagtail .nr-wlist__search .w-drilldown .w-dropdown__toggle--icon[aria-expanded="true"] {
+    background: var(--nr-surface-subtle);
+    color: var(--nr-ink);
+}
+
+body#wagtail .nr-wlist__search .w-drilldown .w-dropdown__toggle-icon {
+    width: 15px;
+    height: 15px;
+    color: currentColor;
+}
+
+body#wagtail .nr-wlist__search .w-drilldown__count {
+    position: static;
+    min-width: 18px;
+    height: 18px;
+    margin: 0;
+    padding: 0 5px;
+    border-radius: 100px;
+    background: var(--nr-ink);
+    color: var(--nr-white);
+    font-size: 11px;
+    line-height: 18px;
+}
+
+body#wagtail .nr-cell-nowrap {
+    white-space: nowrap;
+}
+
+/* Imagens: ordenação e grade/lista, campos extras da busca. */
+body#wagtail .nr-wlist__search .w-field__wrapper:has(select) {
+    flex: 0 0 auto;
+}
+
+body#wagtail .nr-wlist__search select {
+    height: 38px;
+    min-height: 0;
+    padding-block: 0;
+    font-size: 13px;
+}
+
+body#wagtail .nr-wlist__search .w-layout-switch-control {
+    flex: none;
+}
+
+/* No celular, a busca ocupa a linha e o resto (ordenação, grade/lista,
+   filtros) desce para a de baixo. */
+@media (max-width: 639.98px) {
+    body#wagtail .nr-wlist__search {
+        flex-wrap: wrap;
+        row-gap: 8px;
+    }
+
+    body#wagtail .nr-wlist__search .w-field__wrapper:has(input[name="q"]) {
+        flex: 1 1 100%;
+    }
+}
+
+/* Sem busca nem filtros (Categorias, Tags, Coleções): o cartão é só a tabela. */
+body#wagtail .nr-wlist:not(:has(.nr-wlist__toolbar)) ~ #listing-results {
+    border-top: 1px solid var(--nr-line);
+    border-radius: var(--nr-radius-card);
+}
+
+/* Menu ⋯ do Wagtail no cabeçalho (exportar, reordenar, importar), no
+   desenho dos botões secundários. */
+body#wagtail .nr-listhead__more .w-dropdown__toggle {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 1px solid var(--nr-line-2);
+    border-radius: var(--nr-radius);
+    background: var(--nr-white);
+    color: var(--nr-ink-4);
+}
+
+body#wagtail .nr-listhead__more .w-dropdown__toggle:hover,
+body#wagtail .nr-listhead__more .w-dropdown__toggle[aria-expanded="true"] {
+    background: var(--nr-surface-subtle);
+    color: var(--nr-ink);
+}
+
+body#wagtail .nr-listhead__more .w-dropdown__toggle .icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* Listas vazias das demais seções (a mensagem é a do Wagtail). */
+body#wagtail .nr-wlist ~ #listing-results > .nice-padding.w-mt-8 {
+    margin: 0;
+    padding: 36px 16px;
+    color: var(--nr-muted);
+    font-family: var(--nr-font);
+    font-size: 13px;
+    text-align: center;
+}
+
+body#wagtail .nr-wlist ~ #listing-results > .nice-padding.w-mt-8 p {
+    margin: 0;
+}
+
+body#wagtail .nr-wlist ~ #listing-results {
+    margin: 0 24px 24px;
+    border: 1px solid var(--nr-line);
+    border-radius: 0 0 var(--nr-radius-card) var(--nr-radius-card);
+    /* Tabela mais larga que a tela rola dentro do cartão, não some. */
+    overflow-x: auto;
+}
+
+/* Espaço para o botão de menu fixo no canto (.nr-wagtail-menu-toggle). */
+@media (max-width: 1023.98px) {
+    body#wagtail .nr-wlist__head .nr-listhead__heading {
+        padding-left: 44px;
+    }
+}
+
+@media (max-width: 639.98px) {
+    body#wagtail .nr-wlist {
+        padding: 12px 12px 0;
+    }
+
+    body#wagtail .nr-wlist ~ #listing-results {
+        margin: 0 12px 16px;
+    }
+}
+
+/* ── Estrutura (minimapa do Wagtail) ────────────────────────────────────
+   Abre pela ferramenta "Estrutura" da barra (header.html), que só clica no
+   botão nativo. Fechado, não deixa nada sobre o formulário: nem a faixa de
+   tracinhos, nem o "Colapsar tudo" flutuante. Aberto, é um painel como os
+   outros laterais: cabeçalho com fechar, título e recolher/expandir todas as
+   seções; a seção visível destacada e as seções com erro em vermelho.
+   Tudo é o componente React do Wagtail, só restilizado. */
+
+.nr-editorbar__outline[hidden] {
+    display: none !important;
+}
+
+body#wagtail .w-minimap:not(.w-minimap--expanded) {
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateX(calc(var(--w-direction-factor, 1) * 100%));
+}
+
+body#wagtail .w-minimap__collapse-all--floating:not(.w-minimap__collapse-all--inside) {
+    display: none !important;
+}
+
+body#wagtail .w-minimap--expanded {
+    border-inline-start: 1px solid var(--nr-line);
+    background: var(--nr-white);
+    font-family: var(--nr-font);
+}
+
+body#wagtail .w-minimap--expanded .w-minimap__header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-sizing: border-box;
+    min-height: 52px;
+    margin: 0;
+    padding: 0 10px;
+    border: 0;
+    border-bottom: 1px solid var(--nr-line);
+}
+
+/* Título do painel: o cabeçalho do React só tem o botão de fechar. */
+body#wagtail .w-minimap--expanded .w-minimap__header::after {
+    content: "Estrutura";
+    color: var(--nr-ink);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+body#wagtail .w-minimap--expanded .w-minimap__toggle {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    margin: 0;
+    padding: 0;
+    border-radius: var(--nr-radius);
+    color: var(--nr-ink-4);
+}
+
+body#wagtail .w-minimap--expanded .w-minimap__toggle:hover {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+body#wagtail .w-minimap__toggle:focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+}
+
+body#wagtail .w-minimap--expanded .w-minimap__footer {
+    margin: 0;
+    border: 0;
+}
+
+/* Recolher/expandir: um só botão do Wagtail, que alterna. O texto vem do
+   estado (aria-expanded), em português de verdade ("Colapsar" não é). */
+body#wagtail .w-minimap__collapse-all--inside {
+    gap: 6px;
+    min-width: 0;
+    height: 28px;
+    margin-top: 12px;
+    margin-inline-end: 10px;
+    padding: 0 9px;
+    border: 1px solid var(--nr-line-2);
+    border-radius: var(--nr-radius);
+    background: var(--nr-white);
+    color: var(--nr-ink);
+    font-size: 0;
+    line-height: 1;
+}
+
+body#wagtail .w-minimap__collapse-all--inside:hover {
+    background: var(--nr-surface-subtle);
+}
+
+body#wagtail .w-minimap__collapse-all--inside .icon {
+    width: 12px;
+    height: 12px;
+    margin: 0;
+    color: var(--nr-muted);
+}
+
+body#wagtail .w-minimap__collapse-all--inside::after {
+    font-family: var(--nr-font);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+body#wagtail .w-minimap__collapse-all--inside[aria-expanded="true"]::after {
+    content: "Recolher tudo";
+}
+
+body#wagtail .w-minimap__collapse-all--inside[aria-expanded="false"]::after {
+    content: "Expandir tudo";
+}
+
+body#wagtail .w-minimap--expanded .w-minimap__list {
+    padding: 8px 8px 16px;
+}
+
+body#wagtail .w-minimap--expanded .w-minimap__list > li {
+    display: flex;
+}
+
+body#wagtail .w-minimap--expanded .w-minimap-item {
+    flex: 1;
+    gap: 8px;
+    min-width: 0;
+    height: 30px;
+    margin: 1px 0;
+    padding: 0 8px 0 10px;
+    border: 0;
+    border-radius: 6px;
+    color: var(--nr-ink-4);
+    font-size: 13px;
+    text-decoration: none;
+}
+
+body#wagtail .w-minimap--expanded .w-minimap-item--h2 {
+    color: var(--nr-ink);
+    font-weight: 600;
+}
+
+/* Blocos e campos dentro de uma seção: recuados, com o ícone do tipo. */
+body#wagtail .w-minimap--expanded .w-minimap-item:not(.w-minimap-item--h1, .w-minimap-item--h2) {
+    padding-inline-start: 22px;
+}
+
+body#wagtail .w-minimap--expanded .w-minimap-item__icon {
+    width: 14px;
+    height: 14px;
+    color: var(--nr-muted);
+}
+
+body#wagtail .w-minimap--expanded .w-minimap-item__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body#wagtail .w-minimap--expanded .w-minimap-item:hover {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+/* O Wagtail marca como ativas TODAS as seções visíveis na tela: um traço reto
+   à esquerda mostra o trecho que está à vista, sem pesar como um fundo. */
+body#wagtail .w-minimap--expanded .w-minimap-item {
+    position: relative;
+}
+
+body#wagtail .w-minimap--expanded .w-minimap-item--active {
+    color: var(--nr-ink);
+}
+
+body#wagtail .w-minimap--expanded .w-minimap-item--active::before {
+    content: "";
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    left: 0;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--nr-ink);
+}
+
+body#wagtail .w-minimap--expanded .w-minimap-item--error {
+    color: var(--nr-red);
+}
+
+body#wagtail .w-minimap--expanded .w-minimap-item--error.w-minimap-item--active::before {
+    background: var(--nr-red);
+}
+
+/* Contagem de erros no fim da linha, não à esquerda do texto. */
+body#wagtail .w-minimap--expanded .w-minimap-item__errors {
+    order: 2;
+    display: grid;
+    place-items: center;
+    width: auto;
+    min-width: 18px;
+    height: 18px;
+    margin: 0 0 0 auto;
+    padding: 0 5px;
+    border: 0;
+    border-radius: 100px;
+    background: var(--nr-red);
+    color: var(--nr-white);
+    font-size: 10.5px;
+    line-height: 1;
+}
+
+/* O rodapé nativo some quando a barra assume as ações. Continua na página,
+   dentro do formulário: é nele que a barra clica. */
+html.nr-editorbar-ready body#wagtail form[data-edit-form] > footer .actions--primary {
+    display: none;
+}
+
+@media (max-width: 1023.98px) {
+    /* Espaço para o botão de menu fixo no canto (.nr-wagtail-menu-toggle). */
+    body#wagtail .nr-editorbar__start {
+        padding-left: 44px;
+    }
+
+    body#wagtail:has(.nr-editorbar) .nr-menu-toggle.nr-wagtail-menu-toggle {
+        top: 15px;
+    }
+}
+
+@media (max-width: 639.98px) {
+    body#wagtail .nr-editorbar .w-side-panel-toggle {
+        min-width: 30px;
+        padding: 0 6px;
+    }
+
+    body#wagtail .nr-editorbar__tools {
+        gap: 0;
+    }
+}
+
+/* Listagens no celular: a tabela nativa rola dentro da própria área, com
+   largura mínima legível, em vez de espremer o título letra por letra. A
+   página em si continua sem rolagem horizontal. */
+@media (max-width: 799.98px) {
+    body#wagtail #listing-results {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    body#wagtail #listing-results table {
+        min-width: 680px;
+    }
+}
+
+/* Lista vazia (news/wagtail/article_index_results.html). O Wagtail envolve a
+   mensagem em .nice-padding com margem grande; aqui ela fica no cartão. */
+body#wagtail .nr-wlist ~ #listing-results > .nice-padding:has(> .nr-wlist__empty) {
+    margin: 0;
+    padding: 0;
+}
+
+body#wagtail .nr-wlist__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0;
+    padding: 40px 16px;
+    border-top: 1px solid var(--nr-line);
+    color: var(--nr-muted);
+    font-family: var(--nr-font);
+    font-size: 13px;
+}
+
+body#wagtail .nr-wlist__empty .nr-icon {
+    width: 18px;
+    height: 18px;
+}
+
+/* ── Telas avulsas (templates/newsroom/wagtail/page_header.html) ─────────
+   Confirmações, ficha "Inspecionar", envio de várias imagens: o cabeçalho é
+   a barra do editor sem a linha de status. O cartão da confirmação de
+   remover (.nr-confirm) está em newsroom.css, compartilhado com o Django. */
+
+body#wagtail .nr-pagebar {
+    min-height: 56px;
+}
+
+body#wagtail .nr-pagebar__actions {
+    gap: 8px;
+}

@@ -1,0 +1,10 @@
+{% extends "wagtailsnippets/snippets/index_results.html" %}
+{% comment %}
+    Resultados da listagem de notícias (também a resposta da busca ao vivo).
+    A mensagem de lista vazia vem de ArticleIndexView.no_results_message, com
+    o caso de cada aba de estado.
+{% endcomment %}
+
+{% block no_results_message %}
+    {% include "newsroom/wagtail/empty.html" with message=no_results_message %}
+{% endblock %}

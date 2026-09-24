@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.utils.html import format_html
 from django.utils.text import format_lazy
 from unfold.admin import ModelAdmin
@@ -11,7 +11,7 @@ from .models import ContactInquiry
 
 @admin.register(ContactInquiry)
 class ContactInquiryAdmin(AdminUXMixin, ModelAdmin):
-    list_display = ['read_button', 'name', 'email', 'subject', 'course_interest', 'message_preview', 'site', 'status', 'created_at']
+    list_display = ['name', 'email', 'subject', 'course_interest', 'message_preview', 'status_chip', 'received_at']
     list_display_links = ['name']
     list_filter = ['status', 'course_interest', 'site', 'created_at']
     list_filter_submit = True
@@ -19,6 +19,14 @@ class ContactInquiryAdmin(AdminUXMixin, ModelAdmin):
     readonly_fields = ['site', 'name', 'email', 'phone', 'subject', 'course_interest', 'message_display', 'created_at', 'updated_at']
     radio_fields = {'status': admin.HORIZONTAL}
     ux_list_title = 'Mensagens de contato'
+    ux_list_all_label = 'Todas'
+    ux_status_field = 'status'
+    ux_status_tones = {
+        ContactInquiry.Status.NEW: 'info',
+        ContactInquiry.Status.READ: 'neutral',
+        ContactInquiry.Status.REPLIED: 'success',
+        ContactInquiry.Status.ARCHIVED: 'archived',
+    }
     ux_list_description = 'Use esta tela como uma fila de atendimento: responda mensagens novas, marque como lidas e arquive o que já foi tratado.'
     ux_list_icon = 'contact_mail'
     ux_list_actions = [
@@ -54,20 +62,14 @@ class ContactInquiryAdmin(AdminUXMixin, ModelAdmin):
     ]
     actions = ['mark_resolved']
 
-    @admin.display(description='')
-    def read_button(self, obj):
-        # Botão explícito de "Ler" para o operador saber onde clicar.
-        # Renderiza o próprio <a>; por isso 'read_button' fica fora de
-        # list_display_links (senão o Django aninharia outro <a>).
-        url = reverse('admin:contact_contactinquiry_change', args=[obj.pk])
-        return format_html(
-            '<a href="{}" class="kb-read-btn" '
-            'style="display:inline-flex;align-items:center;gap:4px;'
-            'padding:4px 12px;border-radius:6px;background:#1152d4;color:#fff;'
-            'font-size:13px;font-weight:500;text-decoration:none;white-space:nowrap;">'
-            'Ler</a>',
-            url,
-        )
+    @admin.display(description='Status', ordering='status')
+    def status_chip(self, obj):
+        status = self.nr_status(obj)
+        return format_html('<span class="nr-status nr-status--{}">{}</span>', status['tone'], status['label'])
+
+    @admin.display(description='Recebida em', ordering='created_at')
+    def received_at(self, obj):
+        return obj.created_at
 
     @admin.display(description='Mensagem')
     def message_preview(self, obj):
@@ -82,7 +84,7 @@ class ContactInquiryAdmin(AdminUXMixin, ModelAdmin):
             obj.message,
         )
 
-    @admin.action(description='Arquivar mensagens selecionadas')
+    @admin.action(description='Arquivar mensagens selecionadas', permissions=['change'])
     def mark_resolved(self, request, queryset):
         # Update to archived instead of resolved since valid choices are:
         # new, read, replied, archived

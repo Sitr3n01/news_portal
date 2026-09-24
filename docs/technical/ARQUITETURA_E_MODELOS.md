@@ -232,13 +232,13 @@ Coluna **Site?** indica se o modelo é isolado por site (`ForeignKey(Site)` + `o
 
 ## 8. Admin e permissões (resumo)
 
-O painel é Django Unfold. Três camadas:
+O painel é **unificado** (visão geral em `/painel/`, Wagtail em `/cms/`, Django Unfold em `/admin/`, com a mesma sidebar e topbar). Detalhes em [PAINEL_UNIFICADO.md](PAINEL_UNIFICADO.md). Três camadas:
 
 1. **Papéis → Grupos → Permissões** ([`apps/accounts/admin_roles.py`](../../apps/accounts/admin_roles.py)): cada `role` mapeia para um `Group` com permissões definidas em `ROLE_PERMISSION_SPECS`. Os grupos são criados/sincronizados automaticamente após cada migração (signal `post_migrate`). Mudar o `role` de um usuário **remove** os grupos dos outros papéis — privilégios não se acumulam.
-2. **Sidebar e dashboard adaptativos** ([`apps/common/dashboard.py`](../../apps/common/dashboard.py)): cada item de menu e cada card é protegido por `has_perm`. O dashboard só executa `COUNT` no banco para o que o usuário pode ver.
+2. **Navegação e visão geral adaptativas** ([`apps/common/newsroom/navigation.py`](../../apps/common/newsroom/navigation.py) e [`dashboard.py`](../../apps/common/newsroom/dashboard.py)): cada item de menu delega a visibilidade à mesma checagem da tela de destino (porta de `panels.py` + permissão do `ModelAdmin` ou do viewset do Wagtail). A visão geral só consulta o que o usuário pode ver.
 3. **Guias de operação** (`/admin/guias/...`): páginas-tutorial dentro do admin para a equipe não técnica.
 
-> A configuração do dashboard usa `DASHBOARD_CALLBACK` (chave correta do Unfold), **não** `INDEX_DASHBOARD`.
+> A página inicial do `/admin/` redireciona para a visão geral (`/painel/`); o antigo `DASHBOARD_CALLBACK` do Unfold foi removido.
 
 ---
 

@@ -64,10 +64,13 @@ def test_admin_guides_render_for_authorized_staff(client, django_user_model, rou
 
 @pytest.mark.django_db
 def test_admin_dashboard_guide_cards_follow_permissions(client, django_user_model):
+    """Os guias saíram da antiga página inicial do /admin/ para a visão geral
+    unificada (/painel/) — e continuam seguindo as permissões."""
     school_user = make_staff_user(django_user_model, 'school_user', ['school.view_page'])
     client.force_login(school_user)
 
-    response = client.get(reverse('admin:index'))
+    assert client.get(reverse('admin:index')).url == reverse('panel:dashboard')
+    response = client.get(reverse('panel:dashboard'))
     content = response.content.decode()
 
     assert response.status_code == 200
@@ -85,12 +88,17 @@ def test_admin_dashboard_superuser_sees_all_guides(client, django_user_model):
     user = make_staff_user(django_user_model, 'super_user', is_superuser=True)
     client.force_login(user)
 
-    response = client.get(reverse('admin:index'))
+    # Cada guia aparece no espaço de trabalho a que pertence: o de gerenciamento
+    # nos dois, o da Komuniki só no espaço da Komuniki.
+    response = client.get(reverse('panel:dashboard'))
     content = response.content.decode()
-
     assert response.status_code == 200
-    assert 'Guia Komuniki' in content
+    assert 'Guia de Gerenciamento' in content
     assert 'Guia Editorial' not in content
+
+    client.post(reverse('panel:workspace'), {'workspace': 'komuniki'})
+    content = client.get(reverse('panel:dashboard')).content.decode()
+    assert 'Guia Komuniki' in content
     assert 'Guia de Gerenciamento' in content
 
 

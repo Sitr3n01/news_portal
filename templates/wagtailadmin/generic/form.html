@@ -1,0 +1,17 @@
+{% extends "wagtailadmin/generic/form.html" %}
+{% comment %}
+    Override do projeto (estende o próprio template do Wagtail 7.4): todo
+    formulário do Wagtail (grupos, coleções, fluxos e tarefas de revisão,
+    redirecionamentos, imagens, documentos, "Minha conta") troca o slim_header
+    e o título grande pela barra única do editor, a mesma das notícias
+    (templates/newsroom/editor/header.html). O rodapé nativo continua dentro
+    do formulário; newsroom-editor.js (carregado aqui pelo _editor_js.html do
+    Wagtail) monta na barra os botões que clicam nele.
+{% endcomment %}
+
+{% block slim_header %}
+    {% include "newsroom/editor/header.html" %}
+{% endblock %}
+
+{# O título já está na barra. #}
+{% block main_header %}{% endblock %}

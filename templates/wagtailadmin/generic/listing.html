@@ -1,0 +1,19 @@
+{% extends "wagtailadmin/generic/listing.html" %}
+{% load newsroom %}
+{% comment %}
+    Override do projeto (estende o próprio template do Wagtail 7.4): toda
+    listagem do Wagtail (snippets, documentos, relatórios, fluxos, grupos,
+    coleções, redirecionamentos) troca o slim_header pelo cabeçalho do painel,
+    o mesmo das listas do Django admin (templates/newsroom/wagtail/list_header.html;
+    textos em apps/common/newsroom/wagtail_lists.py). As imagens têm cabeçalho
+    próprio e sobrescrevem este bloco em wagtailimages/images/index.html.
+{% endcomment %}
+
+{% block slim_header %}
+    {% nr_wagtail_list_header as head %}
+    {% if head %}
+        {% include "newsroom/wagtail/list_header.html" with head=head %}
+    {% else %}
+        {{ block.super }}
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,26 @@
+{% load static newsroom %}<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{% block title %}{{ page_title }}{% endblock %} · {{ nav.branding.PRODUCT_NAME }}</title>
+    <link rel="stylesheet" href="{% static 'newsroom/css/newsroom.css' %}">
+    <script src="{% static 'js/vendor/htmx.min.js' %}" defer></script>
+    <script src="{% static 'newsroom/js/newsroom.js' %}" defer></script>
+</head>
+<body class="nr-body">
+    <a class="nr-skiplink" href="#nr-main">Pular para o conteúdo</a>
+    <div class="nr-shell">
+        {% newsroom_sidebar %}
+        <div class="nr-app">
+            {% newsroom_topbar page_title=page_title %}
+            <main id="nr-main" class="nr-content" tabindex="-1">
+                {% include "newsroom/partials/toasts.html" %}
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+</body>
+</html>

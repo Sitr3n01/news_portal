@@ -1,0 +1,3185 @@
+/*
+ * Newsroom — design system do painel administrativo unificado.
+ *
+ * Contrato visual: newsroom_dashboard_referencia.html (prévia aprovada).
+ * A prévia foi desenhada num quadro compacto (texto-base de 12px); aqui as
+ * medidas foram escaladas ~1.17x para uso real, mantendo as proporções.
+ *
+ * Escopo: TUDO é prefixado com `nr-` e este arquivo só é carregado nas telas
+ * administrativas (visão geral, Wagtail via insert_global_admin_css e Unfold
+ * via UNFOLD['STYLES']). Nenhum portal público o carrega.
+ *
+ * Integrações específicas de framework ficam em newsroom-wagtail.css e
+ * newsroom-unfold.css. Os tokens abaixo são a fonte única de cor e medida.
+ */
+
+@font-face {
+    font-family: "Newsroom Inter";
+    src: url("../../fonts/editorial/inter-variable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    /* Superfícies */
+    --nr-white: #ffffff;
+    --nr-sidebar: #fafafa;
+    --nr-surface-subtle: #fafafa;
+    --nr-hover: #f0f0f0;
+    --nr-active: #ececec;
+
+    /* Texto — o menor contraste de texto é #737373 (4.7:1 sobre branco).
+       Os cinzas mais claros da prévia (#a3a3a3, #929292) ficam só para ícones
+       e divisórias, que não carregam informação sozinhos. */
+    --nr-ink: #171717;
+    --nr-ink-2: #262626;
+    --nr-ink-3: #404040;
+    --nr-ink-4: #525252;
+    --nr-muted: #737373;
+    --nr-icon: #858585;
+    --nr-icon-faint: #a3a3a3;
+
+    /* Linhas */
+    --nr-line: #eaeaea;
+    --nr-line-2: #e5e5e5;
+    --nr-line-soft: #f1f1f1;
+    --nr-line-strong: #d4d4d4;
+
+    /* Destaque */
+    --nr-blue: #2563eb;
+    --nr-blue-strong: #1d4ed8;
+    --nr-blue-soft: #eff6ff;
+    --nr-blue-line: #dbeafe;
+
+    /* Estados */
+    --nr-green: #15803d;
+    --nr-green-soft: #f0fdf4;
+    --nr-green-line: #dcfce7;
+    --nr-orange: #c2410c;
+    --nr-orange-soft: #fff7ed;
+    --nr-orange-line: #ffedd5;
+    --nr-red: #b91c1c;
+    --nr-red-soft: #fef2f2;
+    --nr-red-line: #fee2e2;
+
+    /* Botão primário */
+    --nr-primary: #171717;
+    --nr-primary-hover: #343434;
+
+    /* Forma */
+    --nr-radius-xs: 5px;
+    --nr-radius-sm: 7px;
+    --nr-radius: 8px;
+    --nr-radius-card: 10px;
+    --nr-radius-lg: 12px;
+    --nr-shadow-xs: 0 1px 2px rgba(0, 0, 0, .04);
+    --nr-shadow-menu: 0 8px 28px rgba(23, 23, 23, .12), 0 1px 3px rgba(23, 23, 23, .06);
+
+    /* Medidas da casca */
+    --nr-sidebar-w: 224px;
+    --nr-topbar-h: 56px;
+    --nr-content-max: 1120px;
+    --nr-font: "Newsroom Inter", Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --nr-focus: 0 0 0 2px var(--nr-white), 0 0 0 4px var(--nr-blue);
+}
+
+/* ── Utilidades ─────────────────────────────────────────────────────────── */
+
+.nr-sr-only {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.nr-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    stroke: currentColor;
+    stroke-width: 1.65;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vertical-align: middle;
+}
+
+.nr-skiplink {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 400;
+    padding: 8px 12px;
+    border-radius: var(--nr-radius);
+    background: var(--nr-primary);
+    color: var(--nr-white);
+    font: 500 13px/1.4 var(--nr-font);
+    text-decoration: none;
+    transform: translateY(-160%);
+}
+
+.nr-skiplink:focus {
+    transform: none;
+}
+
+/* ── Página da visão geral ──────────────────────────────────────────────── */
+
+.nr-body {
+    margin: 0;
+    background: var(--nr-white);
+    color: var(--nr-ink);
+    font-family: var(--nr-font);
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: -.011em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color-scheme: light;
+}
+
+.nr-body *,
+.nr-body *::before,
+.nr-body *::after,
+.nr-sidebar,
+.nr-sidebar *,
+.nr-sidebar *::before,
+.nr-sidebar *::after,
+.nr-topbar,
+.nr-topbar *,
+.nr-menu-toggle {
+    box-sizing: border-box;
+}
+
+.nr-body button,
+.nr-body input,
+.nr-body select,
+.nr-sidebar button {
+    font: inherit;
+    letter-spacing: inherit;
+}
+
+.nr-body a {
+    color: inherit;
+}
+
+.nr-body :focus-visible,
+.nr-sidebar :focus-visible,
+.nr-topbar :focus-visible,
+.nr-menu-toggle:focus-visible {
+    outline: 2px solid var(--nr-blue);
+    outline-offset: 2px;
+}
+
+.nr-app {
+    min-width: 0;
+    min-height: 100vh;
+    margin-left: var(--nr-sidebar-w);
+    background: var(--nr-white);
+}
+
+.nr-content {
+    max-width: var(--nr-content-max);
+    margin: 0 auto;
+    padding: 36px 34px 48px;
+    min-width: 0;
+}
+
+.nr-content:focus {
+    outline: none;
+}
+
+/* ── Sidebar ────────────────────────────────────────────────────────────── */
+
+.nr-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    width: var(--nr-sidebar-w);
+    padding: 16px 12px 14px;
+    background: var(--nr-sidebar);
+    border-right: 1px solid var(--nr-line);
+    color: var(--nr-ink);
+    font-family: var(--nr-font);
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: -.012em;
+    -webkit-font-smoothing: antialiased;
+    text-align: left;
+}
+
+.nr-sidebar a {
+    text-decoration: none;
+}
+
+.nr-sidebar p,
+.nr-sidebar ul {
+    margin: 0;
+}
+
+.nr-sidebar__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 3px 8px 18px;
+}
+
+.nr-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    border-radius: var(--nr-radius);
+    color: var(--nr-ink);
+}
+
+.nr-logo__mark {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--nr-primary);
+    color: var(--nr-white);
+    font-size: 17px;
+    font-weight: 750;
+    letter-spacing: -1.3px;
+    line-height: 1;
+}
+
+.nr-logo__name {
+    color: var(--nr-ink);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -.7px;
+}
+
+.nr-logo__name span {
+    color: var(--nr-muted);
+    font-weight: 400;
+}
+
+.nr-sidebar__close {
+    display: none;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--nr-radius);
+    background: transparent;
+    color: var(--nr-muted);
+    cursor: pointer;
+}
+
+.nr-sidebar__close:hover {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+/* Seletor de espaço de trabalho */
+
+.nr-workspace {
+    position: relative;
+    margin: 0 2px 16px;
+}
+
+.nr-workspace__button {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 9px;
+    border: 1px solid var(--nr-line-2);
+    border-radius: var(--nr-radius);
+    background: var(--nr-white);
+    box-shadow: var(--nr-shadow-xs);
+    list-style: none;
+    cursor: pointer;
+}
+
+.nr-workspace__button::-webkit-details-marker {
+    display: none;
+}
+
+.nr-workspace__button:hover {
+    border-color: var(--nr-line-strong);
+}
+
+.nr-ws-avatar {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: -.3px;
+}
+
+.nr-ws-avatar--blue {
+    background: var(--nr-blue-soft);
+    color: var(--nr-blue);
+}
+
+.nr-ws-avatar--green {
+    border-color: #d1fae5;
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.nr-ws-avatar--sm {
+    width: 22px;
+    height: 22px;
+    font-size: 10.5px;
+}
+
+.nr-workspace__copy {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.nr-workspace__title {
+    overflow: hidden;
+    color: var(--nr-ink);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nr-workspace__caption {
+    color: var(--nr-muted);
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.nr-workspace__chevron {
+    width: 14px;
+    height: 14px;
+    color: var(--nr-icon-faint);
+}
+
+/* Navegação */
+
+/* Navegação + caixa de ajuda rolam juntas; a conta fica fixa embaixo. Com
+   pouca navegação, a caixa de ajuda desce até o rodapé (margin-top: auto). */
+.nr-sidebar__scroll {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    margin: 0 -6px;
+    padding: 0 6px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #d4d4d4 transparent;
+}
+
+.nr-nav {
+    flex: none;
+    padding-bottom: 8px;
+}
+
+.nr-nav__label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 12px 7px;
+    color: var(--nr-muted);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .075em;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+.nr-nav__list {
+    padding: 0;
+    list-style: none;
+}
+
+.nr-nav__item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-height: 36px;
+    margin: 1px 0;
+    padding: 8px 11px;
+    border-radius: var(--nr-radius-sm);
+    color: #5c5c5c;
+    font-size: 13px;
+    font-weight: 450;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+
+.nr-nav__item .nr-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--nr-icon);
+}
+
+.nr-nav__text {
+    overflow: hidden;
+    min-width: 0;
+    text-overflow: ellipsis;
+}
+
+.nr-nav__item:hover {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+.nr-nav__item.is-active {
+    background: var(--nr-active);
+    color: var(--nr-ink);
+    font-weight: 600;
+}
+
+.nr-nav__item.is-active .nr-icon,
+.nr-nav__item:hover .nr-icon {
+    color: var(--nr-ink);
+}
+
+.nr-navbadge {
+    margin-left: auto;
+    padding: 1px 6px;
+    border-radius: var(--nr-radius-xs);
+    background: var(--nr-line);
+    color: var(--nr-ink-4);
+    font-size: 11px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.5;
+}
+
+.nr-navbadge--alert {
+    background: #fff1e8;
+    color: var(--nr-orange);
+}
+
+.nr-nav__section {
+    margin-top: 2px;
+}
+
+.nr-nav__label--toggle {
+    border-radius: var(--nr-radius-sm);
+    list-style: none;
+    cursor: pointer;
+}
+
+.nr-nav__label--toggle::-webkit-details-marker {
+    display: none;
+}
+
+.nr-nav__label--toggle:hover {
+    color: var(--nr-ink);
+}
+
+.nr-nav__section-chevron {
+    width: 13px;
+    height: 13px;
+    transition: transform .15s ease;
+}
+
+.nr-nav__section[open] .nr-nav__section-chevron {
+    transform: rotate(180deg);
+}
+
+/* Rodapé da sidebar */
+
+.nr-sidebar__bottom {
+    flex: none;
+    margin-top: auto;
+}
+
+.nr-helpbox {
+    flex: none;
+    margin: auto 2px 13px;
+    padding: 13px;
+    border: 1px solid var(--nr-line);
+    border-radius: var(--nr-radius-card);
+    background: var(--nr-white);
+}
+
+.nr-helpbox__title {
+    margin-bottom: 5px !important;
+    color: var(--nr-ink);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.nr-helpbox__desc {
+    color: var(--nr-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.nr-helpbox__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+    color: var(--nr-blue) !important;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.nr-helpbox__link .nr-icon {
+    width: 13px;
+    height: 13px;
+}
+
+.nr-helpbox__link:hover {
+    color: var(--nr-blue-strong) !important;
+}
+
+.nr-account {
+    position: relative;
+    padding-top: 12px;
+    border-top: 1px solid var(--nr-line);
+}
+
+.nr-account__button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px;
+    border-radius: var(--nr-radius);
+    list-style: none;
+    cursor: pointer;
+}
+
+.nr-account__button::-webkit-details-marker {
+    display: none;
+}
+
+.nr-account__button:hover {
+    background: var(--nr-hover);
+}
+
+.nr-account__avatar {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #e9e9e9;
+    color: var(--nr-ink-4);
+    font-size: 13px;
+    font-weight: 600;
+    object-fit: cover;
+}
+
+.nr-account__text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.nr-account__name {
+    overflow: hidden;
+    color: var(--nr-ink);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nr-account__role {
+    overflow: hidden;
+    color: var(--nr-muted);
+    font-size: 11px;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nr-account__chevron {
+    width: 14px;
+    height: 14px;
+    color: var(--nr-icon-faint);
+}
+
+/* ── Menus suspensos (details) ──────────────────────────────────────────── */
+
+.nr-menu {
+    position: absolute;
+    z-index: 260;
+    min-width: 220px;
+    padding: 5px;
+    border: 1px solid var(--nr-line-2);
+    border-radius: var(--nr-radius-card);
+    background: var(--nr-white);
+    box-shadow: var(--nr-shadow-menu);
+    color: var(--nr-ink);
+    font-family: var(--nr-font);
+    font-size: 13px;
+    letter-spacing: -.01em;
+}
+
+.nr-menu form {
+    margin: 0;
+}
+
+.nr-menu--workspace {
+    top: calc(100% + 6px);
+    right: 0;
+    left: 0;
+}
+
+.nr-menu--up {
+    bottom: calc(100% + 6px);
+    left: 0;
+    right: 0;
+}
+
+.nr-menu--right {
+    top: calc(100% + 6px);
+    right: 0;
+}
+
+.nr-menu__label {
+    margin: 0;
+    padding: 6px 8px 5px;
+    color: var(--nr-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.nr-menu__divider {
+    height: 1px;
+    margin: 4px 2px;
+    border: 0;
+    background: var(--nr-line-soft);
+}
+
+.nr-menu__header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 4px;
+    padding: 7px 9px 9px;
+    border-bottom: 1px solid var(--nr-line-soft);
+}
+
+.nr-menu__name {
+    font-weight: 600;
+}
+
+.nr-menu__email {
+    color: var(--nr-muted);
+    font-size: 12px;
+}
+
+.nr-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    min-height: 36px;
+    padding: 7px 9px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--nr-ink-3) !important;
+    font-size: 13px;
+    font-weight: 450;
+    line-height: 1.3;
+    text-align: left;
+    text-decoration: none !important;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.nr-menu__item .nr-icon {
+    width: 15px;
+    height: 15px;
+    color: var(--nr-icon);
+}
+
+.nr-menu__item:hover,
+.nr-menu__item:focus-visible {
+    background: var(--nr-hover);
+    color: var(--nr-ink) !important;
+}
+
+.nr-menu__item.is-current {
+    font-weight: 600;
+}
+
+.nr-menu__item.is-danger,
+.nr-menu__item.is-danger .nr-icon {
+    color: var(--nr-red) !important;
+}
+
+.nr-menu__check {
+    margin-left: auto;
+    color: var(--nr-ink) !important;
+}
+
+/* ── Topbar ─────────────────────────────────────────────────────────────── */
+
+.nr-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    height: var(--nr-topbar-h);
+    padding: 0 28px;
+    border-bottom: 1px solid var(--nr-line);
+    background: var(--nr-white);
+    color: var(--nr-ink);
+    font-family: var(--nr-font);
+    letter-spacing: -.011em;
+}
+
+.nr-topbar__start {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.nr-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    color: var(--nr-muted);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.nr-breadcrumbs a {
+    color: var(--nr-muted);
+    text-decoration: none;
+}
+
+.nr-breadcrumbs a:hover {
+    color: var(--nr-ink);
+}
+
+.nr-breadcrumbs__sep {
+    width: 14px;
+    height: 14px;
+    color: var(--nr-icon-faint);
+}
+
+.nr-breadcrumbs strong,
+.nr-breadcrumbs__page {
+    overflow: hidden;
+    min-width: 0;
+    color: var(--nr-ink-3);
+    font-weight: 550;
+    text-overflow: ellipsis;
+}
+
+.nr-breadcrumbs__page a {
+    color: var(--nr-muted);
+}
+
+.nr-topbar__actions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 6px;
+    color: var(--nr-muted);
+}
+
+.nr-icon-button {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--nr-radius);
+    color: var(--nr-muted);
+    text-decoration: none;
+}
+
+.nr-icon-button:hover {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+.nr-topbar__account {
+    position: relative;
+    margin-left: 4px;
+}
+
+.nr-top-avatar {
+    display: grid;
+    overflow: hidden;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--nr-line-2);
+    border-radius: 50%;
+    background: #f5f5f5;
+    color: var(--nr-ink-4);
+    font-size: 12px;
+    font-weight: 600;
+    list-style: none;
+    cursor: pointer;
+}
+
+.nr-top-avatar::-webkit-details-marker {
+    display: none;
+}
+
+.nr-top-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.nr-top-avatar:hover {
+    border-color: var(--nr-line-strong);
+}
+
+.nr-menu-toggle {
+    display: none;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    margin-left: -8px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--nr-radius);
+    background: transparent;
+    color: var(--nr-ink-3);
+    cursor: pointer;
+}
+
+.nr-menu-toggle:hover {
+    background: var(--nr-hover);
+}
+
+.nr-menu-toggle .nr-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.nr-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 190;
+    background: rgba(23, 23, 23, .38);
+}
+
+/* ── Notificações ───────────────────────────────────────────────────────
+   Cartões que descem do topo e ficam sobre o conteúdo, centralizados na área
+   à direita da sidebar, sem empurrar a página. As mesmas classes nas três
+   cascas: newsroom/partials/toasts.html (visão geral e Unfold) e
+   wagtailadmin/base.html. Fechar e sumir sozinhas: newsroom.js. */
+
+.nr-toasts {
+    position: fixed;
+    top: 14px;
+    right: 0;
+    left: 0;
+    z-index: 450;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0 16px;
+    list-style: none;
+    pointer-events: none;
+}
+
+@media (min-width: 1024px) {
+    body:has([data-nr-sidebar]) .nr-toasts {
+        left: var(--nr-sidebar-w);
+    }
+}
+
+.nr-toast {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 520px;
+    margin: 0;
+    padding: 10px 8px 10px 12px;
+    border: 1px solid var(--nr-line-2);
+    border-radius: 12px;
+    background: var(--nr-white);
+    box-shadow: 0 12px 32px rgba(23, 23, 23, .14), 0 2px 6px rgba(23, 23, 23, .06);
+    color: var(--nr-ink);
+    font-family: var(--nr-font);
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -.01em;
+    pointer-events: auto;
+    animation: nr-toast-in .38s cubic-bezier(.2, .9, .25, 1) both;
+}
+
+.nr-toast.is-leaving {
+    animation: nr-toast-out .22s ease-in both;
+}
+
+@keyframes nr-toast-in {
+    from { opacity: 0; transform: translateY(-110%); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes nr-toast-out {
+    to { opacity: 0; transform: translateY(-60%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nr-toast,
+    .nr-toast.is-leaving {
+        animation-duration: .01s;
+    }
+}
+
+.nr-toast__icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--nr-blue-soft);
+    color: var(--nr-blue);
+}
+
+.nr-toast__icon .nr-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.nr-toast--success .nr-toast__icon {
+    background: var(--nr-green-soft);
+    color: var(--nr-green);
+}
+
+.nr-toast--warning .nr-toast__icon {
+    background: var(--nr-orange-soft);
+    color: var(--nr-orange);
+}
+
+.nr-toast--error .nr-toast__icon {
+    background: var(--nr-red-soft);
+    color: var(--nr-red);
+}
+
+.nr-toast__text {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* Ações que o Wagtail põe na mensagem ("Editar", "Desbloquear", "Ir para o
+   primeiro erro") e links do Django: botão discreto, no desenho do painel. */
+:is(body#wagtail, #main, .nr-shell, .nr-toasts) .nr-toast__text :is(.button, button) {
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    min-height: 0;
+    margin: 0 0 0 8px;
+    padding: 0 10px;
+    border: 1px solid var(--nr-line-2);
+    border-radius: var(--nr-radius);
+    background: var(--nr-white);
+    color: var(--nr-ink) !important;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+:is(body#wagtail, #main, .nr-shell, .nr-toasts) .nr-toast__text :is(.button, button):hover {
+    background: var(--nr-surface-subtle);
+}
+
+.nr-toast__text a:not(.button) {
+    color: var(--nr-blue-strong);
+    font-weight: 600;
+}
+
+.nr-toast__text form {
+    display: inline;
+}
+
+:is(body#wagtail, #main, .nr-shell, .nr-toasts) .nr-toast__close {
+    display: grid;
+    flex: none;
+    place-items: center;
+    align-self: flex-start;
+    width: 28px;
+    height: 28px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--nr-radius);
+    background: transparent;
+    color: var(--nr-muted);
+    cursor: pointer;
+}
+
+:is(body#wagtail, #main, .nr-shell, .nr-toasts) .nr-toast__close:hover {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+.nr-toast__close .nr-icon {
+    width: 15px;
+    height: 15px;
+}
+
+/* ── Cabeçalho da página ────────────────────────────────────────────────── */
+
+.nr-overline {
+    margin: 0 0 8px;
+    color: var(--nr-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+}
+
+.nr-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.nr-hero h1 {
+    margin: 0 0 8px;
+    color: var(--nr-ink);
+    font-size: 30px;
+    font-weight: 550;
+    letter-spacing: -.045em;
+    line-height: 1.15;
+}
+
+.nr-hero p {
+    margin: 0;
+    color: var(--nr-muted);
+    font-size: 14px;
+}
+
+/* ── Botões ─────────────────────────────────────────────────────────────── */
+
+.nr-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 9px 15px;
+    border: 1px solid transparent;
+    border-radius: var(--nr-radius);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease;
+}
+
+.nr-btn .nr-icon {
+    width: 15px;
+    height: 15px;
+}
+
+.nr-btn--primary {
+    border-color: var(--nr-primary);
+    background: var(--nr-primary);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+    color: var(--nr-white) !important;
+}
+
+.nr-btn--primary:hover {
+    border-color: var(--nr-primary-hover);
+    background: var(--nr-primary-hover);
+}
+
+.nr-btn--secondary,
+.nr-toolbtn {
+    border: 1px solid var(--nr-line-2);
+    background: var(--nr-white);
+    color: var(--nr-ink-4) !important;
+}
+
+.nr-btn--secondary:hover,
+.nr-toolbtn:hover {
+    background: var(--nr-surface-subtle);
+}
+
+.nr-btn--danger {
+    border-color: var(--nr-red);
+    background: var(--nr-red);
+    color: var(--nr-white) !important;
+}
+
+.nr-btn--danger:hover {
+    border-color: #991b1b;
+    background: #991b1b;
+}
+
+.nr-toolbtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: var(--nr-radius-sm);
+    font-size: 13px;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.nr-toolbtn .nr-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.nr-text-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--nr-ink-4) !important;
+    font-size: 12.5px;
+    font-weight: 550;
+    text-decoration: none !important;
+    white-space: nowrap;
+}
+
+.nr-text-link .nr-icon {
+    width: 13px;
+    height: 13px;
+}
+
+.nr-text-link:hover {
+    color: var(--nr-ink) !important;
+}
+
+/* ── Indicadores: um contêiner dividido em seções ───────────────────────── */
+
+.nr-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-bottom: 32px;
+    overflow: hidden;
+    border: 1px solid var(--nr-line);
+    border-radius: var(--nr-radius-card);
+}
+
+.nr-stats--1 { grid-template-columns: minmax(0, 1fr); }
+.nr-stats--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.nr-stats--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.nr-stat {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 15px 16px 14px;
+    border-right: 1px solid var(--nr-line);
+    color: inherit;
+    text-decoration: none;
+    transition: background-color .15s ease;
+}
+
+.nr-stat:last-child {
+    border-right: 0;
+}
+
+.nr-stat:hover {
+    background: var(--nr-surface-subtle);
+}
+
+.nr-stat__label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--nr-muted);
+    font-size: 12.5px;
+}
+
+.nr-stat__label .nr-icon {
+    width: 15px;
+    height: 15px;
+    color: var(--nr-icon-faint);
+}
+
+.nr-stat__value {
+    margin-top: 7px;
+    color: var(--nr-ink);
+    font-size: 29px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    letter-spacing: -.04em;
+    line-height: 1.25;
+}
+
+.nr-stat__note {
+    overflow: hidden;
+    margin-top: 3px;
+    color: var(--nr-muted);
+    font-size: 11.5px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Seção central ──────────────────────────────────────────────────────── */
+
+.nr-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.nr-section-heading h2 {
+    margin: 0;
+    color: var(--nr-ink);
+    font-size: 15.5px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+}
+
+.nr-section-heading p {
+    margin: 3px 0 0;
+    color: var(--nr-muted);
+    font-size: 12.5px;
+}
+
+.nr-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.nr-tabs {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 18px;
+    min-width: 0;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--nr-line);
+    scrollbar-width: none;
+}
+
+.nr-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.nr-tab {
+    flex: none;
+    padding: 10px 1px 11px;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    color: var(--nr-muted) !important;
+    font-size: 13px;
+    text-decoration: none !important;
+    white-space: nowrap;
+}
+
+.nr-tab:hover {
+    color: var(--nr-ink) !important;
+}
+
+.nr-tab.is-active {
+    border-color: var(--nr-ink);
+    color: var(--nr-ink) !important;
+    font-weight: 600;
+}
+
+/* ── Cabeçalho de listas ────────────────────────────────────────────────
+   Título com contagem, descrição, ações e abas. Usado nas listas do Django
+   admin (templates/admin/includes/model_list_help.html) e do Wagtail
+   (templates/newsroom/wagtail/list_header.html). */
+.nr-listhead {
+    margin: 0 0 18px;
+    font-family: var(--nr-font);
+}
+
+.nr-listhead__main {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 10px;
+}
+
+.nr-listhead__heading {
+    min-width: 0;
+}
+
+:is(#main, body#wagtail) .nr-listhead__title {
+    margin: 0;
+    color: var(--nr-ink);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    line-height: 1.25;
+}
+
+.nr-listhead__count {
+    margin-left: 6px;
+    color: var(--nr-muted);
+    font-size: 15px;
+    font-weight: 450;
+}
+
+:is(#main, body#wagtail) .nr-listhead__desc {
+    max-width: 72ch;
+    margin: 4px 0 0;
+    color: var(--nr-muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.nr-listhead__actions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+}
+
+:is(#main, body#wagtail) .nr-listhead .nr-btn {
+    min-height: 38px;
+    font-family: inherit;
+}
+
+.nr-listhead__tabs {
+    margin-top: 6px;
+}
+
+.nr-tab__count {
+    margin-left: 6px;
+    color: var(--nr-icon);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.nr-tab.is-active .nr-tab__count {
+    color: var(--nr-ink-4);
+}
+
+.nr-listhead__empty {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 16px;
+    padding: 14px 16px;
+    border: 1px dashed var(--nr-line-strong);
+    border-radius: var(--nr-radius-card);
+    color: var(--nr-muted);
+    font-size: 13px;
+}
+
+@media (max-width: 639.98px) {
+    .nr-listhead__guide span,
+    .nr-listhead__primary span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+
+    :is(#main, body#wagtail) .nr-listhead .nr-listhead__guide,
+    :is(#main, body#wagtail) .nr-listhead .nr-listhead__primary {
+        width: 40px;
+        padding: 0;
+    }
+}
+
+.nr-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 14px;
+}
+
+.nr-searchbox,
+.nr-select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 11px;
+    border: 1px solid var(--nr-line-2);
+    border-radius: var(--nr-radius-sm);
+    background: var(--nr-white);
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.nr-searchbox {
+    flex: 1;
+    min-width: 0;
+}
+
+.nr-searchbox:focus-within,
+.nr-select:focus-within {
+    border-color: #a3a3a3;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+}
+
+.nr-searchbox .nr-icon,
+.nr-select .nr-icon {
+    width: 15px;
+    height: 15px;
+    color: var(--nr-icon-faint);
+}
+
+.nr-searchbox input {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--nr-ink);
+    font-size: 13.5px;
+}
+
+.nr-searchbox input::placeholder {
+    color: var(--nr-muted);
+    opacity: 1;
+}
+
+.nr-searchbox input::-webkit-search-cancel-button {
+    cursor: pointer;
+}
+
+.nr-select select {
+    max-width: 190px;
+    padding: 0 2px 0 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--nr-ink-4);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.nr-views {
+    display: flex;
+    flex: none;
+    gap: 2px;
+    height: 38px;
+    padding: 3px;
+    border: 1px solid var(--nr-line-2);
+    border-radius: var(--nr-radius-sm);
+    background: var(--nr-white);
+}
+
+.nr-viewbtn {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--nr-radius-xs);
+    background: transparent;
+    color: var(--nr-icon-faint);
+    cursor: pointer;
+}
+
+.nr-viewbtn:hover {
+    color: var(--nr-ink);
+}
+
+.nr-viewbtn.is-active {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+.nr-viewbtn .nr-icon {
+    width: 15px;
+    height: 15px;
+}
+
+/* ── Listagem ───────────────────────────────────────────────────────────── */
+
+.nr-results {
+    transition: opacity .15s ease;
+}
+
+.nr-results.htmx-request,
+.htmx-request .nr-results {
+    opacity: .55;
+}
+
+.nr-article-list {
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    border: 1px solid var(--nr-line);
+    border-radius: var(--nr-radius-card);
+    list-style: none;
+}
+
+.nr-article {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--nr-line);
+    transition: background-color .16s ease;
+}
+
+.nr-article:first-child {
+    border-top-left-radius: var(--nr-radius-card);
+    border-top-right-radius: var(--nr-radius-card);
+}
+
+.nr-article:last-child {
+    border-bottom: 0;
+    border-bottom-left-radius: var(--nr-radius-card);
+    border-bottom-right-radius: var(--nr-radius-card);
+}
+
+.nr-article:hover {
+    background: var(--nr-surface-subtle);
+}
+
+.nr-thumb {
+    display: grid;
+    flex-shrink: 0;
+    overflow: hidden;
+    place-items: center;
+    width: 74px;
+    height: 54px;
+    border: 1px solid rgba(0, 0, 0, .03);
+    border-radius: 6px;
+}
+
+.nr-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.nr-thumb .nr-icon {
+    width: 22px;
+    height: 22px;
+    stroke-width: 1.2;
+    opacity: .6;
+}
+
+.nr-thumb__initial {
+    font-size: 18px;
+    font-weight: 600;
+    opacity: .75;
+}
+
+.nr-thumb--blue { background: linear-gradient(125deg, #e8f1ff, #c9ddff); color: #3f6aa5; }
+.nr-thumb--violet { background: linear-gradient(130deg, #f4eeff, #e0d4fa); color: #7a53ad; }
+.nr-thumb--sand { background: linear-gradient(135deg, #faf0e3, #e8d9c8); color: #9a744b; }
+.nr-thumb--green { background: linear-gradient(125deg, #e8f3eb, #d2e7d9); color: #4f8a64; }
+
+.nr-article__main {
+    flex: 1;
+    min-width: 0;
+}
+
+.nr-article__main p {
+    margin: 0;
+}
+
+.nr-article__title {
+    overflow: hidden;
+    color: var(--nr-ink-2);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nr-article__title a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.nr-article__title a:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--nr-line-strong);
+    text-underline-offset: 3px;
+}
+
+.nr-article__path {
+    overflow: hidden;
+    margin-top: 3px !important;
+    color: var(--nr-muted);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nr-article__info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    margin-top: 6px !important;
+    overflow: hidden;
+    color: var(--nr-muted);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.nr-article__info span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nr-article__flag {
+    color: var(--nr-blue);
+}
+
+.nr-dot {
+    flex: none;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #d4d4d4;
+}
+
+.nr-article__right {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 10px;
+}
+
+.nr-article__date {
+    min-width: 64px;
+    color: var(--nr-muted);
+    font-size: 12px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* Selos de estado */
+
+.nr-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 9px;
+    border: 1px solid var(--nr-line-2);
+    border-radius: 100px;
+    background: var(--nr-white);
+    color: var(--nr-muted);
+    font-size: 11.5px;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.nr-status::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.nr-status--published,
+.nr-status--success {
+    border-color: var(--nr-green-line);
+    background: var(--nr-green-soft);
+    color: var(--nr-green);
+}
+
+.nr-status--review,
+.nr-status--warning {
+    border-color: var(--nr-orange-line);
+    background: var(--nr-orange-soft);
+    color: var(--nr-orange);
+}
+
+.nr-status--draft,
+.nr-status--neutral,
+.nr-status--archived {
+    background: var(--nr-surface-subtle);
+    color: var(--nr-muted);
+}
+
+.nr-status--scheduled,
+.nr-status--info {
+    border-color: var(--nr-blue-line);
+    background: var(--nr-blue-soft);
+    color: var(--nr-blue);
+}
+
+.nr-status--danger {
+    border-color: var(--nr-red-line);
+    background: var(--nr-red-soft);
+    color: var(--nr-red);
+}
+
+/* Menu de ações da linha */
+
+.nr-more {
+    position: relative;
+}
+
+.nr-more__button {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    color: var(--nr-icon);
+    list-style: none;
+    cursor: pointer;
+}
+
+.nr-more__button::-webkit-details-marker {
+    display: none;
+}
+
+.nr-more__button:hover,
+.nr-more[open] .nr-more__button {
+    background: #eeeeee;
+    color: var(--nr-ink);
+}
+
+.nr-more .nr-menu {
+    min-width: 190px;
+}
+
+/* Grade */
+
+.nr-article-list.is-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    border: 0;
+    border-radius: 0;
+}
+
+.nr-article-list.is-grid .nr-article {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid var(--nr-line);
+    border-radius: var(--nr-radius-card);
+}
+
+.nr-article-list.is-grid .nr-thumb {
+    grid-column: 1 / -1;
+    width: 100%;
+    height: 132px;
+}
+
+.nr-article-list.is-grid .nr-article__main {
+    grid-column: 1 / -1;
+}
+
+.nr-article-list.is-grid .nr-article__right {
+    grid-column: 1 / -1;
+    justify-content: space-between;
+}
+
+.nr-article-list.is-grid .nr-article__date {
+    margin-left: auto;
+}
+
+.nr-empty {
+    padding: 34px;
+    border: 1px dashed var(--nr-line-strong);
+    border-radius: var(--nr-radius-card);
+    color: var(--nr-muted);
+    font-size: 13px;
+    text-align: center;
+}
+
+.nr-listfoot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 1px 20px;
+    color: var(--nr-muted);
+    font-size: 12px;
+}
+
+.nr-pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nr-pagination .nr-toolbtn {
+    height: 32px;
+    padding: 0 10px;
+    font-size: 12.5px;
+}
+
+.nr-pagination__current {
+    white-space: nowrap;
+}
+
+/* ── Cartão de confirmação (remover), no Wagtail e no Django admin ───────
+   templates/wagtailadmin/generic/confirm_delete.html e
+   templates/admin/delete_confirmation.html. */
+
+.nr-confirm {
+    max-width: 560px;
+    margin: 24px 0;
+    padding: 22px 24px;
+    border: 1px solid var(--nr-line);
+    border-radius: var(--nr-radius-card);
+    background: var(--nr-white);
+    font-family: var(--nr-font);
+}
+
+.nr-confirm__title {
+    margin: 0 0 6px;
+    color: var(--nr-ink);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+}
+
+.nr-confirm__text,
+.nr-confirm__usage {
+    margin: 0 0 6px;
+    color: var(--nr-ink-4);
+    font-size: 13.5px;
+    line-height: 1.5;
+}
+
+.nr-confirm__usage a {
+    color: var(--nr-blue-strong);
+    font-weight: 600;
+}
+
+.nr-confirm__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.nr-confirm .nr-btn {
+    min-height: 38px;
+    font-family: inherit;
+}
+
+.nr-confirm__list {
+    margin: 8px 0 0;
+    padding-left: 18px;
+    color: var(--nr-ink-4);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.nr-confirm__details {
+    margin-top: 10px;
+    color: var(--nr-ink-4);
+    font-size: 12.5px;
+}
+
+.nr-confirm__details summary {
+    color: var(--nr-blue-strong);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.nr-confirm__details ul {
+    max-height: 260px;
+    margin: 8px 0 0;
+    padding-left: 18px;
+    overflow-y: auto;
+    line-height: 1.6;
+}
+
+/* ── Histórico de modificações do Django admin (templates/admin/object_history.html) */
+
+.nr-card.nr-history {
+    padding: 0;
+    overflow-x: auto;
+}
+
+.nr-history__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.nr-history__table th {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--nr-line);
+    color: var(--nr-muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.nr-history__table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--nr-line);
+    color: var(--nr-ink-4);
+    vertical-align: top;
+}
+
+.nr-history__table tr:last-child td {
+    border-bottom: 0;
+}
+
+.nr-history__when {
+    color: var(--nr-ink);
+    white-space: nowrap;
+}
+
+.nr-history__pages {
+    display: flex;
+    gap: 12px;
+    padding: 12px 14px;
+    border-top: 1px solid var(--nr-line);
+    font-size: 13px;
+}
+
+.nr-history__pages .is-current {
+    color: var(--nr-ink);
+    font-weight: 600;
+}
+
+/* Com ícone (histórico do Django admin): ícone e texto na mesma linha. O
+   reset do Tailwind no Unfold deixa todo svg como bloco. */
+.nr-empty:has(> .nr-icon) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.nr-empty > .nr-icon {
+    display: inline-block;
+    flex: none;
+    width: 18px;
+    height: 18px;
+}
+
+/* ── Cartões inferiores ─────────────────────────────────────────────────── */
+
+.nr-bottom-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 14px;
+    margin-top: 8px;
+}
+
+.nr-card {
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--nr-line);
+    border-radius: var(--nr-radius-card);
+    background: var(--nr-white);
+}
+
+.nr-card--wide {
+    grid-column: 1 / -1;
+}
+
+.nr-card__heading {
+    margin: 0 0 3px;
+    color: var(--nr-ink);
+    font-size: 13.5px;
+    font-weight: 600;
+    letter-spacing: -.015em;
+}
+
+.nr-card__sub {
+    margin: 0 0 14px;
+    color: var(--nr-muted);
+    font-size: 12px;
+}
+
+.nr-card__empty {
+    margin: 0;
+    padding: 10px 0 2px;
+    border-top: 1px solid var(--nr-line-soft);
+    color: var(--nr-muted);
+    font-size: 12.5px;
+    list-style: none;
+}
+
+.nr-quicklink {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 2px;
+    border-top: 1px solid var(--nr-line-soft);
+    color: var(--nr-ink-4) !important;
+    font-size: 13px;
+    text-decoration: none !important;
+}
+
+.nr-quicklink .nr-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--nr-icon);
+}
+
+.nr-quicklink span {
+    flex: 1;
+    min-width: 0;
+}
+
+.nr-quicklink .nr-quicklink__arrow {
+    width: 13px;
+    height: 13px;
+    color: var(--nr-icon-faint);
+    transition: transform .15s ease;
+}
+
+.nr-quicklink:hover {
+    color: var(--nr-ink) !important;
+}
+
+.nr-quicklink:hover .nr-quicklink__arrow {
+    color: var(--nr-ink);
+    transform: translateX(2px);
+}
+
+.nr-activity-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.nr-activity {
+    display: flex;
+    gap: 10px;
+    padding: 9px 0;
+    border-top: 1px solid var(--nr-line-soft);
+}
+
+.nr-activity p {
+    margin: 0;
+}
+
+.nr-activity__dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    margin-top: 5px;
+    border: 2px solid #93c5fd;
+    border-radius: 50%;
+}
+
+.nr-activity__dot--alert {
+    border-color: #fdba74;
+}
+
+.nr-activity__title {
+    color: var(--nr-ink-3);
+    font-size: 13px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.nr-activity__caption {
+    margin-top: 3px !important;
+    color: var(--nr-muted);
+    font-size: 11.5px;
+}
+
+.nr-health__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.nr-health__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid var(--nr-line);
+    border-radius: var(--nr-radius);
+}
+
+.nr-health__metric {
+    padding: 10px 12px;
+    border-right: 1px solid var(--nr-line);
+}
+
+.nr-health__metric:last-child {
+    border-right: 0;
+}
+
+.nr-health__metric dt {
+    color: var(--nr-muted);
+    font-size: 12px;
+}
+
+.nr-health__metric dd {
+    margin: 3px 0 0;
+    color: var(--nr-ink);
+    font-size: 16px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.nr-health__metric--warning dd { color: var(--nr-orange); }
+.nr-health__metric--danger dd { color: var(--nr-red); }
+.nr-health__metric--success dd { color: var(--nr-green); }
+
+.nr-health__details {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin: 12px 0 0;
+    font-size: 12px;
+}
+
+.nr-health__details dt {
+    color: var(--nr-muted);
+}
+
+.nr-health__details dd {
+    margin: 2px 0 0;
+    color: var(--nr-ink-3);
+    overflow-wrap: anywhere;
+}
+
+.nr-health__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 12px;
+}
+
+/* ── Responsivo ─────────────────────────────────────────────────────────── */
+
+/* Abaixo de 1024px a sidebar vira gaveta: mesma largura e os mesmos rótulos
+   (nada de trilho de ícones ilegível), aberta pelo botão de menu. */
+@media (max-width: 1023.98px) {
+    .nr-sidebar {
+        box-shadow: none;
+        transform: translateX(-102%);
+        transition: transform .2s ease, box-shadow .2s ease;
+        visibility: hidden;
+    }
+
+    .nr-sidebar.is-open {
+        box-shadow: 0 0 40px rgba(0, 0, 0, .18);
+        transform: none;
+        visibility: visible;
+    }
+
+    .nr-sidebar__close {
+        display: grid;
+    }
+
+    .nr-menu-toggle {
+        display: grid;
+    }
+
+    .nr-app {
+        margin-left: 0;
+    }
+
+    .nr-topbar {
+        padding: 0 18px;
+    }
+
+    .nr-content {
+        padding: 28px 20px 40px;
+    }
+
+    .nr-bottom-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .nr-health__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .nr-health__metric:nth-child(2) {
+        border-right: 0;
+    }
+
+    .nr-health__metric:nth-child(-n + 2) {
+        border-bottom: 1px solid var(--nr-line);
+    }
+}
+
+@media (max-width: 720px) {
+    .nr-stats,
+    .nr-stats--3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .nr-stats--1 {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .nr-stat:nth-child(2n) {
+        border-right: 0;
+    }
+
+    .nr-stats--4 .nr-stat:nth-child(-n + 2),
+    .nr-stats--3 .nr-stat:nth-child(-n + 2) {
+        border-bottom: 1px solid var(--nr-line);
+    }
+
+    .nr-stats--3 .nr-stat:nth-child(3) {
+        grid-column: 1 / -1;
+        border-top: 0;
+    }
+
+    .nr-filter-row {
+        flex-wrap: wrap;
+    }
+
+    .nr-searchbox {
+        flex-basis: 100%;
+    }
+
+    .nr-select {
+        flex: 1;
+    }
+
+    .nr-select select {
+        max-width: none;
+        width: 100%;
+    }
+
+    .nr-health__details {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+    .nr-topbar__actions .nr-icon-button {
+        display: none;
+    }
+
+    .nr-content {
+        padding: 22px 16px 36px;
+    }
+
+    .nr-hero {
+        align-items: flex-start;
+    }
+
+    .nr-hero h1 {
+        font-size: 26px;
+    }
+
+    .nr-hero .nr-btn span {
+        display: none;
+    }
+
+    .nr-hero .nr-btn {
+        width: 38px;
+        padding: 0;
+    }
+
+    .nr-stat {
+        padding: 12px;
+    }
+
+    .nr-stat__value {
+        font-size: 25px;
+    }
+
+    .nr-section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .nr-article {
+        gap: 10px;
+        padding: 11px 10px;
+    }
+
+    .nr-thumb {
+        width: 44px;
+        height: 44px;
+    }
+
+    .nr-thumb .nr-icon {
+        width: 17px;
+        height: 17px;
+    }
+
+    .nr-article__path {
+        display: none;
+    }
+
+    .nr-article__date {
+        display: none;
+    }
+
+    .nr-article__right {
+        gap: 4px;
+    }
+
+    .nr-status {
+        padding: 3px 7px;
+        font-size: 11px;
+    }
+
+    .nr-article-list.is-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .nr-article-list.is-grid .nr-thumb {
+        height: 120px;
+    }
+
+    .nr-listfoot {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nr-article,
+    .nr-stat,
+    .nr-sidebar,
+    .nr-results,
+    .nr-quicklink__arrow,
+    .nr-nav__section-chevron,
+    .nr-btn {
+        transition: none !important;
+    }
+}
+
+@media print {
+    .nr-sidebar,
+    .nr-topbar,
+    .nr-backdrop {
+        display: none !important;
+    }
+
+    .nr-app {
+        margin-left: 0;
+    }
+}
+
+/* ── Barra do editor (Wagtail e Django admin) ──────────────────────────── */
+
+/* Uma barra só no topo dos formulários: voltar, título, selo de estado,
+   ferramentas e ações. No Wagtail: templates/newsroom/editor/ (o que é só
+   dele fica em newsroom-wagtail.css); no Django admin:
+   templates/admin/includes/form_bar.html (encaixe em newsroom-unfold.css). */
+
+:is(body#wagtail, #main) .nr-editorbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 64px;
+    padding: 9px 20px 9px 16px;
+    border-bottom: 1px solid var(--nr-line);
+    background: var(--nr-white);
+    color: var(--nr-ink);
+    font-family: var(--nr-font);
+}
+
+.nr-editorbar__start {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.nr-editorbar__back {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--nr-radius);
+    color: var(--nr-muted);
+}
+
+.nr-editorbar__back:hover {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+.nr-editorbar__back .nr-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.nr-editorbar__heading {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.nr-editorbar__crumbs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    font-size: 13px;
+}
+
+:is(body#wagtail, #main) .nr-editorbar__parent {
+    flex: none;
+    color: var(--nr-muted);
+    text-decoration: none;
+}
+
+:is(body#wagtail, #main) .nr-editorbar__parent:hover {
+    color: var(--nr-ink);
+}
+
+.nr-editorbar__sep {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    color: var(--nr-icon-faint);
+}
+
+:is(body#wagtail, #main) .nr-editorbar__title {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    color: var(--nr-ink);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -.015em;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Sem altura mínima: em cadastros sem rascunho (categorias, tags) a linha
+   fica vazia e colapsa, e o título se centraliza sozinho. */
+.nr-editorbar__meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    color: var(--nr-muted);
+    font-size: 12px;
+}
+
+/* O selo nunca encolhe; só a observação ao lado dele é cortada com "…". */
+.nr-editorbar__state {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nr-editorbar__status {
+    flex: none;
+    padding: 2px 8px;
+    font-family: inherit;
+}
+
+.nr-editorbar__status .nr-icon {
+    width: 12px;
+    height: 12px;
+}
+
+.nr-editorbar__note {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nr-editorbar__end {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Ferramentas: os botões de painel lateral do próprio Wagtail. */
+.nr-editorbar__tools {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-right: 2px;
+    padding-right: 10px;
+    border-right: 1px solid var(--nr-line);
+}
+
+/* Remover + ações + menu (barra do Wagtail), que andam juntos. */
+.nr-editorbar__commit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Ações de publicação (montadas por newsroom-editor.js). */
+.nr-editorbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nr-editorbar__actions:empty {
+    display: none;
+}
+
+/* Copiar e inspecionar entram na fileira das ferramentas; o grupo some se não
+   tiver nada (formulário sem painéis, antes do primeiro salvamento). */
+.nr-editorbar__quick,
+.nr-editorbar__danger {
+    display: contents;
+}
+
+.nr-editorbar__tools:not(:has(> :not(:empty))) {
+    display: none;
+}
+
+/* ── Controle "Publicação" (newsroom/editor/_publication.html) ───────────── */
+
+.nr-editorbar__publication {
+    display: contents;
+}
+
+/* Substituído pelo controle; continua na página para "Ver todos os detalhes". */
+.nr-editorbar__tools:has(.nr-pub) [data-side-panel-toggle="status"] {
+    display: none;
+}
+
+.nr-pub {
+    position: relative;
+    margin-right: 6px;
+}
+
+.nr-pub__button {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    box-sizing: border-box;
+    height: 34px;
+    padding: 0 9px 0 11px;
+    border: 1px solid var(--nr-line-2);
+    border-radius: var(--nr-radius);
+    background: var(--nr-white);
+    color: var(--nr-ink);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    list-style: none;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease;
+}
+
+.nr-pub__button::-webkit-details-marker {
+    display: none;
+}
+
+.nr-pub__button:hover,
+.nr-pub[open] .nr-pub__button {
+    border-color: #d4d4d4;
+    background: var(--nr-surface-subtle);
+}
+
+.nr-pub__dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--nr-muted);
+}
+
+.nr-pub--published .nr-pub__dot { background: var(--nr-green); }
+.nr-pub--review .nr-pub__dot { background: var(--nr-orange); }
+.nr-pub--scheduled .nr-pub__dot { background: var(--nr-blue); }
+
+.nr-pub__button .nr-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--nr-muted);
+}
+
+.nr-pub__button .nr-pub__flag--warning {
+    color: var(--nr-orange);
+}
+
+.nr-pub__chevron {
+    margin-left: -1px;
+    transition: transform .15s ease;
+}
+
+.nr-pub[open] .nr-pub__chevron {
+    transform: rotate(180deg);
+}
+
+.nr-pub__panel {
+    top: calc(100% + 6px);
+    left: 0;
+    width: 320px;
+    max-width: calc(100vw - 24px);
+    padding: 0;
+}
+
+.nr-pub__section {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--nr-line);
+}
+
+.nr-pub__line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.nr-pub__title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    color: var(--nr-ink);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.nr-pub__title .nr-icon {
+    width: 15px;
+    height: 15px;
+    color: var(--nr-muted);
+}
+
+.nr-pub__text,
+.nr-pub__meta {
+    margin: 6px 0 0;
+    color: var(--nr-ink-4);
+    font-size: 12.5px;
+    line-height: 1.45;
+}
+
+.nr-pub__meta {
+    color: var(--nr-muted);
+}
+
+:is(body#wagtail, #main) .nr-pub__action {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border: 0;
+    border-radius: var(--nr-radius);
+    background: transparent;
+    color: var(--nr-blue-strong);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+:is(body#wagtail, #main) .nr-pub__action:hover {
+    background: var(--nr-blue-soft);
+}
+
+.nr-pub__action .nr-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.nr-pub__dates {
+    display: grid;
+    gap: 6px;
+    margin: 10px 0 0;
+}
+
+.nr-pub__dates > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12.5px;
+}
+
+.nr-pub__dates dt {
+    color: var(--nr-muted);
+}
+
+.nr-pub__dates dd {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    color: var(--nr-ink);
+    font-weight: 500;
+    text-align: right;
+}
+
+.nr-pub__badge {
+    padding: 1px 6px;
+    border-radius: 100px;
+    background: var(--nr-orange-soft);
+    color: var(--nr-orange);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.nr-pub__alert {
+    margin: 10px 0 0;
+    padding: 8px 10px;
+    border: 1px solid var(--nr-orange-line);
+    border-radius: var(--nr-radius);
+    background: var(--nr-orange-soft);
+    color: var(--nr-orange);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.nr-pub__alert--error {
+    border-color: var(--nr-red-line);
+    background: var(--nr-red-soft);
+    color: var(--nr-red);
+}
+
+:is(body#wagtail, #main) .nr-pub__details {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 0 0 var(--nr-radius-card) var(--nr-radius-card);
+    background: transparent;
+    color: var(--nr-ink-4);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+}
+
+:is(body#wagtail, #main) .nr-pub__details:hover {
+    background: var(--nr-surface-subtle);
+    color: var(--nr-ink);
+}
+
+.nr-pub__details .nr-icon {
+    width: 15px;
+    height: 15px;
+}
+
+:is(body#wagtail, #main) .nr-editorbar .nr-editorbar__remove {
+    border-color: var(--nr-red-line);
+    color: var(--nr-red) !important;
+}
+
+:is(body#wagtail, #main) .nr-editorbar .nr-editorbar__remove:hover {
+    background: var(--nr-red-soft);
+}
+
+:is(body#wagtail, #main) .nr-editorbar .nr-btn {
+    box-sizing: border-box;
+    height: 36px;
+    min-height: 36px;
+    padding: 0 14px;
+    font-family: inherit;
+}
+
+:is(body#wagtail, #main) .nr-editorbar .nr-btn:disabled {
+    cursor: not-allowed;
+    opacity: .55;
+}
+
+:is(body#wagtail, #main) .nr-editorbar .nr-btn.is-loading {
+    cursor: progress;
+    opacity: .75;
+}
+
+.nr-editorbar__split {
+    display: flex;
+    align-items: center;
+}
+
+:is(body#wagtail, #main) .nr-editorbar__split > .nr-editorbar__primary:not(:only-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* A seta que só existe no celular (is-narrow-only) fica oculta a partir de
+   640px: o botão principal volta a ter os cantos arredondados. */
+@media (min-width: 640px) {
+    :is(body#wagtail, #main) .nr-editorbar__split > .nr-editorbar__primary:has(+ .nr-editorbar__menu.is-narrow-only) {
+        border-top-right-radius: var(--nr-radius);
+        border-bottom-right-radius: var(--nr-radius);
+    }
+}
+
+/* <details> não vira flex no Chrome: a seta tem medida própria. */
+.nr-editorbar__menu {
+    position: relative;
+}
+
+:is(body#wagtail, #main) .nr-editorbar__caret {
+    width: 34px;
+    min-width: 0;
+    padding: 0;
+    border-left-color: rgba(255, 255, 255, .22);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    list-style: none;
+}
+
+.nr-editorbar__caret::-webkit-details-marker {
+    display: none;
+}
+
+.nr-editorbar__menu[open] .nr-editorbar__caret .nr-icon {
+    transform: rotate(180deg);
+}
+
+.nr-editorbar__menu .nr-menu {
+    min-width: 250px;
+}
+
+.nr-editorbar__menu.is-narrow-only,
+.nr-editorbar__menu-save {
+    display: none;
+}
+
+.nr-editorbar__label--short {
+    display: none;
+}
+
+.nr-editorbar__more .nr-more__button {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--nr-radius);
+}
+
+@media (max-width: 767.98px) {
+    :is(body#wagtail, #main) .nr-editorbar {
+        flex-wrap: wrap;
+        row-gap: 8px;
+        min-height: 0;
+        padding: 8px 12px;
+    }
+
+    .nr-editorbar__start {
+        flex-basis: 100%;
+    }
+
+    .nr-editorbar__end {
+        flex: 1 1 100%;
+        justify-content: space-between;
+    }
+
+    .nr-editorbar__parent,
+    .nr-editorbar__sep {
+        display: none;
+    }
+
+    .nr-editorbar__tools {
+        padding-right: 0;
+        border-right: 0;
+    }
+
+    .nr-editorbar__actions {
+        margin-left: auto;
+    }
+}
+
+/* Barras sem o ajuste automático (a do Django admin): no celular, "Salvar"
+   vai para o menu da seta. A do Wagtail decide isso pela largura real
+   (newsroom-editor.js, [data-nr-fit]). */
+@media (max-width: 639.98px) {
+    .nr-editorbar:not([data-nr-fit]) .nr-editorbar__save {
+        display: none !important;
+    }
+
+    .nr-editorbar:not([data-nr-fit]) .nr-editorbar__menu.is-narrow-only {
+        display: block;
+    }
+
+    .nr-editorbar:not([data-nr-fit]) .nr-editorbar__menu-save {
+        display: flex;
+    }
+
+    .nr-editorbar:not([data-nr-fit]) hr.nr-editorbar__menu-save {
+        display: block;
+    }
+
+    .nr-editorbar__label--full {
+        display: none;
+    }
+
+    .nr-editorbar__label--short {
+        display: inline;
+    }
+}
+
+/* Barra que se ajusta à largura (newsroom-editor.js, fitBar): o que não cabe
+   vai para o ⋯ das ferramentas, e "Salvar rascunho" para o menu da seta. */
+.nr-editorbar[data-nr-fit] .is-nr-overflowed {
+    display: none !important;
+}
+
+.nr-editorbar.is-nr-save-in-menu .nr-editorbar__menu.is-narrow-only {
+    display: block;
+}
+
+.nr-editorbar.is-nr-save-in-menu .nr-editorbar__menu-save {
+    display: flex;
+}
+
+.nr-editorbar.is-nr-save-in-menu hr.nr-editorbar__menu-save {
+    display: block;
+}
+
+.nr-editorbar__overflow {
+    position: relative;
+}
+
+.nr-editorbar__overflow[hidden] {
+    display: none;
+}
+
+.nr-editorbar__overflow-button {
+    list-style: none;
+    cursor: pointer;
+}
+
+.nr-editorbar__overflow-button::-webkit-details-marker {
+    display: none;
+}
+
+:is(body#wagtail, #main) .nr-editorbar .nr-editorbar__overflow[open] .nr-editorbar__overflow-button {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+.nr-editorbar__overflow-button .nr-icon {
+    width: 17px;
+    height: 17px;
+}
+
+.nr-editorbar__overflow-menu {
+    top: calc(100% + 6px);
+    min-width: 210px;
+}
+
+/* Ferramentas próprias (Django admin: Guia, Histórico, Ver no site), com o
+   mesmo desenho dos botões de painel lateral do Wagtail. */
+.nr-editorbar__tool {
+    display: inline-flex;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    box-sizing: border-box;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: var(--nr-radius);
+    background: transparent;
+    color: var(--nr-ink-4);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    list-style: none;
+}
+
+.nr-editorbar__tool::-webkit-details-marker {
+    display: none;
+}
+
+.nr-editorbar__tool:hover,
+details[open] > .nr-editorbar__tool {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+.nr-editorbar__tool .nr-icon {
+    width: 17px;
+    height: 17px;
+}
+
+.nr-editorbar__tool-label {
+    display: none;
+}
+
+@media (min-width: 1440px) {
+    .nr-editorbar__tool-label {
+        display: inline;
+    }
+}
+
+/* ── Barra de seleção das listas (Django admin e Wagtail) ───────────────── */
+
+/* Aparece no topo da lista quando há itens marcados, no lugar da barra de
+   busca, e fica presa ao rolar: templates/admin/includes/selection_bar.html
+   (Django admin) e templates/wagtailadmin/bulk_actions/footer.html (Wagtail).
+   Cada ação é um botão; as destrutivas ficam por último, em vermelho. */
+.nr-selectionbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 56px;
+    padding: 8px 12px 8px 8px;
+    border: 1px solid var(--nr-blue-line);
+    border-radius: var(--nr-radius-card);
+    background: var(--nr-blue-soft);
+    color: var(--nr-blue-strong);
+    font-family: var(--nr-font);
+    font-size: 13px;
+    box-sizing: border-box;
+}
+
+.nr-selectionbar__clear {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--nr-radius);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.nr-selectionbar__clear:hover {
+    background: rgba(37, 99, 235, .1);
+}
+
+.nr-selectionbar__clear .nr-icon {
+    width: 17px;
+    height: 17px;
+}
+
+.nr-selectionbar__count {
+    flex: none;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.nr-selectionbar__divider {
+    flex: none;
+    width: 1px;
+    height: 22px;
+    background: #bfdbfe;
+}
+
+.nr-selectionbar__actions {
+    display: flex;
+    flex: 0 1 auto;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    margin: 0;
+    padding: 2px;
+    overflow-x: auto;
+    list-style: none;
+    scrollbar-width: none;
+}
+
+.nr-selectionbar__actions::-webkit-scrollbar {
+    display: none;
+}
+
+.nr-selectionbar .nr-btn {
+    flex: none;
+    min-height: 34px;
+    padding: 6px 12px;
+    font-family: inherit;
+}
+
+.nr-selectionbar .nr-btn.is-danger {
+    border-color: var(--nr-red-line);
+    color: var(--nr-red) !important;
+}
+
+.nr-selectionbar .nr-btn.is-danger:hover {
+    background: var(--nr-red-soft);
+}
+
+.nr-selectionbar__across {
+    flex: none;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.nr-selectionbar__across a,
+.nr-selectionbar__across button {
+    border: 0;
+    background: none;
+    color: var(--nr-blue-strong) !important;
+    font: inherit;
+    font-weight: 500;
+    text-decoration: underline !important;
+    cursor: pointer;
+}
+
+/* No celular, as ações descem para uma segunda linha e rolam de lado. */
+@media (max-width: 639.98px) {
+    .nr-selectionbar {
+        flex-wrap: wrap;
+        row-gap: 4px;
+        gap: 6px;
+        padding: 6px 8px 8px 6px;
+    }
+
+    .nr-selectionbar__divider {
+        display: none;
+    }
+
+    .nr-selectionbar__actions {
+        flex: 1 0 100%;
+        order: 3;
+    }
+}

@@ -1,0 +1,61 @@
+{% extends "admin/object_history.html" %}
+{% load i18n newsroom %}
+{% comment %}
+    Override do projeto (estende o do Unfold): o histórico de modificações de
+    um registro no desenho das listas do painel: cabeçalho com contagem e a
+    tabela num cartão, ou a lista vazia do painel. Paginação do Django mantida.
+{% endcomment %}
+
+{% block content %}
+    <div class="nr-listhead">
+        <div class="nr-listhead__main">
+            <div class="nr-listhead__heading">
+                <h1 class="nr-listhead__title">
+                    Histórico de modificações
+                    {% if action_list %}<span class="nr-listhead__count">{{ action_list.paginator.count }}</span>{% endif %}
+                </h1>
+                <p class="nr-listhead__desc">O que foi alterado em “{{ object }}” por esta tela do painel, e por quem.</p>
+            </div>
+        </div>
+    </div>
+
+    {% if action_list %}
+        <div class="nr-card nr-history">
+            <table class="nr-history__table">
+                <thead>
+                    <tr>
+                        <th scope="col">Quando</th>
+                        <th scope="col">Quem</th>
+                        <th scope="col">O que mudou</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for action in action_list %}
+                        <tr>
+                            <td class="nr-history__when">{{ action.action_time|date:"d/m/Y H:i" }}</td>
+                            <td>{{ action.user.get_full_name|default:action.user.get_username }}</td>
+                            <td>{{ action.get_change_message }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if pagination_required %}
+                <nav class="nr-history__pages" aria-label="Páginas">
+                    {% for i in page_range %}
+                        {% if i == action_list.paginator.ELLIPSIS %}
+                            <span>{{ action_list.paginator.ELLIPSIS }}</span>
+                        {% elif i == action_list.number %}
+                            <span class="is-current" aria-current="page">{{ i }}</span>
+                        {% else %}
+                            <a href="?{{ page_var }}={{ i }}">{{ i }}</a>
+                        {% endif %}
+                    {% endfor %}
+                </nav>
+            {% endif %}
+        </div>
+    {% else %}
+        <p class="nr-empty">
+            {% nr_icon "inbox" %}<span>Nenhuma alteração registrada. Este registro não foi criado nem alterado por esta tela do painel.</span>
+        </p>
+    {% endif %}
+{% endblock %}

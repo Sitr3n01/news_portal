@@ -102,13 +102,13 @@ class JobPostingAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
     ]
     actions = ['open_postings', 'close_postings']
 
-    @admin.action(description='Abrir vagas selecionadas')
+    @admin.action(description='Abrir vagas selecionadas', permissions=['change'])
     def open_postings(self, request, queryset):
         from django.utils import timezone
         updated = queryset.update(status=JobPosting.Status.OPEN, published_at=timezone.now())
         self.message_user(request, f'{updated} vaga(s) aberta(s).')
 
-    @admin.action(description='Fechar vagas selecionadas')
+    @admin.action(description='Fechar vagas selecionadas', permissions=['change'])
     def close_postings(self, request, queryset):
         updated = queryset.update(status=JobPosting.Status.CLOSED)
         self.message_user(request, f'{updated} vaga(s) fechada(s).')
@@ -181,17 +181,17 @@ class ApplicationAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
         url = reverse('hiring:download_resume', args=[obj.pk])
         return format_html('<a href="{}" target="_blank" rel="noopener">Baixar currículo</a>', url)
 
-    @admin.action(description='Marcar como Em Análise')
+    @admin.action(description='Marcar como Em Análise', permissions=['change'])
     def mark_reviewing(self, request, queryset):
         updated = queryset.update(status=Application.Status.REVIEWING)
         self.message_user(request, f'{updated} candidatura(s) marcada(s) como em análise.')
 
-    @admin.action(description='Marcar como Aceito')
+    @admin.action(description='Marcar como Aceito', permissions=['change'])
     def mark_accepted(self, request, queryset):
         updated = queryset.update(status=Application.Status.ACCEPTED)
         self.message_user(request, f'{updated} candidatura(s) aceita(s).')
 
-    @admin.action(description='Marcar como Rejeitado')
+    @admin.action(description='Marcar como Rejeitado', permissions=['change'])
     def mark_rejected(self, request, queryset):
         updated = queryset.update(status=Application.Status.REJECTED)
         self.message_user(request, f'{updated} candidatura(s) rejeitada(s).')

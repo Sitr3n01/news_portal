@@ -405,12 +405,12 @@ class TestimonialAdmin(SuperuserOnlyAdminMixin, AdminUXMixin, ModelAdmin):
     ]
     actions = ['feature_selected', 'unfeature_selected']
 
-    @admin.action(description='Destacar depoimentos selecionados')
+    @admin.action(description='Destacar depoimentos selecionados', permissions=['change'])
     def feature_selected(self, request, queryset):
         updated = queryset.update(is_featured=True)
         self.message_user(request, f'{updated} depoimento(s) destacado(s).')
 
-    @admin.action(description='Remover destaque dos depoimentos')
+    @admin.action(description='Remover destaque dos depoimentos', permissions=['change'])
     def unfeature_selected(self, request, queryset):
         updated = queryset.update(is_featured=False)
         self.message_user(request, f'{updated} destaque removido de depoimento(s).')

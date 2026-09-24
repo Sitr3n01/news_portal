@@ -90,12 +90,12 @@ class SocialAccountAdmin(AdminUXMixin, ModelAdmin):
         }),
     ]
 
-    @admin.action(description='Ativar contas selecionadas')
+    @admin.action(description='Ativar contas selecionadas', permissions=['change'])
     def activate_accounts(self, request, queryset):
         updated = queryset.update(is_active=True)
         self.message_user(request, f'{updated} conta(s) ativada(s).')
 
-    @admin.action(description='Desativar contas selecionadas')
+    @admin.action(description='Desativar contas selecionadas', permissions=['change'])
     def deactivate_accounts(self, request, queryset):
         updated = queryset.update(is_active=False)
         self.message_user(request, f'{updated} conta(s) desativada(s).')
@@ -168,12 +168,12 @@ class SocialPostAdmin(AdminUXMixin, ModelAdmin):
             return Truncator(text).chars(60)
         return f'(sem legenda) · {obj.external_id or obj.pk}'
 
-    @admin.action(description='Exibir posts selecionados no site')
+    @admin.action(description='Exibir posts selecionados no site', permissions=['change'])
     def make_visible(self, request, queryset):
         updated = queryset.update(is_visible=True)
         self.message_user(request, f'{updated} post(s) agora visível(is) na home.')
 
-    @admin.action(description='Ocultar posts selecionados do site')
+    @admin.action(description='Ocultar posts selecionados do site', permissions=['change'])
     def make_hidden(self, request, queryset):
         updated = queryset.update(is_visible=False)
         self.message_user(request, f'{updated} post(s) ocultado(s) da home.')

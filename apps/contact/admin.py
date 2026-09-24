@@ -84,7 +84,7 @@ class ContactInquiryAdmin(AdminUXMixin, ModelAdmin):
             obj.message,
         )
 
-    @admin.action(description='Arquivar mensagens selecionadas')
+    @admin.action(description='Arquivar mensagens selecionadas', permissions=['change'])
     def mark_resolved(self, request, queryset):
         # Update to archived instead of resolved since valid choices are:
         # new, read, replied, archived

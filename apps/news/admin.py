@@ -1,4 +1,4 @@
-from django.contrib import admin, messages
+from django.contrib import admin
 from django.urls import reverse_lazy
 from django.utils.text import format_lazy
 from unfold.admin import ModelAdmin
@@ -61,26 +61,25 @@ class NewsletterSubscriptionAdmin(AdminUXMixin, ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-    @admin.action(description='Desativar inscrições selecionadas (spam/bots)')
+    @admin.action(description='Desativar inscrições selecionadas (spam/bots)', permissions=['change'])
     def deactivate_subscriptions(self, request, queryset):
         updated = queryset.update(is_active=False)
         self.message_user(request, f'{updated} inscrição(ões) desativada(s).')
 
-    @admin.action(description='Reativar inscrições selecionadas')
+    @admin.action(description='Reativar inscrições selecionadas', permissions=['change'])
     def activate_subscriptions(self, request, queryset):
         updated = queryset.update(is_active=True)
         self.message_user(request, f'{updated} inscrição(ões) reativada(s).')
 
-    @admin.action(description='Exportar emails como CSV')
-    def export_emails(self, request, queryset):
-        if not request.user.is_superuser:
-            self.message_user(
-                request,
-                'Apenas superusuários podem exportar emails.',
-                messages.ERROR,
-            )
-            return
+    def has_export_permission(self, request):
+        # Exportar tira do painel a lista inteira de e-mails (dado pessoal), o
+        # que pesa mais que editar uma inscrição: 'view' e 'change' não bastam,
+        # já que o Editor de Notícias tem os dois. Fica só com superusuários, e
+        # por ser permissão da ação o Django nem lista a ação nem aceita o POST.
+        return request.user.is_superuser
 
+    @admin.action(description='Exportar emails como CSV', permissions=['export'])
+    def export_emails(self, request, queryset):
         import csv
 
         from django.http import HttpResponse
@@ -199,12 +198,12 @@ class CommentAdmin(AdminUXMixin, ModelAdmin):
     def short_content(self, obj):
         return obj.content[:80] + '...' if len(obj.content) > 80 else obj.content
 
-    @admin.action(description='Aprovar comentários selecionados')
+    @admin.action(description='Aprovar comentários selecionados', permissions=['change'])
     def approve_comments(self, request, queryset):
         updated = queryset.update(is_active=True)
         self.message_user(request, f'{updated} comentário(s) aprovado(s).')
 
-    @admin.action(description='Ocultar comentários selecionados')
+    @admin.action(description='Ocultar comentários selecionados', permissions=['change'])
     def hide_comments(self, request, queryset):
         updated = queryset.update(is_active=False)
         self.message_user(request, f'{updated} comentário(s) ocultado(s).')

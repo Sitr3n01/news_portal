@@ -782,12 +782,6 @@
     color: var(--nr-ink);
 }
 
-.nr-breadcrumbs__icon {
-    width: 15px;
-    height: 15px;
-    color: var(--nr-icon);
-}
-
 .nr-breadcrumbs__sep {
     width: 14px;
     height: 14px;
@@ -1910,10 +1904,6 @@
 
 @media (max-width: 560px) {
     .nr-topbar__actions .nr-icon-button {
-        display: none;
-    }
-
-    .nr-breadcrumbs__icon {
         display: none;
     }
 

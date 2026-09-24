@@ -3,7 +3,6 @@
     <div class="nr-topbar__start">
         {% newsroom_menu_toggle "nr-topbar__menu" %}
         <nav class="nr-breadcrumbs" aria-label="Trilha de navegação">
-            {% nr_icon "panel" "nr-breadcrumbs__icon" %}
             {% if nav.workspace %}
                 <a href="{{ dashboard_url }}">{{ nav.workspace.label }}</a>
             {% else %}

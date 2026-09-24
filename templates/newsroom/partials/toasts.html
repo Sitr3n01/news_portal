@@ -1,0 +1,23 @@
+{% load newsroom %}
+{% comment %}
+    Notificações do painel: cartões que descem do topo e ficam sobre o
+    conteúdo, sem empurrar a página. Usadas na visão geral
+    (newsroom/base.html) e no Unfold (unfold/helpers/messages.html); o Wagtail
+    monta as dele em wagtailadmin/base.html com as mesmas classes, porque o
+    controlador de mensagens do Wagtail também cria notificações pelo JS.
+    Fechar e sumir sozinhas: static/newsroom/js/newsroom.js.
+{% endcomment %}
+{% if messages %}
+    <ul class="nr-toasts" role="status" aria-live="polite">
+        {% for message in messages %}
+            {% with level=message.level_tag|default:"info" %}
+                <li class="nr-toast nr-toast--{{ level }}">
+                    <span class="nr-toast__icon" aria-hidden="true">
+                        {% if level == "success" %}{% nr_icon "check" %}{% elif level == "error" or level == "warning" %}{% nr_icon "alert" %}{% else %}{% nr_icon "info" %}{% endif %}
+                    </span>
+                    <div class="nr-toast__text">{{ message }}</div>
+                </li>
+            {% endwith %}
+        {% endfor %}
+    </ul>
+{% endif %}

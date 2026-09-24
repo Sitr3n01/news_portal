@@ -2,8 +2,9 @@
  * Newsroom — comportamento da casca do painel unificado.
  *
  * JavaScript simples, sem framework: gaveta da sidebar em telas pequenas,
- * menus suspensos (<details>), a alternância lista/grade e o clique na célula
- * inteira das caixas de seleção das listagens. Carregado na visão
+ * menus suspensos (<details>), a alternância lista/grade, o clique na célula
+ * inteira das caixas de seleção das listagens e as notificações (fechar e
+ * sumir sozinhas; sem ele, elas só ficam no topo). Carregado na visão
  * geral, no Wagtail (insert_global_admin_js) e no Unfold (UNFOLD['SCRIPTS']).
  * Tudo funciona sem ele: a sidebar fica acessível pelo teclado, os <details>
  * abrem nativamente e a alternância de visualização cai para envio de formulário.
@@ -630,4 +631,95 @@
         }
         placeRowMenu(menu);
     }, true);
+
+    // Notificações (newsroom/partials/toasts.html e wagtailadmin/base.html).
+    // Todas ganham um botão de fechar; as de sucesso e informação somem
+    // sozinhas, com pausa enquanto o mouse ou o foco estão nelas. Erros e
+    // avisos ficam até alguém fechar. O Wagtail também cria notificações pelo
+    // JS (controlador w-messages), por isso o observador.
+    var TOAST_DELAY = 6000;
+
+    function dismissToast(toast) {
+        if (toast.classList.contains('is-leaving')) {
+            return;
+        }
+        toast.classList.add('is-leaving');
+        var done = function () {
+            toast.remove();
+        };
+        toast.addEventListener('animationend', done, {once: true});
+        // Sem animação (aba oculta, movimento reduzido), sai do mesmo jeito.
+        window.setTimeout(done, 400);
+    }
+
+    function closeIcon() {
+        var ns = 'http://www.w3.org/2000/svg';
+        var use = document.querySelector('svg.nr-icon use');
+        var sprite = use ? (use.getAttribute('href') || '').split('#')[0] : '';
+        var svg = document.createElementNS(ns, 'svg');
+        svg.setAttribute('class', 'nr-icon');
+        svg.setAttribute('aria-hidden', 'true');
+        svg.setAttribute('focusable', 'false');
+        var shape = document.createElementNS(ns, 'use');
+        shape.setAttribute('href', sprite + '#nr-close');
+        svg.appendChild(shape);
+        return svg;
+    }
+
+    function setupToast(toast) {
+        if (toast.hasAttribute('data-nr-toast-ready')) {
+            return;
+        }
+        toast.setAttribute('data-nr-toast-ready', '');
+        var close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'nr-toast__close';
+        close.setAttribute('aria-label', 'Fechar notificação');
+        close.appendChild(closeIcon());
+        close.addEventListener('click', function () {
+            dismissToast(toast);
+        });
+        toast.appendChild(close);
+
+        if (toast.matches('.nr-toast--error, .nr-toast--warning')) {
+            return;
+        }
+        var timer = null;
+        var start = function () {
+            window.clearTimeout(timer);
+            timer = window.setTimeout(function () {
+                dismissToast(toast);
+            }, TOAST_DELAY);
+        };
+        var stop = function () {
+            window.clearTimeout(timer);
+        };
+        toast.addEventListener('mouseenter', stop);
+        toast.addEventListener('mouseleave', start);
+        toast.addEventListener('focusin', stop);
+        toast.addEventListener('focusout', start);
+        start();
+    }
+
+    function setupToasts() {
+        document.querySelectorAll('.nr-toast').forEach(setupToast);
+        document.querySelectorAll('.nr-toasts').forEach(function (list) {
+            new MutationObserver(function (changes) {
+                changes.forEach(function (change) {
+                    change.addedNodes.forEach(function (node) {
+                        if (node.nodeType === 1 && node.matches('.nr-toast')) {
+                            setupToast(node);
+                        }
+                    });
+                });
+            }).observe(list, {childList: true});
+        });
+    }
+
+    // No Unfold este arquivo carrega no <head>, antes do corpo da página.
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupToasts);
+    } else {
+        setupToasts();
+    }
 })();

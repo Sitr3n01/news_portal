@@ -7,10 +7,12 @@
     geral e do /admin/. O script sidebar.js do Wagtail não faz nada quando o
     elemento #wagtail-sidebar não existe.
 
-    Todo o resto do bloco `furniture` é cópia fiel do Wagtail 7.4 (exceto o
-    texto "Ir para o primeiro erro", fixo em português) — área de
-    mensagens (com os controladores Stimulus), atalhos de teclado e <main>. Ao
-    atualizar o Wagtail, compare com wagtail/admin/templates/wagtailadmin/base.html.
+    Todo o resto do bloco `furniture` é cópia fiel do Wagtail 7.4 — atalhos de
+    teclado e <main> — exceto a área de mensagens: os mesmos controladores
+    Stimulus e modelos, mas com a marcação das notificações do painel
+    (newsroom/partials/toasts.html) e o texto "Ir para o primeiro erro", fixo em
+    português. Ao atualizar o Wagtail, compare com
+    wagtail/admin/templates/wagtailadmin/base.html.
 {% endcomment %}
 
 {% block furniture %}
@@ -19,51 +21,58 @@
     {% keyboard_shortcuts_dialog %}
     <main class="content-wrapper w-overflow-x-hidden" id="main">
         <div class="content">
-            {# Always show messages div so it can be appended to by JS #}
-            <div class="messages" role="status" data-controller="w-messages" data-action="w-messages:add@document->w-messages#add w-messages:clear@document->w-messages#clear" data-w-messages-added-class="new" data-w-messages-show-class="appear" data-w-messages-show-delay-value="100">
-                <ul data-w-messages-target="container">
+            {# Sempre presente: o controlador de mensagens do Wagtail (w-messages) também cria notificações pelo JS. #}
+            {# Notificações do painel (as mesmas classes de newsroom/partials/toasts.html); fechar e sumir sozinhas: newsroom.js. #}
+            <div class="nr-toasts-host" role="status" aria-live="polite" data-controller="w-messages" data-action="w-messages:add@document->w-messages#add w-messages:clear@document->w-messages#clear" data-w-messages-added-class="new" data-w-messages-show-class="appear" data-w-messages-show-delay-value="100">
+                <ul class="nr-toasts" data-w-messages-target="container">
                     {% if messages %}
                         {% for message in messages %}
                             {% message_level_tag message as level_tag %}
-                            <li class="{% message_tags message %}">
-                                {% if level_tag == "error" %}
-                                    {# There is no error icon, use warning icon instead #}
-                                    {% icon name="warning" classname="messages-icon" %}
-                                {% elif message.extra_tags == "lock" %}
-                                    {% icon name="lock" classname="messages-icon" %}
-                                {% elif message.extra_tags == "unlock" %}
-                                    {% icon name="lock-open" classname="messages-icon" %}
-                                {% else %}
-                                    {% icon name=level_tag classname="messages-icon" %}
-                                {% endif %}
-                                {{ message }}
-                                {% if level_tag == "error" %}
-                                    {# Show a button to focus the first field/response error if available. #}
-                                    <button
-                                        type="button"
-                                        class="button button-small button-secondary w-hidden w-ml-2.5"
-                                        data-controller="w-count w-focus"
-                                        data-action="click->w-focus#focus wagtail:panel-init@document->w-count#count"
-                                        data-w-count-active-class="!w-inline-block"
-                                        data-w-count-find-value=":not([hidden]):is(.error-message,.help-critical)"
-                                        data-w-focus-target-value=":not([hidden]):is(.error-message,.help-critical)"
-                                    >
-                                        {# Texto fixo: o catálogo pt-BR do Wagtail 7.4.2 não traduz 'Go to the first error'. #}
-                                        Ir para o primeiro erro
-                                    </button>
-                                {% endif %}
+                            <li class="nr-toast nr-toast--{{ level_tag }} {% message_tags message %}">
+                                <span class="nr-toast__icon" aria-hidden="true">
+                                    {% if message.extra_tags == "lock" %}
+                                        {% nr_icon "lock" %}
+                                    {% elif message.extra_tags == "unlock" %}
+                                        {% nr_icon "unlock" %}
+                                    {% elif level_tag == "success" %}
+                                        {% nr_icon "check" %}
+                                    {% elif level_tag == "error" or level_tag == "warning" %}
+                                        {% nr_icon "alert" %}
+                                    {% else %}
+                                        {% nr_icon "info" %}
+                                    {% endif %}
+                                </span>
+                                <div class="nr-toast__text">
+                                    {{ message }}
+                                    {% if level_tag == "error" %}
+                                        {# Show a button to focus the first field/response error if available. #}
+                                        <button
+                                            type="button"
+                                            class="button button-small button-secondary w-hidden w-ml-2.5"
+                                            data-controller="w-count w-focus"
+                                            data-action="click->w-focus#focus wagtail:panel-init@document->w-count#count"
+                                            data-w-count-active-class="!w-inline-block"
+                                            data-w-count-find-value=":not([hidden]):is(.error-message,.help-critical)"
+                                            data-w-focus-target-value=":not([hidden]):is(.error-message,.help-critical)"
+                                        >
+                                            {# Texto fixo: o catálogo pt-BR do Wagtail 7.4.2 não traduz 'Go to the first error'. #}
+                                            Ir para o primeiro erro
+                                        </button>
+                                    {% endif %}
+                                </div>
                             </li>
                         {% endfor %}
                     {% endif %}
                 </ul>
-                <template data-w-messages-target="template" data-type="success">
-                    <li class="success">{% icon name="success" classname="messages-icon" %}<span></span></li>
+                {# O texto entra em data-selector (e não no último filho, que vira o botão de fechar). #}
+                <template data-w-messages-target="template" data-type="success" data-selector=".nr-toast__text">
+                    <li class="nr-toast nr-toast--success success"><span class="nr-toast__icon" aria-hidden="true">{% nr_icon "check" %}</span><div class="nr-toast__text"></div></li>
                 </template>
-                <template data-w-messages-target="template" data-type="error">
-                    <li class="error">{% icon name="warning" classname="messages-icon" %}<span></span></li>
+                <template data-w-messages-target="template" data-type="error" data-selector=".nr-toast__text">
+                    <li class="nr-toast nr-toast--error error"><span class="nr-toast__icon" aria-hidden="true">{% nr_icon "alert" %}</span><div class="nr-toast__text"></div></li>
                 </template>
-                <template data-w-messages-target="template" data-type="warning">
-                    <li class="warning">{% icon name="warning" classname="messages-icon" %}<span></span></li>
+                <template data-w-messages-target="template" data-type="warning" data-selector=".nr-toast__text">
+                    <li class="nr-toast nr-toast--warning warning"><span class="nr-toast__icon" aria-hidden="true">{% nr_icon "alert" %}</span><div class="nr-toast__text"></div></li>
                 </template>
             </div>
 

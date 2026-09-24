@@ -17,13 +17,7 @@
         <div class="nr-app">
             {% newsroom_topbar page_title=page_title %}
             <main id="nr-main" class="nr-content" tabindex="-1">
-                {% if messages %}
-                    <ul class="nr-messages" role="status">
-                        {% for message in messages %}
-                            <li class="nr-message nr-message--{{ message.tags|default:'info' }}">{{ message }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
+                {% include "newsroom/partials/toasts.html" %}
                 {% block content %}{% endblock %}
             </main>
         </div>

@@ -889,33 +889,173 @@
     background: rgba(23, 23, 23, .38);
 }
 
-/* ── Mensagens ──────────────────────────────────────────────────────────── */
+/* ── Notificações ───────────────────────────────────────────────────────
+   Cartões que descem do topo e ficam sobre o conteúdo, centralizados na área
+   à direita da sidebar, sem empurrar a página. As mesmas classes nas três
+   cascas: newsroom/partials/toasts.html (visão geral e Unfold) e
+   wagtailadmin/base.html. Fechar e sumir sozinhas: newsroom.js. */
 
-.nr-messages {
-    margin: 0 0 20px;
-    padding: 0;
+.nr-toasts {
+    position: fixed;
+    top: 14px;
+    right: 0;
+    left: 0;
+    z-index: 450;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0 16px;
     list-style: none;
+    pointer-events: none;
 }
 
-.nr-message {
-    margin-bottom: 8px;
-    padding: 10px 14px;
-    border: 1px solid var(--nr-blue-line);
-    border-radius: var(--nr-radius);
+@media (min-width: 1024px) {
+    body:has([data-nr-sidebar]) .nr-toasts {
+        left: var(--nr-sidebar-w);
+    }
+}
+
+.nr-toast {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 520px;
+    margin: 0;
+    padding: 10px 8px 10px 12px;
+    border: 1px solid var(--nr-line-2);
+    border-radius: 12px;
+    background: var(--nr-white);
+    box-shadow: 0 12px 32px rgba(23, 23, 23, .14), 0 2px 6px rgba(23, 23, 23, .06);
+    color: var(--nr-ink);
+    font-family: var(--nr-font);
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -.01em;
+    pointer-events: auto;
+    animation: nr-toast-in .38s cubic-bezier(.2, .9, .25, 1) both;
+}
+
+.nr-toast.is-leaving {
+    animation: nr-toast-out .22s ease-in both;
+}
+
+@keyframes nr-toast-in {
+    from { opacity: 0; transform: translateY(-110%); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes nr-toast-out {
+    to { opacity: 0; transform: translateY(-60%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nr-toast,
+    .nr-toast.is-leaving {
+        animation-duration: .01s;
+    }
+}
+
+.nr-toast__icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
     background: var(--nr-blue-soft);
-    color: var(--nr-ink-3);
-    font-size: 13px;
+    color: var(--nr-blue);
 }
 
-.nr-message--success {
-    border-color: var(--nr-green-line);
+.nr-toast__icon .nr-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.nr-toast--success .nr-toast__icon {
     background: var(--nr-green-soft);
+    color: var(--nr-green);
 }
 
-.nr-message--warning,
-.nr-message--error {
-    border-color: var(--nr-orange-line);
+.nr-toast--warning .nr-toast__icon {
     background: var(--nr-orange-soft);
+    color: var(--nr-orange);
+}
+
+.nr-toast--error .nr-toast__icon {
+    background: var(--nr-red-soft);
+    color: var(--nr-red);
+}
+
+.nr-toast__text {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* Ações que o Wagtail põe na mensagem ("Editar", "Desbloquear", "Ir para o
+   primeiro erro") e links do Django: botão discreto, no desenho do painel. */
+:is(body#wagtail, #main, .nr-shell, .nr-toasts) .nr-toast__text :is(.button, button) {
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    min-height: 0;
+    margin: 0 0 0 8px;
+    padding: 0 10px;
+    border: 1px solid var(--nr-line-2);
+    border-radius: var(--nr-radius);
+    background: var(--nr-white);
+    color: var(--nr-ink) !important;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+:is(body#wagtail, #main, .nr-shell, .nr-toasts) .nr-toast__text :is(.button, button):hover {
+    background: var(--nr-surface-subtle);
+}
+
+.nr-toast__text a:not(.button) {
+    color: var(--nr-blue-strong);
+    font-weight: 600;
+}
+
+.nr-toast__text form {
+    display: inline;
+}
+
+:is(body#wagtail, #main, .nr-shell, .nr-toasts) .nr-toast__close {
+    display: grid;
+    flex: none;
+    place-items: center;
+    align-self: flex-start;
+    width: 28px;
+    height: 28px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--nr-radius);
+    background: transparent;
+    color: var(--nr-muted);
+    cursor: pointer;
+}
+
+:is(body#wagtail, #main, .nr-shell, .nr-toasts) .nr-toast__close:hover {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+.nr-toast__close .nr-icon {
+    width: 15px;
+    height: 15px;
 }
 
 /* ── Cabeçalho da página ────────────────────────────────────────────────── */

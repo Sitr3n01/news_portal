@@ -72,17 +72,17 @@ class Tag(models.Model):
 class Article(PreviewableMixin, WorkflowMixin, DraftStateMixin, LockableMixin, RevisionMixin, ClusterableModel, TimeStampedModel, SEOModel):
     class Status(models.TextChoices):
         DRAFT = 'draft', 'Rascunho'
-        PUBLISHED = 'published', 'Publicado'
-        ARCHIVED = 'archived', 'Arquivado'
+        PUBLISHED = 'published', 'Publicada'
+        ARCHIVED = 'archived', 'Arquivada'
 
     title = models.CharField('Título', max_length=200)
     slug = models.SlugField('URL amigável', max_length=200, help_text='Gerado automaticamente a partir do título.')
-    excerpt = models.TextField('Resumo', blank=True, help_text='Resumo curto do artigo. Aparece nas listagens e compartilhamentos.')
+    excerpt = models.TextField('Resumo', blank=True, help_text='Resumo curto da notícia. Aparece nas listagens e compartilhamentos.')
     content = models.TextField(
         'Conteúdo',
         blank=True,
         editable=False,
-        help_text='Texto consolidado gerado automaticamente a partir do corpo (body) do artigo.',
+        help_text='Texto consolidado gerado automaticamente a partir do corpo (body) da notícia.',
     )
     body = StreamField(
         ArticleStreamBlock(),
@@ -103,7 +103,7 @@ class Article(PreviewableMixin, WorkflowMixin, DraftStateMixin, LockableMixin, R
         format='JPEG',
         options={'quality': ARTICLE_IMAGE_JPEG_QUALITY, 'optimize': True, 'progressive': True},
         validators=[validate_uploaded_image],
-        help_text='Imagem principal que aparece no topo do artigo. É convertida e otimizada automaticamente.',
+        help_text='Imagem principal que aparece no topo da notícia. É convertida e otimizada automaticamente.',
     )
     featured_image_caption = models.CharField('Legenda da imagem', max_length=255, blank=True, help_text='Texto descritivo exibido abaixo da imagem de capa.')
     featured_image_wagtail = models.ForeignKey(
@@ -113,12 +113,12 @@ class Article(PreviewableMixin, WorkflowMixin, DraftStateMixin, LockableMixin, R
         on_delete=models.SET_NULL,
         related_name='+',
         verbose_name='Imagem de capa (Wagtail)',
-        help_text='Nova imagem de capa pelo sistema Wagtail. Use este campo em vez do campo acima para novos artigos — o antigo continua funcionando, mas não aparece mais no painel Wagtail.',
+        help_text='Nova imagem de capa pelo sistema Wagtail. Use este campo em vez do campo acima para novas notícias — o antigo continua funcionando, mas não aparece mais no painel Wagtail.',
     )
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, null=True,
         related_name='articles', verbose_name='Categoria',
-        help_text='Escolha a categoria principal do artigo.',
+        help_text='Escolha a categoria principal da notícia.',
     )
     tags = ParentalManyToManyField(
         Tag, blank=True, related_name='articles', verbose_name='Tags',
@@ -130,16 +130,16 @@ class Article(PreviewableMixin, WorkflowMixin, DraftStateMixin, LockableMixin, R
     )
     site = models.ForeignKey(
         Site, on_delete=models.CASCADE, related_name='articles',
-        verbose_name='Site', help_text='Em qual portal este artigo será publicado.',
+        verbose_name='Site', help_text='Em qual portal esta notícia será publicada.',
     )
     status = models.CharField(
         'Status', max_length=20, choices=Status.choices, default=Status.DRAFT,
-        help_text='Rascunho: não publicado. Publicado: visível no site. Arquivado: removido do site.',
+        help_text='Rascunho: não publicada. Publicada: visível no site. Arquivada: removida do site.',
     )
-    published_at = models.DateTimeField('Publicado em', null=True, blank=True, help_text='Data e hora da publicação. Preenchido automaticamente ao publicar.')
-    is_featured = models.BooleanField('Destaque', default=False, help_text='Artigos destacados aparecem em posição de destaque na página principal.')
+    published_at = models.DateTimeField('Publicada em', null=True, blank=True, help_text='Data e hora da publicação. Preenchido automaticamente ao publicar.')
+    is_featured = models.BooleanField('Destaque', default=False, help_text='Notícias destacadas aparecem em posição de destaque na página principal.')
     view_count = models.PositiveIntegerField('Visualizações', default=0)
-    meta_title = models.CharField('Título SEO', max_length=70, blank=True, help_text='Título para buscadores (Google). Se vazio, usa o título do artigo.')
+    meta_title = models.CharField('Título SEO', max_length=70, blank=True, help_text='Título para buscadores (Google). Se vazio, usa o título da notícia.')
     meta_description = models.CharField('Descrição SEO', max_length=160, blank=True, help_text='Descrição para buscadores (Google). Se vazio, usa o resumo.')
 
     newsletter_sent_at = models.DateTimeField(
@@ -152,8 +152,8 @@ class Article(PreviewableMixin, WorkflowMixin, DraftStateMixin, LockableMixin, R
 
     class Meta:
         ordering = ['-published_at']
-        verbose_name = 'Artigo'
-        verbose_name_plural = 'Artigos'
+        verbose_name = 'Notícia'
+        verbose_name_plural = 'Notícias'
         constraints = [
             models.UniqueConstraint(fields=['site', 'slug'], name='unique_article_slug_per_site'),
         ]
@@ -338,7 +338,7 @@ class NewsletterDelivery(TimeStampedModel):
 
     article = models.ForeignKey(
         Article, on_delete=models.CASCADE,
-        related_name='newsletter_deliveries', verbose_name='Artigo',
+        related_name='newsletter_deliveries', verbose_name='Notícia',
     )
     subscription = models.ForeignKey(
         NewsletterSubscription, on_delete=models.CASCADE,
@@ -369,7 +369,7 @@ class NewsletterDelivery(TimeStampedModel):
 class ArticleLike(TimeStampedModel):
     article = models.ForeignKey(
         Article, on_delete=models.CASCADE,
-        related_name='likes', verbose_name='Artigo',
+        related_name='likes', verbose_name='Notícia',
     )
     ip_address = models.GenericIPAddressField('Endereço IP', null=True, blank=True)
     session_key = models.CharField('Chave de sessão', max_length=40, null=True, blank=True)
@@ -390,7 +390,7 @@ class ArticleLike(TimeStampedModel):
 class Comment(TimeStampedModel):
     article = models.ForeignKey(
         Article, on_delete=models.CASCADE,
-        related_name='comments', verbose_name='Artigo',
+        related_name='comments', verbose_name='Notícia',
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
@@ -414,7 +414,7 @@ class Comment(TimeStampedModel):
 class ArticleBookmark(TimeStampedModel):
     article = models.ForeignKey(
         Article, on_delete=models.CASCADE,
-        related_name='bookmarks', verbose_name='Artigo',
+        related_name='bookmarks', verbose_name='Notícia',
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
@@ -438,9 +438,9 @@ class NewsHomeConfig(TimeStampedModel, SEOModel):
         related_name='+', verbose_name='Destaque manual do hero',
         help_text='Substitui o destaque automático. Deixe vazio para manter o comportamento atual.')
     secondary_highlights = StreamField(
-        [('artigo', SnippetChooserBlock(Article, label='Artigo'))],
+        [('artigo', SnippetChooserBlock(Article, label='Notícia'))],
         blank=True, use_json_field=True, max_num=4, verbose_name='Destaques secundários',
-        help_text='2 a 4 artigos publicados, na ordem desejada. Vazio: a seção não aparece.')
+        help_text='2 a 4 notícias publicadas, na ordem desejada. Vazio: a seção não aparece.')
 
     objects = models.Manager()
     on_site = CurrentSiteManager()

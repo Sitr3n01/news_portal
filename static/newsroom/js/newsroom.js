@@ -289,10 +289,12 @@
 
     // Wagtail: a barra vem no fim da página (era o rodapé fixo). Ela passa para
     // dentro do cabeçalho fixo da listagem e cobre título e busca enquanto há
-    // seleção. O bulk-actions.js a acha pelo atributo, em qualquer lugar.
+    // seleção. Nas listas com o cabeçalho do painel (newsroom/wagtail/list_header.html)
+    // o encaixe é a faixa da busca. O bulk-actions.js a acha pelo atributo, em
+    // qualquer lugar.
     function dockWagtailBar() {
         var bar = document.querySelector('.nr-selectionbar--wagtail');
-        var header = bar && document.querySelector('main .w-slim-header');
+        var header = bar && (document.querySelector('main [data-nr-selection-dock]') || document.querySelector('main .w-slim-header'));
         if (bar && header && bar.parentElement !== header) {
             header.appendChild(bar);
             bar.classList.add('is-docked');

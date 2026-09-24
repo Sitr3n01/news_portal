@@ -23,6 +23,7 @@ geral unificada (/painel/).
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
 from django.urls import path, reverse
+from django.utils import timezone
 from django.utils.functional import cached_property
 from wagtail import hooks
 from wagtail.admin import messages
@@ -47,9 +48,12 @@ from apps.news.wagtail_article import (
     ArticleAdminForm,
     ArticleCopyView,
     ArticleCreateView,
+    ArticleDeleteView,
+    ArticleEditView,
     ArticleIndexView,
     ArticlePreviewOnCreateView,
     RestrictedPublishingPanel,
+    editorial_badge,
 )
 from apps.news.wagtail_moderation import (
     BULK_ACTIONS,
@@ -70,10 +74,19 @@ class ArticleSnippetViewSet(SnippetViewSet):
     menu_order = 100
     add_to_admin_menu = True
     list_display = (
-        'title', 'category', 'status', 'published_at',
+        'title', 'category',
+        # Estado editorial (publicada, rascunho, em revisão, agendada, arquivada)
+        # como selo, o mesmo da visão geral; ordena pelo campo `status`.
+        Column('status', label='Estado', sort_key='status', accessor=editorial_badge),
+        Column(
+            'published_at', label='Publicada em', sort_key='published_at', classname='nr-cell-nowrap',
+            accessor=lambda article: (
+                timezone.localtime(article.published_at).strftime('%d/%m/%Y %H:%M') if article.published_at else '—'
+            ),
+        ),
         # Só marca o que está em destaque; antes a coluna exibia "True/False" cru.
         Column(
-            'is_featured', label='Destaque', sort_key='is_featured',
+            'is_featured', label='Destaque', sort_key='is_featured', classname='nr-cell-nowrap',
             accessor=lambda article: 'Em destaque' if article.is_featured else '',
         ),
     )
@@ -83,7 +96,11 @@ class ArticleSnippetViewSet(SnippetViewSet):
     # Regra editorial por notícia (apps/news/permissions.py): quem não publica
     # altera as próprias notícias e as dos colegas só enquanto forem rascunho.
     index_view_class = ArticleIndexView
+    index_template_name = 'news/wagtail/article_index.html'
+    index_results_template_name = 'news/wagtail/article_index_results.html'
     add_view_class = ArticleCreateView
+    edit_view_class = ArticleEditView
+    delete_view_class = ArticleDeleteView
     copy_view_class = ArticleCopyView
     preview_on_add_view_class = ArticlePreviewOnCreateView
     # Ficha somente leitura: é para onde a listagem leva quem não pode editar.

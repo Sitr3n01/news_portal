@@ -118,7 +118,7 @@ class NewsletterDeliveryAdmin(AdminUXMixin, ModelAdmin):
     ux_form_description = 'Esta tela é de auditoria. Use as informações para entender falhas e reprocessar pelo fluxo adequado.'
     ux_form_icon = 'mark_email_read'
     ux_form_steps = [
-        'Confira artigo, destinatário e tentativas.',
+        'Confira notícia, destinatário e tentativas.',
         'Leia o erro apenas quando houver falha.',
         'Ajustes de envio devem ser feitos nas configurações do site ou no fluxo de newsletter.',
     ]
@@ -173,7 +173,7 @@ class CommentAdmin(AdminUXMixin, ModelAdmin):
     ux_form_description = 'O conteúdo do comentário não é editado no admin. Use a visibilidade para aprovar ou ocultar.'
     ux_form_icon = 'forum'
     ux_form_steps = [
-        'Leia o comentário no contexto do artigo.',
+        'Leia o comentário no contexto da notícia.',
         'Mantenha visível quando estiver adequado à conversa.',
         'Oculte quando precisar remover do portal sem perder registro.',
     ]

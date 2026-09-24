@@ -290,7 +290,7 @@ body#wagtail .nr-selectionbar--wagtail.is-docked {
 
 /* Enquanto a barra aparece, o título, a busca e os filtros do cabeçalho
    somem sem mudar a altura dele (no celular são duas linhas). */
-body#wagtail .w-slim-header:has(> .nr-selectionbar--wagtail.is-docked:not(.hidden)) > :not(.nr-selectionbar) {
+body#wagtail :is(.w-slim-header, [data-nr-selection-dock]):has(> .nr-selectionbar--wagtail.is-docked:not(.hidden)) > :not(.nr-selectionbar) {
     visibility: hidden;
 }
 
@@ -577,6 +577,135 @@ body#wagtail .nr-editorbar__start {
     }
 }
 
+/* ── Listagens com o cabeçalho do painel ────────────────────────────────
+   templates/newsroom/wagtail/list_header.html (hoje, a de notícias): o mesmo
+   desenho das listas do Django admin. Cabeçalho, abas e, num cartão, a faixa
+   da busca e dos filtros em cima da tabela (#listing-results). */
+
+body#wagtail .nr-wlist {
+    padding: 22px 24px 0;
+    font-family: var(--nr-font);
+}
+
+body#wagtail .nr-wlist__head {
+    margin-bottom: 16px;
+}
+
+body#wagtail .nr-wlist__toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    min-height: 56px;
+    padding: 9px 12px;
+    border: 1px solid var(--nr-line);
+    border-bottom: 0;
+    border-radius: var(--nr-radius-card) var(--nr-radius-card) 0 0;
+    background: var(--nr-white);
+}
+
+body#wagtail .nr-wlist__search {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+body#wagtail .nr-wlist__search .w-field__wrapper {
+    flex: 0 1 340px;
+    min-width: 0;
+    margin: 0;
+}
+
+body#wagtail .nr-wlist__search input[type="search"],
+body#wagtail .nr-wlist__search input[type="text"] {
+    height: 38px;
+    min-height: 0;
+    padding-block: 0;
+    font-size: 13px;
+}
+
+body#wagtail .nr-wlist__search .w-drilldown {
+    margin-left: auto;
+}
+
+/* Botão da gaveta de filtros como o "Filtros" das listas do Django admin. */
+body#wagtail .nr-wlist__search .w-drilldown .w-dropdown__toggle--icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: auto;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--nr-line-2);
+    border-radius: var(--nr-radius);
+    background: var(--nr-white);
+    color: var(--nr-ink-4);
+    font-family: var(--nr-font);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+body#wagtail .nr-wlist__search .w-drilldown .w-dropdown__toggle--icon::before {
+    content: "Filtros";
+}
+
+body#wagtail .nr-wlist__search .w-drilldown .w-dropdown__toggle--icon:hover,
+body#wagtail .nr-wlist__search .w-drilldown .w-dropdown__toggle--icon[aria-expanded="true"] {
+    background: var(--nr-surface-subtle);
+    color: var(--nr-ink);
+}
+
+body#wagtail .nr-wlist__search .w-drilldown .w-dropdown__toggle-icon {
+    width: 15px;
+    height: 15px;
+    color: currentColor;
+}
+
+body#wagtail .nr-wlist__search .w-drilldown__count {
+    position: static;
+    min-width: 18px;
+    height: 18px;
+    margin: 0;
+    padding: 0 5px;
+    border-radius: 100px;
+    background: var(--nr-ink);
+    color: var(--nr-white);
+    font-size: 11px;
+    line-height: 18px;
+}
+
+body#wagtail .nr-cell-nowrap {
+    white-space: nowrap;
+}
+
+body#wagtail .nr-wlist ~ #listing-results {
+    margin: 0 24px 24px;
+    border: 1px solid var(--nr-line);
+    border-radius: 0 0 var(--nr-radius-card) var(--nr-radius-card);
+    /* Tabela mais larga que a tela rola dentro do cartão, não some. */
+    overflow-x: auto;
+}
+
+/* Espaço para o botão de menu fixo no canto (.nr-wagtail-menu-toggle). */
+@media (max-width: 1023.98px) {
+    body#wagtail .nr-wlist__head .nr-listhead__heading {
+        padding-left: 44px;
+    }
+}
+
+@media (max-width: 639.98px) {
+    body#wagtail .nr-wlist {
+        padding: 12px 12px 0;
+    }
+
+    body#wagtail .nr-wlist ~ #listing-results {
+        margin: 0 12px 16px;
+    }
+}
+
 /* ── Estrutura (minimapa do Wagtail) ────────────────────────────────────
    Abre pela ferramenta "Estrutura" da barra (header.html), que só clica no
    botão nativo. Fechado, não deixa nada sobre o formulário: nem a faixa de
@@ -829,4 +958,29 @@ html.nr-editorbar-ready body#wagtail form[data-edit-form] > footer .actions--pri
     body#wagtail #listing-results table {
         min-width: 680px;
     }
+}
+
+/* Lista vazia (news/wagtail/article_index_results.html). O Wagtail envolve a
+   mensagem em .nice-padding com margem grande; aqui ela fica no cartão. */
+body#wagtail .nr-wlist ~ #listing-results > .nice-padding:has(> .nr-wlist__empty) {
+    margin: 0;
+    padding: 0;
+}
+
+body#wagtail .nr-wlist__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0;
+    padding: 40px 16px;
+    border-top: 1px solid var(--nr-line);
+    color: var(--nr-muted);
+    font-family: var(--nr-font);
+    font-size: 13px;
+}
+
+body#wagtail .nr-wlist__empty .nr-icon {
+    width: 18px;
+    height: 18px;
 }

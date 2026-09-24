@@ -73,86 +73,6 @@
 
 /* ── Listas: cabeçalho, abas, barra de seleção e menu ⋯ ──────────────────
    templates/admin/change_list.html e templates/admin/includes/. */
-.nr-listhead {
-    margin: 0 0 18px;
-    font-family: var(--nr-font);
-}
-
-.nr-listhead__main {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 10px;
-}
-
-.nr-listhead__heading {
-    min-width: 0;
-}
-
-#main .nr-listhead__title {
-    margin: 0;
-    color: var(--nr-ink);
-    font-size: 21px;
-    font-weight: 600;
-    letter-spacing: -.02em;
-    line-height: 1.25;
-}
-
-.nr-listhead__count {
-    margin-left: 6px;
-    color: var(--nr-muted);
-    font-size: 15px;
-    font-weight: 450;
-}
-
-#main .nr-listhead__desc {
-    max-width: 72ch;
-    margin: 4px 0 0;
-    color: var(--nr-muted);
-    font-size: 13px;
-    line-height: 1.45;
-}
-
-.nr-listhead__actions {
-    display: flex;
-    flex: none;
-    align-items: center;
-    gap: 8px;
-}
-
-#main .nr-listhead .nr-btn {
-    min-height: 38px;
-    font-family: inherit;
-}
-
-.nr-listhead__tabs {
-    margin-top: 6px;
-}
-
-.nr-tab__count {
-    margin-left: 6px;
-    color: var(--nr-icon);
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.nr-tab.is-active .nr-tab__count {
-    color: var(--nr-ink-4);
-}
-
-.nr-listhead__empty {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0 0 16px;
-    padding: 14px 16px;
-    border: 1px dashed var(--nr-line-strong);
-    border-radius: var(--nr-radius-card);
-    color: var(--nr-muted);
-    font-size: 13px;
-}
-
 /* Barra de seleção: escondida sem seleção; com seleção, ocupa o lugar da
    barra de busca e fica presa logo abaixo da topbar ao rolar. */
 #changelist-form .nr-selectionbar--admin {
@@ -322,24 +242,6 @@
     #result_list tr.data-row > th::before,
     #result_list tr.data-row > td:has(> .nr-rowmenu)::before {
         content: none;
-    }
-}
-
-@media (max-width: 639.98px) {
-    .nr-listhead__guide span,
-    .nr-listhead__primary span {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip: rect(0 0 0 0);
-        white-space: nowrap;
-    }
-
-    #main .nr-listhead .nr-listhead__guide,
-    #main .nr-listhead .nr-listhead__primary {
-        width: 40px;
-        padding: 0;
     }
 }
 

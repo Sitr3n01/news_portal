@@ -1,13 +1,12 @@
 {% load newsroom %}
-{# Menu "Mais opções" da barra do editor. Reenviado pelo salvamento automático: na criação, ele só existe depois do primeiro salvamento. #}
+{# Menu "Mais opções" da barra do editor, com o que não virou ícone nem botão (editor.py, _secondary). Reenviado pelo salvamento automático. #}
 <div class="nr-editorbar__more-slot" id="nr-editorbar-more">
     {% if bar.more %}
         <details class="nr-more nr-editorbar__more" data-nr-dropdown>
             <summary class="nr-more__button" aria-label="Mais opções">{% nr_icon "ellipsis" %}</summary>
             <div class="nr-menu nr-menu--right">
                 {% for item in bar.more %}
-                    {% if item.divider_before %}<hr class="nr-menu__divider">{% endif %}
-                    <a class="nr-menu__item{% if item.danger %} is-danger{% endif %}" href="{{ item.url }}"{{ item.attrs }}>
+                    <a class="nr-menu__item" href="{{ item.url }}"{{ item.attrs }}>
                         {% nr_icon item.icon %}<span>{{ item.label }}</span>
                     </a>
                 {% endfor %}

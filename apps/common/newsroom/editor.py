@@ -21,8 +21,12 @@ from apps.news.models import Article
 BACK_LABELS = {Article: 'Notícias'}
 NEW_TITLES = {Article: 'Nova notícia'}
 
-# Ícones do Wagtail → sprite do painel, no menu "Mais opções".
-MORE_ICONS = {'copy': 'copy', 'bin': 'trash', 'info-circle': 'info', 'history': 'history', 'lock': 'lock'}
+# Ícones do Wagtail → sprite do painel. "Inspecionar" usa a lupa: o "i" já é
+# o do painel "Status", nas ferramentas.
+MORE_ICONS = {'copy': 'copy', 'bin': 'trash', 'info-circle': 'search', 'history': 'history', 'lock': 'lock'}
+# Copiar e inspecionar viram ícones nas ferramentas; remover, botão ao lado de
+# "Salvar rascunho". O que sobrar fica no menu "Mais opções".
+QUICK_ICONS = ('copy', 'info-circle')
 DANGER_ICONS = {'bin'}
 
 GENERIC_LABELS = {'published': 'Publicado', 'draft': 'Rascunho'}
@@ -122,31 +126,40 @@ def _status(context, model):
     return _generic_status(model, obj)
 
 
-def _more(context):
+def _secondary(context):
+    """Ações secundárias do Wagtail (header_more_buttons), repartidas entre os
+    ícones das ferramentas, o botão de remover e o menu "Mais opções"."""
     view = context.get('view')
     buttons = getattr(view, 'header_more_buttons', None) or []
-    items = []
+    quick, danger, more = [], [], []
     for button in sorted(buttons):
         if not getattr(button, 'url', None):
             continue
         icon = getattr(button, 'icon_name', '') or ''
-        items.append({
+        item = {
             'label': button.label,
             'url': button.url,
             'icon': MORE_ICONS.get(icon, 'arrow'),
             'attrs': getattr(button, 'base_attrs_string', ''),
             'danger': icon in DANGER_ICONS,
-        })
-    # Ação destrutiva sempre por último, separada das demais.
-    items.sort(key=lambda item: item['danger'])
-    for index, item in enumerate(items):
-        item['divider_before'] = item['danger'] and index > 0 and not items[index - 1]['danger']
-    return items
+        }
+        if icon in QUICK_ICONS:
+            quick.append((QUICK_ICONS.index(icon), item))
+        elif item['danger']:
+            danger.append(item)
+        else:
+            more.append(item)
+    return {
+        'quick': [item for _, item in sorted(quick, key=lambda pair: pair[0])],
+        'danger': danger,
+        'more': more,
+    }
 
 
 def editor_bar(context):
     model = _model(context)
     is_create = _is_create(context)
+    secondary = _secondary(context)
     return {
         # Só os formulários de snippet usam a barra (templates/wagtailsnippets/snippets/).
         'enabled': isinstance(context.get('view'), (snippet_views.CreateView, snippet_views.EditView)),
@@ -154,6 +167,8 @@ def editor_bar(context):
         'title': _title(context, model, is_create),
         'status': _status(context, model),
         'locked': bool(context.get('locked_for_user')),
-        'more': _more(context),
+        'quick': secondary['quick'],
+        'danger': secondary['danger'],
+        'more': secondary['more'],
         'history_url': context.get('history_url'),
     }

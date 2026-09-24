@@ -3,8 +3,9 @@
     Barra única do editor: substitui o cabeçalho do Wagtail (slim_header) nos
     formulários de criação e edição de snippets. Reúne num só lugar o título,
     o status, o salvamento automático, quem mais está editando, os painéis
-    laterais (status, pré-visualização, verificações), o histórico, as ações de
-    publicação e o menu "Mais opções".
+    laterais (status, pré-visualização, verificações), o histórico, copiar e
+    inspecionar como ícones, o botão de remover, as ações de publicação e o
+    menu "Mais opções" (só com o que sobrar).
 
     Continua sendo o Wagtail que faz tudo:
     - os botões de painel são os componentes nativos (`panel.toggle`);
@@ -16,7 +17,8 @@
       botões dentro do formulário, continua valendo.
 
     O salvamento automático reenvia o título (#nr-editorbar-title), o status
-    (#nr-editorbar-state) e o menu (#nr-editorbar-more); ver
+    (#nr-editorbar-state), os ícones (#nr-editorbar-quick), o botão de remover
+    (#nr-editorbar-danger) e o menu (#nr-editorbar-more); ver
     templates/wagtailadmin/generic/edit_partials.html. A trilha nativa não é
     exibida, mas fica oculta em [data-w-breadcrumbs] porque o Wagtail também a
     reenvia.
@@ -58,24 +60,26 @@
         </div>
 
         <div class="nr-editorbar__end">
-            {% if side_panels or bar.history_url %}
-                <div class="nr-editorbar__tools" role="group" aria-label="Ferramentas do editor">
-                    {% for panel in side_panels %}
-                        {% component panel.toggle %}
-                    {% endfor %}
-                    {% if bar.history_url %}
-                        <a href="{{ bar.history_url }}"
-                           class="w-side-panel-toggle"
-                           aria-label="Histórico"
-                           data-controller="w-tooltip"
-                           data-w-tooltip-content-value="Histórico"
-                           data-w-tooltip-offset-value="[0, 0]">
-                            {% nr_icon "history" "w-side-panel-toggle__icon" %}
-                            <span class="w-side-panel-toggle__label">Histórico</span>
-                        </a>
-                    {% endif %}
-                </div>
-            {% endif %}
+            {# Sempre presente: na criação, copiar e inspecionar chegam pelo salvamento automático. #}
+            <div class="nr-editorbar__tools" role="group" aria-label="Ferramentas do editor">
+                {% for panel in side_panels %}
+                    {% component panel.toggle %}
+                {% endfor %}
+                {% if bar.history_url %}
+                    <a href="{{ bar.history_url }}"
+                       class="w-side-panel-toggle"
+                       aria-label="Histórico"
+                       data-controller="w-tooltip"
+                       data-w-tooltip-content-value="Histórico"
+                       data-w-tooltip-offset-value="[0, 0]">
+                        {% nr_icon "history" "w-side-panel-toggle__icon" %}
+                        <span class="w-side-panel-toggle__label">Histórico</span>
+                    </a>
+                {% endif %}
+                {% include "newsroom/editor/_quick.html" %}
+            </div>
+
+            {% include "newsroom/editor/_danger.html" %}
 
             {# Preenchido por newsroom-editor.js a partir dos botões nativos do rodapé. #}
             <div class="nr-editorbar__actions" data-nr-editor-actions></div>

@@ -189,6 +189,28 @@
         return controls[0];
     }
 
+    // No celular o "Remover" (newsroom/editor/_danger.html) também sai da barra
+    // e vem para o menu. Copiado a cada abertura: na criação, ele só chega com o
+    // primeiro salvamento automático.
+    function syncRemove(holder) {
+        var source = document.querySelector('#nr-editorbar-danger .nr-editorbar__remove');
+        holder.textContent = '';
+        if (!source) {
+            return;
+        }
+        var divider = document.createElement('hr');
+        divider.className = 'nr-menu__divider';
+        var link = document.createElement('a');
+        link.className = 'nr-menu__item is-danger';
+        link.href = source.getAttribute('href');
+        link.appendChild(icon('trash'));
+        var text = document.createElement('span');
+        text.textContent = source.getAttribute('aria-label');
+        link.appendChild(text);
+        holder.appendChild(divider);
+        holder.appendChild(link);
+    }
+
     function build() {
         var bar = document.querySelector('[data-nr-editorbar]');
         var slot = bar && bar.querySelector('[data-nr-editor-actions]');
@@ -230,7 +252,8 @@
         group.className = 'nr-editorbar__split';
         group.appendChild(makeControl(primary, 'nr-btn nr-btn--primary nr-editorbar__primary'));
 
-        if (others.length || save) {
+        var dangerSlot = bar.querySelector('#nr-editorbar-danger');
+        if (others.length || save || dangerSlot) {
             var details = document.createElement('details');
             details.className = 'nr-editorbar__menu' + (others.length ? '' : ' is-narrow-only');
             details.setAttribute('data-nr-dropdown', '');
@@ -256,6 +279,17 @@
                 }
                 menu.appendChild(makeControl(control, 'nr-menu__item'));
             });
+            if (dangerSlot) {
+                var holder = document.createElement('div');
+                holder.className = 'nr-editorbar__menu-remove';
+                menu.appendChild(holder);
+                syncRemove(holder);
+                details.addEventListener('toggle', function () {
+                    if (details.open) {
+                        syncRemove(holder);
+                    }
+                });
+            }
             details.appendChild(menu);
             group.appendChild(details);
         }

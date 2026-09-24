@@ -94,16 +94,23 @@ def test_article_editor_has_a_single_bar(client, editor, site, category):
 
 
 @pytest.mark.django_db
-def test_more_menu_lists_remove_last_as_danger(client, editor, site, category):
+def test_secondary_actions_are_tool_icons_and_a_remove_button(client, editor, site, category):
     article = _article(site, category, editor, 'menu')
     client.force_login(editor)
 
     bar = _bar(client.get(_edit_url(article)).content.decode())
-    labels = re.findall(r'class="nr-menu__item[^"]*" href="[^"]+">\s*<svg[^>]*>.*?</svg><span>([^<]+)</span>', bar, re.S)
+    tools = bar[bar.index('class="nr-editorbar__tools"'):bar.index('id="nr-editorbar-danger"')]
+    icons = re.findall(r'href="([^"]+)"\s+class="w-side-panel-toggle"\s+aria-label="([^"]+)"', tools)
 
-    assert labels == ['Copiar', 'Inspecionar', 'Remover']
-    assert 'class="nr-menu__item is-danger" href="/cms/snippets/news/article/delete/' in bar
-    assert '<hr class="nr-menu__divider">' in bar
+    # Copiar e inspecionar: ícones nas ferramentas, depois do histórico.
+    assert [label for _, label in icons] == ['Histórico', 'Copiar', 'Inspecionar']
+    assert icons[1][0] == f'/cms/snippets/news/article/copy/{article.pk}/'
+    assert icons[2][0] == f'/cms/snippets/news/article/inspect/{article.pk}/'
+    # Remover: botão próprio, antes das ações de publicação.
+    assert re.search(r'class="nr-btn nr-btn--secondary nr-editorbar__remove" href="/cms/snippets/news/article/delete/', bar)
+    assert bar.index('nr-editorbar__remove') < bar.index('data-nr-editor-actions')
+    # Nada sobrou para o menu "Mais opções".
+    assert 'nr-editorbar__more' not in bar[bar.index('id="nr-editorbar-more"'):]
 
 
 @pytest.mark.django_db
@@ -281,6 +288,8 @@ def test_autosave_response_refreshes_the_bar(client, editor, site, category):
     assert 'Título salvo sozinho' in partials
     assert 'data-w-teleport-target-value="#nr-editorbar-state"' in partials
     assert 'Alterações não publicadas' in partials
+    assert 'data-w-teleport-target-value="#nr-editorbar-quick"' in partials
+    assert 'data-w-teleport-target-value="#nr-editorbar-danger"' in partials
     assert 'data-w-teleport-target-value="#nr-editorbar-more"' in partials
 
 

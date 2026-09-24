@@ -2176,6 +2176,26 @@ button.nr-editorbar__status:hover,
     display: none;
 }
 
+/* Copiar e inspecionar entram na fileira das ferramentas; o grupo some se não
+   tiver nada (formulário sem painéis, antes do primeiro salvamento). */
+.nr-editorbar__quick,
+.nr-editorbar__danger {
+    display: contents;
+}
+
+.nr-editorbar__tools:has(> .nr-editorbar__quick:only-child:empty) {
+    display: none;
+}
+
+:is(body#wagtail, #main) .nr-editorbar .nr-editorbar__remove {
+    border-color: var(--nr-red-line);
+    color: var(--nr-red) !important;
+}
+
+:is(body#wagtail, #main) .nr-editorbar .nr-editorbar__remove:hover {
+    background: var(--nr-red-soft);
+}
+
 :is(body#wagtail, #main) .nr-editorbar .nr-btn {
     box-sizing: border-box;
     height: 36px;
@@ -2241,7 +2261,8 @@ button.nr-editorbar__status:hover,
 }
 
 .nr-editorbar__menu.is-narrow-only,
-.nr-editorbar__menu-save {
+.nr-editorbar__menu-save,
+.nr-editorbar__menu-remove {
     display: none;
 }
 
@@ -2310,6 +2331,15 @@ button.nr-editorbar__status:hover,
 
     .nr-editorbar__label--short {
         display: inline;
+    }
+
+    /* "Remover" sai da barra e vai para o menu do publicar (newsroom-editor.js). */
+    .nr-editorbar__danger {
+        display: none;
+    }
+
+    .nr-editorbar__menu-remove {
+        display: contents;
     }
 }
 

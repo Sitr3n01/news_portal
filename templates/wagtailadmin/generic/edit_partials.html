@@ -4,9 +4,10 @@
     Override do projeto: depois de cada salvamento automático, o Wagtail 7.4
     reenvia pedaços da tela nestes <template data-controller="w-teleport">. Nos
     formulários com a barra única do editor (templates/newsroom/editor/header.html),
-    o status e o menu "Mais opções" também vão junto: assim "Alterações não
-    publicadas" aparece sem recarregar a página e, na criação, o menu surge
-    assim que a notícia passa a existir. O resto é o template original.
+    o status, os ícones de copiar e inspecionar, o botão de remover e o menu
+    "Mais opções" também vão junto: assim "Alterações não publicadas" aparece
+    sem recarregar a página e, na criação, essas ações surgem assim que a
+    notícia passa a existir. O resto é o template original.
 {% endcomment %}
 
 {% block extra %}
@@ -26,6 +27,20 @@
             data-w-teleport-mode-value="outerHTML"
         >
             {% include "newsroom/editor/_state.html" %}
+        </template>
+        <template
+            data-controller="w-teleport"
+            data-w-teleport-target-value="#nr-editorbar-quick"
+            data-w-teleport-mode-value="outerHTML"
+        >
+            {% include "newsroom/editor/_quick.html" %}
+        </template>
+        <template
+            data-controller="w-teleport"
+            data-w-teleport-target-value="#nr-editorbar-danger"
+            data-w-teleport-mode-value="outerHTML"
+        >
+            {% include "newsroom/editor/_danger.html" %}
         </template>
         <template
             data-controller="w-teleport"

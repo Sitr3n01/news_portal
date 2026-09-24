@@ -514,6 +514,55 @@ body#wagtail .nr-editorbar .w-side-panel-toggle__counter {
     }
 }
 
+/* Barra estreita (a sidebar ocupa parte da tela, então vale a largura da
+   própria barra, não a da janela): título e status numa linha, ferramentas e
+   ações na de baixo, como no celular. Com base 0, o título nunca força a
+   quebra sozinho; só a regra do contêiner a provoca. */
+body#wagtail .nr-editorbar {
+    container: nr-editorbar / inline-size;
+    flex-wrap: wrap;
+    row-gap: 8px;
+}
+
+body#wagtail .nr-editorbar__start {
+    flex: 1 1 0;
+}
+
+@container nr-editorbar (max-width: 979.98px) {
+    body#wagtail .nr-editorbar__start {
+        flex-basis: 100%;
+    }
+
+    body#wagtail .nr-editorbar__end {
+        flex: 1 1 100%;
+    }
+
+    /* Ferramentas à esquerda; remover e publicar juntos à direita. Aqui quem
+       empurra é a margem das ferramentas (sempre presentes nesta barra), não a
+       das ações, senão o "Remover" ficaria solto no meio. */
+    body#wagtail .nr-editorbar__tools {
+        margin-right: auto;
+        padding-right: 0;
+        border-right: 0;
+    }
+
+    body#wagtail .nr-editorbar__actions {
+        margin-left: 0;
+    }
+}
+
+@container nr-editorbar (min-width: 980px) and (max-width: 1279.98px) {
+    /* Uma linha só, mas apertada: remover fica só com o ícone. */
+    body#wagtail .nr-editorbar .nr-editorbar__remove {
+        width: 36px;
+        padding: 0;
+    }
+
+    body#wagtail .nr-editorbar__remove .nr-editorbar__label {
+        display: none;
+    }
+}
+
 /* O rodapé nativo some quando a barra assume as ações. Continua na página,
    dentro do formulário: é nele que a barra clica. */
 html.nr-editorbar-ready body#wagtail form[data-edit-form] > footer .actions--primary {
@@ -533,8 +582,19 @@ html.nr-editorbar-ready body#wagtail form[data-edit-form] > footer .actions--pri
 
 @media (max-width: 639.98px) {
     body#wagtail .nr-editorbar .w-side-panel-toggle {
-        min-width: 32px;
-        padding: 0 7px;
+        min-width: 30px;
+        padding: 0 6px;
+    }
+
+    body#wagtail .nr-editorbar__tools {
+        gap: 0;
+    }
+
+    /* Seis ferramentas, remover e publicar cabem numa linha a partir de ~380px;
+       abaixo disso, as ações descem em vez de vazar para o lado. */
+    body#wagtail .nr-editorbar__end {
+        flex-wrap: wrap;
+        row-gap: 8px;
     }
 }
 

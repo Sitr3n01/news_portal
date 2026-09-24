@@ -1,0 +1,12 @@
+{% load newsroom %}
+{# Copiar e inspecionar como ícones nas ferramentas da barra. Reenviado pelo salvamento automático: na criação, só existem depois do primeiro salvamento. #}
+<span class="nr-editorbar__quick" id="nr-editorbar-quick">{% for item in bar.quick %}
+    <a href="{{ item.url }}"
+       class="w-side-panel-toggle"
+       aria-label="{{ item.label }}"
+       data-controller="w-tooltip"
+       data-w-tooltip-content-value="{{ item.label }}"
+       data-w-tooltip-offset-value="[0, 0]"{{ item.attrs }}>
+        {% nr_icon item.icon "w-side-panel-toggle__icon" %}
+    </a>
+{% endfor %}</span>

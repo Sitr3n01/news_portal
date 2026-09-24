@@ -26,7 +26,8 @@
  *
  * 5. Barra única do editor (templates/newsroom/editor/header.html e
  *    static/newsroom/js/newsroom-editor.js): título, status, ferramentas e
- *    ações de publicação num só lugar, no lugar do cabeçalho e do rodapé.
+ *    ações de publicação num só lugar, no lugar do cabeçalho e do rodapé. O
+ *    minimapa vira o painel "Estrutura", aberto pela barra.
  *
  * 6. Caixas de seleção: borda e visto legíveis, sempre visíveis nas listagens,
  *    linha selecionada destacada e as ações em massa na barra de seleção do
@@ -574,6 +575,218 @@ body#wagtail .nr-editorbar__start {
     body#wagtail .nr-editorbar__remove .nr-editorbar__label {
         display: none;
     }
+}
+
+/* ── Estrutura (minimapa do Wagtail) ────────────────────────────────────
+   Abre pela ferramenta "Estrutura" da barra (header.html), que só clica no
+   botão nativo. Fechado, não deixa nada sobre o formulário: nem a faixa de
+   tracinhos, nem o "Colapsar tudo" flutuante. Aberto, é um painel como os
+   outros laterais: cabeçalho com fechar, título e recolher/expandir todas as
+   seções; a seção visível destacada e as seções com erro em vermelho.
+   Tudo é o componente React do Wagtail, só restilizado. */
+
+.nr-editorbar__outline[hidden] {
+    display: none !important;
+}
+
+body#wagtail .w-minimap:not(.w-minimap--expanded) {
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateX(calc(var(--w-direction-factor, 1) * 100%));
+}
+
+body#wagtail .w-minimap__collapse-all--floating:not(.w-minimap__collapse-all--inside) {
+    display: none !important;
+}
+
+body#wagtail .w-minimap--expanded {
+    border-inline-start: 1px solid var(--nr-line);
+    background: var(--nr-white);
+    font-family: var(--nr-font);
+}
+
+body#wagtail .w-minimap--expanded .w-minimap__header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-sizing: border-box;
+    min-height: 52px;
+    margin: 0;
+    padding: 0 10px;
+    border: 0;
+    border-bottom: 1px solid var(--nr-line);
+}
+
+/* Título do painel: o cabeçalho do React só tem o botão de fechar. */
+body#wagtail .w-minimap--expanded .w-minimap__header::after {
+    content: "Estrutura";
+    color: var(--nr-ink);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+body#wagtail .w-minimap--expanded .w-minimap__toggle {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    margin: 0;
+    padding: 0;
+    border-radius: var(--nr-radius);
+    color: var(--nr-ink-4);
+}
+
+body#wagtail .w-minimap--expanded .w-minimap__toggle:hover {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+body#wagtail .w-minimap__toggle:focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+}
+
+body#wagtail .w-minimap--expanded .w-minimap__footer {
+    margin: 0;
+    border: 0;
+}
+
+/* Recolher/expandir: um só botão do Wagtail, que alterna. O texto vem do
+   estado (aria-expanded), em português de verdade ("Colapsar" não é). */
+body#wagtail .w-minimap__collapse-all--inside {
+    gap: 6px;
+    min-width: 0;
+    height: 28px;
+    margin-top: 12px;
+    margin-inline-end: 10px;
+    padding: 0 9px;
+    border: 1px solid var(--nr-line-2);
+    border-radius: var(--nr-radius);
+    background: var(--nr-white);
+    color: var(--nr-ink);
+    font-size: 0;
+    line-height: 1;
+}
+
+body#wagtail .w-minimap__collapse-all--inside:hover {
+    background: var(--nr-surface-subtle);
+}
+
+body#wagtail .w-minimap__collapse-all--inside .icon {
+    width: 12px;
+    height: 12px;
+    margin: 0;
+    color: var(--nr-muted);
+}
+
+body#wagtail .w-minimap__collapse-all--inside::after {
+    font-family: var(--nr-font);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+body#wagtail .w-minimap__collapse-all--inside[aria-expanded="true"]::after {
+    content: "Recolher tudo";
+}
+
+body#wagtail .w-minimap__collapse-all--inside[aria-expanded="false"]::after {
+    content: "Expandir tudo";
+}
+
+body#wagtail .w-minimap--expanded .w-minimap__list {
+    padding: 8px 8px 16px;
+}
+
+body#wagtail .w-minimap--expanded .w-minimap__list > li {
+    display: flex;
+}
+
+body#wagtail .w-minimap--expanded .w-minimap-item {
+    flex: 1;
+    gap: 8px;
+    min-width: 0;
+    height: 30px;
+    margin: 1px 0;
+    padding: 0 8px 0 10px;
+    border: 0;
+    border-radius: 6px;
+    color: var(--nr-ink-4);
+    font-size: 13px;
+    text-decoration: none;
+}
+
+body#wagtail .w-minimap--expanded .w-minimap-item--h2 {
+    color: var(--nr-ink);
+    font-weight: 600;
+}
+
+/* Blocos e campos dentro de uma seção: recuados, com o ícone do tipo. */
+body#wagtail .w-minimap--expanded .w-minimap-item:not(.w-minimap-item--h1, .w-minimap-item--h2) {
+    padding-inline-start: 22px;
+}
+
+body#wagtail .w-minimap--expanded .w-minimap-item__icon {
+    width: 14px;
+    height: 14px;
+    color: var(--nr-muted);
+}
+
+body#wagtail .w-minimap--expanded .w-minimap-item__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body#wagtail .w-minimap--expanded .w-minimap-item:hover {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+/* O Wagtail marca como ativas TODAS as seções visíveis na tela: um traço reto
+   à esquerda mostra o trecho que está à vista, sem pesar como um fundo. */
+body#wagtail .w-minimap--expanded .w-minimap-item {
+    position: relative;
+}
+
+body#wagtail .w-minimap--expanded .w-minimap-item--active {
+    color: var(--nr-ink);
+}
+
+body#wagtail .w-minimap--expanded .w-minimap-item--active::before {
+    content: "";
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    left: 0;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--nr-ink);
+}
+
+body#wagtail .w-minimap--expanded .w-minimap-item--error {
+    color: var(--nr-red);
+}
+
+body#wagtail .w-minimap--expanded .w-minimap-item--error.w-minimap-item--active::before {
+    background: var(--nr-red);
+}
+
+/* Contagem de erros no fim da linha, não à esquerda do texto. */
+body#wagtail .w-minimap--expanded .w-minimap-item__errors {
+    order: 2;
+    display: grid;
+    place-items: center;
+    width: auto;
+    min-width: 18px;
+    height: 18px;
+    margin: 0 0 0 auto;
+    padding: 0 5px;
+    border: 0;
+    border-radius: 100px;
+    background: var(--nr-red);
+    color: var(--nr-white);
+    font-size: 10.5px;
+    line-height: 1;
 }
 
 /* O rodapé nativo some quando a barra assume as ações. Continua na página,

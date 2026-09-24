@@ -200,6 +200,7 @@
     var FIT_ORDER = [
         '[data-side-panel-toggle="preview"]',
         '[data-side-panel-toggle="checks"]',
+        '.nr-editorbar__outline',
         '.nr-editorbar__save',
         '.nr-editorbar__history',
         '#nr-editorbar-quick a',
@@ -373,8 +374,9 @@
             }
         }).observe(bar);
         // O salvamento automático troca pedaços da barra (Publicação, ícones,
-        // remover), e a largura deles muda. As mudanças dentro do próprio ⋯
-        // (o menu montado a cada abertura) não contam.
+        // remover), e "Estrutura" aparece só depois do load: a largura muda.
+        // As mudanças no próprio ⋯ (que fitBar mostra e esconde, e o menu
+        // montado a cada abertura) não contam, senão seria um laço.
         new MutationObserver(function (changes) {
             var outside = changes.some(function (change) {
                 return !overflow.contains(change.target);
@@ -382,7 +384,7 @@
             if (outside) {
                 refit();
             }
-        }).observe(end, {childList: true, subtree: true});
+        }).observe(end, {childList: true, subtree: true, attributes: true, attributeFilter: ['hidden']});
         if (document.fonts && document.fonts.ready) {
             document.fonts.ready.then(refit);
         }
@@ -487,7 +489,33 @@
         }
     });
 
+    // "Estrutura" (header.html) abre o minimapa do Wagtail, um componente React
+    // montado no load da página e só quando o formulário tem seções. O botão
+    // aparece quando o minimapa existe e espelha o estado dele, que o Wagtail
+    // marca no <body> (minimap-open) e guarda no navegador.
+    function setupOutline() {
+        var button = document.querySelector('[data-nr-editorbar] .nr-editorbar__outline');
+        var container = document.querySelector('[data-minimap-container]');
+        if (!button || !container) {
+            return;
+        }
+        var sync = function () {
+            var missing = !document.getElementById('w-minimap-toggle');
+            if (button.hidden !== missing) {
+                button.hidden = missing;
+            }
+            var open = document.body.classList.contains('minimap-open') ? 'true' : 'false';
+            if (button.getAttribute('aria-expanded') !== open) {
+                button.setAttribute('aria-expanded', open);
+            }
+        };
+        new MutationObserver(sync).observe(container, {childList: true});
+        new MutationObserver(sync).observe(document.body, {attributes: true, attributeFilter: ['class']});
+        sync();
+    }
+
     try {
+        setupOutline();
         build();
     } catch (error) {
         // Qualquer falha deixa o rodapé nativo do Wagtail à vista.

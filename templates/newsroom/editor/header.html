@@ -70,6 +70,19 @@
                 {% for panel in side_panels %}
                     {% component panel.toggle %}
                 {% endfor %}
+                {# Estrutura: abre o minimapa do Wagtail (#w-minimap-toggle, que o React monta ao carregar a página). newsroom-editor.js mostra o botão quando o minimapa existe e espelha o estado em aria-expanded. #}
+                <button type="button"
+                        class="w-side-panel-toggle nr-editorbar__outline"
+                        aria-label="Estrutura"
+                        aria-expanded="false"
+                        data-nr-proxy-click="#w-minimap-toggle"
+                        data-controller="w-tooltip"
+                        data-w-tooltip-content-value="Estrutura (atalho: ])"
+                        data-w-tooltip-offset-value="[0, 0]"
+                        hidden>
+                    {% nr_icon "outline" "w-side-panel-toggle__icon" %}
+                    <span class="w-side-panel-toggle__label">Estrutura</span>
+                </button>
                 {% if bar.history_url %}
                     <a href="{{ bar.history_url }}"
                        class="w-side-panel-toggle nr-editorbar__history"

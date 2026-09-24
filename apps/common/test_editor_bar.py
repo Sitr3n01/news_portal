@@ -92,6 +92,9 @@ def test_article_editor_has_a_single_bar(client, editor, site, category):
     assert 'data-side-panel-toggle="preview"' in bar
     assert 'data-side-panel-toggle="checks"' in bar
     assert 'aria-label="Histórico"' in bar
+    # "Estrutura" abre o minimapa do Wagtail; nasce oculta até o React montá-lo.
+    assert re.search(r'class="w-side-panel-toggle nr-editorbar__outline"[^>]*data-nr-proxy-click="#w-minimap-toggle"[^>]*hidden>', bar, re.S)
+    assert 'data-minimap-container' in html
     assert 'newsroom/js/newsroom-editor.js' in html
 
 

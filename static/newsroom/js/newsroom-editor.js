@@ -189,26 +189,43 @@
         return controls[0];
     }
 
-    // No celular o "Remover" (newsroom/editor/_danger.html) também sai da barra
-    // e vem para o menu. Copiado a cada abertura: na criação, ele só chega com o
-    // primeiro salvamento automático.
-    function syncRemove(holder) {
-        var source = document.querySelector('#nr-editorbar-danger .nr-editorbar__remove');
-        holder.textContent = '';
-        if (!source) {
-            return;
-        }
-        var divider = document.createElement('hr');
-        divider.className = 'nr-menu__divider';
+    function menuLink(source, className) {
         var link = document.createElement('a');
-        link.className = 'nr-menu__item is-danger';
+        link.className = className;
         link.href = source.getAttribute('href');
-        link.appendChild(icon('trash'));
+        var drawing = source.querySelector('svg');
+        if (drawing) {
+            var copy = drawing.cloneNode(true);
+            copy.setAttribute('class', 'nr-icon');
+            link.appendChild(copy);
+        }
         var text = document.createElement('span');
         text.textContent = source.getAttribute('aria-label');
         link.appendChild(text);
-        holder.appendChild(divider);
-        holder.appendChild(link);
+        return link;
+    }
+
+    // No celular, copiar, inspecionar (newsroom/editor/_quick.html) e remover
+    // (_danger.html) saem da barra e vêm para o menu. Copiados a cada abertura:
+    // na criação, eles só chegam com o primeiro salvamento automático.
+    function syncExtras(holder) {
+        holder.textContent = '';
+        var quick = document.querySelectorAll('#nr-editorbar-quick a');
+        var remove = document.querySelector('#nr-editorbar-danger .nr-editorbar__remove');
+        if (quick.length) {
+            var divider = document.createElement('hr');
+            divider.className = 'nr-menu__divider';
+            holder.appendChild(divider);
+            Array.prototype.forEach.call(quick, function (source) {
+                holder.appendChild(menuLink(source, 'nr-menu__item'));
+            });
+        }
+        if (remove) {
+            var line = document.createElement('hr');
+            line.className = 'nr-menu__divider';
+            holder.appendChild(line);
+            holder.appendChild(menuLink(remove, 'nr-menu__item is-danger'));
+        }
     }
 
     function build() {
@@ -281,12 +298,12 @@
             });
             if (dangerSlot) {
                 var holder = document.createElement('div');
-                holder.className = 'nr-editorbar__menu-remove';
+                holder.className = 'nr-editorbar__menu-extra';
                 menu.appendChild(holder);
-                syncRemove(holder);
+                syncExtras(holder);
                 details.addEventListener('toggle', function () {
                     if (details.open) {
-                        syncRemove(holder);
+                        syncExtras(holder);
                     }
                 });
             }
@@ -298,13 +315,23 @@
         document.documentElement.classList.add(READY_CLASS);
     }
 
-    // O selo de status abre o painel "Status" clicando no botão da barra: o
-    // selo é reenviado pelo salvamento automático, o botão não.
+    // O controle "Publicação" (newsroom/editor/_publication.html) só clica nos
+    // controles do painel "Status" do Wagtail: a janela de agendamento, a trava
+    // e o próprio botão do painel. O controle é reenviado pelo salvamento
+    // automático, por isso a delegação no documento.
     document.addEventListener('click', function (event) {
-        var badge = event.target.closest('[data-nr-status-toggle]');
-        var toggle = badge && document.querySelector('[data-nr-editorbar] [data-side-panel-toggle="status"]');
-        if (toggle) {
-            toggle.click();
+        var trigger = event.target.closest('[data-nr-proxy-click]');
+        if (!trigger) {
+            return;
+        }
+        var target = document.querySelector(trigger.getAttribute('data-nr-proxy-click'));
+        var dropdown = trigger.closest('details[open]');
+        if (dropdown) {
+            dropdown.open = false;
+        }
+        if (target) {
+            event.preventDefault();
+            target.click();
         }
     });
 

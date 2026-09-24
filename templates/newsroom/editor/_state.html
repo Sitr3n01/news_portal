@@ -1,22 +1,13 @@
 {% load newsroom %}
 {% comment %}
-    Selo de status da barra do editor. Reenviado pelo salvamento automático
-    (wagtailadmin/generic/edit_partials.html). Não é um `data-side-panel-toggle`:
-    o Wagtail liga esses botões uma vez, ao carregar, e o selo reenviado ficaria
-    sem clique. newsroom-editor.js repassa o clique ao botão "Status" da barra.
+    Linha sob o título da barra do editor. Reenviado pelo salvamento automático
+    (wagtailadmin/generic/edit_partials.html). O estado mora no controle
+    "Publicação" (_publication.html); o selo só aparece aqui quando não há esse
+    controle (formulário sem o painel "Status").
 {% endcomment %}
 <span class="nr-editorbar__state" id="nr-editorbar-state">
-    {% if bar.status %}
-        {% if side_panels %}
-            <button type="button"
-                    class="nr-status nr-status--{{ bar.status.key }} nr-editorbar__status"
-                    data-nr-status-toggle
-                    aria-label="Status: {{ bar.status.label }}. Abrir detalhes da publicação"
-                    data-controller="w-tooltip"
-                    data-w-tooltip-content-value="Detalhes da publicação">{{ bar.status.label }}</button>
-        {% else %}
-            <span class="nr-status nr-status--{{ bar.status.key }} nr-editorbar__status">{{ bar.status.label }}</span>
-        {% endif %}
+    {% if bar.status and not bar.publication %}
+        <span class="nr-status nr-status--{{ bar.status.key }} nr-editorbar__status">{{ bar.status.label }}</span>
     {% endif %}
     {% if bar.locked %}
         <span class="nr-status nr-status--warning nr-editorbar__status">{% nr_icon "lock" %}Bloqueada</span>

@@ -2128,15 +2128,6 @@
     font-family: inherit;
 }
 
-button.nr-editorbar__status {
-    cursor: pointer;
-}
-
-button.nr-editorbar__status:hover,
-.nr-editorbar:has([data-side-panel-toggle="status"][aria-expanded="true"]) button.nr-editorbar__status {
-    box-shadow: 0 0 0 3px var(--nr-hover);
-}
-
 .nr-editorbar__status .nr-icon {
     width: 12px;
     height: 12px;
@@ -2165,6 +2156,13 @@ button.nr-editorbar__status:hover,
     border-right: 1px solid var(--nr-line);
 }
 
+/* Remover + ações + menu (barra do Wagtail), que andam juntos. */
+.nr-editorbar__commit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 /* Ações de publicação (montadas por newsroom-editor.js). */
 .nr-editorbar__actions {
     display: flex;
@@ -2183,8 +2181,238 @@ button.nr-editorbar__status:hover,
     display: contents;
 }
 
-.nr-editorbar__tools:has(> .nr-editorbar__quick:only-child:empty) {
+.nr-editorbar__tools:not(:has(> :not(:empty))) {
     display: none;
+}
+
+/* ── Controle "Publicação" (newsroom/editor/_publication.html) ───────────── */
+
+.nr-editorbar__publication {
+    display: contents;
+}
+
+/* Substituído pelo controle; continua na página para "Ver todos os detalhes". */
+.nr-editorbar__tools:has(.nr-pub) [data-side-panel-toggle="status"] {
+    display: none;
+}
+
+.nr-pub {
+    position: relative;
+    margin-right: 6px;
+}
+
+.nr-pub__button {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    box-sizing: border-box;
+    height: 34px;
+    padding: 0 9px 0 11px;
+    border: 1px solid var(--nr-line-2);
+    border-radius: var(--nr-radius);
+    background: var(--nr-white);
+    color: var(--nr-ink);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    list-style: none;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease;
+}
+
+.nr-pub__button::-webkit-details-marker {
+    display: none;
+}
+
+.nr-pub__button:hover,
+.nr-pub[open] .nr-pub__button {
+    border-color: #d4d4d4;
+    background: var(--nr-surface-subtle);
+}
+
+.nr-pub__dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--nr-muted);
+}
+
+.nr-pub--published .nr-pub__dot { background: var(--nr-green); }
+.nr-pub--review .nr-pub__dot { background: var(--nr-orange); }
+.nr-pub--scheduled .nr-pub__dot { background: var(--nr-blue); }
+
+.nr-pub__button .nr-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--nr-muted);
+}
+
+.nr-pub__button .nr-pub__flag--warning {
+    color: var(--nr-orange);
+}
+
+.nr-pub__chevron {
+    margin-left: -1px;
+    transition: transform .15s ease;
+}
+
+.nr-pub[open] .nr-pub__chevron {
+    transform: rotate(180deg);
+}
+
+.nr-pub__panel {
+    top: calc(100% + 6px);
+    left: 0;
+    width: 320px;
+    max-width: calc(100vw - 24px);
+    padding: 0;
+}
+
+.nr-pub__section {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--nr-line);
+}
+
+.nr-pub__line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.nr-pub__title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    color: var(--nr-ink);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.nr-pub__title .nr-icon {
+    width: 15px;
+    height: 15px;
+    color: var(--nr-muted);
+}
+
+.nr-pub__text,
+.nr-pub__meta {
+    margin: 6px 0 0;
+    color: var(--nr-ink-4);
+    font-size: 12.5px;
+    line-height: 1.45;
+}
+
+.nr-pub__meta {
+    color: var(--nr-muted);
+}
+
+:is(body#wagtail, #main) .nr-pub__action {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border: 0;
+    border-radius: var(--nr-radius);
+    background: transparent;
+    color: var(--nr-blue-strong);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+:is(body#wagtail, #main) .nr-pub__action:hover {
+    background: var(--nr-blue-soft);
+}
+
+.nr-pub__action .nr-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.nr-pub__dates {
+    display: grid;
+    gap: 6px;
+    margin: 10px 0 0;
+}
+
+.nr-pub__dates > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12.5px;
+}
+
+.nr-pub__dates dt {
+    color: var(--nr-muted);
+}
+
+.nr-pub__dates dd {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    color: var(--nr-ink);
+    font-weight: 500;
+    text-align: right;
+}
+
+.nr-pub__badge {
+    padding: 1px 6px;
+    border-radius: 100px;
+    background: var(--nr-orange-soft);
+    color: var(--nr-orange);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.nr-pub__alert {
+    margin: 10px 0 0;
+    padding: 8px 10px;
+    border: 1px solid var(--nr-orange-line);
+    border-radius: var(--nr-radius);
+    background: var(--nr-orange-soft);
+    color: var(--nr-orange);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.nr-pub__alert--error {
+    border-color: var(--nr-red-line);
+    background: var(--nr-red-soft);
+    color: var(--nr-red);
+}
+
+:is(body#wagtail, #main) .nr-pub__details {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 0 0 var(--nr-radius-card) var(--nr-radius-card);
+    background: transparent;
+    color: var(--nr-ink-4);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+}
+
+:is(body#wagtail, #main) .nr-pub__details:hover {
+    background: var(--nr-surface-subtle);
+    color: var(--nr-ink);
+}
+
+.nr-pub__details .nr-icon {
+    width: 15px;
+    height: 15px;
 }
 
 :is(body#wagtail, #main) .nr-editorbar .nr-editorbar__remove {
@@ -2262,7 +2490,7 @@ button.nr-editorbar__status:hover,
 
 .nr-editorbar__menu.is-narrow-only,
 .nr-editorbar__menu-save,
-.nr-editorbar__menu-remove {
+.nr-editorbar__menu-extra {
     display: none;
 }
 
@@ -2333,12 +2561,14 @@ button.nr-editorbar__status:hover,
         display: inline;
     }
 
-    /* "Remover" sai da barra e vai para o menu do publicar (newsroom-editor.js). */
+    /* Copiar, inspecionar e remover saem da barra e vão para o menu do
+       publicar (newsroom-editor.js), abrindo espaço para "Publicação". */
+    .nr-editorbar__quick,
     .nr-editorbar__danger {
         display: none;
     }
 
-    .nr-editorbar__menu-remove {
+    .nr-editorbar__menu-extra {
         display: contents;
     }
 }

@@ -2,22 +2,25 @@
 {% comment %}
     Barra única do editor: substitui o cabeçalho do Wagtail (slim_header) nos
     formulários de criação e edição de snippets. Reúne num só lugar o título,
-    o status, o salvamento automático, quem mais está editando, os painéis
-    laterais (status, pré-visualização, verificações), o histórico, copiar e
+    o controle "Publicação" (estado, agendamento, trava), o salvamento
+    automático, quem mais está editando, os painéis laterais (pré-visualização,
+    verificações; o de status abre por "Publicação"), o histórico, copiar e
     inspecionar como ícones, o botão de remover, as ações de publicação e o
     menu "Mais opções" (só com o que sobrar).
 
     Continua sendo o Wagtail que faz tudo:
     - os botões de painel são os componentes nativos (`panel.toggle`);
-    - o selo de status também abre o painel "Status" (via newsroom-editor.js);
+    - o controle "Publicação" só clica nos controles do painel "Status"
+      (janela de agendamento, trava, o próprio botão do painel);
     - salvar, publicar e enviar para moderação continuam DENTRO do formulário,
       no rodapé nativo, que some quando newsroom-editor.js monta os botões da
       barra em [data-nr-editor-actions]. Os botões da barra só clicam nos
       nativos, e a proteção de edição simultânea do Wagtail, que só vigia
       botões dentro do formulário, continua valendo.
 
-    O salvamento automático reenvia o título (#nr-editorbar-title), o status
-    (#nr-editorbar-state), os ícones (#nr-editorbar-quick), o botão de remover
+    O salvamento automático reenvia o título (#nr-editorbar-title), a linha
+    sob ele (#nr-editorbar-state), o controle "Publicação"
+    (#nr-editorbar-publication), os ícones (#nr-editorbar-quick), o botão de remover
     (#nr-editorbar-danger) e o menu (#nr-editorbar-more); ver
     templates/wagtailadmin/generic/edit_partials.html. A trilha nativa não é
     exibida, mas fica oculta em [data-w-breadcrumbs] porque o Wagtail também a
@@ -62,12 +65,14 @@
         <div class="nr-editorbar__end">
             {# Sempre presente: na criação, copiar e inspecionar chegam pelo salvamento automático. #}
             <div class="nr-editorbar__tools" role="group" aria-label="Ferramentas do editor">
+                {% include "newsroom/editor/_publication.html" %}
+                {# O botão nativo do painel "Status" fica oculto: o controle "Publicação" o substitui e o aciona em "Ver todos os detalhes". #}
                 {% for panel in side_panels %}
                     {% component panel.toggle %}
                 {% endfor %}
                 {% if bar.history_url %}
                     <a href="{{ bar.history_url }}"
-                       class="w-side-panel-toggle"
+                       class="w-side-panel-toggle nr-editorbar__history"
                        aria-label="Histórico"
                        data-controller="w-tooltip"
                        data-w-tooltip-content-value="Histórico"
@@ -79,12 +84,15 @@
                 {% include "newsroom/editor/_quick.html" %}
             </div>
 
-            {% include "newsroom/editor/_danger.html" %}
+            {# Remover, salvar, publicar e o menu andam juntos: se a linha não couber, descem juntos. #}
+            <div class="nr-editorbar__commit">
+                {% include "newsroom/editor/_danger.html" %}
 
-            {# Preenchido por newsroom-editor.js a partir dos botões nativos do rodapé. #}
-            <div class="nr-editorbar__actions" data-nr-editor-actions></div>
+                {# Preenchido por newsroom-editor.js a partir dos botões nativos do rodapé. #}
+                <div class="nr-editorbar__actions" data-nr-editor-actions></div>
 
-            {% include "newsroom/editor/_more.html" %}
+                {% include "newsroom/editor/_more.html" %}
+            </div>
         </div>
     </header>
 

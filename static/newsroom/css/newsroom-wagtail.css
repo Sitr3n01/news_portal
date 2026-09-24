@@ -533,21 +533,34 @@ body#wagtail .nr-editorbar__start {
         flex-basis: 100%;
     }
 
+    /* Ferramentas à esquerda, o grupo remover/salvar/publicar à direita. Se não
+       couberem na mesma linha, o grupo desce inteiro, ainda à direita. */
     body#wagtail .nr-editorbar__end {
         flex: 1 1 100%;
+        flex-wrap: wrap;
+        row-gap: 8px;
     }
 
-    /* Ferramentas à esquerda; remover e publicar juntos à direita. Aqui quem
-       empurra é a margem das ferramentas (sempre presentes nesta barra), não a
-       das ações, senão o "Remover" ficaria solto no meio. */
     body#wagtail .nr-editorbar__tools {
-        margin-right: auto;
         padding-right: 0;
         border-right: 0;
     }
 
-    body#wagtail .nr-editorbar__actions {
-        margin-left: 0;
+    body#wagtail .nr-editorbar__commit {
+        margin-left: auto;
+    }
+}
+
+/* Remover fica só com o ícone quando a linha aperta: na faixa de uma linha
+   até 1280px e, nas duas linhas, abaixo de 820px. */
+@container nr-editorbar (max-width: 819.98px) {
+    body#wagtail .nr-editorbar .nr-editorbar__remove {
+        width: 36px;
+        padding: 0;
+    }
+
+    body#wagtail .nr-editorbar__remove .nr-editorbar__label {
+        display: none;
     }
 }
 
@@ -590,11 +603,11 @@ html.nr-editorbar-ready body#wagtail form[data-edit-form] > footer .actions--pri
         gap: 0;
     }
 
-    /* Seis ferramentas, remover e publicar cabem numa linha a partir de ~380px;
-       abaixo disso, as ações descem em vez de vazar para o lado. */
-    body#wagtail .nr-editorbar__end {
-        flex-wrap: wrap;
-        row-gap: 8px;
+    /* "Publicação", as ferramentas e o publicar cabem numa linha a partir de
+       ~340px; abaixo disso, o publicar desce, alinhado à direita. */
+    /* O histórico também está no controle "Publicação". */
+    body#wagtail .nr-editorbar__tools:has(.nr-pub) .nr-editorbar__history {
+        display: none;
     }
 }
 

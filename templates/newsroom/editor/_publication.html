@@ -1,0 +1,102 @@
+{% load newsroom %}
+{% comment %}
+    Controle "Publicação" da barra do editor: o estado da notícia num botão
+    que abre, num só painel, o estado, as datas de entrar e sair do ar, a trava
+    de edição e o histórico. Dados em apps/common/newsroom/editor.py
+    (_publication).
+
+    Os controles de verdade continuam no painel "Status" do Wagtail, que segue
+    na página: "Definir datas" e "Travar" clicam neles (data-nr-proxy-click,
+    em newsroom-editor.js), então a janela de agendamento, a trava e as
+    permissões são as do Wagtail. "Ver todos os detalhes" abre o painel.
+
+    Reenviado pelo salvamento automático (wagtailadmin/generic/edit_partials.html).
+{% endcomment %}
+<span class="nr-editorbar__publication" id="nr-editorbar-publication">{% if bar.publication %}{% with pub=bar.publication schedule=bar.publication.schedule lock=bar.publication.lock %}
+    <details class="nr-pub" data-nr-dropdown>
+        <summary class="nr-pub__button nr-pub--{{ bar.status.key }}"
+                 aria-label="Publicação: {{ bar.status.label }}{% if schedule.active %}, com agendamento{% endif %}{% if schedule.pending %}, datas ainda não agendadas{% endif %}{% if lock.locked %}, travada{% endif %}. Abrir estado, agendamento e trava">
+            <span class="nr-pub__dot" aria-hidden="true"></span>
+            <span class="nr-pub__label">{{ bar.status.label }}</span>
+            {% if schedule.pending %}
+                {% nr_icon "clock" "nr-pub__flag nr-pub__flag--warning" %}
+            {% elif schedule.active %}
+                {% nr_icon "clock" "nr-pub__flag" %}
+            {% endif %}
+            {% if lock.locked %}{% nr_icon "lock" "nr-pub__flag" %}{% endif %}
+            {% nr_icon "down" "nr-pub__chevron" %}
+        </summary>
+        <div class="nr-menu nr-pub__panel">
+            <section class="nr-pub__section">
+                <div class="nr-pub__line">
+                    <span class="nr-status nr-status--{{ bar.status.key }}">{{ bar.status.label }}</span>
+                    {% if bar.history_url %}
+                        <a class="nr-pub__action" href="{{ bar.history_url }}">{% nr_icon "history" %}Histórico</a>
+                    {% endif %}
+                </div>
+                {% if bar.status.note %}<p class="nr-pub__text">{{ bar.status.note }}</p>{% endif %}
+                {% if pub.last_edit %}
+                    <p class="nr-pub__meta">Última edição {{ pub.last_edit.at|nr_relative|lower }}{% if pub.last_edit.by %} por {{ pub.last_edit.by }}{% endif %}</p>
+                {% endif %}
+            </section>
+
+            {% if schedule %}
+                <section class="nr-pub__section">
+                    <div class="nr-pub__line">
+                        <p class="nr-pub__title">{% nr_icon "clock" %}Agendamento</p>
+                        {% if schedule.editable %}
+                            <button type="button" class="nr-pub__action" data-nr-proxy-click='[data-side-panel="status"] [data-a11y-dialog-show="schedule-publishing-dialog"]'>Definir datas</button>
+                        {% endif %}
+                    </div>
+                    <dl class="nr-pub__dates">
+                        <div>
+                            <dt>Entra no ar</dt>
+                            <dd>
+                                {% if schedule.go_live %}
+                                    {{ schedule.go_live.when }}
+                                    {% if schedule.go_live.state == "pending" %}<span class="nr-pub__badge">Não agendada</span>{% endif %}
+                                {% elif bar.status.key == "published" %}
+                                    Já está no ar
+                                {% else %}
+                                    Assim que publicar
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt>Sai do ar</dt>
+                            <dd>
+                                {% if schedule.expire %}
+                                    {{ schedule.expire.when }}
+                                    {% if schedule.expire.state == "pending" %}<span class="nr-pub__badge">Não agendada</span>{% endif %}
+                                {% else %}
+                                    Não sai
+                                {% endif %}
+                            </dd>
+                        </div>
+                    </dl>
+                    {% if schedule.errors %}
+                        <p class="nr-pub__alert nr-pub__alert--error">Há um erro nas datas. Abra "Definir datas" para corrigir.</p>
+                    {% elif schedule.pending %}
+                        <p class="nr-pub__alert">As datas marcadas só valem depois de "Agendar publicação", no botão de publicar.</p>
+                    {% endif %}
+                </section>
+            {% endif %}
+
+            {% if lock %}
+                <section class="nr-pub__section">
+                    <div class="nr-pub__line">
+                        <p class="nr-pub__title">{% if lock.locked %}{% nr_icon "lock" %}{% else %}{% nr_icon "unlock" %}{% endif %}{{ lock.title }}</p>
+                        {% if lock.can_toggle %}
+                            <button type="button" class="nr-pub__action" data-nr-proxy-click='[data-side-panel="status"] input[data-w-action-url-value]'>{% if lock.locked %}Destravar{% else %}Travar{% endif %}</button>
+                        {% endif %}
+                    </div>
+                    <p class="nr-pub__text">{{ lock.text }}</p>
+                </section>
+            {% endif %}
+
+            <button type="button" class="nr-pub__details" data-nr-proxy-click='[data-nr-editorbar] [data-side-panel-toggle="status"]'>
+                {% nr_icon "info" %}Ver todos os detalhes
+            </button>
+        </div>
+    </details>
+{% endwith %}{% endif %}</span>

@@ -83,10 +83,12 @@ def test_article_editor_has_a_single_bar(client, editor, site, category):
     assert 'w-slim-header w-bg-surface-header' not in html
     assert '>Notícias</a>' in bar
     assert '<h1 class="nr-editorbar__title" id="nr-editorbar-title">Notícia barra</h1>' in bar
-    # Selo de status (abre o painel "Status" pelo botão da ferramenta).
-    assert 'nr-status nr-status--draft nr-editorbar__status' in bar
-    assert 'data-nr-status-toggle' in bar
-    assert bar.count('data-side-panel-toggle="status"') == 1
+    # Controle "Publicação" no lugar do selo; o botão nativo do painel "Status"
+    # continua na barra (oculto), acionado por "Ver todos os detalhes".
+    assert 'class="nr-pub__button nr-pub--draft"' in bar
+    assert 'nr-editorbar__status' not in bar
+    assert bar.count('data-side-panel-toggle="status"') == 2
+    assert 'data-nr-proxy-click=\'[data-nr-editorbar] [data-side-panel-toggle="status"]\'' in bar
     assert 'data-side-panel-toggle="preview"' in bar
     assert 'data-side-panel-toggle="checks"' in bar
     assert 'aria-label="Histórico"' in bar
@@ -100,7 +102,7 @@ def test_secondary_actions_are_tool_icons_and_a_remove_button(client, editor, si
 
     bar = _bar(client.get(_edit_url(article)).content.decode())
     tools = bar[bar.index('class="nr-editorbar__tools"'):bar.index('id="nr-editorbar-danger"')]
-    icons = re.findall(r'href="([^"]+)"\s+class="w-side-panel-toggle"\s+aria-label="([^"]+)"', tools)
+    icons = re.findall(r'href="([^"]+)"\s+class="w-side-panel-toggle[^"]*"\s+aria-label="([^"]+)"', tools)
 
     # Copiar e inspecionar: ícones nas ferramentas, depois do histórico.
     assert [label for _, label in icons] == ['Histórico', 'Copiar', 'Inspecionar']
@@ -206,6 +208,93 @@ def test_live_article_with_a_scheduled_new_version(editor, site, category):
     assert status['note'] == f'Nova versão agendada para {_when(go_live)}'
 
 
+# ── Controle "Publicação" ─────────────────────────────────────────────────
+
+
+def _publication(client, article):
+    bar = _bar(client.get(_edit_url(article)).content.decode())
+    return re.search(r'<details class="nr-pub".*?</details>', bar, re.S).group(0)
+
+
+@pytest.mark.django_db
+def test_publication_control_without_schedule(client, editor, site, category):
+    article = _article(site, category, editor, 'pub-livre', live=False)
+    article.save_revision(user=editor)
+    client.force_login(editor)
+
+    pub = _publication(client, article)
+
+    assert 'nr-pub__flag' not in pub
+    assert 'Assim que publicar' in pub
+    assert 'Não sai' in pub
+    assert 'nr-pub__alert' not in pub
+    assert re.search(r'Última edição agora por \S', pub)
+    # Os botões clicam nos controles nativos do painel "Status".
+    assert '[data-a11y-dialog-show="schedule-publishing-dialog"]' in pub
+    assert 'Edição livre' in pub
+    assert '>Travar</button>' in pub
+    assert f'href="/cms/snippets/news/article/history/{article.pk}/"' in pub
+
+
+@pytest.mark.django_db
+def test_publication_control_warns_about_a_date_not_yet_scheduled(client, editor, site, category):
+    go_live = timezone.now() + timezone.timedelta(days=2)
+    article = _article(site, category, editor, 'pub-so-data', live=False, go_live_at=go_live)
+    article.save_revision(user=editor)
+    client.force_login(editor)
+
+    pub = _publication(client, article)
+
+    assert 'datas ainda não agendadas' in pub  # rótulo acessível do botão
+    assert 'nr-pub__flag nr-pub__flag--warning' in pub
+    assert f'{_when(go_live)}' in pub
+    assert 'Não agendada' in pub
+    assert 'só valem depois de "Agendar publicação"' in pub
+
+
+@pytest.mark.django_db
+def test_publication_control_shows_an_active_schedule(client, editor, site, category):
+    go_live = timezone.now() + timezone.timedelta(days=2)
+    article = _article(site, category, editor, 'pub-agendada', live=False, go_live_at=go_live)
+    article.save_revision(user=editor).publish(user=editor)
+    client.force_login(editor)
+
+    pub = _publication(client, article)
+
+    assert 'class="nr-pub__button nr-pub--scheduled"' in pub
+    assert ', com agendamento' in pub
+    assert 'nr-pub__flag--warning' not in pub
+    assert 'Não agendada' not in pub
+    assert _when(go_live) in pub
+
+
+@pytest.mark.django_db
+def test_reporter_sees_the_dates_but_cannot_set_them(client, make_panel_user, site, category):
+    """A governança tira as datas do formulário de quem não publica
+    (RestrictedPublishingPanel): o controle mostra, mas não oferece "Definir"."""
+    reporter = make_panel_user('eb_reporter', role=CustomUser.Role.REPORTER)
+    article = _article(site, category, reporter, 'pub-reporter', live=False)
+    article.save_revision(user=reporter)
+    client.force_login(reporter)
+
+    pub = _publication(client, article)
+
+    assert 'Agendamento' in pub
+    assert 'Definir datas' not in pub
+
+
+@pytest.mark.django_db
+def test_publication_control_shows_the_lock(client, editor, site, category):
+    article = _article(site, category, editor, 'pub-travada', locked=True, locked_by=editor, locked_at=timezone.now())
+    article.save_revision(user=editor)
+    client.force_login(editor)
+
+    pub = _publication(client, article)
+
+    assert ', travada' in pub
+    assert '>Destravar</button>' in pub
+
+
 @pytest.mark.django_db
 def test_schedule_button_is_in_portuguese(client, editor, site, category):
     """O catálogo pt-BR do Wagtail 7.4.2 não traduz "Schedule to publish"."""
@@ -266,6 +355,7 @@ def test_category_editor_has_the_bar_without_status(client, root, category):
 
     assert '>Categorias</a>' in bar
     assert 'nr-editorbar__status' not in bar
+    assert 'nr-pub' not in bar
     assert 'name="action-publish"' not in html
 
 
@@ -288,6 +378,8 @@ def test_autosave_response_refreshes_the_bar(client, editor, site, category):
     assert 'Título salvo sozinho' in partials
     assert 'data-w-teleport-target-value="#nr-editorbar-state"' in partials
     assert 'Alterações não publicadas' in partials
+    assert 'data-w-teleport-target-value="#nr-editorbar-publication"' in partials
+    assert 'class="nr-pub__button nr-pub--published"' in partials
     assert 'data-w-teleport-target-value="#nr-editorbar-quick"' in partials
     assert 'data-w-teleport-target-value="#nr-editorbar-danger"' in partials
     assert 'data-w-teleport-target-value="#nr-editorbar-more"' in partials

@@ -96,7 +96,6 @@ class ArticleSnippetViewSet(SnippetViewSet):
     # Regra editorial por notícia (apps/news/permissions.py): quem não publica
     # altera as próprias notícias e as dos colegas só enquanto forem rascunho.
     index_view_class = ArticleIndexView
-    index_template_name = 'news/wagtail/article_index.html'
     index_results_template_name = 'news/wagtail/article_index_results.html'
     add_view_class = ArticleCreateView
     edit_view_class = ArticleEditView

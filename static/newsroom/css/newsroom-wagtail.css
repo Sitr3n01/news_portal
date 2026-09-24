@@ -681,6 +681,80 @@ body#wagtail .nr-cell-nowrap {
     white-space: nowrap;
 }
 
+/* Imagens: ordenação e grade/lista, campos extras da busca. */
+body#wagtail .nr-wlist__search .w-field__wrapper:has(select) {
+    flex: 0 0 auto;
+}
+
+body#wagtail .nr-wlist__search select {
+    height: 38px;
+    min-height: 0;
+    padding-block: 0;
+    font-size: 13px;
+}
+
+body#wagtail .nr-wlist__search .w-layout-switch-control {
+    flex: none;
+}
+
+/* No celular, a busca ocupa a linha e o resto (ordenação, grade/lista,
+   filtros) desce para a de baixo. */
+@media (max-width: 639.98px) {
+    body#wagtail .nr-wlist__search {
+        flex-wrap: wrap;
+        row-gap: 8px;
+    }
+
+    body#wagtail .nr-wlist__search .w-field__wrapper:has(input[name="q"]) {
+        flex: 1 1 100%;
+    }
+}
+
+/* Sem busca nem filtros (Categorias, Tags, Coleções): o cartão é só a tabela. */
+body#wagtail .nr-wlist:not(:has(.nr-wlist__toolbar)) ~ #listing-results {
+    border-top: 1px solid var(--nr-line);
+    border-radius: var(--nr-radius-card);
+}
+
+/* Menu ⋯ do Wagtail no cabeçalho (exportar, reordenar, importar), no
+   desenho dos botões secundários. */
+body#wagtail .nr-listhead__more .w-dropdown__toggle {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 1px solid var(--nr-line-2);
+    border-radius: var(--nr-radius);
+    background: var(--nr-white);
+    color: var(--nr-ink-4);
+}
+
+body#wagtail .nr-listhead__more .w-dropdown__toggle:hover,
+body#wagtail .nr-listhead__more .w-dropdown__toggle[aria-expanded="true"] {
+    background: var(--nr-surface-subtle);
+    color: var(--nr-ink);
+}
+
+body#wagtail .nr-listhead__more .w-dropdown__toggle .icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* Listas vazias das demais seções (a mensagem é a do Wagtail). */
+body#wagtail .nr-wlist ~ #listing-results > .nice-padding.w-mt-8 {
+    margin: 0;
+    padding: 36px 16px;
+    color: var(--nr-muted);
+    font-family: var(--nr-font);
+    font-size: 13px;
+    text-align: center;
+}
+
+body#wagtail .nr-wlist ~ #listing-results > .nice-padding.w-mt-8 p {
+    margin: 0;
+}
+
 body#wagtail .nr-wlist ~ #listing-results {
     margin: 0 24px 24px;
     border: 1px solid var(--nr-line);

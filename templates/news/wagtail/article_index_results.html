@@ -1,12 +1,10 @@
 {% extends "wagtailsnippets/snippets/index_results.html" %}
-{% load newsroom %}
 {% comment %}
     Resultados da listagem de notícias (também a resposta da busca ao vivo).
-    Só troca a mensagem de lista vazia: o Wagtail fixa aqui "Não há Notícias
-    para exibir. Por que não adicionar um?"; a nossa vem de
-    ArticleIndexView.no_results_message, com o caso de cada aba.
+    A mensagem de lista vazia vem de ArticleIndexView.no_results_message, com
+    o caso de cada aba de estado.
 {% endcomment %}
 
 {% block no_results_message %}
-    <p class="nr-wlist__empty">{% nr_icon "inbox" %}<span>{{ no_results_message }}</span></p>
+    {% include "newsroom/wagtail/empty.html" with message=no_results_message %}
 {% endblock %}

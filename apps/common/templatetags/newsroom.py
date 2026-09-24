@@ -23,6 +23,8 @@ from apps.common.newsroom.admin_lists import list_header
 from apps.common.newsroom.branding import get_branding
 from apps.common.newsroom.editor import editor_bar
 from apps.common.newsroom.navigation import build_navigation
+from apps.common.newsroom.wagtail_lists import empty_message as wagtail_empty_message
+from apps.common.newsroom.wagtail_lists import list_header as wagtail_list_header
 
 register = template.Library()
 
@@ -205,6 +207,18 @@ def newsroom_menu_toggle(classname=''):
 def nr_editor_bar(context):
     """Dados da barra única do editor (templates/newsroom/editor/header.html)."""
     return editor_bar(context)
+
+
+@register.simple_tag(takes_context=True)
+def nr_wagtail_list_header(context):
+    """Dados do cabeçalho das listagens do Wagtail (templates/newsroom/wagtail/list_header.html)."""
+    return wagtail_list_header(context)
+
+
+@register.simple_tag(takes_context=True)
+def nr_wagtail_empty_message(context):
+    """Frase de lista vazia das listagens do Wagtail, ou None (fica a do Wagtail)."""
+    return wagtail_empty_message(context)
 
 
 @register.simple_tag(takes_context=True)

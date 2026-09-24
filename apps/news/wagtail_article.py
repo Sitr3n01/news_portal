@@ -90,7 +90,7 @@ def editorial_badge(article):
 
 
 class ArticleIndexView(IndexView):
-    """Listagem de notícias no desenho do painel (news/wagtail/article_index.html):
+    """Listagem de notícias no desenho do painel (newsroom/wagtail/list_header.html):
     cabeçalho com contagem e "Nova notícia", abas por estado editorial com
     contagem (as mesmas da visão geral) e a busca e os filtros do Wagtail."""
 

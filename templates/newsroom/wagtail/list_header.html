@@ -14,9 +14,10 @@
     A faixa da busca recebe a barra de seleção das ações em massa
     (data-nr-selection-dock; newsroom.js a encaixa ali).
 
-    Variáveis: head (título, descrição, total, primary, tabs, state,
-    state_param), mais search_form, filters e index_results_url do contexto
-    da view.
+    Variáveis: head (título, descrição, total, primary, secondary, tabs,
+    state, state_param; apps/common/newsroom/wagtail_lists.py ou, nas
+    notícias, a própria view), mais search_form, filters, index_results_url e,
+    nas imagens, extra_form_fields (ordenação e grade/lista), do contexto.
 {% endcomment %}
 <div class="nr-wlist">
     <div class="nr-listhead nr-wlist__head">
@@ -24,22 +25,31 @@
             <div class="nr-listhead__heading">
                 <h1 class="nr-listhead__title">
                     {{ head.title }}
-                    <span class="nr-listhead__count">{{ head.total }}</span>
+                    {% if head.total is not None %}<span class="nr-listhead__count">{{ head.total }}</span>{% endif %}
                 </h1>
                 {% if head.description %}
                     <p class="nr-listhead__desc">{{ head.description }}</p>
                 {% endif %}
             </div>
-            {% if head.primary %}
+            {% if head.primary or head.secondary %}
                 <div class="nr-listhead__actions">
-                    <a class="nr-btn nr-btn--primary nr-listhead__primary" href="{{ head.primary.url }}" aria-label="{{ head.primary.label }}">
-                        {% nr_icon "plus" %}<span>{{ head.primary.label }}</span>
-                    </a>
+                    {% for action in head.secondary %}
+                        {% if action.component %}
+                            <div class="nr-listhead__more">{% component action.component %}</div>
+                        {% else %}
+                            <a class="nr-btn nr-btn--secondary" href="{{ action.url }}">{{ action.label }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    {% if head.primary %}
+                        <a class="nr-btn nr-btn--primary nr-listhead__primary" href="{{ head.primary.url }}" aria-label="{{ head.primary.label }}">
+                            {% nr_icon "plus" %}<span>{{ head.primary.label }}</span>
+                        </a>
+                    {% endif %}
                 </div>
             {% endif %}
         </div>
         {% if head.tabs %}
-            <nav class="nr-tabs nr-listhead__tabs" aria-label="Estado das notícias">
+            <nav class="nr-tabs nr-listhead__tabs" aria-label="Filtros rápidos">
                 {% for tab in head.tabs %}
                     <a class="nr-tab{% if tab.active %} is-active{% endif %}" href="{{ tab.url }}"{% if tab.active %} aria-current="true"{% endif %}>
                         {{ tab.label }}<span class="nr-tab__count">{{ tab.count }}</span>
@@ -73,6 +83,8 @@
                 {% if head.state %}
                     <input type="hidden" name="{{ head.state_param }}" value="{{ head.state }}">
                 {% endif %}
+
+                {{ extra_form_fields }}
 
                 {% if filters %}
                     <div

@@ -2629,8 +2629,7 @@
 }
 
 .nr-editorbar__menu.is-narrow-only,
-.nr-editorbar__menu-save,
-.nr-editorbar__menu-extra {
+.nr-editorbar__menu-save {
     display: none;
 }
 
@@ -2676,20 +2675,23 @@
     }
 }
 
+/* Barras sem o ajuste automático (a do Django admin): no celular, "Salvar"
+   vai para o menu da seta. A do Wagtail decide isso pela largura real
+   (newsroom-editor.js, [data-nr-fit]). */
 @media (max-width: 639.98px) {
-    .nr-editorbar__save {
+    .nr-editorbar:not([data-nr-fit]) .nr-editorbar__save {
         display: none !important;
     }
 
-    .nr-editorbar__menu.is-narrow-only {
+    .nr-editorbar:not([data-nr-fit]) .nr-editorbar__menu.is-narrow-only {
         display: block;
     }
 
-    .nr-editorbar__menu-save {
+    .nr-editorbar:not([data-nr-fit]) .nr-editorbar__menu-save {
         display: flex;
     }
 
-    hr.nr-editorbar__menu-save {
+    .nr-editorbar:not([data-nr-fit]) hr.nr-editorbar__menu-save {
         display: block;
     }
 
@@ -2700,17 +2702,56 @@
     .nr-editorbar__label--short {
         display: inline;
     }
+}
 
-    /* Copiar, inspecionar e remover saem da barra e vão para o menu do
-       publicar (newsroom-editor.js), abrindo espaço para "Publicação". */
-    .nr-editorbar__quick,
-    .nr-editorbar__danger {
-        display: none;
-    }
+/* Barra que se ajusta à largura (newsroom-editor.js, fitBar): o que não cabe
+   vai para o ⋯ das ferramentas, e "Salvar rascunho" para o menu da seta. */
+.nr-editorbar[data-nr-fit] .is-nr-overflowed {
+    display: none !important;
+}
 
-    .nr-editorbar__menu-extra {
-        display: contents;
-    }
+.nr-editorbar.is-nr-save-in-menu .nr-editorbar__menu.is-narrow-only {
+    display: block;
+}
+
+.nr-editorbar.is-nr-save-in-menu .nr-editorbar__menu-save {
+    display: flex;
+}
+
+.nr-editorbar.is-nr-save-in-menu hr.nr-editorbar__menu-save {
+    display: block;
+}
+
+.nr-editorbar__overflow {
+    position: relative;
+}
+
+.nr-editorbar__overflow[hidden] {
+    display: none;
+}
+
+.nr-editorbar__overflow-button {
+    list-style: none;
+    cursor: pointer;
+}
+
+.nr-editorbar__overflow-button::-webkit-details-marker {
+    display: none;
+}
+
+:is(body#wagtail, #main) .nr-editorbar .nr-editorbar__overflow[open] .nr-editorbar__overflow-button {
+    background: var(--nr-hover);
+    color: var(--nr-ink);
+}
+
+.nr-editorbar__overflow-button .nr-icon {
+    width: 17px;
+    height: 17px;
+}
+
+.nr-editorbar__overflow-menu {
+    top: calc(100% + 6px);
+    min-width: 210px;
 }
 
 /* Ferramentas próprias (Django admin: Guia, Histórico, Ver no site), com o

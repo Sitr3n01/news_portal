@@ -12,7 +12,7 @@
  * Arrumação:
  * - principal (preto): o passo que leva a matéria adiante: aprovar, publicar
  *   ou enviar para moderação, nessa ordem de preferência;
- * - "Salvar rascunho" ao lado, como secundário (no celular vai para o menu);
+ * - "Salvar rascunho" ao lado, como secundário (sem espaço, vai para o menu);
  * - o resto (retirar do ar, cancelar moderação, outras ações de moderação) no
  *   menu da seta, com as destrutivas por último.
  *
@@ -189,43 +189,204 @@
         return controls[0];
     }
 
-    function menuLink(source, className) {
-        var link = document.createElement('a');
-        link.className = className;
-        link.href = source.getAttribute('href');
+    // ── Barra que se ajusta à largura ────────────────────────────────────
+    // Com a barra em duas linhas (título em cima, ferramentas e ações
+    // embaixo), a linha de baixo mostra o que couber, na ordem de importância
+    // de FIT_ORDER; o que não couber vai para o botão ⋯ ("Mais ferramentas")
+    // da própria fileira. "Salvar rascunho" é o único que vai para outro lugar:
+    // o menu da seta do publicar, onde já ficava no celular. Em uma linha só
+    // (barra larga), tudo fica à vista. Sem este script, a linha só quebra.
+    var HIDDEN = 'is-nr-overflowed';
+    var FIT_ORDER = [
+        '[data-side-panel-toggle="preview"]',
+        '[data-side-panel-toggle="checks"]',
+        '.nr-editorbar__save',
+        '.nr-editorbar__history',
+        '#nr-editorbar-quick a',
+        '.nr-editorbar__remove'
+    ];
+
+    function fitCandidates(bar) {
+        var found = [];
+        FIT_ORDER.forEach(function (selector) {
+            bar.querySelectorAll(selector).forEach(function (element) {
+                if (found.indexOf(element) < 0) {
+                    found.push(element);
+                }
+            });
+        });
+        return found;
+    }
+
+    function sameLine(a, b) {
+        var first = a.getBoundingClientRect();
+        var second = b.getBoundingClientRect();
+        return Math.abs((first.top + first.height / 2) - (second.top + second.height / 2)) < first.height / 2;
+    }
+
+    function fitBar(bar) {
+        var start = bar.querySelector('.nr-editorbar__start');
+        var end = bar.querySelector('.nr-editorbar__end');
+        var tools = bar.querySelector('.nr-editorbar__tools');
+        var commit = bar.querySelector('.nr-editorbar__commit');
+        var overflow = bar.querySelector('.nr-editorbar__overflow');
+        if (!start || !end || !tools || !commit || !overflow) {
+            return;
+        }
+        var candidates = fitCandidates(bar);
+        var save = bar.querySelector('.nr-editorbar__save');
+        var fits = function () {
+            return end.scrollWidth <= end.clientWidth + 1 && sameLine(tools, commit);
+        };
+
+        candidates.forEach(function (element) {
+            element.classList.remove(HIDDEN);
+        });
+        bar.classList.remove('is-nr-save-in-menu');
+        overflow.hidden = true;
+        if (sameLine(start, end) || fits()) {
+            return;
+        }
+
+        // Tudo recolhido, depois de volta um a um, na ordem de importância,
+        // enquanto couber. Um item grande que não cabe não impede um menor.
+        overflow.hidden = false;
+        candidates.forEach(function (element) {
+            element.classList.add(HIDDEN);
+        });
+        bar.classList.add('is-nr-save-in-menu');
+        candidates.forEach(function (element) {
+            element.classList.remove(HIDDEN);
+            if (element === save) {
+                bar.classList.remove('is-nr-save-in-menu');
+            }
+            if (!fits()) {
+                element.classList.add(HIDDEN);
+                if (element === save) {
+                    bar.classList.add('is-nr-save-in-menu');
+                }
+            }
+        });
+        var inOverflow = candidates.some(function (element) {
+            return element !== save && element.classList.contains(HIDDEN);
+        });
+        if (!inOverflow) {
+            overflow.hidden = true;
+        }
+    }
+
+    function overflowItem(source, className) {
+        var isLink = source.tagName === 'A';
+        var item = document.createElement(isLink ? 'a' : 'button');
+        item.className = className;
+        if (isLink) {
+            item.href = source.getAttribute('href');
+        } else {
+            item.type = 'button';
+            item.addEventListener('click', function () {
+                closeMenu(item);
+                source.click();
+            });
+        }
         var drawing = source.querySelector('svg');
         if (drawing) {
             var copy = drawing.cloneNode(true);
             copy.setAttribute('class', 'nr-icon');
-            link.appendChild(copy);
+            item.appendChild(copy);
         }
+        var named = source.querySelector('.w-side-panel-toggle__label, .nr-editorbar__label');
         var text = document.createElement('span');
-        text.textContent = source.getAttribute('aria-label');
-        link.appendChild(text);
-        return link;
+        text.textContent = (named && named.textContent.trim()) || source.getAttribute('aria-label') || '';
+        item.appendChild(text);
+        return item;
     }
 
-    // No celular, copiar, inspecionar (newsroom/editor/_quick.html) e remover
-    // (_danger.html) saem da barra e vêm para o menu. Copiados a cada abertura:
-    // na criação, eles só chegam com o primeiro salvamento automático.
-    function syncExtras(holder) {
-        holder.textContent = '';
-        var quick = document.querySelectorAll('#nr-editorbar-quick a');
-        var remove = document.querySelector('#nr-editorbar-danger .nr-editorbar__remove');
-        if (quick.length) {
-            var divider = document.createElement('hr');
-            divider.className = 'nr-menu__divider';
-            holder.appendChild(divider);
-            Array.prototype.forEach.call(quick, function (source) {
-                holder.appendChild(menuLink(source, 'nr-menu__item'));
+    // O menu ⋯ é montado a cada abertura, com o que está recolhido naquele
+    // momento; remover vem por último, separado.
+    function fillOverflow(bar, menu) {
+        menu.textContent = '';
+        var hidden = fitCandidates(bar).filter(function (element) {
+            return element.classList.contains(HIDDEN) && !element.classList.contains('nr-editorbar__save');
+        });
+        hidden.forEach(function (element) {
+            var danger = element.classList.contains('nr-editorbar__remove');
+            if (danger && menu.childElementCount) {
+                var divider = document.createElement('hr');
+                divider.className = 'nr-menu__divider';
+                menu.appendChild(divider);
+            }
+            menu.appendChild(overflowItem(element, 'nr-menu__item' + (danger ? ' is-danger' : '')));
+        });
+        // O botão fica no meio da barra: o menu não pode sair da tela.
+        menu.style.left = '0px';
+        var box = menu.getBoundingClientRect();
+        var shift = Math.min(0, window.innerWidth - 12 - box.right) + Math.max(0, 12 - box.left);
+        menu.style.left = shift + 'px';
+    }
+
+    function setupFit(bar) {
+        var tools = bar.querySelector('.nr-editorbar__tools');
+        var end = bar.querySelector('.nr-editorbar__end');
+        if (!tools || !end) {
+            return;
+        }
+        var overflow = document.createElement('details');
+        overflow.className = 'nr-editorbar__overflow';
+        overflow.setAttribute('data-nr-dropdown', '');
+        overflow.hidden = true;
+        var summary = document.createElement('summary');
+        summary.className = 'w-side-panel-toggle nr-editorbar__overflow-button';
+        summary.setAttribute('aria-label', 'Mais ferramentas');
+        summary.appendChild(icon('ellipsis'));
+        overflow.appendChild(summary);
+        var menu = document.createElement('div');
+        menu.className = 'nr-menu nr-editorbar__overflow-menu';
+        overflow.appendChild(menu);
+        overflow.addEventListener('toggle', function () {
+            if (overflow.open) {
+                fillOverflow(bar, menu);
+            }
+        });
+        tools.appendChild(overflow);
+        bar.setAttribute('data-nr-fit', '');
+
+        var queued = false;
+        var refit = function () {
+            if (queued) {
+                return;
+            }
+            queued = true;
+            // setTimeout, não requestAnimationFrame: com a aba oculta o rAF para.
+            window.setTimeout(function () {
+                queued = false;
+                if (!overflow.open) {
+                    fitBar(bar);
+                }
+            }, 0);
+        };
+        var width = 0;
+        new ResizeObserver(function (entries) {
+            var current = Math.round(entries[0].contentRect.width);
+            if (current !== width) {
+                width = current;
+                refit();
+            }
+        }).observe(bar);
+        // O salvamento automático troca pedaços da barra (Publicação, ícones,
+        // remover), e a largura deles muda. As mudanças dentro do próprio ⋯
+        // (o menu montado a cada abertura) não contam.
+        new MutationObserver(function (changes) {
+            var outside = changes.some(function (change) {
+                return !overflow.contains(change.target);
             });
+            if (outside) {
+                refit();
+            }
+        }).observe(end, {childList: true, subtree: true});
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(refit);
         }
-        if (remove) {
-            var line = document.createElement('hr');
-            line.className = 'nr-menu__divider';
-            holder.appendChild(line);
-            holder.appendChild(menuLink(remove, 'nr-menu__item is-danger'));
-        }
+        fitBar(bar);
     }
 
     function build() {
@@ -269,8 +430,7 @@
         group.className = 'nr-editorbar__split';
         group.appendChild(makeControl(primary, 'nr-btn nr-btn--primary nr-editorbar__primary'));
 
-        var dangerSlot = bar.querySelector('#nr-editorbar-danger');
-        if (others.length || save || dangerSlot) {
+        if (others.length || save) {
             var details = document.createElement('details');
             details.className = 'nr-editorbar__menu' + (others.length ? '' : ' is-narrow-only');
             details.setAttribute('data-nr-dropdown', '');
@@ -282,7 +442,7 @@
             var menu = document.createElement('div');
             menu.className = 'nr-menu nr-menu--right';
             if (save) {
-                // No celular o "Salvar rascunho" sai da barra e vem para cá.
+                // Quando não cabe na barra (fitBar), o "Salvar rascunho" vem para cá.
                 menu.appendChild(makeControl(save, 'nr-menu__item nr-editorbar__menu-save'));
             }
             others.forEach(function (control, index) {
@@ -296,23 +456,15 @@
                 }
                 menu.appendChild(makeControl(control, 'nr-menu__item'));
             });
-            if (dangerSlot) {
-                var holder = document.createElement('div');
-                holder.className = 'nr-editorbar__menu-extra';
-                menu.appendChild(holder);
-                syncExtras(holder);
-                details.addEventListener('toggle', function () {
-                    if (details.open) {
-                        syncExtras(holder);
-                    }
-                });
-            }
             details.appendChild(menu);
             group.appendChild(details);
         }
 
         slot.appendChild(group);
         document.documentElement.classList.add(READY_CLASS);
+        if (window.ResizeObserver) {
+            setupFit(bar);
+        }
     }
 
     // O controle "Publicação" (newsroom/editor/_publication.html) só clica nos

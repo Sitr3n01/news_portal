@@ -602,13 +602,6 @@ html.nr-editorbar-ready body#wagtail form[data-edit-form] > footer .actions--pri
     body#wagtail .nr-editorbar__tools {
         gap: 0;
     }
-
-    /* "Publicação", as ferramentas e o publicar cabem numa linha a partir de
-       ~340px; abaixo disso, o publicar desce, alinhado à direita. */
-    /* O histórico também está no controle "Publicação". */
-    body#wagtail .nr-editorbar__tools:has(.nr-pub) .nr-editorbar__history {
-        display: none;
-    }
 }
 
 /* Listagens no celular: a tabela nativa rola dentro da própria área, com

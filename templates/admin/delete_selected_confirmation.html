@@ -1,0 +1,52 @@
+{% extends "admin/delete_selected_confirmation.html" %}
+{% load i18n l10n %}
+{% comment %}
+    Override do projeto (estende o do Unfold): a confirmação da ação em massa
+    "Remover" no cartão do painel (o mesmo de templates/admin/delete_confirmation.html).
+    Campos ocultos, a ação e o cancel.js do Django são os originais.
+{% endcomment %}
+
+{% block content %}
+    <div class="nr-confirm">
+        {% if perms_lacking %}
+            <p class="nr-confirm__title">Não dá para remover os itens selecionados</p>
+            <p class="nr-confirm__text">Removê-los também removeria itens que a sua conta não pode remover:</p>
+            <ul class="nr-confirm__list">
+                {% for obj in perms_lacking %}<li>{{ obj }}</li>{% endfor %}
+            </ul>
+        {% elif protected %}
+            <p class="nr-confirm__title">Não dá para remover os itens selecionados</p>
+            <p class="nr-confirm__text">Estes itens dependem deles e estão protegidos. Remova ou altere antes:</p>
+            <ul class="nr-confirm__list">
+                {% for obj in protected %}<li>{{ obj }}</li>{% endfor %}
+            </ul>
+        {% else %}
+            <p class="nr-confirm__title">Remover {{ queryset|length }} {{ objects_name }}?</p>
+            <p class="nr-confirm__text">Essa ação não pode ser desfeita.{% if model_count %} Serão removidos:{% endif %}</p>
+            {% if model_count %}
+                <ul class="nr-confirm__list">
+                    {% for model_name, object_count in model_count %}
+                        <li>{{ model_name|capfirst }}: {{ object_count }}</li>
+                    {% endfor %}
+                </ul>
+                <details class="nr-confirm__details">
+                    <summary>Ver cada item afetado</summary>
+                    {% for deletable_object in deletable_objects %}
+                        <ul>{{ deletable_object|unordered_list }}</ul>
+                    {% endfor %}
+                </details>
+            {% endif %}
+            <form method="post" class="nr-confirm__actions">
+                {% csrf_token %}
+                {% if request.POST.dataset %}<input type="hidden" name="dataset" value="{{ request.POST.dataset }}">{% endif %}
+                {% for obj in queryset %}
+                    <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}">
+                {% endfor %}
+                <input type="hidden" name="action" value="delete_selected">
+                <input type="hidden" name="post" value="yes">
+                <a href="#" class="nr-btn nr-btn--secondary cancel-link">Cancelar</a>
+                <button type="submit" class="nr-btn nr-btn--danger">Remover</button>
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}

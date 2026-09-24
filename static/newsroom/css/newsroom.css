@@ -1862,6 +1862,139 @@
     white-space: nowrap;
 }
 
+/* ── Cartão de confirmação (remover), no Wagtail e no Django admin ───────
+   templates/wagtailadmin/generic/confirm_delete.html e
+   templates/admin/delete_confirmation.html. */
+
+.nr-confirm {
+    max-width: 560px;
+    margin: 24px 0;
+    padding: 22px 24px;
+    border: 1px solid var(--nr-line);
+    border-radius: var(--nr-radius-card);
+    background: var(--nr-white);
+    font-family: var(--nr-font);
+}
+
+.nr-confirm__title {
+    margin: 0 0 6px;
+    color: var(--nr-ink);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+}
+
+.nr-confirm__text,
+.nr-confirm__usage {
+    margin: 0 0 6px;
+    color: var(--nr-ink-4);
+    font-size: 13.5px;
+    line-height: 1.5;
+}
+
+.nr-confirm__usage a {
+    color: var(--nr-blue-strong);
+    font-weight: 600;
+}
+
+.nr-confirm__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.nr-confirm .nr-btn {
+    min-height: 38px;
+    font-family: inherit;
+}
+
+.nr-confirm__list {
+    margin: 8px 0 0;
+    padding-left: 18px;
+    color: var(--nr-ink-4);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.nr-confirm__details {
+    margin-top: 10px;
+    color: var(--nr-ink-4);
+    font-size: 12.5px;
+}
+
+.nr-confirm__details summary {
+    color: var(--nr-blue-strong);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.nr-confirm__details ul {
+    max-height: 260px;
+    margin: 8px 0 0;
+    padding-left: 18px;
+    overflow-y: auto;
+    line-height: 1.6;
+}
+
+/* ── Histórico de modificações do Django admin (templates/admin/object_history.html) */
+
+.nr-card.nr-history {
+    padding: 0;
+    overflow-x: auto;
+}
+
+.nr-history__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.nr-history__table th {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--nr-line);
+    color: var(--nr-muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.nr-history__table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--nr-line);
+    color: var(--nr-ink-4);
+    vertical-align: top;
+}
+
+.nr-history__table tr:last-child td {
+    border-bottom: 0;
+}
+
+.nr-history__when {
+    color: var(--nr-ink);
+    white-space: nowrap;
+}
+
+.nr-history__pages {
+    display: flex;
+    gap: 12px;
+    padding: 12px 14px;
+    border-top: 1px solid var(--nr-line);
+    font-size: 13px;
+}
+
+.nr-history__pages .is-current {
+    color: var(--nr-ink);
+    font-weight: 600;
+}
+
+.nr-empty .nr-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    vertical-align: -4px;
+}
+
 /* ── Cartões inferiores ─────────────────────────────────────────────────── */
 
 .nr-bottom-grid {

@@ -151,3 +151,34 @@ def test_multiple_image_upload_uses_the_page_header(client, root):
 
     assert '<header class="nr-editorbar nr-pagebar">' in html
     assert '<header class="w-slim-header' not in html
+
+
+# ── Django admin: exclusão e histórico no desenho do painel ────────────────
+
+
+@pytest.mark.django_db
+def test_django_delete_confirmation_is_the_panel_card(client, root):
+    from django.contrib.auth.models import Group, Permission
+
+    group = Group.objects.create(name='Grupo de teste')
+    group.permissions.set(Permission.objects.all()[:30])
+    client.force_login(root)
+
+    html = client.get(reverse('admin:auth_group_delete', args=[group.pk])).content.decode()
+
+    assert 'Remover grupo “Grupo de teste”?' in html
+    assert 'class="nr-btn nr-btn--danger">Remover</button>' in html
+    # O resumo fica à vista; a lista de cada item afetado, recolhida.
+    assert re.search(r'Relacionamentos? group-permission: 30', html)
+    assert '<details class="nr-confirm__details">' in html
+    assert 'Are you sure' not in html
+
+
+@pytest.mark.django_db
+def test_django_history_uses_the_list_header(client, root):
+    client.force_login(root)
+
+    html = client.get(reverse('admin:accounts_customuser_history', args=[root.pk])).content.decode()
+
+    assert re.search(r'<h1 class="nr-listhead__title">\s*Histórico de modificações', html)
+    assert 'Nenhuma alteração registrada.' in html

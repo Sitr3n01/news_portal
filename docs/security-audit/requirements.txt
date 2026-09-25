@@ -1,0 +1,4 @@
+reportlab>=4.0
+matplotlib>=3.8
+# opcional, só para --previa (rasterizar as páginas)
+pypdfium2>=4.0

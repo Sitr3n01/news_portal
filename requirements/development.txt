@@ -1,6 +1,6 @@
 -r base.txt
 django-debug-toolbar>=4.3
-django-browser-reload>=1.12
+django-browser-reload>=1.21.0
 ruff>=0.4
 pytest-django>=4.8
 factory-boy>=3.3.3

@@ -113,7 +113,8 @@ class CustomUserAdmin(AdminUXMixin, ModelAdmin, UserAdmin):
         ('Cargo e permissões', {
             'fields': ('role', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
             'classes': ('tab',),
-            'description': 'Administrador Komuniki e Administrador Geral liberam automaticamente o acesso administrativo ao salvar. Superusuário continua sendo uma escolha separada.',
+            'description': 'Administrador Komuniki e Administrador Geral liberam automaticamente o acesso administrativo ao salvar. '
+                           'Superusuário, grupos e permissões individuais só podem ser alterados por um superusuário.',
         }),
         ('Perfil', {'fields': ('avatar', 'bio'), 'classes': ('tab',)}),
         ('Datas Importantes', {'fields': ('last_login', 'date_joined'), 'classes': ('collapse',)}),
@@ -137,6 +138,36 @@ class CustomUserAdmin(AdminUXMixin, ModelAdmin, UserAdmin):
         css = {
             'all': [],
         }
+
+    # Campos que dão privilégio por fora do cargo. Só superusuário os altera: o
+    # caminho normal é o `role`, que sincroniza os grupos em save_related. Sem
+    # esta trava, qualquer conta com accounts.change_customuser (o Administrador
+    # Geral) marcava is_superuser na própria conta ou se dava permissões avulsas.
+    SUPERUSER_ONLY_FIELDS = ('is_superuser', 'groups', 'user_permissions')
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly = list(super().get_readonly_fields(request, obj))
+        if not request.user.is_superuser:
+            readonly += [field for field in self.SUPERUSER_ONLY_FIELDS if field not in readonly]
+        return readonly
+
+    @staticmethod
+    def _is_protected_superuser(request, obj):
+        return obj is not None and obj.is_superuser and not request.user.is_superuser
+
+    def has_change_permission(self, request, obj=None):
+        # Também fecha a troca de senha: UserAdmin.user_change_password confere
+        # exatamente has_change_permission(request, usuário).
+        if self._is_protected_superuser(request, obj):
+            return False
+        return super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        # Vale para a exclusão em massa também: get_deleted_objects confere
+        # objeto a objeto e recusa a ação inteira se houver um superusuário.
+        if self._is_protected_superuser(request, obj):
+            return False
+        return super().has_delete_permission(request, obj)
 
     def nr_form_links(self, request, obj):
         # A tela de senha do Django não tinha caminho a partir do usuário.

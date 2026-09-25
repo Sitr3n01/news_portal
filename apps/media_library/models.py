@@ -1,7 +1,24 @@
 from django.conf import settings
+from django.core.validators import FileExtensionValidator
 from django.db import models
 
 from apps.common.models import TimeStampedModel
+from apps.common.validators import ALLOWED_IMAGE_EXTENSIONS
+
+# Extensões aceitas, por tipo — fonte única: o admin detecta o tipo daqui.
+#
+# Lista branca, e não "qualquer arquivo": /media/ é servida pelo nginx na MESMA
+# origem do /admin/ e do /cms/. Um .html, .svg, .xml ou .js enviado aqui abria
+# como página e rodava script com a sessão de quem clicasse no link. SVG ficou
+# de fora por isso (é XML com <script>); GIF e BMP não executam nada.
+EXTRA_IMAGE_EXTENSIONS = {'.gif', '.bmp'}
+DOCUMENT_EXTENSIONS = {'.pdf', '.doc', '.docx', '.odt', '.txt', '.rtf', '.xls', '.xlsx', '.csv', '.ppt', '.pptx'}
+VIDEO_EXTENSIONS = {'.mp4', '.mov', '.avi', '.webm', '.mkv'}
+AUDIO_EXTENSIONS = {'.mp3', '.wav', '.ogg', '.m4a', '.flac', '.aac'}
+ALLOWED_EXTENSIONS = sorted(
+    ext.lstrip('.')
+    for ext in ALLOWED_IMAGE_EXTENSIONS | EXTRA_IMAGE_EXTENSIONS | DOCUMENT_EXTENSIONS | VIDEO_EXTENSIONS | AUDIO_EXTENSIONS
+)
 
 
 class MediaFolder(models.Model):
@@ -34,7 +51,11 @@ class MediaFile(TimeStampedModel):
         OTHER = 'other', 'Outro'
 
     title = models.CharField('Título', max_length=255)
-    file = models.FileField('Arquivo', upload_to='media_library/files/')
+    file = models.FileField(
+        'Arquivo', upload_to='media_library/files/',
+        validators=[FileExtensionValidator(ALLOWED_EXTENSIONS)],
+        help_text='Imagens (JPG, PNG, WebP, GIF, BMP), documentos (PDF, Office, texto), vídeo ou áudio.',
+    )
     file_type = models.CharField('Tipo de arquivo', max_length=20, choices=FileType.choices, default=FileType.OTHER)
     alt_text = models.CharField(
         'Texto alternativo',

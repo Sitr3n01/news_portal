@@ -51,10 +51,11 @@ INSTALLED_APPS = [
     # passa a se chamar wagtailcore.UserProfile e esperar a tabela
     # `wagtailcore_userprofile`, que NENHUMA migration do wagtailcore cria. O
     # resultado é tabela inexistente em runtime.
-    # As telas de Usuários/Grupos que este app acrescenta ao /cms/ são protegidas
-    # pelas permissões `wagtailusers`, que nenhum grupo de cargo recebe
-    # (ver apps/accounts/admin_roles.GENERAL_ADMIN_APP_LABELS), então só
-    # superusuário as enxerga.
+    # As telas de Usuários/Grupos que este app acrescenta ao /cms/ conferem as
+    # permissões do modelo de usuário (accounts.*_customuser) e de auth.group,
+    # não uma permissão própria. Criar, editar e excluir usuários ali é travado
+    # para não-superusuários em apps/accounts/wagtail_hooks.py, e o
+    # Administrador Geral só vê grupos (apps/accounts/admin_roles.py).
     'wagtail.users',
     'wagtail.contrib.table_block',
     # Redirecionamentos: trocar o endereço (slug) de uma notícia que já esteve
@@ -199,6 +200,17 @@ WAGTAILADMIN_BASE_URL = env('WAGTAILADMIN_BASE_URL', default='http://localhost:8
 # of cms_media, otherwise Wagtail creates the stock models instead.
 WAGTAILIMAGES_IMAGE_MODEL = 'cms_media.Image'
 WAGTAILDOCS_DOCUMENT_MODEL = 'cms_media.Document'
+
+# Documentos: lista branca de extensões. Sem ela o Wagtail aceita qualquer
+# arquivo, e um .html/.svg enviado como "documento" abria direto em
+# /media/documents/ — mesma origem do /admin/ e do /cms/, com o script rodando
+# na sessão de quem abrisse o link. Mesma lista de documentos da biblioteca
+# legada (apps/media_library/models.py).
+WAGTAILDOCS_EXTENSIONS = ['pdf', 'doc', 'docx', 'odt', 'rtf', 'txt', 'csv', 'xls', 'xlsx', 'ppt', 'pptx']
+# Explícito, e não por omissão: documentos saem só pela view do Wagtail
+# (/documents/<id>/<arquivo>), que confere a privacidade da coleção e responde
+# com CSP sandbox. O nginx não serve /media/documents/ (docker/nginx/nginx.conf).
+WAGTAILDOCS_SERVE_METHOD = 'serve_view'
 
 # Teto de upload de imagem no caminho do Wagtail (/cms/images/).
 #

@@ -40,6 +40,9 @@
 | Flood/scrapers | Rate limit no nginx (10 req/s, burst 20) | `nginx.conf` |
 | Container comprometido | Processo como usuário não-root | `Dockerfile` |
 | Vazamento entre portais | Manager `on_site` em views/feeds/sitemaps | Toda a camada pública |
+| Rascunho lido por ID (favoritar/curtir/comentar) | Ações do leitor só alcançam notícia publicada do Site atual; o painel do leitor aplica o mesmo recorte | `apps/news/views.py` (`_published_article_or_404`) |
+| Escalada para superusuário | `is_superuser`, grupos e permissões avulsas só por superusuário; superusuário não é editável, excluível nem tem a senha trocada por quem não é; Administrador Geral só **vê** grupos; usuários no `/cms/` só por superusuário | `apps/accounts/admin.py`, `admin_roles.py`, `wagtail_hooks.py` |
+| XSS por upload (HTML/SVG na mesma origem) | Lista branca de extensões na Biblioteca de mídia e nos Documentos; nginx recusa tipos executáveis em `/media/` e não serve `/media/documents/` | `apps/media_library/models.py`, `base.py` (`WAGTAILDOCS_EXTENSIONS`), `nginx.conf` |
 | Bots/spam em formulários | Cloudflare Turnstile (widget + siteverify) | `apps/common/turnstile.py` + forms |
 | Bots/scraping na borda | Cloudflare proxy + Bot Fight Mode + firewall só-CF | Cloudflare + `cloudflare-firewall.sh` |
 | IP real atrás do proxy | `realip` lendo `CF-Connecting-IP` | `nginx.conf` + `cloudflare-realip.conf` |
@@ -174,7 +177,8 @@ Configurada em `base.py` via `django-csp` e **espelhada** no [`nginx.conf`](../.
 
 - **Rate limiting (nginx):** `limit_req_zone ... rate=10r/s` com `burst=20 nodelay` — segura floods e scrapers.
 - **Limite de upload:** `client_max_body_size 10M` (alinhado com `DATA_UPLOAD_MAX_MEMORY_SIZE` do Django).
-- **Locations internas:** `/protected/` e `/media/hiring/resumes/` são `internal` — só acessíveis via `X-Accel-Redirect`.
+- **Locations internas:** `/protected/` e `/media/hiring/resumes/` são `internal` — só acessíveis via `X-Accel-Redirect`. `/media/documents/` também: documentos do Wagtail saem só por `/documents/<id>/<arquivo>` (checagem de coleção + CSP sandbox).
+- **Sem conteúdo executável em `/media/`:** `.html`, `.htm`, `.shtml`, `.xhtml`, `.svg`, `.svgz`, `.xml`, `.xsl`, `.js` e `.mjs` respondem 404. `/media/` é a mesma origem do `/admin/` e do `/cms/`: um HTML enviado por upload rodaria script com a sessão de quem abrisse o link. Os uploads já recusam essas extensões; a regra do nginx cobre arquivos antigos.
 - **Container não-root:** o processo roda como `appuser` (UID 1000), reduzindo impacto de um comprometimento.
 - **TLS:** Certbot/Let's Encrypt no nginx (bloco `:443` ativo).
 - **Proteção de bots (Cloudflare):** duas camadas — Turnstile nos formulários (app) e Bot Fight Mode + firewall só-Cloudflare na borda. Blocos de comando em [cloudflare-bots.md](cloudflare-bots.md).
@@ -209,9 +213,11 @@ Configurada em `base.py` via `django-csp` e **espelhada** no [`nginx.conf`](../.
 
 - [ ] Conteúdo HTML novo do usuário? Garanta sanitização no `save()` via `apps.common.sanitization`.
 - [ ] View pública nova? Use `on_site`, nunca `objects`.
+- [ ] Rota que recebe ID do navegador? Busque já com o recorte de quem chama (publicada + `on_site` para o leitor, posse para dados pessoais, permissão de modelo **e** a mesma regra da tela para o painel).
+- [ ] Campo ou ação que dá privilégio (superusuário, grupos, permissões)? Só superusuário, nos dois painéis.
 - [ ] Formulário novo? Tem `{% csrf_token %}`?
 - [ ] Mensagem de erro de auth/candidatura? Mantenha genérica (não revele existência de dados).
-- [ ] Upload novo? Valide conteúdo real (magic bytes), não só extensão/MIME.
+- [ ] Upload novo? Lista branca de extensões (nada que o navegador execute: HTML, SVG, XML, JS) e valide conteúdo real (magic bytes), não só extensão/MIME.
 - [ ] Template novo? Não use o filtro de escape-off; use `|sanitize_html`.
 - [ ] Mudou middleware? Confira a ordem (axes depois de auth; CSP por último).
 

@@ -18,13 +18,14 @@ from apps.common.validators import (
     validate_uploaded_image,
 )
 
-from .models import MediaFile, MediaFolder
-
-# Extensões reconhecidas por tipo — a auto-detecção evita o usuário escolher na mão.
-_DOCUMENT_EXTS = {'.pdf', '.doc', '.docx', '.odt', '.txt', '.rtf', '.xls', '.xlsx', '.csv', '.ppt', '.pptx'}
-_VIDEO_EXTS = {'.mp4', '.mov', '.avi', '.webm', '.mkv'}
-_AUDIO_EXTS = {'.mp3', '.wav', '.ogg', '.m4a', '.flac', '.aac'}
-_OTHER_IMAGE_EXTS = {'.gif', '.bmp', '.svg'}  # imagens exibíveis, mas fora do pipeline de otimização
+from .models import (
+    AUDIO_EXTENSIONS,
+    DOCUMENT_EXTENSIONS,
+    EXTRA_IMAGE_EXTENSIONS,
+    VIDEO_EXTENSIONS,
+    MediaFile,
+    MediaFolder,
+)
 
 _TYPE_ICONS = {
     MediaFile.FileType.IMAGE: 'image',
@@ -37,13 +38,15 @@ _TYPE_ICONS = {
 
 def _detect_file_type(name):
     ext = Path(name or '').suffix.lower()
-    if ext in ALLOWED_IMAGE_EXTENSIONS or ext in _OTHER_IMAGE_EXTS:
+    # A auto-detecção evita o usuário escolher o tipo na mão. GIF e BMP são
+    # imagens exibíveis, mas ficam fora do pipeline de otimização.
+    if ext in ALLOWED_IMAGE_EXTENSIONS or ext in EXTRA_IMAGE_EXTENSIONS:
         return MediaFile.FileType.IMAGE
-    if ext in _DOCUMENT_EXTS:
+    if ext in DOCUMENT_EXTENSIONS:
         return MediaFile.FileType.DOCUMENT
-    if ext in _VIDEO_EXTS:
+    if ext in VIDEO_EXTENSIONS:
         return MediaFile.FileType.VIDEO
-    if ext in _AUDIO_EXTS:
+    if ext in AUDIO_EXTENSIONS:
         return MediaFile.FileType.AUDIO
     return MediaFile.FileType.OTHER
 
@@ -96,8 +99,9 @@ class MediaFileForm(forms.ModelForm):
 
     def clean_file(self):
         uploaded = self.cleaned_data.get('file')
-        # Valida como imagem só quando a extensão é de imagem do pipeline; PDFs,
-        # vídeos e afins passam livremente — a biblioteca aceita qualquer arquivo.
+        # A extensão já passou pela lista branca do modelo (MediaFile.file); aqui
+        # as imagens do pipeline ainda são abertas pelo Pillow, para barrar
+        # arquivo renomeado ou corrompido.
         if uploaded and Path(uploaded.name).suffix.lower() in ALLOWED_IMAGE_EXTENSIONS:
             validate_uploaded_image(uploaded)
         return uploaded

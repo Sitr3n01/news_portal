@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         // Prevents Flash Of Unstyled Content (FOUC) on theme change.
         // Padrão claro: só escurece quando o usuário escolheu 'dark' explicitamente.
         if (localStorage.getItem('theme') === 'dark') {
@@ -58,7 +58,7 @@
 
     <!-- Tailwind (engine auto-hospedado e pinado, com plugins forms+container-queries) -->
     <script src="{% static 'js/vendor/tailwind.forms-cq.min.js' %}"></script>
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         tailwind.config = {
             darkMode: "class",
             theme: {
@@ -98,6 +98,8 @@
     <script src="{% static 'js/vendor/htmx.min.js' %}" defer></script>
     <script defer src="{% static 'js/news-theme-reveal.js' %}"></script>
     <script defer src="{% static 'js/vendor/alpine.min.js' %}"></script>
+    <!-- Ações dos botões (confirmar, compartilhar...) sem onclick inline: ver o cabeçalho do arquivo -->
+    <script defer src="{% static 'js/site-actions.js' %}"></script>
 
     <style>
         /* Base typography */

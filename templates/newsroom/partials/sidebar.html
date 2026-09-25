@@ -138,7 +138,7 @@
     a restauração espera a sidebar ganhar tamanho (o ResizeObserver dispara
     antes da pintura desse quadro).
 {% endcomment %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     (function () {
         var box = document.querySelector('[data-nr-sidebar-scroll]');
         if (!box) {

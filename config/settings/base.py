@@ -51,10 +51,11 @@ INSTALLED_APPS = [
     # passa a se chamar wagtailcore.UserProfile e esperar a tabela
     # `wagtailcore_userprofile`, que NENHUMA migration do wagtailcore cria. O
     # resultado é tabela inexistente em runtime.
-    # As telas de Usuários/Grupos que este app acrescenta ao /cms/ são protegidas
-    # pelas permissões `wagtailusers`, que nenhum grupo de cargo recebe
-    # (ver apps/accounts/admin_roles.GENERAL_ADMIN_APP_LABELS), então só
-    # superusuário as enxerga.
+    # As telas de Usuários/Grupos que este app acrescenta ao /cms/ conferem as
+    # permissões do modelo de usuário (accounts.*_customuser) e de auth.group,
+    # não uma permissão própria. Criar, editar e excluir usuários ali é travado
+    # para não-superusuários em apps/accounts/wagtail_hooks.py, e o
+    # Administrador Geral só vê grupos (apps/accounts/admin_roles.py).
     'wagtail.users',
     'wagtail.contrib.table_block',
     # Redirecionamentos: trocar o endereço (slug) de uma notícia que já esteve
@@ -199,6 +200,17 @@ WAGTAILADMIN_BASE_URL = env('WAGTAILADMIN_BASE_URL', default='http://localhost:8
 # of cms_media, otherwise Wagtail creates the stock models instead.
 WAGTAILIMAGES_IMAGE_MODEL = 'cms_media.Image'
 WAGTAILDOCS_DOCUMENT_MODEL = 'cms_media.Document'
+
+# Documentos: lista branca de extensões. Sem ela o Wagtail aceita qualquer
+# arquivo, e um .html/.svg enviado como "documento" abria direto em
+# /media/documents/ — mesma origem do /admin/ e do /cms/, com o script rodando
+# na sessão de quem abrisse o link. Mesma lista de documentos da biblioteca
+# legada (apps/media_library/models.py).
+WAGTAILDOCS_EXTENSIONS = ['pdf', 'doc', 'docx', 'odt', 'rtf', 'txt', 'csv', 'xls', 'xlsx', 'ppt', 'pptx']
+# Explícito, e não por omissão: documentos saem só pela view do Wagtail
+# (/documents/<id>/<arquivo>), que confere a privacidade da coleção e responde
+# com CSP sandbox. O nginx não serve /media/documents/ (docker/nginx/nginx.conf).
+WAGTAILDOCS_SERVE_METHOD = 'serve_view'
 
 # Teto de upload de imagem no caminho do Wagtail (/cms/images/).
 #
@@ -440,20 +452,31 @@ VERIFICATION_CODE_TTL = env.int('VERIFICATION_CODE_TTL', default=600)  # 10 minu
 VERIFICATION_CODE_MAX_ATTEMPTS = env.int('VERIFICATION_CODE_MAX_ATTEMPTS', default=5)
 
 # ── Content Security Policy (django-csp) — defense-in-depth ────────────────
-# Espelha a política CSP do docker/nginx/nginx.conf para proteção mesmo sem
-# reverse proxy. As duas TÊM de andar juntas: o nginx usa `add_header ... always`,
-# então quando os dois mandam CSP o navegador aplica a INTERSEÇÃO das políticas —
-# relaxar só um lado não tem efeito nenhum em produção.
-# Alpine.js, HTMX e Tailwind CDN requerem unsafe-inline/unsafe-eval e hosts CDN
-# explicitamente permitidos para que o frontend publico renderize sob CSP.
-from csp.constants import NONE, SELF, UNSAFE_EVAL, UNSAFE_INLINE  # noqa: E402
+# O nginx também manda CSP (docker/nginx/nginx.conf, `add_header ... always`), e
+# com duas políticas o navegador exige que um recurso passe nas DUAS. As duas
+# andam juntas em tudo, menos em script-src, onde esta é a mais estrita:
+#
+# * Páginas que o Django renderiza exigem NONCE em script inline. Sem
+#   'unsafe-inline', um <script> ou onerror= injetado não roda. Todo script
+#   inline dos templates leva nonce="{{ request.csp_nonce }}" e nenhum template
+#   tem atributo on* (static/js/site-actions.js cobre os antigos onclick) —
+#   apps/common/test_template_rules.py cobra as duas regras.
+# * 'unsafe-eval' continua: o build padrão do Alpine.js (493 diretivas nos
+#   templates, e o Unfold) e o hx-on do HTMX avaliam expressões com new
+#   Function. Sair dele pede o build CSP do Alpine — dívida registrada em
+#   docs/technical/SEGURANCA.md.
+# * /admin/ e /cms/ ficam fora desta política (EXCLUDE_URL_PREFIXES): os
+#   templates do Django admin, do Unfold e do Wagtail têm scripts inline sem
+#   nonce. Ali vale só a política do nginx, que é a de antes.
+from csp.constants import NONCE, NONE, SELF, UNSAFE_EVAL, UNSAFE_INLINE  # noqa: E402
 
 CONTENT_SECURITY_POLICY = {
+    'EXCLUDE_URL_PREFIXES': ['/admin/', '/cms/'],
     'DIRECTIVES': {
         'default-src': [SELF],
         'script-src': [
             SELF,
-            UNSAFE_INLINE,
+            NONCE,
             UNSAFE_EVAL,
             'https://challenges.cloudflare.com',
         ],

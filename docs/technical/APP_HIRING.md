@@ -137,8 +137,9 @@ A view [`download_resume`](../../apps/hiring/views.py) é a **única** porta par
 
 ```python
 @staff_member_required
-@permission_required('hiring.view_application', raise_exception=True)
 def download_resume(request, application_id):
+    if not _can_view_applications(request):   # a MESMA regra do ApplicationAdmin
+        raise PermissionDenied
     ...
     if settings.DEBUG:
         return FileResponse(...)           # dev: serve direto
@@ -146,7 +147,8 @@ def download_resume(request, application_id):
     return response
 ```
 
-- **Exige** estar logado como staff **e** ter a permissão `hiring.view_application`.
+- **Exige** estar logado como staff **e** passar na mesma regra da tela de Candidaturas (`ApplicationAdmin.has_view_permission`). Candidaturas são recurso guardado (`SuperuserOnlyAdminMixin`), então hoje isso significa **superusuário**. A permissão de modelo `hiring.view_application` sozinha não basta: o Administrador Geral a recebe e, antes, baixava currículos que a tela dele recusava (auditoria de segurança, PRIV-02).
+- A checagem vem **antes** de buscar a candidatura: quem não pode ver recebe 403 para qualquer ID, sem distinguir candidatura existente de inexistente.
 - **Em produção** usa `X-Accel-Redirect`: o Django autoriza, mas quem entrega o arquivo é o nginx, a partir de uma *location interna* (`/protected/`). O Django não fica segurando bytes de arquivo.
 - **Em desenvolvimento** (sem nginx) cai para `FileResponse`.
 
@@ -154,6 +156,8 @@ No [`nginx.conf`](../../docker/nginx/nginx.conf), o acesso público direto é **
 ```nginx
 location /protected/            { internal; alias /app/media/; }   # só acessível via X-Accel
 location /media/hiring/resumes/ { internal; }                      # bloqueia acesso direto
+location /media/documents/      { internal; }                      # documentos só pela view do Wagtail
+location ~* ^/media/.*\.(s?html?|xht(ml)?|svgz?|xml|xsl|m?js)$ { return 404; }  # nada executável
 location /media/                { alias /app/media/; expires 7d; } # resto da mídia é público
 ```
 
@@ -165,7 +169,7 @@ sequenceDiagram
     participant Django
     participant Nginx
     Staff->>Django: GET /hiring/application/<id>/resume/
-    Django->>Django: staff? tem hiring.view_application?
+    Django->>Django: staff? passa na regra do ApplicationAdmin (superusuário)?
     alt sem permissão
         Django-->>Staff: 403
     else autorizado (produção)
@@ -185,7 +189,7 @@ No admin, o link "Baixar currículo" (`resume_link` em `ApplicationAdmin`) apont
 
 | Rota | View | Acesso |
 |------|------|--------|
-| `/hiring/application/<id>/resume/` | `download_resume` | Staff + permissão |
+| `/hiring/application/<id>/resume/` | `download_resume` | Staff + regra do `ApplicationAdmin` (superusuário) |
 
 `/hiring/` e `/hiring/<slug>/` respondem 404 desde 14/09/2026.
 

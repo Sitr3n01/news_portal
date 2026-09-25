@@ -53,6 +53,11 @@ jobs:
     - name: Run Linting
       run: |
         ruff check .
+
+    # Falha se aparecer segredo fora dos falsos positivos já triados em
+    # .secrets.baseline (detect-secrets, instalado pelo requirements/development.txt).
+    - name: Secret Scanning
+      run: scripts/ci/check-secrets.sh
         
     # Builds the staticfiles manifest so {% static %} (used by the base
     # templates for the vendored JS) resolves during template rendering in

@@ -129,10 +129,15 @@ def _general_admin_permissions():
             content_type__app_label__in=GENERAL_ADMIN_APP_LABELS,
         ).select_related('content_type')
     )
+    # Grupos só para leitura. Com add/change de auth.group o Administrador Geral
+    # dava ao próprio grupo qualquer permissão do sistema (no /admin/ e no
+    # /cms/groups/). Editar grupos fica com o superusuário; o post_migrate
+    # reaplica esta lista, então o próximo deploy já revoga o que existia.
     permissions.extend(
         Permission.objects.filter(
             content_type__app_label='auth',
             content_type__model='group',
+            codename='view_group',
         ).select_related('content_type')
     )
     return permissions

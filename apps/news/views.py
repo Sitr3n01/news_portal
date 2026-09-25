@@ -1,9 +1,9 @@
 from django.contrib import messages
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import cache
+from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db.models import F, Q
 from django.http import Http404, HttpResponse
@@ -29,6 +29,16 @@ def safe_referer_redirect(request, default_url):
     return redirect(default_url)
 
 User = get_user_model()
+
+
+def _published_article_or_404(article_id):
+    """Notícia publicada do Site atual, ou 404 — a porta das ações do leitor.
+
+    Favoritar, curtir e comentar recebem só o ID da notícia. Buscar por ID em
+    Article.objects aceitava rascunho, agendada, arquivada e notícia de outro
+    Site, e o painel do leitor exibia o título e o texto delas.
+    """
+    return get_object_or_404(Article.on_site, id=article_id, status=Article.Status.PUBLISHED)
 
 
 def _resolve_home_highlights(site, articles):
@@ -395,21 +405,24 @@ def user_dashboard(request):
     user = request.user
     site = get_current_site(request)
 
+    # Mesmo recorte das páginas públicas: só o que está no ar neste Site. Um
+    # favorito antigo de notícia que saiu do ar some da lista em vez de expor
+    # o conteúdo que não é mais público.
     saved_articles = (
-        Article.objects
-        .filter(bookmarks__user=user)
+        Article.on_site
+        .filter(status=Article.Status.PUBLISHED, bookmarks__user=user)
         .select_related('category', 'author', 'featured_image_wagtail')
         .prefetch_related('featured_image_wagtail__renditions')
         .order_by('-bookmarks__created_at')
     )
     liked_articles = (
-        Article.objects
-        .filter(likes__user=user)
+        Article.on_site
+        .filter(status=Article.Status.PUBLISHED, likes__user=user)
         .select_related('category', 'author', 'featured_image_wagtail')
         .prefetch_related('featured_image_wagtail__renditions')
         .order_by('-likes__created_at')
     )
-    user_comments = user.comments.select_related('article').order_by('-created_at')
+    user_comments = user.comments.filter(article__site=site).select_related('article').order_by('-created_at')
 
     has_newsletter = NewsletterSubscription.objects.filter(
         email=user.email,
@@ -435,7 +448,7 @@ def user_dashboard(request):
 @email_verified_required
 def toggle_bookmark(request, article_id):
     """Toggle de bookmark de artigo para o usuario autenticado."""
-    article = get_object_or_404(Article, id=article_id)
+    article = _published_article_or_404(article_id)
     bookmark, created = ArticleBookmark.objects.get_or_create(user=request.user, article=article)
 
     if not created:
@@ -461,7 +474,7 @@ def toggle_bookmark(request, article_id):
 @email_verified_required
 def toggle_like(request, article_id):
     """Toggle de like em artigo (por usuario autenticado)."""
-    article = get_object_or_404(Article, id=article_id)
+    article = _published_article_or_404(article_id)
     like, created = ArticleLike.objects.get_or_create(
         article=article,
         user=request.user,
@@ -487,7 +500,7 @@ def toggle_like(request, article_id):
 @email_verified_required
 def add_comment(request, article_id):
     """Adiciona comentario em um artigo (usuario autenticado)."""
-    article = get_object_or_404(Article, id=article_id, status=Article.Status.PUBLISHED)
+    article = _published_article_or_404(article_id)
     content = request.POST.get('content', '').strip()[:5000]
 
     if not content:
@@ -521,16 +534,22 @@ def delete_comment(request, comment_id):
     return safe_referer_redirect(request, article_url)
 
 
-@staff_member_required
+@login_required(login_url='panel:login')
 def newsletter_preview(request, article_id):
-    """Preview do template de newsletter para um artigo (somente staff).
+    """Preview do template de newsletter para um artigo (quem vê notícias no painel).
+
+    A regra é a permissão de ver notícias, não is_staff: antes qualquer staff —
+    inclusive o Administrador Komuniki, sem acesso a notícias — lia rascunhos
+    por ID, e Editor/Repórter (que não são staff) não abriam a própria prévia.
 
     Passa o request para que os links no preview usem o host real do servidor,
     tornando-os navegáveis no browser (em vez do domínio configurado no banco).
     """
     from .newsletter import get_newsletter_context
 
-    article = get_object_or_404(Article, id=article_id)
+    if not request.user.has_perm('news.view_article'):
+        raise PermissionDenied
+    article = get_object_or_404(Article.on_site, id=article_id)
     context = get_newsletter_context(article, request=request)
     html = render_to_string('news/email/newsletter_article.html', context)
     return HttpResponse(html)

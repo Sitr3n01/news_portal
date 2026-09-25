@@ -248,7 +248,7 @@
                     <!-- Save Bookmark Button (HTMX) -->
                     {% include 'news/partials/bookmark_button.html' with article=article is_bookmarked=is_bookmarked %}
                     <button :aria-label="t('Compartilhar Artigo', 'Share Article')"
-                        onclick="if(navigator.share){navigator.share({title:'{{ article.title|escapejs }}',url:window.location.href})}else{alert('Link copied!')}"
+                        data-share-title="{{ article.title }}"
                         class="group flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                         <span
                             class="material-symbols-outlined text-[20px] text-slate-400 group-hover:text-primary transition-colors">ios_share</span>
@@ -283,7 +283,7 @@
                     <!-- Comments Link with Count -->
                     <div class="flex flex-col items-center gap-1">
                         <button
-                            onclick="document.getElementById('comments-section').scrollIntoView({behavior: 'smooth'})"
+                            data-scroll-to="comments-section"
                             class="group flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm hover:border-primary/50 hover:text-primary dark:border-slate-700 dark:bg-background-dark dark:text-slate-400 transition-all outline-none"
                             :aria-label="t('Comentários', 'Comments')">
                             <span class="material-symbols-outlined text-[20px]">chat_bubble</span>
@@ -296,7 +296,7 @@
 
                     <!-- Share -->
                     <button
-                        onclick="if(navigator.share){navigator.share({title:'{{ article.title|escapejs }}',url:window.location.href})}else{alert('Link copied!')}"
+                        data-share-title="{{ article.title }}"
                         class="group flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm hover:border-primary/50 hover:text-primary dark:border-slate-700 dark:bg-background-dark dark:text-slate-400 transition-all outline-none"
                         :aria-label="t('Compartilhar Artigo', 'Share Article')">
                         <span class="material-symbols-outlined text-[20px]">share</span>

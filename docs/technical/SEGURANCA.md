@@ -11,7 +11,8 @@
 | Ameaça | Proteção | Onde |
 |--------|----------|------|
 | XSS em conteúdo | Sanitização com `bleach` no `save()` dos modelos | `apps/common/sanitization.py` |
-| XSS em template | Filtro `sanitize_html`; proibição do filtro de escape-off | Templates + `templatetags/sanitize.py` |
+| XSS em template | Filtro `sanitize_html`; proibição do filtro de escape-off (cobrada por teste) | Templates + `templatetags/sanitize.py` + `apps/common/test_template_rules.py` |
+| Script injetado que escape da sanitização | CSP do site público sem `'unsafe-inline'`: script inline só roda com o nonce da resposta, e `onerror=`/`onclick=` injetados são bloqueados | `base.py` (`CONTENT_SECURITY_POLICY`) + `static/js/site-actions.js` |
 | CSRF | Middleware CSRF + `{% csrf_token %}` | Middleware + formulários |
 | SQL Injection | ORM parametrizado (sem SQL cru) | Toda a camada de dados |
 | Força bruta no login | `django-axes` (5 tentativas → 30 min de bloqueio) | `AxesMiddleware` |
@@ -29,6 +30,9 @@
 | Conta duplicada por capitalização | E-mail normalizado na gravação + busca `__iexact` | `apps/accounts/forms.py` + migration `0009` |
 | Enumeração de usuários | Mensagens e redirecionamentos idênticos em cadastro e reset | Views e forms |
 | E-mail sumindo em silêncio | System check `accounts.E001` barra backend fake fora de DEBUG, no deploy | `apps/accounts/checks.py` |
+| Segredo commitado por engano | Varredura `detect-secrets` no CI (push, PR e deploy) contra a `.secrets.baseline` de falsos positivos triados | `scripts/ci/check-secrets.sh` + `.github/workflows/` |
+| Segredo de exemplo em produção | System checks `common.E010`–`E012` barram no deploy a `SECRET_KEY`, a senha do banco e os segredos de serviço copiados dos exemplos do repositório | `apps/common/checks.py` |
+| Rascunho lido pela prévia de newsletter | A prévia exige `news.view_article` (não `is_staff`) e `Article.on_site` | `apps/news/views.py` |
 | Clickjacking | `X-Frame-Options: DENY` | Middleware + nginx |
 | Upload malicioso de currículo | Sem upload público desde 14/09/2026: o formulário de candidatura saiu com as vagas | — |
 | Vazamento de currículo | Nome UUID + download autenticado via `X-Accel-Redirect` | `hiring` + nginx |
@@ -40,6 +44,9 @@
 | Flood/scrapers | Rate limit no nginx (10 req/s, burst 20) | `nginx.conf` |
 | Container comprometido | Processo como usuário não-root | `Dockerfile` |
 | Vazamento entre portais | Manager `on_site` em views/feeds/sitemaps | Toda a camada pública |
+| Rascunho lido por ID (favoritar/curtir/comentar) | Ações do leitor só alcançam notícia publicada do Site atual; o painel do leitor aplica o mesmo recorte | `apps/news/views.py` (`_published_article_or_404`) |
+| Escalada para superusuário | `is_superuser`, grupos e permissões avulsas só por superusuário; superusuário não é editável, excluível nem tem a senha trocada por quem não é; Administrador Geral só **vê** grupos; usuários no `/cms/` só por superusuário | `apps/accounts/admin.py`, `admin_roles.py`, `wagtail_hooks.py` |
+| XSS por upload (HTML/SVG na mesma origem) | Lista branca de extensões na Biblioteca de mídia e nos Documentos; nginx recusa tipos executáveis em `/media/` e não serve `/media/documents/` | `apps/media_library/models.py`, `base.py` (`WAGTAILDOCS_EXTENSIONS`), `nginx.conf` |
 | Bots/spam em formulários | Cloudflare Turnstile (widget + siteverify) | `apps/common/turnstile.py` + forms |
 | Bots/scraping na borda | Cloudflare proxy + Bot Fight Mode + firewall só-CF | Cloudflare + `cloudflare-firewall.sh` |
 | IP real atrás do proxy | `realip` lendo `CF-Connecting-IP` | `nginx.conf` + `cloudflare-realip.conf` |
@@ -124,7 +131,7 @@ A política é **nunca revelar** se um e-mail/usuário existe:
 Detalhado em [APP_HIRING.md](APP_HIRING.md#5-currículos-o-ponto-mais-sensível). Desde 14/09/2026 o site não recebe currículos: o formulário de candidatura saiu junto com as vagas. Os currículos já gravados seguem protegidos por duas barreiras:
 
 1. **Nome imprevisível:** `resume_upload_path` grava com `uuid4().hex` — nada de URL adivinhável.
-2. **Entrega protegida:** `download_resume` exige `staff` + permissão `hiring.view_application`; em produção delega ao nginx via `X-Accel-Redirect` a partir de uma *location interna* (`/protected/`). O nginx **bloqueia** acesso público direto a `/media/hiring/resumes/`.
+2. **Entrega protegida:** `download_resume` exige `staff` e a **mesma regra da tela de Candidaturas** (`ApplicationAdmin.has_view_permission`, hoje só superusuário — recurso guardado); a permissão de modelo sozinha não basta. Em produção delega ao nginx via `X-Accel-Redirect` a partir de uma *location interna* (`/protected/`). O nginx **bloqueia** acesso público direto a `/media/hiring/resumes/`.
 
 A validação real de conteúdo — tipo MIME, extensão e **magic bytes** (`%PDF-`, `PK\x03\x04`, `\xd0\xcf\x11\xe0`), com limite de 5 MB — ficava em `ApplicationForm.clean_resume` e saiu com o formulário. Se a candidatura pelo site voltar, essa validação volta junto.
 
@@ -136,13 +143,15 @@ A validação real de conteúdo — tipo MIME, extensão e **magic bytes** (`%PD
 Configurada em `base.py` via `django-csp` e **espelhada** no [`nginx.conf`](../../docker/nginx/nginx.conf) (defesa mesmo sem o proxy):
 
 - `default-src` restrito à própria origem;
-- `script-src` precisa liberar execução inline e avaliação dinâmica de JS — exigência do **HTMX** e do **Alpine.js** (os tokens exatos estão em `base.py`/`nginx.conf`);
+- `script-src` **sem `'unsafe-inline'`** nas páginas que o Django renderiza: todo `<script>` inline leva `nonce="{{ request.csp_nonce }}"` e nenhum template usa atributo `on*` — as ações que eram `onclick` (confirmar, compartilhar, rolar, curtir sem conta) são atributos `data-*` tratados por [`static/js/site-actions.js`](../../static/js/site-actions.js). Um `<script>` ou `onerror=` injetado é recusado pelo navegador. [`apps/common/test_template_rules.py`](../../apps/common/test_template_rules.py) falha se um template novo quebrar a regra;
+- `script-src` ainda tem `'unsafe-eval'`: o build padrão do **Alpine.js** (centenas de diretivas nos templates, e o Unfold) e o `hx-on` do **HTMX** avaliam expressões com `new Function` (ver dívidas);
+- `/admin/` e `/cms/` ficam fora da política do Django (`EXCLUDE_URL_PREFIXES`): os templates do Django admin, do Unfold e do Wagtail têm scripts inline sem nonce. Ali vale só a política do nginx, com `'unsafe-inline'` — como antes;
 - `style-src` permite estilos inline + Google Fonts;
 - `img-src` permite `data:` e `https:`;
 - `frame-src` permite apenas YouTube;
 - `object-src` bloqueado (`none`); `base-uri` e `form-action` restritos à origem; `frame-ancestors 'none'` (anti-clickjacking moderno, complementa `X-Frame-Options`).
 
-> O preço de `script-src` liberar inline/eval é mitigado por: sanitização do conteúdo, `frame-src` restrito e `object-src` bloqueado.
+> Com duas políticas (Django + nginx) o navegador exige as duas; nas páginas do Django a de lá, com nonce, é a que decide `script-src`.
 
 ### Cabeçalhos (nginx, `always`)
 `X-Content-Type-Options: nosniff` · `X-Frame-Options: DENY` · `Referrer-Policy: strict-origin-when-cross-origin` · `Permissions-Policy` (geolocation/microphone/camera vazios) · `Content-Security-Policy`.
@@ -174,8 +183,11 @@ Configurada em `base.py` via `django-csp` e **espelhada** no [`nginx.conf`](../.
 
 - **Rate limiting (nginx):** `limit_req_zone ... rate=10r/s` com `burst=20 nodelay` — segura floods e scrapers.
 - **Limite de upload:** `client_max_body_size 10M` (alinhado com `DATA_UPLOAD_MAX_MEMORY_SIZE` do Django).
-- **Locations internas:** `/protected/` e `/media/hiring/resumes/` são `internal` — só acessíveis via `X-Accel-Redirect`.
+- **Locations internas:** `/protected/` e `/media/hiring/resumes/` são `internal` — só acessíveis via `X-Accel-Redirect`. `/media/documents/` também: documentos do Wagtail saem só por `/documents/<id>/<arquivo>` (checagem de coleção + CSP sandbox).
+- **Sem conteúdo executável em `/media/`:** `.html`, `.htm`, `.shtml`, `.xhtml`, `.svg`, `.svgz`, `.xml`, `.xsl`, `.js` e `.mjs` respondem 404. `/media/` é a mesma origem do `/admin/` e do `/cms/`: um HTML enviado por upload rodaria script com a sessão de quem abrisse o link. Os uploads já recusam essas extensões; a regra do nginx cobre arquivos antigos.
 - **Container não-root:** o processo roda como `appuser` (UID 1000), reduzindo impacto de um comprometimento.
+- **IP da origem fora do repositório:** a VPS só é citada como `<IP_DA_VPS>`; com o Cloudflare na frente, o acesso direto deve ser recusado pelo firewall ([cloudflare-bots.md](cloudflare-bots.md)). O IP antigo continua no histórico do git, então a proteção real é o firewall, não o sigilo.
+- **Compose de desenvolvimento só no loopback:** Postgres (senha de dev versionada) e Mailpit (onde chegam os códigos por e-mail) publicam em `127.0.0.1`, não na rede local.
 - **TLS:** Certbot/Let's Encrypt no nginx (bloco `:443` ativo).
 - **Proteção de bots (Cloudflare):** duas camadas — Turnstile nos formulários (app) e Bot Fight Mode + firewall só-Cloudflare na borda. Blocos de comando em [cloudflare-bots.md](cloudflare-bots.md).
 - **IP real atrás do proxy:** o nginx usa `realip` com `CF-Connecting-IP` e encaminha `X-Forwarded-For $remote_addr` — `rate-limit`, `axes` e Turnstile veem o visitante real, não o Cloudflare.
@@ -198,6 +210,8 @@ Configurada em `base.py` via `django-csp` e **espelhada** no [`nginx.conf`](../.
 | Item | Situação | Observação |
 |------|----------|------------|
 | Warnings do `django-axes` | Conhecidos | Dívida técnica separada; não bloqueiam |
+| `'unsafe-eval'` na CSP | Pendente | Sair dele pede o build CSP do Alpine (`@alpinejs/csp`) com as expressões movidas para `Alpine.data`, e trocar os `hx-on` por listeners em arquivo. Enquanto isso, uma injeção de HTML que escape da sanitização ainda pode usar diretivas do Alpine (`x-init`) como gadget |
+| CSP do `/admin/` e do `/cms/` | Relaxada | Templates de terceiros com script inline; a política é a do nginx |
 | Antivírus em uploads | Ausente | Validação por magic bytes cobre o básico; para ambiente sensível, considerar ClamAV |
 | Tipo MIME do upload | Secundário | É falsificável; a defesa real são os magic bytes |
 | Páginas de erro 404/500/403 | Pendentes | Fase 10 (hardening de produção) |
@@ -209,11 +223,15 @@ Configurada em `base.py` via `django-csp` e **espelhada** no [`nginx.conf`](../.
 
 - [ ] Conteúdo HTML novo do usuário? Garanta sanitização no `save()` via `apps.common.sanitization`.
 - [ ] View pública nova? Use `on_site`, nunca `objects`.
+- [ ] Rota que recebe ID do navegador? Busque já com o recorte de quem chama (publicada + `on_site` para o leitor, posse para dados pessoais, permissão de modelo **e** a mesma regra da tela para o painel).
+- [ ] Campo ou ação que dá privilégio (superusuário, grupos, permissões)? Só superusuário, nos dois painéis.
 - [ ] Formulário novo? Tem `{% csrf_token %}`?
 - [ ] Mensagem de erro de auth/candidatura? Mantenha genérica (não revele existência de dados).
-- [ ] Upload novo? Valide conteúdo real (magic bytes), não só extensão/MIME.
+- [ ] Upload novo? Lista branca de extensões (nada que o navegador execute: HTML, SVG, XML, JS) e valide conteúdo real (magic bytes), não só extensão/MIME.
 - [ ] Template novo? Não use o filtro de escape-off; use `|sanitize_html`.
+- [ ] Script inline novo? `nonce="{{ request.csp_nonce }}"`. Ação em clique? `data-*` + `static/js/site-actions.js`, nunca `onclick=`.
 - [ ] Mudou middleware? Confira a ordem (axes depois de auth; CSP por último).
+- [ ] O CI acusou segredo? Se for real, remova e **troque a credencial** (o histórico guarda o valor). Se for falso positivo: `detect-secrets scan --baseline .secrets.baseline` e `detect-secrets audit .secrets.baseline`.
 
 ---
 

@@ -234,7 +234,7 @@
 {% block extra_js %}
 {% get_static_prefix as static_prefix %}
 {# Chaves com o prefixo estático remapeiam os imports relativos do three para as URLs com hash do collectstatic. #}
-<script type="importmap">
+<script type="importmap" nonce="{{ request.csp_nonce }}">
 {
     "imports": {
         "three": "{% static 'js/vendor/three-r186/three.module.js' %}",

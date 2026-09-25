@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         try {
             document.documentElement.classList.toggle('dark', localStorage.getItem('theme') === 'dark');
             document.documentElement.lang = localStorage.getItem('lang') === 'en' ? 'en' : 'pt-BR';
@@ -30,7 +30,7 @@
     {% if site_settings.favicon %}<link rel="icon" href="{{ site_settings.favicon.url }}">{% endif %}
     <link rel="preload" href="{% static 'fonts/editorial/barlow-condensed-bold.woff2' %}" as="font" type="font/woff2" crossorigin>
     <script src="{% static 'js/vendor/tailwind.min.js' %}"></script>
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         tailwind.config = {
             darkMode: 'class',
             theme: { extend: {

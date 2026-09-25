@@ -62,6 +62,9 @@ jobs:
       - name: Run linting
         run: ruff check .
 
+      - name: Secret scanning
+        run: scripts/ci/check-secrets.sh
+
       - name: Collect static files
         run: python manage.py collectstatic --noinput
 

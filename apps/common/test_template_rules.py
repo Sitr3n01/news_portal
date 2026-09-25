@@ -41,12 +41,12 @@ def _inline_executable_scripts(html):
 
 
 def test_no_template_uses_safe_filter():
-    offenders = [str(path.relative_to(TEMPLATES)) for path in _templates() if re.search(r'\|\s*safe(seq)?\b', path.read_text())]
+    offenders = [str(path.relative_to(TEMPLATES)) for path in _templates() if re.search(r'\|\s*safe(seq)?\b', path.read_text(encoding='utf-8'))]
     assert offenders == []
 
 
 def test_no_template_uses_inline_event_handlers():
-    offenders = [str(path.relative_to(TEMPLATES)) for path in _templates() if INLINE_HANDLER.search(path.read_text())]
+    offenders = [str(path.relative_to(TEMPLATES)) for path in _templates() if INLINE_HANDLER.search(path.read_text(encoding='utf-8'))]
     assert offenders == [], 'use data-* + static/js/site-actions.js no lugar de on*="..."'
 
 
@@ -54,7 +54,7 @@ def test_every_inline_script_in_templates_carries_the_nonce():
     offenders = [
         f'{path.relative_to(TEMPLATES)}: <script{attrs}>'
         for path in _templates()
-        for attrs in _inline_executable_scripts(path.read_text())
+        for attrs in _inline_executable_scripts(path.read_text(encoding='utf-8'))
         if 'nonce="{{ request.csp_nonce }}"' not in attrs
     ]
     assert offenders == []

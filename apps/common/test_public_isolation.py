@@ -55,7 +55,7 @@ def test_public_views_only_query_site_models_through_on_site():
     offenders = [
         f'{module}:{line} {usage}'
         for module in PUBLIC_MODULES
-        for line, usage in _violations((Path(settings.BASE_DIR) / module).read_text(), site_models)
+        for line, usage in _violations((Path(settings.BASE_DIR) / module).read_text(encoding='utf-8'), site_models)
     ]
     assert offenders == []
 

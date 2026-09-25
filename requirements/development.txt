@@ -4,3 +4,5 @@ django-browser-reload>=1.12
 ruff>=0.4
 pytest-django>=4.8
 factory-boy>=3.3.3
+# Varredura de segredos do CI (.secrets.baseline). Pinado: a baseline depende da versão.
+detect-secrets==1.5.0

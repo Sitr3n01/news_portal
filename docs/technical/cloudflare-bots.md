@@ -53,7 +53,7 @@ docker compose -p kellysys -f docker/docker-compose.prod.yml up -d --force-recre
 
 1. **Add a Site** no Cloudflare para `komuniki.com.br` e `kellyfarias.com.br` (plano Free serve).
 2. No registrador (Hostinger), troque os **nameservers** para os que o Cloudflare indicar. *(Propagação: minutos a horas.)*
-3. Em **DNS**, registros `A` para `@` e `www` apontando para `2.25.178.16`, com **proxy LIGADO (nuvem laranja)**.
+3. Em **DNS**, registros `A` para `@` e `www` apontando para `<IP_DA_VPS>`, com **proxy LIGADO (nuvem laranja)**.
 4. Em **SSL/TLS → Overview**, modo **Full (strict)**. A origem já tem certificado Let's Encrypt válido.
    > ⚠️ **Nunca use "Flexible"** — causaria loop de redirecionamento com `SECURE_SSL_REDIRECT=True`.
 5. Em **Security → Bots**, ligue **Bot Fight Mode**.
@@ -83,7 +83,7 @@ git diff docker/nginx/nginx.conf
 ### B3 — Firewall: origem só aceita o Cloudflare
 
 Só execute **depois** de B1 concluído e do tráfego já entrar via Cloudflare.
-Sem isto, um atacante ignora o Bot Fight Mode batendo direto em `2.25.178.16`.
+Sem isto, um atacante ignora o Bot Fight Mode batendo direto em `<IP_DA_VPS>`.
 
 ```bash
 cd /opt/kelly_sys
@@ -100,7 +100,7 @@ libera 80/443 só das faixas Cloudflare e aplica `default deny incoming`.
 
 ```bash
 # 1) De uma máquina FORA das faixas Cloudflare (ex.: seu notebook):
-curl -I --max-time 5 http://2.25.178.16/        # esperado: timeout / connection refused
+curl -I --max-time 5 http://<IP_DA_VPS>/        # esperado: timeout / connection refused
 curl -I --max-time 5 https://komuniki.com.br/   # esperado: 200/301 (via Cloudflare)
 
 # 2) Header do Cloudflare presente (prova que passou pela borda):

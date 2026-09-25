@@ -30,6 +30,7 @@
 | Conta duplicada por capitalização | E-mail normalizado na gravação + busca `__iexact` | `apps/accounts/forms.py` + migration `0009` |
 | Enumeração de usuários | Mensagens e redirecionamentos idênticos em cadastro e reset | Views e forms |
 | E-mail sumindo em silêncio | System check `accounts.E001` barra backend fake fora de DEBUG, no deploy | `apps/accounts/checks.py` |
+| Segredo commitado por engano | Varredura `detect-secrets` no CI (push, PR e deploy) contra a `.secrets.baseline` de falsos positivos triados | `scripts/ci/check-secrets.sh` + `.github/workflows/` |
 | Segredo de exemplo em produção | System checks `common.E010`–`E012` barram no deploy a `SECRET_KEY`, a senha do banco e os segredos de serviço copiados dos exemplos do repositório | `apps/common/checks.py` |
 | Rascunho lido pela prévia de newsletter | A prévia exige `news.view_article` (não `is_staff`) e `Article.on_site` | `apps/news/views.py` |
 | Clickjacking | `X-Frame-Options: DENY` | Middleware + nginx |
@@ -185,6 +186,8 @@ Configurada em `base.py` via `django-csp` e **espelhada** no [`nginx.conf`](../.
 - **Locations internas:** `/protected/` e `/media/hiring/resumes/` são `internal` — só acessíveis via `X-Accel-Redirect`. `/media/documents/` também: documentos do Wagtail saem só por `/documents/<id>/<arquivo>` (checagem de coleção + CSP sandbox).
 - **Sem conteúdo executável em `/media/`:** `.html`, `.htm`, `.shtml`, `.xhtml`, `.svg`, `.svgz`, `.xml`, `.xsl`, `.js` e `.mjs` respondem 404. `/media/` é a mesma origem do `/admin/` e do `/cms/`: um HTML enviado por upload rodaria script com a sessão de quem abrisse o link. Os uploads já recusam essas extensões; a regra do nginx cobre arquivos antigos.
 - **Container não-root:** o processo roda como `appuser` (UID 1000), reduzindo impacto de um comprometimento.
+- **IP da origem fora do repositório:** a VPS só é citada como `<IP_DA_VPS>`; com o Cloudflare na frente, o acesso direto deve ser recusado pelo firewall ([cloudflare-bots.md](cloudflare-bots.md)). O IP antigo continua no histórico do git, então a proteção real é o firewall, não o sigilo.
+- **Compose de desenvolvimento só no loopback:** Postgres (senha de dev versionada) e Mailpit (onde chegam os códigos por e-mail) publicam em `127.0.0.1`, não na rede local.
 - **TLS:** Certbot/Let's Encrypt no nginx (bloco `:443` ativo).
 - **Proteção de bots (Cloudflare):** duas camadas — Turnstile nos formulários (app) e Bot Fight Mode + firewall só-Cloudflare na borda. Blocos de comando em [cloudflare-bots.md](cloudflare-bots.md).
 - **IP real atrás do proxy:** o nginx usa `realip` com `CF-Connecting-IP` e encaminha `X-Forwarded-For $remote_addr` — `rate-limit`, `axes` e Turnstile veem o visitante real, não o Cloudflare.
@@ -228,6 +231,7 @@ Configurada em `base.py` via `django-csp` e **espelhada** no [`nginx.conf`](../.
 - [ ] Template novo? Não use o filtro de escape-off; use `|sanitize_html`.
 - [ ] Script inline novo? `nonce="{{ request.csp_nonce }}"`. Ação em clique? `data-*` + `static/js/site-actions.js`, nunca `onclick=`.
 - [ ] Mudou middleware? Confira a ordem (axes depois de auth; CSP por último).
+- [ ] O CI acusou segredo? Se for real, remova e **troque a credencial** (o histórico guarda o valor). Se for falso positivo: `detect-secrets scan --baseline .secrets.baseline` e `detect-secrets audit .secrets.baseline`.
 
 ---
 

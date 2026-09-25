@@ -37,8 +37,10 @@ services:
       POSTGRES_DB: news_portal
       POSTGRES_USER: news_portal_user
       POSTGRES_PASSWORD: news_portal_pass
+    # Só no loopback: publicado em 0.0.0.0, o banco de dev (com a senha acima,
+    # que está no repositório) ficava aberto para toda a rede local.
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U news_portal_user -d news_portal"]
       interval: 5s
@@ -46,11 +48,13 @@ services:
       retries: 5
 
   # UI de inspeção dos e-mails capturados (nada sai para a internet): http://localhost:8025
+  # Só no loopback: a caixa do Mailpit guarda códigos de verificação e de
+  # recuperação de senha, e não pede login para ser lida.
   mailpit:
     image: axllent/mailpit
     ports:
-      - "8025:8025"
-      - "1025:1025"
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
 
 volumes:
   postgres_data:

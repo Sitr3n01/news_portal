@@ -452,20 +452,31 @@ VERIFICATION_CODE_TTL = env.int('VERIFICATION_CODE_TTL', default=600)  # 10 minu
 VERIFICATION_CODE_MAX_ATTEMPTS = env.int('VERIFICATION_CODE_MAX_ATTEMPTS', default=5)
 
 # ── Content Security Policy (django-csp) — defense-in-depth ────────────────
-# Espelha a política CSP do docker/nginx/nginx.conf para proteção mesmo sem
-# reverse proxy. As duas TÊM de andar juntas: o nginx usa `add_header ... always`,
-# então quando os dois mandam CSP o navegador aplica a INTERSEÇÃO das políticas —
-# relaxar só um lado não tem efeito nenhum em produção.
-# Alpine.js, HTMX e Tailwind CDN requerem unsafe-inline/unsafe-eval e hosts CDN
-# explicitamente permitidos para que o frontend publico renderize sob CSP.
-from csp.constants import NONE, SELF, UNSAFE_EVAL, UNSAFE_INLINE  # noqa: E402
+# O nginx também manda CSP (docker/nginx/nginx.conf, `add_header ... always`), e
+# com duas políticas o navegador exige que um recurso passe nas DUAS. As duas
+# andam juntas em tudo, menos em script-src, onde esta é a mais estrita:
+#
+# * Páginas que o Django renderiza exigem NONCE em script inline. Sem
+#   'unsafe-inline', um <script> ou onerror= injetado não roda. Todo script
+#   inline dos templates leva nonce="{{ request.csp_nonce }}" e nenhum template
+#   tem atributo on* (static/js/site-actions.js cobre os antigos onclick) —
+#   apps/common/test_template_rules.py cobra as duas regras.
+# * 'unsafe-eval' continua: o build padrão do Alpine.js (493 diretivas nos
+#   templates, e o Unfold) e o hx-on do HTMX avaliam expressões com new
+#   Function. Sair dele pede o build CSP do Alpine — dívida registrada em
+#   docs/technical/SEGURANCA.md.
+# * /admin/ e /cms/ ficam fora desta política (EXCLUDE_URL_PREFIXES): os
+#   templates do Django admin, do Unfold e do Wagtail têm scripts inline sem
+#   nonce. Ali vale só a política do nginx, que é a de antes.
+from csp.constants import NONCE, NONE, SELF, UNSAFE_EVAL, UNSAFE_INLINE  # noqa: E402
 
 CONTENT_SECURITY_POLICY = {
+    'EXCLUDE_URL_PREFIXES': ['/admin/', '/cms/'],
     'DIRECTIVES': {
         'default-src': [SELF],
         'script-src': [
             SELF,
-            UNSAFE_INLINE,
+            NONCE,
             UNSAFE_EVAL,
             'https://challenges.cloudflare.com',
         ],

@@ -11,7 +11,8 @@
 | Ameaça | Proteção | Onde |
 |--------|----------|------|
 | XSS em conteúdo | Sanitização com `bleach` no `save()` dos modelos | `apps/common/sanitization.py` |
-| XSS em template | Filtro `sanitize_html`; proibição do filtro de escape-off | Templates + `templatetags/sanitize.py` |
+| XSS em template | Filtro `sanitize_html`; proibição do filtro de escape-off (cobrada por teste) | Templates + `templatetags/sanitize.py` + `apps/common/test_template_rules.py` |
+| Script injetado que escape da sanitização | CSP do site público sem `'unsafe-inline'`: script inline só roda com o nonce da resposta, e `onerror=`/`onclick=` injetados são bloqueados | `base.py` (`CONTENT_SECURITY_POLICY`) + `static/js/site-actions.js` |
 | CSRF | Middleware CSRF + `{% csrf_token %}` | Middleware + formulários |
 | SQL Injection | ORM parametrizado (sem SQL cru) | Toda a camada de dados |
 | Força bruta no login | `django-axes` (5 tentativas → 30 min de bloqueio) | `AxesMiddleware` |
@@ -141,13 +142,15 @@ A validação real de conteúdo — tipo MIME, extensão e **magic bytes** (`%PD
 Configurada em `base.py` via `django-csp` e **espelhada** no [`nginx.conf`](../../docker/nginx/nginx.conf) (defesa mesmo sem o proxy):
 
 - `default-src` restrito à própria origem;
-- `script-src` precisa liberar execução inline e avaliação dinâmica de JS — exigência do **HTMX** e do **Alpine.js** (os tokens exatos estão em `base.py`/`nginx.conf`);
+- `script-src` **sem `'unsafe-inline'`** nas páginas que o Django renderiza: todo `<script>` inline leva `nonce="{{ request.csp_nonce }}"` e nenhum template usa atributo `on*` — as ações que eram `onclick` (confirmar, compartilhar, rolar, curtir sem conta) são atributos `data-*` tratados por [`static/js/site-actions.js`](../../static/js/site-actions.js). Um `<script>` ou `onerror=` injetado é recusado pelo navegador. [`apps/common/test_template_rules.py`](../../apps/common/test_template_rules.py) falha se um template novo quebrar a regra;
+- `script-src` ainda tem `'unsafe-eval'`: o build padrão do **Alpine.js** (centenas de diretivas nos templates, e o Unfold) e o `hx-on` do **HTMX** avaliam expressões com `new Function` (ver dívidas);
+- `/admin/` e `/cms/` ficam fora da política do Django (`EXCLUDE_URL_PREFIXES`): os templates do Django admin, do Unfold e do Wagtail têm scripts inline sem nonce. Ali vale só a política do nginx, com `'unsafe-inline'` — como antes;
 - `style-src` permite estilos inline + Google Fonts;
 - `img-src` permite `data:` e `https:`;
 - `frame-src` permite apenas YouTube;
 - `object-src` bloqueado (`none`); `base-uri` e `form-action` restritos à origem; `frame-ancestors 'none'` (anti-clickjacking moderno, complementa `X-Frame-Options`).
 
-> O preço de `script-src` liberar inline/eval é mitigado por: sanitização do conteúdo, `frame-src` restrito e `object-src` bloqueado.
+> Com duas políticas (Django + nginx) o navegador exige as duas; nas páginas do Django a de lá, com nonce, é a que decide `script-src`.
 
 ### Cabeçalhos (nginx, `always`)
 `X-Content-Type-Options: nosniff` · `X-Frame-Options: DENY` · `Referrer-Policy: strict-origin-when-cross-origin` · `Permissions-Policy` (geolocation/microphone/camera vazios) · `Content-Security-Policy`.
@@ -204,6 +207,8 @@ Configurada em `base.py` via `django-csp` e **espelhada** no [`nginx.conf`](../.
 | Item | Situação | Observação |
 |------|----------|------------|
 | Warnings do `django-axes` | Conhecidos | Dívida técnica separada; não bloqueiam |
+| `'unsafe-eval'` na CSP | Pendente | Sair dele pede o build CSP do Alpine (`@alpinejs/csp`) com as expressões movidas para `Alpine.data`, e trocar os `hx-on` por listeners em arquivo. Enquanto isso, uma injeção de HTML que escape da sanitização ainda pode usar diretivas do Alpine (`x-init`) como gadget |
+| CSP do `/admin/` e do `/cms/` | Relaxada | Templates de terceiros com script inline; a política é a do nginx |
 | Antivírus em uploads | Ausente | Validação por magic bytes cobre o básico; para ambiente sensível, considerar ClamAV |
 | Tipo MIME do upload | Secundário | É falsificável; a defesa real são os magic bytes |
 | Páginas de erro 404/500/403 | Pendentes | Fase 10 (hardening de produção) |
@@ -221,6 +226,7 @@ Configurada em `base.py` via `django-csp` e **espelhada** no [`nginx.conf`](../.
 - [ ] Mensagem de erro de auth/candidatura? Mantenha genérica (não revele existência de dados).
 - [ ] Upload novo? Lista branca de extensões (nada que o navegador execute: HTML, SVG, XML, JS) e valide conteúdo real (magic bytes), não só extensão/MIME.
 - [ ] Template novo? Não use o filtro de escape-off; use `|sanitize_html`.
+- [ ] Script inline novo? `nonce="{{ request.csp_nonce }}"`. Ação em clique? `data-*` + `static/js/site-actions.js`, nunca `onclick=`.
 - [ ] Mudou middleware? Confira a ordem (axes depois de auth; CSP por último).
 
 ---

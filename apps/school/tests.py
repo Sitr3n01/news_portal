@@ -191,7 +191,7 @@ def test_school_homepage_renders_particle_stage_with_local_three(client, current
     # O gancho de depuração só existe na prévia local
     assert 'data-particles-debug' not in content
     # three vem da cópia local via import map: a CSP não libera CDN
-    assert '<script type="importmap">' in content
+    assert '<script type="importmap" nonce="' in content  # import map inline precisa do nonce da CSP
     assert 'js/vendor/three-r186/three.module.js' in content
     assert 'js/vendor/three-r186/three.core.js' in content
     assert 'js/school-editorial-particles.js' in content
@@ -593,7 +593,7 @@ def test_course_detail_renders_tsuru_particle_stage_with_local_three(client, cur
     # O gancho de depuração só existe na prévia local
     assert 'data-particles-debug' not in content
     # three vem da cópia local via import map: a CSP não libera CDN
-    assert '<script type="importmap">' in content
+    assert '<script type="importmap" nonce="' in content  # import map inline precisa do nonce da CSP
     assert 'js/vendor/three-r186/three.module.js' in content
     assert 'js/vendor/three-r186/three.core.js' in content
     assert 'js/school-editorial-particles-tsuru.js' in content

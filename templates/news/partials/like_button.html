@@ -8,7 +8,7 @@ Context: article, like_count, is_liked (bool)
         hx-target="#like-btn-{{ article.pk }}"
         hx-swap="outerHTML"
         {% if not user.is_authenticated %}
-        onclick="window.location='{% url 'accounts:login' %}?next={{ request.path|urlencode }}'; return false;"
+        data-login-href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}"
         {% endif %}
         class="group flex h-10 w-10 items-center justify-center rounded-full border {% if is_liked %}border-primary text-primary bg-primary/5{% else %}border-slate-200 bg-white dark:border-slate-700 dark:bg-background-dark dark:text-slate-400{% endif %} shadow-sm hover:border-primary/50 hover:text-primary transition-all outline-none"
         :aria-label="t('Curtir', 'Like')">

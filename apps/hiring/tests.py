@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
+from apps.accounts.models import CustomUser
 from apps.hiring.models import Application, Department, JobPosting
 
 
@@ -98,12 +99,42 @@ def test_download_resume_staff_without_perm_forbidden(client, django_user_model,
 
 
 @pytest.mark.django_db
-def test_download_resume_staff_with_perm_ok(client, django_user_model, application):
+def test_download_resume_staff_with_model_perm_but_not_superuser_forbidden(client, django_user_model, application):
+    """Candidaturas são recurso guardado: a permissão de modelo sozinha não basta
+    (auditoria de segurança, PRIV-02). Antes a rota baixava o currículo que a
+    tela de Candidaturas recusava a este mesmo usuário."""
     user = django_user_model.objects.create_user(username='rh', password='x', is_staff=True)
     user.user_permissions.add(Permission.objects.get(codename='view_application'))
+    client.force_login(user)
+    assert client.get(reverse('admin:hiring_application_changelist')).status_code == 403
+    response = client.get(reverse('hiring:download_resume', args=[application.pk]))
+    assert response.status_code == 403
+    assert 'X-Accel-Redirect' not in response
+
+
+@pytest.mark.django_db
+def test_download_resume_general_admin_forbidden(client, make_panel_user, application):
+    general_admin = make_panel_user('geral_rh', role=CustomUser.Role.SUPER_ADMIN, is_staff=True)
+    assert general_admin.has_perm('hiring.view_application')
+    client.force_login(general_admin)
+    response = client.get(reverse('hiring:download_resume', args=[application.pk]))
+    assert response.status_code == 403
+    assert 'X-Accel-Redirect' not in response
+
+
+@pytest.mark.django_db
+def test_download_resume_superuser_ok(client, django_user_model, application):
+    user = django_user_model.objects.create_superuser(username='raiz', email='raiz@example.com', password='x')
     client.force_login(user)
     url = reverse('hiring:download_resume', args=[application.pk])
     response = client.get(url)
     assert response.status_code == 200
     # Nunca expõe o caminho público; serve apenas via location interna do nginx
     assert response['X-Accel-Redirect'].startswith('/protected/hiring/resumes/')
+
+
+@pytest.mark.django_db
+def test_download_resume_forbidden_does_not_reveal_missing_ids(client, django_user_model):
+    user = django_user_model.objects.create_user(username='curioso', password='x', is_staff=True)
+    client.force_login(user)
+    assert client.get(reverse('hiring:download_resume', args=[999999])).status_code == 403

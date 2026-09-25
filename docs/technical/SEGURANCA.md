@@ -29,6 +29,8 @@
 | Conta duplicada por capitalização | E-mail normalizado na gravação + busca `__iexact` | `apps/accounts/forms.py` + migration `0009` |
 | Enumeração de usuários | Mensagens e redirecionamentos idênticos em cadastro e reset | Views e forms |
 | E-mail sumindo em silêncio | System check `accounts.E001` barra backend fake fora de DEBUG, no deploy | `apps/accounts/checks.py` |
+| Segredo de exemplo em produção | System checks `common.E010`–`E012` barram no deploy a `SECRET_KEY`, a senha do banco e os segredos de serviço copiados dos exemplos do repositório | `apps/common/checks.py` |
+| Rascunho lido pela prévia de newsletter | A prévia exige `news.view_article` (não `is_staff`) e `Article.on_site` | `apps/news/views.py` |
 | Clickjacking | `X-Frame-Options: DENY` | Middleware + nginx |
 | Upload malicioso de currículo | Sem upload público desde 14/09/2026: o formulário de candidatura saiu com as vagas | — |
 | Vazamento de currículo | Nome UUID + download autenticado via `X-Accel-Redirect` | `hiring` + nginx |
@@ -127,7 +129,7 @@ A política é **nunca revelar** se um e-mail/usuário existe:
 Detalhado em [APP_HIRING.md](APP_HIRING.md#5-currículos-o-ponto-mais-sensível). Desde 14/09/2026 o site não recebe currículos: o formulário de candidatura saiu junto com as vagas. Os currículos já gravados seguem protegidos por duas barreiras:
 
 1. **Nome imprevisível:** `resume_upload_path` grava com `uuid4().hex` — nada de URL adivinhável.
-2. **Entrega protegida:** `download_resume` exige `staff` + permissão `hiring.view_application`; em produção delega ao nginx via `X-Accel-Redirect` a partir de uma *location interna* (`/protected/`). O nginx **bloqueia** acesso público direto a `/media/hiring/resumes/`.
+2. **Entrega protegida:** `download_resume` exige `staff` e a **mesma regra da tela de Candidaturas** (`ApplicationAdmin.has_view_permission`, hoje só superusuário — recurso guardado); a permissão de modelo sozinha não basta. Em produção delega ao nginx via `X-Accel-Redirect` a partir de uma *location interna* (`/protected/`). O nginx **bloqueia** acesso público direto a `/media/hiring/resumes/`.
 
 A validação real de conteúdo — tipo MIME, extensão e **magic bytes** (`%PDF-`, `PK\x03\x04`, `\xd0\xcf\x11\xe0`), com limite de 5 MB — ficava em `ApplicationForm.clean_resume` e saiu com o formulário. Se a candidatura pelo site voltar, essa validação volta junto.
 

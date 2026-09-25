@@ -1,9 +1,9 @@
 from django.contrib import messages
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import cache
+from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db.models import F, Q
 from django.http import Http404, HttpResponse
@@ -534,16 +534,22 @@ def delete_comment(request, comment_id):
     return safe_referer_redirect(request, article_url)
 
 
-@staff_member_required
+@login_required(login_url='panel:login')
 def newsletter_preview(request, article_id):
-    """Preview do template de newsletter para um artigo (somente staff).
+    """Preview do template de newsletter para um artigo (quem vê notícias no painel).
+
+    A regra é a permissão de ver notícias, não is_staff: antes qualquer staff —
+    inclusive o Administrador Komuniki, sem acesso a notícias — lia rascunhos
+    por ID, e Editor/Repórter (que não são staff) não abriam a própria prévia.
 
     Passa o request para que os links no preview usem o host real do servidor,
     tornando-os navegáveis no browser (em vez do domínio configurado no banco).
     """
     from .newsletter import get_newsletter_context
 
-    article = get_object_or_404(Article, id=article_id)
+    if not request.user.has_perm('news.view_article'):
+        raise PermissionDenied
+    article = get_object_or_404(Article.on_site, id=article_id)
     context = get_newsletter_context(article, request=request)
     html = render_to_string('news/email/newsletter_article.html', context)
     return HttpResponse(html)

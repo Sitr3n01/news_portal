@@ -39,17 +39,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-    
+
     - name: Set up Python 3.12
       uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: "3.12"
-        
+        # O lock (requirements/development.txt) é a chave do cache: muda o lock, refaz o cache.
+        cache: pip
+        cache-dependency-path: requirements/development.txt
+
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements/development.txt
-        
+
     - name: Run Linting
       run: |
         ruff check .
@@ -58,7 +61,12 @@ jobs:
     # .secrets.baseline (detect-secrets, instalado pelo requirements/development.txt).
     - name: Secret Scanning
       run: scripts/ci/check-secrets.sh
-        
+
+    # Falha se algum model mudou sem a migration correspondente.
+    - name: Check Missing Migrations
+      run: |
+        python manage.py makemigrations --check --dry-run
+
     # Builds the staticfiles manifest so {% static %} (used by the base
     # templates for the vendored JS) resolves during template rendering in
     # tests — CompressedManifestStaticFilesStorage needs it.
@@ -66,6 +74,29 @@ jobs:
       run: |
         python manage.py collectstatic --noinput
 
+    # Cobertura configurada em pyproject.toml ([tool.coverage]); fail_under
+    # impede que ela caia sem ninguém perceber. O resumo vai para a página do job.
     - name: Run Tests
       run: |
-        pytest
+        pytest --cov --cov-report=term
+        coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
+
+  # Vulnerabilidades conhecidas nas versões fixadas do lock. Job separado: não é
+  # o check obrigatório do master, então um aviso novo não trava merges, mas
+  # aparece no PR.
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: "3.12"
+
+    # --no-deps/--disable-pip: o lock já fixa a árvore inteira, não há o que resolver.
+    - name: Audit locked requirements
+      run: |
+        python -m pip install pip-audit==2.10.1
+        pip-audit --strict --no-deps --disable-pip -r requirements/production.txt -r requirements/development.txt

@@ -34,6 +34,27 @@ updates:
         update-types:
           - "version-update:semver-major"
 
+  # Só o build do CSS (package.json). Depois de um bump, rode `npm run build:css` e
+  # commite o CSS: o CI recompila e falha se o arquivo versionado não bater.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "deps"
+    groups:
+      css-build:
+        patterns:
+          - "*"
+    ignore:
+      # O Tailwind 4 troca o formato do config e do CSS gerado: é migração, não bump semanal.
+      - dependency-name: "tailwindcss"
+        update-types:
+          - "version-update:semver-major"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

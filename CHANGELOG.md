@@ -25,6 +25,12 @@ the same tag (see [CONTRIBUTING.md](CONTRIBUTING.md#releases)).
   `requirements/*.txt` are uv-compiled locks for Python 3.12. Django is pinned
   to the 5.2 LTS series and Dependabot sends one grouped update per week
   ([#56](https://github.com/Sitr3n01/news_portal/pull/56)).
+- Tailwind is compiled at build time instead of running in the browser: the
+  public pages drop the 122 KB (gzipped) Play CDN runtime for 4–9 KB of CSS,
+  with identical rendering, and CI fails if the committed CSS is stale
+  ([#69](https://github.com/Sitr3n01/news_portal/pull/69)).
+- The 2,900-line `apps/news/tests.py` is split into 13 thematic modules
+  ([#65](https://github.com/Sitr3n01/news_portal/pull/65)).
 
 ### Removed
 - Machine-specific paths from the Komuniki engineering notes

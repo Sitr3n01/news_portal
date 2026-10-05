@@ -81,14 +81,14 @@ A [Komuniki](https://komuniki.com.br) é uma escola de comunicação, artes e li
 ## Arquitetura
 
 ```mermaid
-flowchart LR
+flowchart TD
     users([Visitantes e equipe da cliente]) --> cf[Cloudflare]
+    cf --> nginx
     subgraph vps[VPS · Docker Compose]
         nginx[Nginx] --> app[Gunicorn · Django 5.2 + Wagtail 7.4]
         app --> db[(PostgreSQL 16)]
         timer[Timer de deploy · a cada 10 min]
     end
-    cf --> nginx
     app -.-> mail[SMTP]
     app -.-> sentry[Sentry]
     subgraph gh[GitHub]

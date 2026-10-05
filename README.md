@@ -81,14 +81,14 @@ A production system for a real client, built and operated end to end: data model
 ## Architecture
 
 ```mermaid
-flowchart LR
+flowchart TD
     users([Visitors and the client team]) --> cf[Cloudflare]
+    cf --> nginx
     subgraph vps[VPS · Docker Compose]
         nginx[Nginx] --> app[Gunicorn · Django 5.2 + Wagtail 7.4]
         app --> db[(PostgreSQL 16)]
         timer[Deploy timer · every 10 min]
     end
-    cf --> nginx
     app -.-> mail[SMTP]
     app -.-> sentry[Sentry]
     subgraph gh[GitHub]

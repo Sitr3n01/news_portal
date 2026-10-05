@@ -56,44 +56,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet" />
 
-    <!-- Tailwind (engine auto-hospedado e pinado, com plugins forms+container-queries) -->
-    <script src="{% static 'js/vendor/tailwind.forms-cq.min.js' %}"></script>
-    <script nonce="{{ request.csp_nonce }}">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": {
-                            50: "#eef2ff",
-                            100: "#dce5ff",
-                            200: "#b9ccfe",
-                            300: "#8baafe",
-                            400: "#5882fd",
-                            500: "#1152d4",
-                            600: "#1152d4",
-                            700: "#163ca8",
-                            800: "#112e82",
-                            900: "#082868",
-                            DEFAULT: "#1152d4"
-                        },
-                        "background-light": "#ffffff",
-                        // Preto puro, como o site da escola. Só o escuro usa este token.
-                        "background-dark": "#000000",
-                        "slate-900": "#1a1a1a",
-                        "slate-500": "#6b7280",
-                    },
-                    fontFamily: {
-                        "display": ["Newsreader", "serif"],
-                        "sans": ["Inter", "sans-serif"],
-                        "ui": ["Inter", "sans-serif"],
-                    },
-                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
-                },
-            },
-        }
-    </script>
-
     <!-- HTMX & Alpine.js (vendorizados e pinados) -->
     <script src="{% static 'js/vendor/htmx.min.js' %}" defer></script>
     <script defer src="{% static 'js/news-theme-reveal.js' %}"></script>
@@ -217,6 +179,8 @@
     </style>
 
     {% block extra_css %}{% endblock %}
+    {# Tailwind compilado (frontend/tailwind/news.config.js, npm run build:css). Vai por último no <head>: nos empates de especificidade as utilitárias vencem o <style> acima e o extra_css, como quando o runtime do CDN anexava o <style> dele ao fim do head. #}
+    <link rel="stylesheet" href="{% static 'css/tailwind-news.css' %}">
 </head>
 
 <body

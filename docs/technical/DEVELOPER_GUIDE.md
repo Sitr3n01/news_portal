@@ -220,6 +220,17 @@ def article_detail(request, slug):
 <a href="{% url 'news:article_detail' article.slug %}">{{ article.title }}</a>
 ```
 
+### CSS do site público (Tailwind)
+
+As classes utilitárias dos dois portais vêm de CSS compilado, versionado em `static/css/tailwind-school.css` e `static/css/tailwind-news.css`. As origens ficam em `frontend/tailwind/`: um `*.config.js` por base (tema, `darkMode`, plugins e os caminhos de `content` que o Tailwind varre) e um `*.css` com as diretivas. O Tailwind (3.4.17) e os plugins estão fixados em `package.json`; o Node só entra no build, nunca no runtime nem na imagem Docker.
+
+```bash
+npm ci              # uma vez, ou quando o package-lock.json mudar
+npm run build:css   # depois de usar uma classe nova em template, JS ou Python
+```
+
+Commite o CSS gerado junto com a mudança que pediu a classe. O CI recompila e falha se o arquivo versionado não bater com as origens. Classe montada em tempo de execução (por exemplo, `bg-{{ cor }}-500`) não aparece para o Tailwind: escreva os nomes inteiros no código. Template novo fora dos padrões de `content` precisa entrar no config da sua base.
+
 ### Admin
 
 ```python

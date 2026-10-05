@@ -1,0 +1,15 @@
+{
+  "name": "news-portal-frontend",
+  "private": true,
+  "description": "Só o build do CSS (Tailwind). Não há dependência de runtime: o Django serve o resultado compilado de static/css/tailwind-*.css.",
+  "scripts": {
+    "build:css": "npm run build:css:school && npm run build:css:news",
+    "build:css:school": "tailwindcss --config frontend/tailwind/school.config.js --input frontend/tailwind/school.css --output static/css/tailwind-school.css --minify",
+    "build:css:news": "tailwindcss --config frontend/tailwind/news.config.js --input frontend/tailwind/news.css --output static/css/tailwind-news.css --minify"
+  },
+  "devDependencies": {
+    "@tailwindcss/container-queries": "0.1.1",
+    "@tailwindcss/forms": "0.5.10",
+    "tailwindcss": "3.4.17"
+  }
+}

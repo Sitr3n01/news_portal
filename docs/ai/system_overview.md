@@ -26,7 +26,7 @@ Sistema Django 5.1+ monolítico. Um banco PostgreSQL 16 em produção. Dois port
 | Banco | PostgreSQL 16 em prod; SQLite opcional local | Não assuma outro banco em prod |
 | Admin | Django Unfold (`django-unfold>=0.40`) | Importar `ModelAdmin` de `unfold.admin` |
 | Frontend | Django templates + HTMX + Alpine.js | Sem SPA |
-| CSS público | CSS próprio versionado | Não adicionar Tailwind CDN público |
+| CSS público | CSS próprio + Tailwind compilado (`frontend/tailwind/`, `npm run build:css`) | Não carregar Tailwind no navegador (Play CDN) nem de CDN público; commitar o CSS gerado |
 | Sanitização | `apps.common.sanitization` | Não usar `bleach` espalhado |
 | Deploy | Docker Compose + Nginx + GitHub tag aprovada | Ver `docs/technical/secure-deploy.md` |
 

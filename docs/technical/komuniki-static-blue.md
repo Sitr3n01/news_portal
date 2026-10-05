@@ -35,7 +35,7 @@ Evidências locais, ignoradas pelo Git, em `.preview/evidence/static-blue/`: `su
 ## Iniciar, encerrar e reverter somente esta apresentação
 
 ```powershell
-Set-Location 'C:\Users\Sitr3n\Documents\Github\news_portal-komuniki-design'
+Set-Location ..\news_portal-komuniki-design
 .\scripts\preview\preview.ps1 -Action start
 # Revisão principal: http://127.0.0.1:8012/
 # Referência de conteúdo: http://127.0.0.1:8011/
@@ -54,7 +54,7 @@ Esse revert restaura a apresentação animada/amarela de `8d7c349` e **mantém o
 
 ## Registro da edição da imagem
 
-Ferramenta: `image_gen.imagegen` integrada, sem CLI. Arquivo final no projeto: `static/images/komuniki-editorial-hero.png`, servido com `?v=2`. Saída final da ferramenta: `C:\Users\Sitr3n\.codex\generated_images\01a081e6-6269-7f50-9dea-e4207ff99441\exec-62364b39-364c-44bb-9970-b71c9fc755e9.png`.
+Ferramenta: `image_gen.imagegen` integrada, sem CLI. Arquivo final no projeto: `static/images/komuniki-editorial-hero.png`, servido com `?v=2`.
 
 Prompt da alteração de cor:
 

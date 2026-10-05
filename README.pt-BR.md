@@ -14,6 +14,7 @@ Newsroom — o painel da equipe
 ![Django 5.2 LTS](https://img.shields.io/badge/django-5.2%20LTS-092E20?logo=django&logoColor=white)
 ![Wagtail 7.4](https://img.shields.io/badge/wagtail-7.4-43B1B0)
 [![Licença: MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-lightgrey)](LICENSE)
+[![Última versão](https://img.shields.io/github/v/release/Sitr3n01/news_portal)](https://github.com/Sitr3n01/news_portal/releases)
 
 [English](README.md) · **Português**
 
@@ -180,9 +181,9 @@ O desenvolvimento usa agentes de código com IA (Claude Code e Codex) como pares
 
 ## Próximos passos
 
-- Rodar a suíte de testes contra PostgreSQL no CI, como em produção.
-- Migrar para o Wagtail 8 e re-sincronizar o override da sidebar do Unfold, para que os dois saiam dos pins.
-- Levar o catálogo de cursos para snippets do Wagtail se a escola passar a editá-lo com frequência.
+- Rodar a suíte de testes contra PostgreSQL no CI, como em produção ([#66](https://github.com/Sitr3n01/news_portal/issues/66)).
+- Migrar para o Wagtail 8 e re-sincronizar o override da sidebar do Unfold, para que os dois saiam dos pins ([#67](https://github.com/Sitr3n01/news_portal/issues/67)).
+- Levar o catálogo de cursos para snippets do Wagtail se a escola passar a editá-lo com frequência ([#68](https://github.com/Sitr3n01/news_portal/issues/68)).
 
 ## Histórico do projeto
 

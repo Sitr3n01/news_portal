@@ -14,6 +14,7 @@ Newsroom — the team's admin panel
 ![Django 5.2 LTS](https://img.shields.io/badge/django-5.2%20LTS-092E20?logo=django&logoColor=white)
 ![Wagtail 7.4](https://img.shields.io/badge/wagtail-7.4-43B1B0)
 [![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/Sitr3n01/news_portal)](https://github.com/Sitr3n01/news_portal/releases)
 
 **English** · [Português](README.pt-BR.md)
 
@@ -182,9 +183,9 @@ Development uses AI coding agents (Claude Code and Codex) as pair programmers. T
 
 ## Roadmap
 
-- Run the test suite against PostgreSQL in CI, matching production.
-- Migrate to Wagtail 8 and re-sync the Unfold sidebar override so both can leave their pins.
-- Move the course catalog to Wagtail snippets if the school starts editing it often.
+- Run the test suite against PostgreSQL in CI, matching production ([#66](https://github.com/Sitr3n01/news_portal/issues/66)).
+- Migrate to Wagtail 8 and re-sync the Unfold sidebar override so both can leave their pins ([#67](https://github.com/Sitr3n01/news_portal/issues/67)).
+- Move the course catalog to Wagtail snippets if the school starts editing it often ([#68](https://github.com/Sitr3n01/news_portal/issues/68)).
 
 ## Project history
 

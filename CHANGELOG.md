@@ -18,7 +18,7 @@ the same tag (see [CONTRIBUTING.md](CONTRIBUTING.md#releases)).
   branch-coverage floor in CI
   ([#56](https://github.com/Sitr3n01/news_portal/pull/56)).
 - Portfolio README in English and Portuguese, contributing guide, issue forms
-  and pull request template.
+  and pull request template ([#57](https://github.com/Sitr3n01/news_portal/pull/57)).
 
 ### Changed
 - Dependencies are locked: `requirements/*.in` hold the direct dependencies and
@@ -27,7 +27,8 @@ the same tag (see [CONTRIBUTING.md](CONTRIBUTING.md#releases)).
   ([#56](https://github.com/Sitr3n01/news_portal/pull/56)).
 
 ### Removed
-- Machine-specific paths from the Komuniki engineering notes.
+- Machine-specific paths from the Komuniki engineering notes
+  ([#57](https://github.com/Sitr3n01/news_portal/pull/57)).
 
 ## [2.3.0] - 2026-09-25
 

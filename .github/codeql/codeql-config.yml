@@ -1,0 +1,7 @@
+name: news_portal CodeQL
+
+# Bibliotecas vendorizadas (three, GSAP, htmx, Alpine...) são código de terceiros
+# copiado do npm; os alertas delas não são acionáveis aqui.
+paths-ignore:
+  - static/js/vendor
+  - staticfiles

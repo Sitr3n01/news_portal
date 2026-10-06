@@ -1,8 +1,16 @@
 [project]
 name = "news-portal"
-version = "0.1.0"
-description = "Sistema web para escola e portal de notícias"
+version = "2.3.0"
+description = "Django + Wagtail platform behind komuniki.com.br and the Blog da Kelly news portal"
+readme = "README.md"
+license = "MIT"
 requires-python = ">=3.12"
+authors = [{ name = "José Gilberto (Sitr3n01)" }]
+
+[project.urls]
+Homepage = "https://komuniki.com.br"
+Repository = "https://github.com/Sitr3n01/news_portal"
+Changelog = "https://github.com/Sitr3n01/news_portal/blob/master/CHANGELOG.md"
 
 [tool.ruff]
 line-length = 200
@@ -18,3 +26,27 @@ select = ["E", "F", "I", "N", "W"]
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings.test"
 python_files = "tests.py test_*.py"
+
+[tool.coverage.run]
+branch = true
+source = ["apps", "config"]
+omit = [
+    "*/migrations/*",
+    "*/tests.py",
+    "*/test_*.py",
+    "*/conftest.py",
+    # Pontos de entrada e settings de outros ambientes: a suíte só carrega base.py e test.py.
+    "config/asgi.py",
+    "config/wsgi.py",
+    "config/settings/development.py",
+    "config/settings/design_preview.py",
+    "config/settings/local_sqlite.py",
+    "config/settings/production.py",
+]
+
+[tool.coverage.report]
+precision = 1
+skip_covered = true
+show_missing = true
+# Piso, não meta: impede que a cobertura caia sem ninguém perceber. Suba junto quando ela subir.
+fail_under = 82

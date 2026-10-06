@@ -1,0 +1,12 @@
+# Ferramentas de desenvolvimento e CI. Edite aqui e regenere requirements/development.txt
+# (comando no cabeçalho de requirements/base.in).
+-r base.in
+django-debug-toolbar>=4.3
+django-browser-reload>=1.21.0
+ruff>=0.16.0
+pytest-django>=4.8
+# Cobertura medida no CI (configuração em pyproject.toml, [tool.coverage]).
+pytest-cov>=6.0
+factory-boy>=3.3.3
+# Varredura de segredos do CI (.secrets.baseline). Pinado: a baseline depende da versão.
+detect-secrets==1.5.0

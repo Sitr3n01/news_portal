@@ -1,0 +1,5 @@
+# Dependências só de produção. Edite aqui e regenere requirements/production.txt
+# (comando no cabeçalho de requirements/base.in).
+-r base.in
+gunicorn>=22.0
+sentry-sdk>=2.0

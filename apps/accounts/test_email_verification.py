@@ -24,7 +24,7 @@ SENHA = 'SenhaTeste#2026'
 
 
 def mock_turnstile(monkeypatch, *, valid=True):
-    """Mesmo padrão de apps/news/tests.py: substitui a chamada de rede real
+    """Mesmo padrão de apps/news/test_newsletter.py: substitui a chamada de rede real
     por uma checagem de token fixo, sem depender das chaves de teste da
     Cloudflare (que nem entram em jogo aqui — settings.test define DEBUG=False,
     então get_turnstile_secret_key() nem cairia no fallback de teste)."""

@@ -60,6 +60,28 @@ def test_every_inline_script_in_templates_carries_the_nonce():
     assert offenders == []
 
 
+def test_no_template_loads_the_tailwind_play_cdn():
+    """O Tailwind é compilado (npm run build:css). O runtime do Play CDN gerava o CSS no navegador e é só para desenvolvimento."""
+    offenders = [
+        str(path.relative_to(TEMPLATES)) for path in _templates()
+        if re.search(r'tailwind(\.forms-cq)?\.min\.js|tailwind\.config\s*=', path.read_text(encoding='utf-8'))
+    ]
+    assert offenders == []
+
+
+@pytest.mark.parametrize('base, stylesheet', [
+    ('base_school_editorial.html', 'css/tailwind-school.css'),
+    ('base_news.html', 'css/tailwind-news.css'),
+])
+def test_public_bases_link_their_compiled_tailwind_last_in_head(base, stylesheet):
+    """O link vai por último no <head>: nos empates de especificidade, as utilitárias vencem o CSS próprio, como no runtime antigo."""
+    head = (TEMPLATES / base).read_text(encoding='utf-8').split('</head>')[0]
+    link = f"<link rel=\"stylesheet\" href=\"{{% static '{stylesheet}' %}}\">"
+    assert link in head
+    assert not re.search(r'<(link|style|script)\b', head.split(link, 1)[1])
+    assert (Path(settings.BASE_DIR) / 'static' / stylesheet).is_file()
+
+
 # ── Dinâmico: o cabeçalho de verdade bate com as tags de verdade ─────────────
 
 

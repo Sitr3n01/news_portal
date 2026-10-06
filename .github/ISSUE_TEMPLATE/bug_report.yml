@@ -1,0 +1,42 @@
+name: Bug report
+description: Something on the sites or in the admin does not work as expected.
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Where
+      options:
+        - Komuniki (komuniki.com.br)
+        - Blog da Kelly (/news/)
+        - Newsroom panel (/admin/, /cms/)
+        - Deploy, CI or infrastructure
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open …
+        2. Click …
+        3. See …
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and device
+      placeholder: Chrome 154 on Android, Safari on iPhone, …
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots or logs
+      description: Remove personal data and secrets before pasting.

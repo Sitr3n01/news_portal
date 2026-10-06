@@ -1,0 +1,23 @@
+name: Feature request
+description: Propose a change to the sites, the admin or the tooling.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Who needs this, and what is hard today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What should change? Include screens or examples if you have them.
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Constraints and alternatives
+      description: Security, performance, editorial workflow, deploy impact, options you considered.

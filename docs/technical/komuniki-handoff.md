@@ -1,6 +1,6 @@
 # Continuidade da Komuniki
 
-Estado de 14/09/2026. Trabalhar em `C:\Users\Sitr3n\Documents\Github\news_portal-komuniki-design`, branch **`codex/komuniki-editorial-test`**. A partir de `026249c` (tag `codex/komuniki-static-blue`), a troca dos detalhes menta por azul claro e o hero de partículas foram versionados juntos no commit `8983664` (`feat(school): replace hero illustration with WebGL particle stage`). Os refinamentos do hero, com camadas e tema claro sem bloco, vieram no commit seguinte (`feat(school): layer the hero particles over the copy and drop the black stage`). Em 14/09/2026 o site editorial virou o site da escola, e o `master` local avançou até a branch por fast-forward; veja [Troca do site](komuniki-troca-do-site.md). Não houve push nem publicação. Novas rodadas continuam na worktree; para levá-las ao `master`, repita o fast-forward.
+Registro histórico de 14/09/2026. O redesign foi feito na worktree irmã `news_portal-komuniki-design`, branch **`codex/komuniki-editorial-test`**, hoje inteiramente incorporada ao `master`. A partir de `026249c` (tag `codex/komuniki-static-blue`), a troca dos detalhes menta por azul claro e o hero de partículas foram versionados juntos no commit `8983664` (`feat(school): replace hero illustration with WebGL particle stage`). Os refinamentos do hero, com camadas e tema claro sem bloco, vieram no commit seguinte (`feat(school): layer the hero particles over the copy and drop the black stage`). Em 14/09/2026 o site editorial virou o site da escola, e o `master` local avançou até a branch por fast-forward; veja [Troca do site](komuniki-troca-do-site.md). O site foi publicado no mesmo dia pelo PR #49. Desde então o trabalho segue em branches criadas a partir do `master`, com PR e CI; a worktree continua útil só como ambiente de prévia, com os bancos e as evidências de `.preview/`.
 
 ## Decisões atuais do usuário
 
@@ -33,7 +33,7 @@ Estado de 14/09/2026. Trabalhar em `C:\Users\Sitr3n\Documents\Github\news_portal
 ## Prévia e dados
 
 ```powershell
-Set-Location 'C:\Users\Sitr3n\Documents\Github\news_portal-komuniki-design'
+Set-Location ..\news_portal-komuniki-design
 .\scripts\preview\preview.ps1 -Action status
 .\scripts\preview\preview.ps1 -Action start
 # Encerrar antes de reiniciar após mudanças em templates/Python:
@@ -47,7 +47,7 @@ Set-Location 'C:\Users\Sitr3n\Documents\Github\news_portal-komuniki-design'
 - Se a 8013 ou o servidor do `master` na 8000 estiverem fora do ar, religue-os pelo `.claude/launch.json` do checkout `news_portal`: `komuniki-particles` (8013) e `news-portal-dev` (8000).
 - `.preview/` contém bancos, mídia e evidências locais ignorados pelo Git. Outro agente nesta máquina deve reutilizar esta worktree. Um clone Git novo não recebe os bancos; consulte [conteúdo oficial](komuniki-official-content.md) e [preparação da prévia](komuniki-editorial-preview.md) antes de recriá-los.
 - `.preview/local.sqlite3` já tem `contact.0005`, `hiring.0008`, `school.0010` e `common.0010`. A `school.0010` não mudou dados, porque esse banco já tinha os valores reais, e a `common.0010` preencheu o slogan em inglês. As cópias anteriores estão em `.preview/backups/local-antes-dados-reais-2026-09-14.sqlite3` e `.preview/backups/local-antes-tagline-en-2026-09-14.sqlite3`. Os bancos `current.sqlite3` e `demo.sqlite3` ainda precisam de `migrate` quando forem religados, e com ele recebem os dados reais no lugar dos exemplos.
-- O checkout `C:\Users\Sitr3n\Documents\Github\news_portal` está no `master`, que avançou até a branch em 14/09/2026. Antes de cada `migrate` do `db.sqlite3` dele, uma cópia foi para `backups\`, ignorada pelo Git: `db-antes-troca-do-site-2026-09-14.sqlite3`, `db-antes-dados-reais-2026-09-14.sqlite3` e `db-antes-tagline-en-2026-09-14.sqlite3`. Migrações novas: curso de interesse no contato (`contact.0005`, veja [Curso de interesse](komuniki-curso-de-interesse.md)), texto de ajuda do status das vagas (`hiring.0008`), dados reais (`school.0010`), que trocou os exemplos desse banco pelos dados reais, e slogan em inglês (`common.0010`). As páginas públicas de vagas saíram; o Blog não mudou.
+- O checkout principal (`news_portal`) estava no `master`, que avançou até a branch em 14/09/2026. Antes de cada `migrate` do `db.sqlite3` dele, uma cópia foi para `backups\`, ignorada pelo Git: `db-antes-troca-do-site-2026-09-14.sqlite3`, `db-antes-dados-reais-2026-09-14.sqlite3` e `db-antes-tagline-en-2026-09-14.sqlite3`. Migrações novas: curso de interesse no contato (`contact.0005`, veja [Curso de interesse](komuniki-curso-de-interesse.md)), texto de ajuda do status das vagas (`hiring.0008`), dados reais (`school.0010`), que trocou os exemplos desse banco pelos dados reais, e slogan em inglês (`common.0010`). As páginas públicas de vagas saíram; o Blog não mudou.
 
 ## Verificação
 

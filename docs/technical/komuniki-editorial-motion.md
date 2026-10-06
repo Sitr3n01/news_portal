@@ -88,7 +88,7 @@ Referências Git locais:
 Para voltar ao comportamento aprovado anterior, preserve primeiro eventuais alterações posteriores. Com a worktree limpa, reverta somente o commit de motion; os bancos e a mídia em `.preview/` não são tocados:
 
 ```powershell
-Set-Location 'C:\Users\Sitr3n\Documents\Github\news_portal-komuniki-design'
+Set-Location ..\news_portal-komuniki-design
 git status --short
 git revert --no-edit codex/komuniki-editorial-motion-v1
 .\scripts\preview\preview.ps1 -Action stop

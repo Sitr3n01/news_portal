@@ -6,6 +6,8 @@ curso, incluindo sua tradução; find_course() é usado por apps.school.views.co
 meta_description não tem _en: é renderizada só no servidor (Django), e o idioma da página é uma preferência só do
 cliente (Alpine/localStorage, ver static/js/school-editorial.js) que não chega até a view."""
 
+import re
+
 COURSE_GROUPS = [
     {
         'eyebrow': 'Formação profissionalizante',
@@ -1464,18 +1466,38 @@ def find_course_group(slug):
 
 # Hífen condicional (U+00AD): invisível, só aparece se o navegador realmente quebrar a linha ali. O
 # CSS "hyphens: auto" existe, mas depende de um dicionário de hifenização nem sempre presente no
-# navegador; para os títulos compridos que já quebraram no meio da palavra (sem respeitar sílaba),
-# a separação abaixo é explícita e correta em português, e funciona em qualquer navegador.
-_TITLE_HYPHENATION = {
-    'Profissionalizante': 'Profissionali­zante',
-    'Apresentação': 'Apresenta­ção',
-    'Conversação': 'Conversa­ção',
-}
+# navegador, e o Chrome não hifeniza palavra com inicial maiúscula (é o caso de todo título). Sem isso,
+# uma palavra comprida que não cabe na coluna quebra no meio, sem hífen ("COMMUNICATIO / N" no H1 em
+# inglês a 1920 px, "PROFISSIONALIZANT / E" nos cards de Cursos no celular). Cada entrada é a palavra
+# já separada nas sílabas onde a quebra pode cair; a troca ignora maiúsculas e minúsculas e preserva a
+# grafia do texto. A lista nasce das quebras medidas de 320 a 1920 px, em português e em inglês, e toda
+# palavra de 12+ letras de um nome de curso precisa estar aqui (apps/school/tests.py confere).
+_SOFT_HYPHEN = '\u00ad'
+_TITLE_HYPHENATION = (
+    'Profis\u00adsionali\u00adzante',
+    'Apresenta\u00adção',
+    'Conversa\u00adção',
+    'Comuni\u00adcação',
+    'Comuni\u00adcador',
+    'aconteci\u00admento',
+    'Communi\u00adcation',
+    'Communi\u00adcator',
+    'Conver\u00adsation',
+    'Profes\u00adsional',
+)
 
 
-def hero_title_for_display(title):
-    """course['title'] com hífen condicional nas palavras compridas conhecidas, só para o H1 da
-    página do curso. Não mexe no valor original: breadcrumb, cards e <title> continuam exatos."""
-    for word, hyphenated in _TITLE_HYPHENATION.items():
-        title = title.replace(word, hyphenated)
+def _hyphenate_like(match, hyphenated):
+    """Copia os hífens condicionais de `hyphenated` para o trecho casado, preservando maiúsculas e minúsculas."""
+    letters = iter(match.group())
+    return ''.join(_SOFT_HYPHEN if char == _SOFT_HYPHEN else next(letters) for char in hyphenated)
+
+
+def title_for_display(title):
+    """Título com hífen condicional nas palavras compridas conhecidas, para onde ele aparece grande: o H1
+    da página do curso, os cards de Cursos e os títulos de seção, em português e em inglês. Não mexe no
+    valor original: breadcrumb, <title> e a etiqueta do curso em Contato continuam com o texto exato."""
+    for hyphenated in _TITLE_HYPHENATION:
+        word = hyphenated.replace(_SOFT_HYPHEN, '')
+        title = re.sub(rf'\b{re.escape(word)}\b', lambda match, h=hyphenated: _hyphenate_like(match, h), title, flags=re.IGNORECASE)
     return title

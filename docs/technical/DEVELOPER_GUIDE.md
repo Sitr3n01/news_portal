@@ -6,7 +6,7 @@
 
 ## O Que É Este Projeto
 
-news_portal é um sistema multi-portal construído em Django 5.1+. Ele serve dois portais a partir do mesmo codebase:
+news_portal é um sistema multi-portal construído em Django 5.2 LTS e Wagtail 7.4. Ele serve dois portais a partir do mesmo codebase:
 
 | Portal | URL Base | Propósito |
 |--------|----------|-----------|
@@ -97,9 +97,11 @@ news_portal/
 ├── static/                 # CSS, JS, imagens estáticas
 ├── media/                  # Uploads de usuários (não versionar)
 ├── requirements/
-│   ├── base.txt
-│   ├── development.txt
-│   └── production.txt
+│   ├── base.in             # Dependências diretas (editar aqui)
+│   ├── development.in
+│   ├── development.txt     # Lock gerado — não editar à mão
+│   ├── production.in
+│   └── production.txt      # Lock gerado — não editar à mão
 └── manage.py
 ```
 
@@ -217,6 +219,17 @@ def article_detail(request, slug):
 <!-- Sempre use {% url %} — nunca hardcode links -->
 <a href="{% url 'news:article_detail' article.slug %}">{{ article.title }}</a>
 ```
+
+### CSS do site público (Tailwind)
+
+As classes utilitárias dos dois portais vêm de CSS compilado, versionado em `static/css/tailwind-school.css` e `static/css/tailwind-news.css`. As origens ficam em `frontend/tailwind/`: um `*.config.js` por base (tema, `darkMode`, plugins e os caminhos de `content` que o Tailwind varre) e um `*.css` com as diretivas. O Tailwind (3.4.17) e os plugins estão fixados em `package.json`; o Node só entra no build, nunca no runtime nem na imagem Docker.
+
+```bash
+npm ci              # uma vez, ou quando o package-lock.json mudar
+npm run build:css   # depois de usar uma classe nova em template, JS ou Python
+```
+
+Commite o CSS gerado junto com a mudança que pediu a classe. O CI recompila e falha se o arquivo versionado não bater com as origens. Classe montada em tempo de execução (por exemplo, `bg-{{ cor }}-500`) não aparece para o Tailwind: escreva os nomes inteiros no código. Template novo fora dos padrões de `content` precisa entrar no config da sua base.
 
 ### Admin
 
@@ -380,7 +393,23 @@ ruff check .
 
 # Rodar testes
 pytest
+
+# Testes com cobertura (o CI falha abaixo do piso em pyproject.toml)
+pytest --cov
 ```
+
+### Dependências
+
+Os `requirements/*.in` listam só as dependências diretas, com os comentários de cada pin. Os `requirements/*.txt` são o lock: fixam a árvore inteira, e é deles que o Dockerfile e o CI instalam. Para adicionar, remover ou atualizar um pacote, edite o `.in` e regenere os dois locks com o [uv](https://docs.astral.sh/uv/):
+
+```bash
+uv pip compile requirements/production.in --universal --python-version 3.12 -o requirements/production.txt
+uv pip compile requirements/development.in --universal --python-version 3.12 -o requirements/development.txt
+```
+
+`--universal` produz um lock só, válido para o Linux do Docker e do CI e para o Windows de desenvolvimento; `--python-version 3.12` é a versão da imagem de produção. Para alinhar o seu venv ao lock: `uv pip sync requirements/development.txt`.
+
+O Dependabot abre um PR semanal agrupado com os bumps de minor/patch. Unfold (pinado pelo override da sidebar), Wagtail fora da série 7.4 e Django 6 ficam de fora de propósito: são migrações planejadas, não bumps automáticos (ver `.github/dependabot.yml`).
 
 ---
 

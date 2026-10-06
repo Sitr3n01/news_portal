@@ -1,6 +1,9 @@
 # Monitoramento de supply-chain: alerta e abre PRs para dependências
 # desatualizadas ou vulneráveis. Cobre o Python (requirements/) e as GitHub
 # Actions (que hoje são pinadas por SHA — Dependabot mantém o SHA atualizado).
+#
+# Os bumps de minor/patch chegam agrupados num PR por semana em cada ecossistema,
+# em vez de um PR por pacote.
 version: 2
 updates:
   - package-ecosystem: "pip"
@@ -12,6 +15,45 @@ updates:
       - "dependencies"
     commit-message:
       prefix: "deps"
+    groups:
+      python-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # Pinado em requirements/base.in: templates/admin/nav_sidebar.html copia o
+      # markup do Unfold 0.87. Atualizar exige re-sincronizar o override antes.
+      - dependency-name: "django-unfold"
+      # Série 7.4 travada em base.in. A 8.x é uma migração planejada, não um bump semanal.
+      - dependency-name: "wagtail"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+      # 5.2 LTS de propósito. A 6.x é uma migração planejada.
+      - dependency-name: "django"
+        update-types:
+          - "version-update:semver-major"
+
+  # Só o build do CSS (package.json). Depois de um bump, rode `npm run build:css` e
+  # commite o CSS: o CI recompila e falha se o arquivo versionado não bater.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "deps"
+    groups:
+      css-build:
+        patterns:
+          - "*"
+    ignore:
+      # O Tailwind 4 troca o formato do config e do CSS gerado: é migração, não bump semanal.
+      - dependency-name: "tailwindcss"
+        update-types:
+          - "version-update:semver-major"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -23,3 +65,7 @@ updates:
       - "ci"
     commit-message:
       prefix: "ci"
+    groups:
+      github-actions:
+        patterns:
+          - "*"

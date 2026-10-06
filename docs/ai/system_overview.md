@@ -26,11 +26,11 @@ Sistema Django 5.1+ monolítico. Um banco PostgreSQL 16 em produção. Dois port
 | Banco | PostgreSQL 16 em prod; SQLite opcional local | Não assuma outro banco em prod |
 | Admin | Django Unfold (`django-unfold>=0.40`) | Importar `ModelAdmin` de `unfold.admin` |
 | Frontend | Django templates + HTMX + Alpine.js | Sem SPA |
-| CSS público | CSS próprio versionado | Não adicionar Tailwind CDN público |
+| CSS público | CSS próprio + Tailwind compilado (`frontend/tailwind/`, `npm run build:css`) | Não carregar Tailwind no navegador (Play CDN) nem de CDN público; commitar o CSS gerado |
 | Sanitização | `apps.common.sanitization` | Não usar `bleach` espalhado |
 | Deploy | Docker Compose + Nginx + GitHub tag aprovada | Ver `docs/technical/secure-deploy.md` |
 
-`requirements/base.txt` pina o Unfold (0.87.0) e limita o Wagtail à série 7.4. Ao atualizar qualquer um dos dois, confira os overrides da casca do painel unificado (`templates/wagtailadmin/base.html`, `templates/admin/nav_sidebar.html`, `templates/unfold/helpers/header.html`) e os tokens de `static/newsroom/css/newsroom-wagtail.css`.
+`requirements/base.in` pina o Unfold (0.87.0) e limita o Wagtail à série 7.4 (os `.txt` ao lado são o lock gerado a partir dos `.in`). Ao atualizar qualquer um dos dois, confira os overrides da casca do painel unificado (`templates/wagtailadmin/base.html`, `templates/admin/nav_sidebar.html`, `templates/unfold/helpers/header.html`) e os tokens de `static/newsroom/css/newsroom-wagtail.css`.
 
 ---
 

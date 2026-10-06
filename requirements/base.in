@@ -1,0 +1,39 @@
+# Dependências diretas da aplicação, comuns a produção e desenvolvimento.
+#
+# Os .in são editados à mão; os .txt são gerados e fixam a árvore inteira de
+# dependências (o Dockerfile e o CI instalam só os .txt). Depois de mudar um .in:
+#   uv pip compile requirements/production.in --universal --python-version 3.12 -o requirements/production.txt
+#   uv pip compile requirements/development.in --universal --python-version 3.12 -o requirements/development.txt
+# --universal gera um lock só para o Linux do Docker/CI e o Windows de desenvolvimento;
+# --python-version 3.12 é a versão da imagem de produção (docker/Dockerfile).
+
+# Série 5.2 LTS (suporte até abril de 2028). A 6.x fica para uma migração planejada.
+Django>=5.2,<6.0
+psycopg[binary]>=3.1
+# Pinado: templates/admin/nav_sidebar.html copia o markup interno do Unfold
+# (drawer + backdrop mobile). A partir de 0.88 o Unfold reescreveu a sidebar
+# (sidebarOpen + largura dinâmica) — incompatível com o override, faz a sidebar
+# sobrepor o conteúdo. Ao atualizar, re-sincronizar o override antes de subir o pin.
+django-unfold==0.87.0
+django-htmx>=1.28.0
+Pillow>=12.2.0
+django-imagekit>=5.0
+whitenoise>=6.12.0
+django-environ>=0.11
+django-extensions>=4.1
+django-axes>=6.0
+bleach[css]>=6.0
+django-csp>=4.0
+httpx>=0.28.1
+# Validação do ID token do Google (assinatura contra o JWKS, iss/aud/exp) no
+# login com Google — apps/accounts/oauth_google.py. Só isso: o fluxo OAuth em
+# si é próprio, com httpx, para não trazer os models/views/templates de login
+# de uma biblioteca de social login e colidir com o login unificado.
+google-auth>=2.28
+# Piso em 7.4.2 (e não 7.4): as migrations de apps/news e apps/cms_media dependem
+# de `wagtailcore.0097_baselogentry_uuid_action_timestamp_indexes`, o último nó do
+# grafo nesta série. Uma 7.4.x anterior sem esse nó faz o `migrate` morrer antes da
+# primeira migration. Ver o guard em apps/common/tests.py.
+wagtail>=7.4.2,<7.5
+django-modelcluster>=6.5
+django-taggit>=6.1

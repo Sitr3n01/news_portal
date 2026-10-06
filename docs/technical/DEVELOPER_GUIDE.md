@@ -222,7 +222,7 @@ def article_detail(request, slug):
 
 ### CSS do site público (Tailwind)
 
-As classes utilitárias dos dois portais vêm de CSS compilado, versionado em `static/css/tailwind-school.css` e `static/css/tailwind-news.css`. As origens ficam em `frontend/tailwind/`: um `*.config.js` por base (tema, `darkMode`, plugins e os caminhos de `content` que o Tailwind varre) e um `*.css` com as diretivas. O Tailwind (3.4.17) e os plugins estão fixados em `package.json`; o Node só entra no build, nunca no runtime nem na imagem Docker.
+As classes utilitárias dos dois portais vêm de CSS compilado, versionado em `static/css/tailwind-school.css` e `static/css/tailwind-news.css`. As origens ficam em `frontend/tailwind/`: um `*.config.js` por base (tema, `darkMode`, plugins e os caminhos de `content` que o Tailwind varre) e um `*.css` com as diretivas. O Tailwind 3.4 e os plugins estão fixados em `package.json`; o Node só entra no build, nunca no runtime nem na imagem Docker. O `overrides` do `package.json` força o `postcss-selector-parser` 7.1.6 ou mais novo: o Tailwind 3.4 ainda pede a 6.x, que tem alerta de segurança, e a 7.x gera o mesmo CSS. Tire o override na migração para o Tailwind 4, que não usa esse pacote.
 
 ```bash
 npm ci              # uma vez, ou quando o package-lock.json mudar

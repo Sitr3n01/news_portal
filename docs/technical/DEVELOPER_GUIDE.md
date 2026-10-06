@@ -6,7 +6,7 @@
 
 ## O Que É Este Projeto
 
-news_portal é um sistema multi-portal construído em Django 5.1+. Ele serve dois portais a partir do mesmo codebase:
+news_portal é um sistema multi-portal construído em Django 5.2 LTS e Wagtail 7.4. Ele serve dois portais a partir do mesmo codebase:
 
 | Portal | URL Base | Propósito |
 |--------|----------|-----------|
@@ -97,9 +97,11 @@ news_portal/
 ├── static/                 # CSS, JS, imagens estáticas
 ├── media/                  # Uploads de usuários (não versionar)
 ├── requirements/
-│   ├── base.txt
-│   ├── development.txt
-│   └── production.txt
+│   ├── base.in             # Dependências diretas (editar aqui)
+│   ├── development.in
+│   ├── development.txt     # Lock gerado — não editar à mão
+│   ├── production.in
+│   └── production.txt      # Lock gerado — não editar à mão
 └── manage.py
 ```
 
@@ -380,7 +382,23 @@ ruff check .
 
 # Rodar testes
 pytest
+
+# Testes com cobertura (o CI falha abaixo do piso em pyproject.toml)
+pytest --cov
 ```
+
+### Dependências
+
+Os `requirements/*.in` listam só as dependências diretas, com os comentários de cada pin. Os `requirements/*.txt` são o lock: fixam a árvore inteira, e é deles que o Dockerfile e o CI instalam. Para adicionar, remover ou atualizar um pacote, edite o `.in` e regenere os dois locks com o [uv](https://docs.astral.sh/uv/):
+
+```bash
+uv pip compile requirements/production.in --universal --python-version 3.12 -o requirements/production.txt
+uv pip compile requirements/development.in --universal --python-version 3.12 -o requirements/development.txt
+```
+
+`--universal` produz um lock só, válido para o Linux do Docker e do CI e para o Windows de desenvolvimento; `--python-version 3.12` é a versão da imagem de produção. Para alinhar o seu venv ao lock: `uv pip sync requirements/development.txt`.
+
+O Dependabot abre um PR semanal agrupado com os bumps de minor/patch. Unfold (pinado pelo override da sidebar), Wagtail fora da série 7.4 e Django 6 ficam de fora de propósito: são migrações planejadas, não bumps automáticos (ver `.github/dependabot.yml`).
 
 ---
 

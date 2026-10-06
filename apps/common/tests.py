@@ -419,7 +419,7 @@ def test_migration_graph_loads_without_missing_dependencies():
         pytest.fail(
             f'Migration com dependência inexistente: {exc}\n'
             'Se a dependência é de um app de terceiro (wagtailcore, taggit...), '
-            'confira se a versão fixada em requirements/base.txt realmente traz '
+            'confira se a versão fixada em requirements/development.txt (o lock) realmente traz '
             'aquela migration — e se o seu venv não tem arquivo órfão de outra versão.'
         )
 

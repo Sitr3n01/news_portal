@@ -62,7 +62,7 @@ A [Komuniki](https://komuniki.com.br) é uma escola de comunicação, artes e li
 - Diagnóstico e correção de um deploy que ficou dois meses repetindo em loop e de imagens Docker que cresciam de forma quadrática com os dumps do banco: o cache de build caiu de **23,95 GB para 442 MB**. Relato em [`docs/MAINTENANCE_HISTORY.md`](docs/MAINTENANCE_HISTORY.md).
 
 **Travas de qualidade**
-- **817 testes**, com cobertura de branches exigida a partir de 82% (hoje, 83,4%).
+- **823 testes**, com cobertura de branches exigida a partir de 82% (hoje, 83,5%).
 - Ruff, checagem de migration faltando, varredura de segredos (detect-secrets), CodeQL, pip-audit e dependências travadas. O Dependabot manda uma atualização agrupada por semana.
 - O `master` é protegido: o check `test` precisa passar com a branch em dia, inclusive para administradores.
 
@@ -133,7 +133,7 @@ Os dois sites públicos saem do mesmo projeto Django. O Nginx associa cada domí
 
 **Decisões principais**
 - **Um projeto, dois sites, um registro `Site`.** Hoje, roteamento por caminho mais Nginx; os managers `on_site` deixam o multi-site real a uma chave de distância.
-- **Sem CDN.** three.js, GSAP, htmx e Alpine são vendorizados e servidos pela aplicação, o que mantém a CSP em `'self'` mais um nonce.
+- **Sem CDN.** three.js, GSAP, htmx e Alpine são vendorizados e servidos pela aplicação, e o Tailwind é compilado em CSS estático no build, o que mantém a CSP em `'self'` mais um nonce.
 - **O catálogo de cursos fica no código** ([`apps/school/courses.py`](apps/school/courses.py)). Os slugs fixos mantêm estáveis os links compartilhados e o *curso de interesse* do formulário de contato, e todo texto vem com a versão em inglês. A contrapartida é que mudar um texto exige deploy; se o catálogo passar a mudar com frequência, o próximo passo é levá-lo para snippets do Wagtail.
 - **O GitHub nunca se conecta ao servidor.** A VPS puxa uma tag aprovada, em vez de o CI empurrar por SSH.
 

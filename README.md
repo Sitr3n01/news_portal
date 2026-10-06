@@ -62,7 +62,7 @@ A production system for a real client, built and operated end to end: data model
 - Found and fixed a deploy that had been retrying in a loop for two months and Docker images that grew quadratically with database dumps: the build cache went from **23.95 GB to 442 MB**. Write-up in [`docs/MAINTENANCE_HISTORY.md`](docs/MAINTENANCE_HISTORY.md).
 
 **Quality gates**
-- **817 tests**, with branch coverage enforced at a floor of 82% (83.4% today).
+- **823 tests**, with branch coverage enforced at a floor of 82% (83.5% today).
 - Ruff, missing-migration check, secret scan (detect-secrets), CodeQL, pip-audit and locked dependencies. Dependabot sends one grouped update per week.
 - `master` is protected: the `test` check must pass on an up-to-date branch, for admins too.
 
@@ -133,7 +133,7 @@ Both public sites are served by the same Django project. Nginx maps each domain 
 
 **Key decisions**
 - **One project, two sites, one `Site` record.** Path routing plus Nginx today; the `on_site` managers keep a real multi-site setup one switch away.
-- **No CDNs.** three.js, GSAP, htmx and Alpine are vendored and served by the app, which keeps the CSP at `'self'` plus a nonce.
+- **No CDNs.** three.js, GSAP, htmx and Alpine are vendored and served by the app, and Tailwind is compiled to static CSS at build time, which keeps the CSP at `'self'` plus a nonce.
 - **The course catalog lives in code** ([`apps/school/courses.py`](apps/school/courses.py)). Fixed slugs keep shared links and the contact form's *course of interest* stable, and every text ships with its English version. The trade-off is that copy changes need a deploy; moving the catalog to Wagtail snippets is the next step if it starts changing often.
 - **GitHub never connects to the server.** The VPS pulls an approved tag instead of CI pushing over SSH.
 

@@ -1,5 +1,5 @@
 {% extends 'base_school_editorial.html' %}
-{% load static %}
+{% load static school_titles %}
 
 {% block title %}{% if home_config.meta_title %}{{ home_config.meta_title }}{% else %}{{ current_site.name }} - {{ home_config.hero_title }}{% endif %}{% endblock %}
 {% block meta_description %}{{ home_config.meta_description|default:site_settings.tagline|default:home_config.hero_subtitle }}{% endblock %}
@@ -15,7 +15,7 @@
                 <div class="ed-tag"><span data-reveal="fade" x-text="t('{{ home_config.hero_badge|escapejs }}', '{{ home_config.hero_badge_en|default:home_config.hero_badge|escapejs }}')">{{ home_config.hero_badge }}</span></div>
                 <h1 class="mt-8 max-w-5xl font-display text-5xl font-extrabold leading-[0.98] tracking-tight text-slate-950 md:text-7xl lg:text-8xl"
                     data-reveal="mask"
-                    x-text="t('{{ home_config.hero_title|escapejs }}', '{{ home_config.hero_title_en|default:home_config.hero_title|escapejs }}')">
+                    x-text="t('{{ home_config.hero_title|soft_hyphens|escapejs }}', '{{ home_config.hero_title_en|default:home_config.hero_title|soft_hyphens|escapejs }}')">
                     {{ home_config.hero_title }}
                 </h1>
                 <p class="mt-7 max-w-2xl text-lg leading-relaxed text-slate-600 md:text-xl"
@@ -78,7 +78,7 @@
                     x-text="t('{{ home_config.visual_eyebrow|escapejs }}', '{{ home_config.visual_eyebrow_en|default:home_config.visual_eyebrow|escapejs }}')">{{ home_config.visual_eyebrow }}</p>
                 <h2 class="mt-4 font-display text-4xl font-extrabold leading-tight tracking-tight text-slate-950 md:text-6xl"
                     data-reveal="mask"
-                    x-text="t('{{ home_config.visual_title|escapejs }}', '{{ home_config.visual_title_en|default:home_config.visual_title|escapejs }}')">{{ home_config.visual_title }}</h2>
+                    x-text="t('{{ home_config.visual_title|soft_hyphens|escapejs }}', '{{ home_config.visual_title_en|default:home_config.visual_title|soft_hyphens|escapejs }}')">{{ home_config.visual_title|soft_hyphens }}</h2>
                 <p class="mt-5 max-w-xl text-lg leading-relaxed text-slate-600 " data-reveal="fade"
                     x-text="t('{{ home_config.proposal_description|escapejs }}', '{{ home_config.proposal_description_en|default:home_config.proposal_description|escapejs }}')">{{ home_config.proposal_description }}</p>
             </div>
@@ -91,7 +91,7 @@
             <p class="text-sm font-bold uppercase text-primary-700" data-reveal="fade"
                 x-text="t('{{ home_config.proposal_eyebrow|escapejs }}', '{{ home_config.proposal_eyebrow_en|default:home_config.proposal_eyebrow|escapejs }}')">{{ home_config.proposal_eyebrow }}</p>
             <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl" data-reveal="mask"
-                x-text="t('{{ course_proposal_title|escapejs }}', '{{ course_proposal_title_en|default:course_proposal_title|escapejs }}')">{{ course_proposal_title }}</h2>
+                x-text="t('{{ course_proposal_title|soft_hyphens|escapejs }}', '{{ course_proposal_title_en|default:course_proposal_title|soft_hyphens|escapejs }}')">{{ course_proposal_title|soft_hyphens }}</h2>
             <p class="mt-5 text-lg leading-relaxed text-slate-600" data-reveal="fade"
                 x-text="t('{{ course_proposal_description|escapejs }}', '{{ course_proposal_description_en|default:course_proposal_description|escapejs }}')">
                 {{ course_proposal_description }}
@@ -186,7 +186,7 @@
             <p class="text-sm font-bold uppercase text-primary-700" data-reveal="fade"
                 x-text="t('{{ home_config.testimonials_eyebrow|escapejs }}', '{{ home_config.testimonials_eyebrow_en|default:home_config.testimonials_eyebrow|escapejs }}')">{{ home_config.testimonials_eyebrow }}</p>
             <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-5xl" data-reveal="mask"
-                x-text="t('{{ home_config.testimonials_title|escapejs }}', '{{ home_config.testimonials_title_en|default:home_config.testimonials_title|escapejs }}')">{{ home_config.testimonials_title }}</h2>
+                x-text="t('{{ home_config.testimonials_title|soft_hyphens|escapejs }}', '{{ home_config.testimonials_title_en|default:home_config.testimonials_title|soft_hyphens|escapejs }}')">{{ home_config.testimonials_title|soft_hyphens }}</h2>
             <p class="mt-5 text-lg leading-relaxed text-slate-600" data-reveal="fade"
                 x-text="t('{{ home_config.testimonials_description|escapejs }}', '{{ home_config.testimonials_description_en|default:home_config.testimonials_description|escapejs }}')">
                 {{ home_config.testimonials_description }}
@@ -237,7 +237,7 @@
             <div class="bg-white/35 p-8 md:p-12" data-reveal-group>
                 <p class="text-sm font-bold uppercase text-primary-700" data-reveal="fade" x-text="t('Cursos e mentorias', 'Courses and mentoring')">Cursos e mentorias</p>
                 <h2 class="mt-4 font-display text-3xl font-bold text-slate-950 md:text-4xl" data-reveal="mask"
-                    x-text="t('{{ home_config.hiring_title|escapejs }}', '{{ home_config.hiring_title_en|default:home_config.hiring_title|escapejs }}')">{{ home_config.hiring_title }}</h2>
+                    x-text="t('{{ home_config.hiring_title|soft_hyphens|escapejs }}', '{{ home_config.hiring_title_en|default:home_config.hiring_title|soft_hyphens|escapejs }}')">{{ home_config.hiring_title|soft_hyphens }}</h2>
                 <p class="mt-4 leading-relaxed text-slate-600" data-reveal="fade"
                     x-text="t('{{ home_config.hiring_description|escapejs }}', '{{ home_config.hiring_description_en|default:home_config.hiring_description|escapejs }}')">
                     {{ home_config.hiring_description }}
@@ -250,7 +250,7 @@
             <div class="p-8 text-white md:p-12 ed-inverted" data-reveal-group>
                 <p class="text-sm font-bold uppercase text-primary-100" data-reveal="fade" x-text="t('Fale com a Komuniki', 'Talk to Komuniki')">Fale com a Komuniki</p>
                 <h2 class="mt-4 font-display text-3xl font-bold md:text-4xl" data-reveal="mask"
-                    x-text="t('{{ home_config.contact_title|escapejs }}', '{{ home_config.contact_title_en|default:home_config.contact_title|escapejs }}')">{{ home_config.contact_title }}</h2>
+                    x-text="t('{{ home_config.contact_title|soft_hyphens|escapejs }}', '{{ home_config.contact_title_en|default:home_config.contact_title|soft_hyphens|escapejs }}')">{{ home_config.contact_title|soft_hyphens }}</h2>
                 <p class="mt-4 leading-relaxed text-primary-50" data-reveal="fade"
                     x-text="t('{{ home_config.contact_description|escapejs }}', '{{ home_config.contact_description_en|default:home_config.contact_description|escapejs }}')">
                     {{ home_config.contact_description }}

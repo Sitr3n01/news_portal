@@ -36,7 +36,7 @@ def usuario(db, django_user_model):
 
 
 def mock_turnstile(monkeypatch, *, valid=True):
-    """Mesmo padrão de apps/news/tests.py e test_email_verification.py."""
+    """Mesmo padrão de apps/news/test_newsletter.py e test_email_verification.py."""
     monkeypatch.setattr(turnstile, 'verify_turnstile', lambda token, remote_ip='': valid and token == 'valid-token')
 
 

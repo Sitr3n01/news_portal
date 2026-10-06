@@ -20,7 +20,9 @@ Newsroom — o painel da equipe
 
 </div>
 
-![Home da Komuniki no tema escuro: a nuvem de partículas WebGL formou a Terra ao lado do título](docs/images/komuniki-home-dark.jpg)
+[![Komuniki no site no ar: as partículas WebGL passam de um microfone para a Terra, a troca de tema em círculo redesenha as partículas como tinta, uma página de curso mostra os tsurus e o layout se ajusta ao celular](docs/images/komuniki-demo.webp)](https://komuniki.com.br)
+
+<p align="center"><sub>Trecho de 26 segundos gravado no site da Komuniki no ar.</sub></p>
 
 ## O que é
 
@@ -66,17 +68,35 @@ A [Komuniki](https://komuniki.com.br) é uma escola de comunicação, artes e li
 
 ## Telas
 
-| Komuniki, tema claro | Página de curso com os tsurus |
+### Komuniki
+
+| Início, tema claro | Catálogo de cursos |
 |---|---|
-| ![Home da Komuniki no tema claro, com o microfone de partículas desenhado como tinta](docs/images/komuniki-home-light.jpg) | ![Página do curso Comunicação Destravada com a cena de partículas dos tsurus](docs/images/komuniki-course-tsurus.jpg) |
-| **Blog da Kelly, tema preto** | **Painel Newsroom, editor do Wagtail** |
-| ![Home do Blog da Kelly no tema preto](docs/images/blog-home-dark.jpg) | ![Editor de notícia do Wagtail dentro do painel Newsroom](docs/assets/screenshots/painel-unificado/wagtail-editor-na-casca.jpg) |
+| ![Home da Komuniki no tema claro, com o microfone de partículas desenhado como tinta](docs/images/komuniki-home-light.jpg) | ![Catálogo de cursos no tema escuro: o título ao lado do cartão do Prêmio Paulo Freire de Educação e das trilhas de cursos](docs/images/komuniki-courses.jpg) |
+| **Cursos profissionalizantes** | **Página de curso com os tsurus** |
+| ![Cards dos cursos com carga horária, duração e requisito](docs/images/komuniki-course-cards.jpg) | ![Página do curso Comunicação Destravada com a cena de partículas dos tsurus](docs/images/komuniki-course-tsurus.jpg) |
+
+### Blog da Kelly
+
+| Início, tema preto | Notícia montada com blocos do StreamField |
+|---|---|
+| ![Home do Blog da Kelly no tema preto, com a notícia em destaque e a lista de mais lidas](docs/images/blog-home-dark.jpg) | ![Corpo de uma notícia com intertítulos, texto rico, citação e lista, cada um um bloco do StreamField](docs/images/blog-article.jpg) |
+
+### Newsroom
+
+| Visão geral do espaço Blog da Kelly | Editor de blocos (Wagtail) |
+|---|---|
+| ![Visão geral do Newsroom: contadores de publicadas, rascunhos, em revisão e comentários, e a lista editorial com o estado de cada notícia](docs/images/newsroom-overview.jpg) | ![Editor do Wagtail com blocos de intertítulo, texto rico e citação, sob a barra de edição do Newsroom](docs/images/newsroom-editor.jpg) |
+| **Biblioteca de notícias (Wagtail)** | **Mensagens de contato (Django admin)** |
+| ![Lista de notícias do Wagtail com uma aba por estado editorial](docs/images/newsroom-articles.jpg) | ![Lista de mensagens de contato do Django admin no espaço Komuniki, com o mesmo visual das telas do Wagtail](docs/images/newsroom-messages.jpg) |
 
 <p align="center">
   <img src="docs/images/komuniki-mobile.jpg" alt="Home da Komuniki no celular, com a Terra de partículas abaixo do título" width="260">
   &nbsp;&nbsp;
   <img src="docs/images/newsroom-mobile.jpg" alt="Visão geral do Newsroom no celular" width="260">
 </p>
+
+<sub>A Komuniki e a home do Blog da Kelly são capturas do site no ar. As telas do Newsroom e a página de notícia rodam localmente, com dados fictícios de demonstração: todo nome, mensagem e notícia nelas é inventado.</sub>
 
 ## Arquitetura
 

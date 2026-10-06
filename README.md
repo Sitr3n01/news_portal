@@ -20,7 +20,9 @@ Newsroom — the team's admin panel
 
 </div>
 
-![Komuniki home page in the dark theme: the WebGL particle cloud has assembled into the Earth next to the headline](docs/images/komuniki-home-dark.jpg)
+[![Komuniki on the live site: the WebGL particles morph from a microphone into the Earth, the circular theme switch redraws them as ink, a course page shows the origami cranes, and the layout adapts to a phone](docs/images/komuniki-demo.webp)](https://komuniki.com.br)
+
+<p align="center"><sub>26-second loop recorded on the live Komuniki site.</sub></p>
 
 ## What this is
 
@@ -66,17 +68,35 @@ A production system for a real client, built and operated end to end: data model
 
 ## Screenshots
 
-| Komuniki, light theme | Course page with the origami cranes |
+### Komuniki
+
+| Home, light theme | Course catalog |
 |---|---|
-| ![Komuniki home in the light theme, with the particle microphone drawn as ink](docs/images/komuniki-home-light.jpg) | ![Course page "Comunicação Destravada" with the origami crane particle scene](docs/images/komuniki-course-tsurus.jpg) |
-| **Blog da Kelly, black theme** | **Newsroom panel, Wagtail editor** |
-| ![Blog da Kelly home in the black theme](docs/images/blog-home-dark.jpg) | ![Wagtail article editor inside the Newsroom panel](docs/assets/screenshots/painel-unificado/wagtail-editor-na-casca.jpg) |
+| ![Komuniki home in the light theme, with the particle microphone drawn as ink](docs/images/komuniki-home-light.jpg) | ![Course catalog in the dark theme: the headline next to the Paulo Freire Education Award card and the course tracks](docs/images/komuniki-courses.jpg) |
+| **Professional courses** | **Course page with the origami cranes** |
+| ![Course cards with workload, duration and entry requirement](docs/images/komuniki-course-cards.jpg) | ![Course page "Comunicação Destravada" with the origami crane particle scene](docs/images/komuniki-course-tsurus.jpg) |
+
+### Blog da Kelly
+
+| Home, black theme | Article built from StreamField blocks |
+|---|---|
+| ![Blog da Kelly home in the black theme, with the featured article and the most-read list](docs/images/blog-home-dark.jpg) | ![Article body with headings, rich text, a pull quote and a list, each one a StreamField block](docs/images/blog-article.jpg) |
+
+### Newsroom
+
+| Overview of the Blog da Kelly workspace | Block editor (Wagtail) |
+|---|---|
+| ![Newsroom overview: counters for published, drafts, in review and comments, then the editorial list with a status badge per article](docs/images/newsroom-overview.jpg) | ![Wagtail editor with heading, rich text and quote blocks under the Newsroom editor bar](docs/images/newsroom-editor.jpg) |
+| **Article library (Wagtail)** | **Contact messages (Django admin)** |
+| ![Wagtail article listing with a tab per editorial state](docs/images/newsroom-articles.jpg) | ![Django admin list of contact messages in the Komuniki workspace, styled like the Wagtail screens](docs/images/newsroom-messages.jpg) |
 
 <p align="center">
   <img src="docs/images/komuniki-mobile.jpg" alt="Komuniki home on a phone, with the particle Earth below the headline" width="260">
   &nbsp;&nbsp;
   <img src="docs/images/newsroom-mobile.jpg" alt="Newsroom overview on a phone" width="260">
 </p>
+
+<sub>Komuniki and the Blog da Kelly home are captured from production. The Newsroom screens and the article page run locally on fictional demo data: every name, message and article in them is made up.</sub>
 
 ## Architecture
 

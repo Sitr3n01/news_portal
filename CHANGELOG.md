@@ -17,8 +17,10 @@ the same tag (see [CONTRIBUTING.md](CONTRIBUTING.md#releases)).
   job over the locked versions, a missing-migration check and an 82%
   branch-coverage floor in CI
   ([#56](https://github.com/Sitr3n01/news_portal/pull/56)).
-- Portfolio README in English and Portuguese, contributing guide, issue forms
-  and pull request template ([#57](https://github.com/Sitr3n01/news_portal/pull/57)).
+- Portfolio README in English and Portuguese, with an animated preview recorded
+  on the live Komuniki site and screenshots of both sites and the Newsroom
+  panel, plus a contributing guide, issue forms and a pull request template
+  ([#57](https://github.com/Sitr3n01/news_portal/pull/57)).
 
 ### Changed
 - Dependencies are locked: `requirements/*.in` hold the direct dependencies and
@@ -31,6 +33,11 @@ the same tag (see [CONTRIBUTING.md](CONTRIBUTING.md#releases)).
   ([#69](https://github.com/Sitr3n01/news_portal/pull/69)).
 - The 2,900-line `apps/news/tests.py` is split into 13 thematic modules
   ([#65](https://github.com/Sitr3n01/news_portal/pull/65)).
+
+### Fixed
+- Long words in Komuniki titles and course cards break at a syllable, with a
+  hyphen, instead of mid-word; the English course title no longer splits as
+  "COMMUNICATIO / N" ([#70](https://github.com/Sitr3n01/news_portal/pull/70)).
 
 ### Removed
 - Machine-specific paths from the Komuniki engineering notes

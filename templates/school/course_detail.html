@@ -1,5 +1,5 @@
 {% extends 'base_school_editorial.html' %}
-{% load static %}
+{% load static school_titles %}
 
 {% block title %}{{ course.title }} - {{ current_site.name }}{% endblock %}
 {% block meta_description %}{{ course.page.meta_description }}{% endblock %}
@@ -27,7 +27,7 @@
                 <p class="text-sm font-bold uppercase text-primary-700" data-reveal="fade"
                     x-text="t('{{ group.eyebrow|escapejs }}', '{{ group.eyebrow_en|escapejs }}')">{{ group.eyebrow }}</p>
                 <h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-slate-950 md:text-6xl" data-reveal="mask"
-                    x-text="t('{{ hero_title|escapejs }}', '{{ course.title_en|escapejs }}')">{{ hero_title }}</h1>
+                    x-text="t('{{ course.title|soft_hyphens|escapejs }}', '{{ course.title_en|soft_hyphens|escapejs }}')">{{ course.title|soft_hyphens }}</h1>
                 <p class="mt-6 text-lg leading-relaxed text-slate-600 md:text-xl" data-reveal="fade"
                     x-text="t('{{ course.page.hero_tagline|escapejs }}', '{{ course.page.hero_tagline_en|escapejs }}')">{{ course.page.hero_tagline }}</p>
 
@@ -87,7 +87,7 @@
             <p class="text-sm font-bold uppercase text-primary-700" data-reveal="fade"
                 x-text="t('{{ section.eyebrow|escapejs }}', '{{ section.eyebrow_en|escapejs }}')">{{ section.eyebrow }}</p>
             <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-4xl" data-reveal="mask"
-                x-text="t('{{ section.title|escapejs }}', '{{ section.title_en|escapejs }}')">{{ section.title }}</h2>
+                x-text="t('{{ section.title|soft_hyphens|escapejs }}', '{{ section.title_en|soft_hyphens|escapejs }}')">{{ section.title|soft_hyphens }}</h2>
             {% if section.lead %}
             <p class="mt-4 leading-relaxed text-slate-600" data-reveal="fade"
                 x-text="t('{{ section.lead|escapejs }}', '{{ section.lead_en|escapejs }}')">{{ section.lead }}</p>
@@ -98,7 +98,7 @@
             <article class="ed-card rounded-[1.75rem] p-6" data-reveal-group data-reveal-step="0.1">
                 <p class="ed-mono text-primary-700" data-reveal="fade" aria-hidden="true">{{ forloop.counter|stringformat:"02d" }}</p>
                 <h3 class="mt-3 font-display text-xl font-bold text-slate-950" data-reveal="fade"
-                    x-text="t('{{ item.title|escapejs }}', '{{ item.title_en|escapejs }}')">{{ item.title }}</h3>
+                    x-text="t('{{ item.title|soft_hyphens|escapejs }}', '{{ item.title_en|soft_hyphens|escapejs }}')">{{ item.title|soft_hyphens }}</h3>
                 <p class="mt-3 leading-relaxed text-slate-600" data-reveal="fade"
                     x-text="t('{{ item.body|escapejs }}', '{{ item.body_en|escapejs }}')">{{ item.body }}</p>
             </article>
@@ -110,7 +110,7 @@
             <p class="text-sm font-bold uppercase text-primary-700" data-reveal="fade"
                 x-text="t('{{ section.eyebrow|escapejs }}', '{{ section.eyebrow_en|escapejs }}')">{{ section.eyebrow }}</p>
             <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-4xl" data-reveal="mask"
-                x-text="t('{{ section.title|escapejs }}', '{{ section.title_en|escapejs }}')">{{ section.title }}</h2>
+                x-text="t('{{ section.title|soft_hyphens|escapejs }}', '{{ section.title_en|soft_hyphens|escapejs }}')">{{ section.title|soft_hyphens }}</h2>
             {% if section.lead %}
             <p class="mt-4 leading-relaxed text-slate-600" data-reveal="fade"
                 x-text="t('{{ section.lead|escapejs }}', '{{ section.lead_en|escapejs }}')">{{ section.lead }}</p>
@@ -134,7 +134,7 @@
             <p class="text-sm font-bold uppercase text-primary-700" data-reveal="fade"
                 x-text="t('{{ section.eyebrow|escapejs }}', '{{ section.eyebrow_en|escapejs }}')">{{ section.eyebrow }}</p>
             <h2 class="mt-3 font-display text-3xl font-bold text-slate-950 md:text-4xl" data-reveal="mask"
-                x-text="t('{{ section.title|escapejs }}', '{{ section.title_en|escapejs }}')">{{ section.title }}</h2>
+                x-text="t('{{ section.title|soft_hyphens|escapejs }}', '{{ section.title_en|soft_hyphens|escapejs }}')">{{ section.title|soft_hyphens }}</h2>
             {% for paragraph in section.body %}
             <p class="mt-4 leading-relaxed text-slate-600" data-reveal="fade"
                 x-text="t('{{ paragraph.text|escapejs }}', '{{ paragraph.text_en|escapejs }}')">{{ paragraph.text }}</p>
@@ -145,7 +145,7 @@
         <div class="ed-panel ed-inverted mx-auto max-w-4xl rounded-[2rem] p-8 md:p-12" data-reveal-group>
             {% if section.title %}
             <h2 class="font-display text-2xl font-bold md:text-3xl" data-reveal="mask"
-                x-text="t('{{ section.title|escapejs }}', '{{ section.title_en|escapejs }}')">{{ section.title }}</h2>
+                x-text="t('{{ section.title|soft_hyphens|escapejs }}', '{{ section.title_en|soft_hyphens|escapejs }}')">{{ section.title|soft_hyphens }}</h2>
             {% endif %}
             {% if section.lead %}
             <p class="mt-4 leading-relaxed text-primary-50" data-reveal="fade"
@@ -183,7 +183,7 @@
                 <p class="text-sm font-bold uppercase text-primary-700" data-reveal="fade"
                     x-text="t('{{ section.eyebrow|escapejs }}', '{{ section.eyebrow_en|escapejs }}')">{{ section.eyebrow }}</p>
                 <h2 class="mt-4 font-display text-3xl font-bold leading-tight tracking-tight text-slate-950 md:text-4xl" data-reveal="mask"
-                    x-text="t('{{ section.title|escapejs }}', '{{ section.title_en|escapejs }}')">{{ section.title }}</h2>
+                    x-text="t('{{ section.title|soft_hyphens|escapejs }}', '{{ section.title_en|soft_hyphens|escapejs }}')">{{ section.title|soft_hyphens }}</h2>
                 {% for paragraph in section.body %}
                 <p class="mt-4 text-lg leading-relaxed text-slate-600" data-reveal="fade"
                     x-text="t('{{ paragraph.text|escapejs }}', '{{ paragraph.text_en|escapejs }}')">{{ paragraph.text }}</p>
@@ -198,7 +198,7 @@
 <section class="ed-section px-4 py-14 sm:px-6 md:py-20 lg:px-8">
     <div class="ed-panel mx-auto max-w-4xl rounded-[2.25rem] p-8 text-center md:p-12" data-reveal-group>
         <h2 class="font-display text-3xl font-bold text-slate-950 md:text-4xl" data-reveal="mask"
-            x-text="t('{{ course.page.final_cta.title|escapejs }}', '{{ course.page.final_cta.title_en|escapejs }}')">{{ course.page.final_cta.title }}</h2>
+            x-text="t('{{ course.page.final_cta.title|soft_hyphens|escapejs }}', '{{ course.page.final_cta.title_en|soft_hyphens|escapejs }}')">{{ course.page.final_cta.title|soft_hyphens }}</h2>
         <p class="mx-auto mt-4 max-w-2xl leading-relaxed text-slate-600" data-reveal="fade"
             x-text="t('{{ course.page.final_cta.text|escapejs }}', '{{ course.page.final_cta.text_en|escapejs }}')">{{ course.page.final_cta.text }}</p>
         {% if course.page.final_cta.highlight %}

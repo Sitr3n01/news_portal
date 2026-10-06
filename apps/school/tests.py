@@ -1,3 +1,4 @@
+import re
 from importlib import import_module
 
 import pytest
@@ -7,7 +8,7 @@ from django.templatetags.static import static
 from django.urls import reverse
 
 from apps.common.models import SiteExtension
-from apps.school.courses import COURSE_GROUPS, find_course, hero_title_for_display
+from apps.school.courses import COURSE_GROUPS, find_course, title_for_display
 from apps.school.models import Page, SchoolFeature, SchoolHomeConfig, TeamMember
 from apps.school.models import Testimonial as SchoolTestimonial
 
@@ -476,7 +477,7 @@ def test_school_privacy_page_renders_transparent_bilingual_policy(client, curren
     assert 'How Komuniki handles data on this site' in content
     assert 'Dados enviados por formulários' in content
     assert 'Data sent through forms' in content
-    assert 'Registros técnicos e compartilhamento' in content
+    assert 'Registros técnicos e compartilha&shy;mento' in content
     assert 'Technical logs and sharing' in content
     assert 'Retenção, correção e remoção' in content
     assert 'Retention, correction and deletion' in content
@@ -512,10 +513,11 @@ def test_courses_page_renders_komuniki_course_cards(client, current_site):
 
     content = response.content.decode()
     assert response.status_code == 200
-    assert 'Comunicador Profissionalizante' in content
+    # O card leva o hífen condicional (\xad): invisível, só aparece se a linha quebrar ali.
+    assert 'Comuni\xadcador Profis\xadsionali\xadzante' in content
     assert '350 horas' in content
     assert 'Produção Cultural' in content
-    assert 'Comunicação Destravada' in content
+    assert 'Comuni\xadcação Destravada' in content
     assert 'Vencedor do Prêmio Paulo Freire de Educação 2024' in content
     # Cada card de curso leva à página detalhada do curso, com traço por linha no título e crescimento ao interagir
     for slug in ['comunicador-profissionalizante', 'producao-cultural', 'jornalismo-cultural',
@@ -542,7 +544,8 @@ def test_course_detail_page_renders_for_every_catalog_course(client, current_sit
     assert response.status_code == 200
     assert f'<title>{course["title"]} - {current_site.name}</title>' in content
     assert course['page']['hero_tagline'] in content
-    assert course['page']['final_cta']['title'] in content
+    # O título final passa pelo soft_hyphens: hífen condicional nas palavras compridas, invisível sem quebra.
+    assert title_for_display(course['page']['final_cta']['title']) in content
     # O CTA do hero e o CTA final levam a Contato com o curso pré-selecionado
     contact_url = reverse('contact:page')
     assert content.count(f'href="{contact_url}?curso={slug}"') >= 2
@@ -623,13 +626,57 @@ def test_course_sitemap_lists_every_course_detail_url(client, current_site):
         assert reverse('school:course_detail', kwargs={'course_slug': slug}) in content
 
 
-def test_hero_title_for_display_inserts_soft_hyphen_at_the_syllable_break():
+def test_title_for_display_inserts_soft_hyphen_at_the_syllable_break():
     # \xad é o hífen condicional: invisível a menos que o navegador quebre a linha bem ali.
-    assert hero_title_for_display('Comunicador Profissionalizante') == 'Comunicador Profissionali\xadzante'
-    assert hero_title_for_display('Apresentação de Palco e Eventos') == 'Apresenta\xadção de Palco e Eventos'
-    assert hero_title_for_display('Espanhol – Conversação e Escrita') == 'Espanhol – Conversa\xadção e Escrita'
-    # Sem palavra longa conhecida, o título sai inalterado.
-    assert hero_title_for_display('Comunicação Destravada') == 'Comunicação Destravada'
+    assert title_for_display('Comunicador Profissionalizante') == 'Comuni\xadcador Profis\xadsionali\xadzante'
+    assert title_for_display('Apresentação de Palco e Eventos') == 'Apresenta\xadção de Palco e Eventos'
+    assert title_for_display('Espanhol – Conversação e Escrita') == 'Espanhol – Conversa\xadção e Escrita'
+    # Os títulos em inglês também: "COMMUNICATIO / N" quebrava no H1 a 1920 px.
+    assert title_for_display('Unlocked Communication') == 'Unlocked Communi\xadcation'
+    assert title_for_display('Professional Communicator') == 'Profes\xadsional Communi\xadcator'
+    assert title_for_display('Spanish – Conversation and Writing') == 'Spanish – Conver\xadsation and Writing'
+    # A troca ignora maiúsculas e minúsculas e preserva a grafia, inclusive no meio de uma frase.
+    assert title_for_display('UNLOCKED COMMUNICATION') == 'UNLOCKED COMMUNI\xadCATION'
+    assert title_for_display('Do acontecimento à história.') == 'Do aconteci\xadmento à história.'
+    # Sem palavra longa conhecida, o título sai inalterado; e só palavra inteira é trocada.
+    assert title_for_display('Jornalismo Cultural') == 'Jornalismo Cultural'
+    assert title_for_display('Communications') == 'Communications'
+
+
+def test_every_long_word_in_course_titles_has_a_syllable_break():
+    """O Chrome não hifeniza palavra com inicial maiúscula: uma palavra de 12+ letras sem hífen condicional
+    quebra no meio, sem hífen, no H1 ou no card de Cursos quando não cabe na coluna. Um curso novo com
+    palavra assim precisa de uma entrada em _TITLE_HYPHENATION (apps/school/courses.py)."""
+    long_words = {
+        word
+        for group in COURSE_GROUPS
+        for course in group['courses']
+        for title in (course['title'], course['title_en'])
+        for word in re.findall(r'\w+', title)
+        if len(word) >= 12
+    }
+    assert long_words  # o teste só vale enquanto houver palavra comprida para conferir
+    assert [word for word in sorted(long_words) if '\xad' not in title_for_display(word)] == []
+
+
+@pytest.mark.django_db
+def test_course_detail_hero_h1_soft_hyphen_reaches_the_english_title(client, current_site):
+    content = client.get(reverse('school:course_detail', kwargs={'course_slug': 'comunicacao-destravada'})).content.decode()
+
+    h1 = content[content.index('<h1'):content.index('</h1>')]
+    # O escapejs não escapa o \xad: ele vai cru na string do x-text, e o Alpine o aplica ao trocar para inglês.
+    assert "'Unlocked Communi\xadcation'" in h1
+
+
+@pytest.mark.django_db
+def test_course_cards_carry_soft_hyphens_in_both_languages(client, current_site):
+    Page.objects.update_or_create(site=current_site, slug='cursos', defaults={'title': 'Cursos', 'is_published': True})
+
+    content = client.get(reverse('school:page_detail', kwargs={'slug': 'cursos'})).content.decode()
+
+    assert 'Comuni\xadcador Profis\xadsionali\xadzante' in content
+    assert "'Profes\xadsional Communi\xadcator'" in content
+    assert "'Unlocked Communi\xadcation'" in content
 
 
 @pytest.mark.django_db

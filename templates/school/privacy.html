@@ -99,7 +99,8 @@
 
             <article class="ed-panel rounded-[2rem] p-6 md:p-8" >
                 <p class="text-sm font-bold uppercase text-primary-700" x-text="t('Operação do serviço', 'Service operation')">Operação do serviço</p>
-                <h2 class="mt-3 font-display text-3xl font-bold text-slate-950" x-text="t('Registros técnicos e compartilhamento', 'Technical logs and sharing')">Registros técnicos e compartilhamento</h2>
+                {# Hífen condicional em "compartilha-mento": a 360 px a palavra não cabe e quebrava no meio, sem hífen. #}
+                <h2 class="mt-3 font-display text-3xl font-bold text-slate-950" x-text="t('Registros técnicos e compartilha­mento', 'Technical logs and sharing')">Registros técnicos e compartilha&shy;mento</h2>
                 <p class="mt-4 text-lg leading-relaxed text-slate-600"
                     x-text="t('Como qualquer aplicação web, o servidor pode registrar informações técnicas de acesso, como data, rota acessada, endereço IP, agente do navegador e eventos de erro. Esses registros ajudam a investigar falhas, manter segurança e melhorar a estabilidade.', 'Like any web application, the server may record technical access information such as date, route visited, IP address, browser agent and error events. These logs help investigate failures, maintain security and improve stability.')">
                     Como qualquer aplicação web, o servidor pode registrar informações técnicas de acesso, como data, rota acessada, endereço IP, agente do navegador e eventos de erro. Esses registros ajudam a investigar falhas, manter segurança e melhorar a estabilidade.

@@ -67,6 +67,21 @@ jobs:
       run: |
         python manage.py makemigrations --check --dry-run
 
+    - name: Set up Node
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: "22"
+        cache: npm
+
+    # O CSS do Tailwind é versionado (static/css/tailwind-*.css). Recompila a partir
+    # de frontend/tailwind/ e falha se o arquivo commitado não bater: uma classe nova
+    # sem `npm run build:css` sumiria em produção sem ninguém ver.
+    - name: Check Compiled CSS
+      run: |
+        npm ci
+        npm run build:css
+        git diff --exit-code -- static/css/
+
     # Builds the staticfiles manifest so {% static %} (used by the base
     # templates for the vendored JS) resolves during template rendering in
     # tests — CompressedManifestStaticFilesStorage needs it.

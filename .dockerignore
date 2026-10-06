@@ -18,6 +18,9 @@ env/
 .claude/
 *.local.md
 
+# Dependências de build do CSS (npm run build:css). A imagem só usa o CSS já compilado em static/css/.
+node_modules/
+
 # Banco de dev e mídia de runtime (vêm de volumes, não da imagem)
 *.sqlite3
 db.sqlite3*

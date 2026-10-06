@@ -31,6 +31,9 @@ the same tag (see [CONTRIBUTING.md](CONTRIBUTING.md#releases)).
   public pages drop the 122 KB (gzipped) Play CDN runtime for 4–9 KB of CSS,
   with identical rendering, and CI fails if the committed CSS is stale
   ([#69](https://github.com/Sitr3n01/news_portal/pull/69)).
+- Tailwind 3.4.19 and `@tailwindcss/forms` 0.5.11: the forms reset now scopes
+  its rules to `input` and `select` elements, with the same declarations
+  ([#71](https://github.com/Sitr3n01/news_portal/pull/71)).
 - The 2,900-line `apps/news/tests.py` is split into 13 thematic modules
   ([#65](https://github.com/Sitr3n01/news_portal/pull/65)).
 
@@ -42,6 +45,11 @@ the same tag (see [CONTRIBUTING.md](CONTRIBUTING.md#releases)).
 ### Removed
 - Machine-specific paths from the Komuniki engineering notes
   ([#57](https://github.com/Sitr3n01/news_portal/pull/57)).
+
+### Security
+- The CSS build forces `postcss-selector-parser` 7.1.6 under Tailwind 3.4,
+  which closes a medium Dependabot alert (quadratic selector parsing); the
+  compiled CSS is unchanged ([#73](https://github.com/Sitr3n01/news_portal/pull/73)).
 
 ## [2.3.0] - 2026-09-25
 

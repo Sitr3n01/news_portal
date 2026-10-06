@@ -21,9 +21,9 @@ Abra a [galeria comparativa histórica](../../.preview/evidence/comparison.html)
 
 ## Isolamento e execução
 
-- Worktree: `C:\Users\Sitr3n\Documents\Github\news_portal-komuniki-design`.
+- Worktree: `news_portal-komuniki-design`, pasta irmã do checkout principal.
 - Branch: `codex/komuniki-editorial-test`, criada a partir de `4e0fc78`.
-- Projeto original: `C:\Users\Sitr3n\Documents\Github\news_portal`, preservado.
+- Projeto original: o checkout principal (`news_portal`), preservado.
 - Bancos independentes: `.preview/current.sqlite3`, `.preview/local.sqlite3` (principal) e `.preview/demo.sqlite3` (demonstração arquivada), criados com o backup do SQLite, abrindo a origem somente para leitura.
 - Mídia independente: `.preview/current-media/`, `.preview/local-media/` e `.preview/demo-media/`.
 - Configuração explícita: `config.settings.design_preview`; nenhuma cópia do `.env` original. Chave Django exclusivamente de teste, cache e e-mail em memória, OAuth desativado, chaves oficiais de teste do Turnstile.
@@ -34,7 +34,7 @@ Abra a [galeria comparativa histórica](../../.preview/evidence/comparison.html)
 No PowerShell:
 
 ```powershell
-Set-Location 'C:\Users\Sitr3n\Documents\Github\news_portal-komuniki-design'
+Set-Location ..\news_portal-komuniki-design
 
 # Apenas na preparação inicial; execuções seguintes preservam as cópias existentes.
 .\scripts\preview\preview.ps1 -Action prepare

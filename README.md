@@ -1,179 +1,218 @@
+<div align="center">
+
 # news_portal
 
-Portal institucional da Komuniki e portal de notícias Blog da Kelly, servidos por um único projeto Django.
+**One Django + Wagtail codebase running two production websites and the newsroom behind them.**
 
-![Python](https://img.shields.io/badge/python-3.12+-blue)
-![Django](https://img.shields.io/badge/django-5.1+-green)
-![PostgreSQL](https://img.shields.io/badge/postgres-16-blue)
-![License](https://img.shields.io/badge/license-MIT-lightgrey)
+[Komuniki](https://komuniki.com.br) — editorial site of a communication & arts school ·
+[Blog da Kelly](https://kellyfarias.com.br/news/) — news portal ·
+Newsroom — the team's admin panel
 
-![Home do Blog da Kelly, com artigo em destaque e lista de mais lidas](docs/images/blog-da-kelly-home.png)
+[![CI](https://github.com/Sitr3n01/news_portal/actions/workflows/django.yml/badge.svg?branch=master)](https://github.com/Sitr3n01/news_portal/actions/workflows/django.yml)
+[![CodeQL](https://github.com/Sitr3n01/news_portal/actions/workflows/codeql.yml/badge.svg?branch=master)](https://github.com/Sitr3n01/news_portal/actions/workflows/codeql.yml)
+![Python 3.12](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)
+![Django 5.2 LTS](https://img.shields.io/badge/django-5.2%20LTS-092E20?logo=django&logoColor=white)
+![Wagtail 7.4](https://img.shields.io/badge/wagtail-7.4-43B1B0)
+[![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/Sitr3n01/news_portal)](https://github.com/Sitr3n01/news_portal/releases)
 
-![Artigo publicado, renderizado a partir dos blocos do StreamField](docs/images/artigo-streamfield.png)
+**English** · [Português](README.pt-BR.md)
 
-![Painel administrativo em Django Unfold](docs/images/admin-unfold.png)
+</div>
 
----
+[![Komuniki on the live site: the WebGL particles morph from a microphone into the Earth, the circular theme switch redraws them as ink, a course page shows the origami cranes, and the layout adapts to a phone](docs/images/komuniki-demo.webp)](https://komuniki.com.br)
 
-## Status
+<p align="center"><sub>26-second loop recorded on the live Komuniki site.</sub></p>
 
-Sistema em produção para um cliente real. O repositório está em fase de manutenção evolutiva: mudanças devem preservar segurança, operação do admin e compatibilidade com o deploy atual.
+## What this is
 
-No ar: [komuniki.com.br](https://komuniki.com.br) · [kellyfarias.com.br/news/](https://kellyfarias.com.br/news/)
+A production system for a real client, built and operated end to end: data model, front end, back office, CI/CD and the VPS it runs on. In production since June 2026.
 
----
+[Komuniki](https://komuniki.com.br) is a Brazilian school of communication, arts and leadership founded by journalist Kelly Farias; the [Blog da Kelly](https://kellyfarias.com.br/news/) is her news portal. Both sites, the editorial back office their team uses every day and the operations around them live in this repository.
 
-## Visão Geral
+| Surface | Where | What it does |
+|---|---|---|
+| **Komuniki** | [komuniki.com.br](https://komuniki.com.br) | Editorial school site: home, about, course catalog with a page per course, contact. Portuguese and English. |
+| **Blog da Kelly** | [kellyfarias.com.br/news](https://kellyfarias.com.br/news/) | News portal: articles built from StreamField blocks, categories, tags, search, RSS, comments, likes, bookmarks, newsletter. |
+| **Newsroom** | `/admin/` and `/cms/` | One panel over the Django admin (Unfold) and Wagtail: editorial workflow, scheduling, media, users and roles. |
 
-O projeto serve dois portais públicos e um painel administrativo a partir do mesmo codebase:
+## Highlights
 
-| Superfície | URL/prefixo | Propósito |
-|------------|-------------|-----------|
-| Komuniki | `/` em [komuniki.com.br](https://komuniki.com.br) | Site institucional da escola |
-| Blog da Kelly | `/news/` em [kellyfarias.com.br](https://kellyfarias.com.br/news/) | Portal de notícias com artigos, RSS, comentários e newsletter |
-| Admin | `/admin/` | Painel Django Unfold para operação dos dois portais |
+**Motion that respects the reader**
+- WebGL hero built with three.js and custom shaders: 16,000 triangles (9,000 on phones) reassemble in a loop, from an RCA 44-BX microphone to the Earth to a loose cloud. Two transparent canvases, one behind the headline and one in front, let particles cross over and under the letters. Drag to rotate, with inertia.
+- Course pages get a second particle scene: a garland of origami cranes (*tsurus*).
+- GSAP SplitText line reveals, an animated underline on interactive text, page fades, and a circular theme switch built on the View Transitions API on both sites.
+- All of it backs off under `prefers-reduced-motion`: no loops, no split text, no fades.
 
-**Ponto importante:** hoje os dois portais compartilham `SITE_ID=1`. A separação pública é por roteamento de caminho e configuração de domínio no Nginx, não por dois registros `Site` ativos. O Django Sites Framework e os managers `on_site` existem como proteção arquitetural para um futuro multi-site real.
+**A back office the client's team actually uses**
+- The Django admin and the Wagtail admin were redesigned into a single *Newsroom* panel: one sidebar, a workspace per site, shared list headers and selection bars, one editor bar and toast messages across both.
+- Per-article editorial governance: reporters write, editors approve, and scheduling only ever publishes an approved revision.
+- Newsletter sends are queued on publish and run from a command or an admin action, never inside the publish signal.
+- Plain-language manuals for non-technical staff in [`docs/user/`](docs/user/index.md).
 
----
+**Security, audited**
+- A five-category audit found 7 issues (3 high, 3 medium, 1 low): privilege escalation inside the admin, IDOR on reader actions, stored XSS through uploads, CSP gaps and deploy secret placeholders. All were fixed in four sprints, each with regression tests. Report: [`docs/security-audit/`](docs/security-audit/relatorio-auditoria-seguranca.pdf).
+- Nonce-based CSP on every public page. Nginx adds a baseline policy for `/admin/` and `/cms/`, and browsers enforce the intersection of the two.
+- Uploads are checked by extension allowlist and MIME type, nothing executable is served from `/media/`, and résumés are only reachable through an authenticated `X-Accel-Redirect` view.
+- Unified login with Google (own OAuth flow, ID token verified with `google-auth`), e-mail verification, code-based password reset, lockout with django-axes, and Cloudflare Turnstile on public forms.
 
-## Stack
+**Operations on a small VPS**
+- Docker Compose (Nginx, Gunicorn, PostgreSQL 16) on a 1 vCPU / 4 GB VPS behind Cloudflare.
+- Pull-based deploys: a manual GitHub Actions workflow runs the checks, waits for approval on the `production` environment and moves the `production-approved` tag. The VPS polls that tag over HTTPS and deploys itself: database backup, build, migrate, eight health checks. CI holds no server credentials and nothing connects in.
+- Found and fixed a deploy that had been retrying in a loop for two months and Docker images that grew quadratically with database dumps: the build cache went from **23.95 GB to 442 MB**. Write-up in [`docs/MAINTENANCE_HISTORY.md`](docs/MAINTENANCE_HISTORY.md).
 
-| Camada | Tecnologia |
-|--------|------------|
-| Backend | Python 3.12+ / Django 5.1+ |
-| Banco | PostgreSQL 16 em produção |
-| CMS editorial | Wagtail 7.4 — corpo dos artigos em StreamField, rascunho/revisão/preview e biblioteca de imagens |
-| Frontend | Django Templates + HTMX + Alpine.js |
-| Admin | Django Unfold |
-| Estáticos | WhiteNoise em dev, Nginx em produção |
-| Deploy | Docker Compose, Nginx, Let's Encrypt, GitHub Actions com tag aprovada |
+**Quality gates**
+- **823 tests**, with branch coverage enforced at a floor of 82% (83.5% today).
+- Ruff, missing-migration check, secret scan (detect-secrets), CodeQL, pip-audit and locked dependencies. Dependabot sends one grouped update per week.
+- `master` is protected: the `test` check must pass on an up-to-date branch, for admins too.
 
----
+## Screenshots
 
-## Estrutura
+### Komuniki
 
-```text
-apps/
-  common/        Models abstratos, sanitização, SiteExtension, dashboard e guias
-  accounts/      CustomUser, autenticação, papéis e grupos
-  school/        Home, páginas, equipe, depoimentos e blocos da Komuniki
-  hiring/        Vagas, departamentos e candidaturas (só no admin)
-  contact/       Formulário de contato
-  news/          Artigos em blocos, categorias, tags, newsletter, RSS, comentários
-  cms_media/     Modelos de imagem e documento do Wagtail, com crédito e ponte para a mídia legada
-  media_library/ Biblioteca de mídia compartilhada
-  social/        Contas e posts de Instagram/TikTok, com sync opcional por API
+| Home, light theme | Course catalog |
+|---|---|
+| ![Komuniki home in the light theme, with the particle microphone drawn as ink](docs/images/komuniki-home-light.jpg) | ![Course catalog in the dark theme: the headline next to the Paulo Freire Education Award card and the course tracks](docs/images/komuniki-courses.jpg) |
+| **Professional courses** | **Course page with the origami cranes** |
+| ![Course cards with workload, duration and entry requirement](docs/images/komuniki-course-cards.jpg) | ![Course page "Comunicação Destravada" with the origami crane particle scene](docs/images/komuniki-course-tsurus.jpg) |
 
-docs/
-  user/          Guias para pessoas não técnicas
-  technical/     Engenharia, deploy, segurança e runbooks
-  ai/            Regras para agentes de IA
+### Blog da Kelly
+
+| Home, black theme | Article built from StreamField blocks |
+|---|---|
+| ![Blog da Kelly home in the black theme, with the featured article and the most-read list](docs/images/blog-home-dark.jpg) | ![Article body with headings, rich text, a pull quote and a list, each one a StreamField block](docs/images/blog-article.jpg) |
+
+### Newsroom
+
+| Overview of the Blog da Kelly workspace | Block editor (Wagtail) |
+|---|---|
+| ![Newsroom overview: counters for published, drafts, in review and comments, then the editorial list with a status badge per article](docs/images/newsroom-overview.jpg) | ![Wagtail editor with heading, rich text and quote blocks under the Newsroom editor bar](docs/images/newsroom-editor.jpg) |
+| **Article library (Wagtail)** | **Contact messages (Django admin)** |
+| ![Wagtail article listing with a tab per editorial state](docs/images/newsroom-articles.jpg) | ![Django admin list of contact messages in the Komuniki workspace, styled like the Wagtail screens](docs/images/newsroom-messages.jpg) |
+
+<p align="center">
+  <img src="docs/images/komuniki-mobile.jpg" alt="Komuniki home on a phone, with the particle Earth below the headline" width="260">
+  &nbsp;&nbsp;
+  <img src="docs/images/newsroom-mobile.jpg" alt="Newsroom overview on a phone" width="260">
+</p>
+
+<sub>Komuniki and the Blog da Kelly home are captured from production. The Newsroom screens and the article page run locally on fictional demo data: every name, message and article in them is made up.</sub>
+
+## Architecture
+
+```mermaid
+flowchart TD
+    users([Visitors and the client team]) --> cf[Cloudflare]
+    cf --> nginx
+    subgraph vps[VPS · Docker Compose]
+        nginx[Nginx] --> app[Gunicorn · Django 5.2 + Wagtail 7.4]
+        app --> db[(PostgreSQL 16)]
+        timer[Deploy timer · every 10 min]
+    end
+    app -.-> mail[SMTP]
+    app -.-> sentry[Sentry]
+    subgraph gh[GitHub]
+        checks[CI and CodeQL] --> approve[Deploy workflow · manual approval] --> tag[[production-approved tag]]
+    end
+    timer -- fetches the tag over HTTPS --> tag
 ```
 
----
+Both public sites are served by the same Django project. Nginx maps each domain to its path prefix, and public views read through Site-aware managers (`Model.on_site`), so turning on a second `Site` later cannot leak content between portals.
 
-## Setup Rápido
+| App | Responsibility |
+|---|---|
+| `common` | Abstract models, HTML sanitization, site settings, the Newsroom panel shell, dashboards and system checks |
+| `accounts` | Custom user, unified login, Google OAuth, roles and groups |
+| `school` | Komuniki pages, course catalog, team and home blocks |
+| `news` | Wagtail articles (StreamField), categories, tags, comments, likes, newsletter, RSS, editorial workflow |
+| `cms_media` | Wagtail image and document models with credits, plus the bridge to legacy media |
+| `media_library` | Shared media library for the Django admin |
+| `contact` | Contact form, including the course a visitor is interested in |
+| `hiring` | Job openings and applications (admin only) with protected résumé downloads |
+| `social` | Instagram and TikTok accounts and posts, with optional API sync |
 
-### Com Docker
+**Key decisions**
+- **One project, two sites, one `Site` record.** Path routing plus Nginx today; the `on_site` managers keep a real multi-site setup one switch away.
+- **No CDNs.** three.js, GSAP, htmx and Alpine are vendored and served by the app, and Tailwind is compiled to static CSS at build time, which keeps the CSP at `'self'` plus a nonce.
+- **The course catalog lives in code** ([`apps/school/courses.py`](apps/school/courses.py)). Fixed slugs keep shared links and the contact form's *course of interest* stable, and every text ships with its English version. The trade-off is that copy changes need a deploy; moving the catalog to Wagtail snippets is the next step if it starts changing often.
+- **GitHub never connects to the server.** The VPS pulls an approved tag instead of CI pushing over SSH.
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Back end | Python 3.12, Django 5.2 LTS, Wagtail 7.4 |
+| Data | PostgreSQL 16 in production; SQLite for local development and the test suite |
+| Front end | Django templates, HTMX, Alpine.js, Tailwind CSS, GSAP 3.15 (ScrollTrigger, SplitText), three.js r186 |
+| Admin | Django Unfold and the Wagtail admin, unified as the Newsroom panel |
+| Security | django-csp (nonces), django-axes, bleach, Cloudflare Turnstile, google-auth |
+| Infrastructure | Docker Compose, Nginx, Gunicorn, WhiteNoise, Let's Encrypt, Cloudflare, Sentry |
+| CI/CD | GitHub Actions, CodeQL, Dependabot, detect-secrets, pip-audit, uv-compiled lock files |
+
+## Getting started
+
+Quick start with SQLite (no PostgreSQL needed):
 
 ```bash
 git clone https://github.com/Sitr3n01/news_portal.git
 cd news_portal
-
-cp .env.example .env
-
-docker compose -f docker/docker-compose.yml up -d
-docker compose -f docker/docker-compose.yml exec web python manage.py migrate
-docker compose -f docker/docker-compose.yml exec web python manage.py createsuperuser
-```
-
-Acesse:
-
-- App: http://localhost:8000
-- Admin: http://localhost:8000/admin
-- Mailpit: http://localhost:8025
-
-### Sem Docker
-
-```bash
-git clone https://github.com/Sitr3n01/news_portal.git
-cd news_portal
-
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements/development.txt
 cp .env.example .env
-
-# Alternativa rápida sem PostgreSQL local:
-export DJANGO_SETTINGS_MODULE=config.settings.local_sqlite
-
+export DJANGO_SETTINGS_MODULE=config.settings.local_sqlite   # Windows: $env:DJANGO_SETTINGS_MODULE = "config.settings.local_sqlite"
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
 ```
 
----
+With Docker (PostgreSQL and Mailpit included):
 
-## Regras Críticas
+```bash
+cp .env.example .env
+docker compose -f docker/docker-compose.yml up -d
+docker compose -f docker/docker-compose.yml exec web python manage.py migrate
+docker compose -f docker/docker-compose.yml exec web python manage.py createsuperuser
+```
 
-- Views públicas usam Function-Based Views e `Model.on_site`, nunca `Model.objects`.
-- Conteúdo HTML de usuário passa por `apps.common.sanitization`; templates usam `sanitize_html`, nunca `safe`.
-- Uploads validam extensão e MIME.
-- Admins herdam de `unfold.admin.ModelAdmin` e textos visíveis ficam em PT-BR.
-- Newsletter não é enviada no signal de publicação: o artigo é marcado como pendente, e o envio roda por comando ou ação no admin.
-- Deploy de produção só deve seguir o fluxo de tag aprovada descrito em `docs/technical/secure-deploy.md`.
+The app runs at http://localhost:8000, the admin at http://localhost:8000/admin and Mailpit at http://localhost:8025.
 
----
-
-## Testes
+Checks, the same ones CI runs:
 
 ```bash
 ruff check .
-pytest
+pytest --cov
 ```
 
-493 testes, todos passando: `accounts` (224), `news` (131), `common` (54), `school` (32), `social` (27), `contact` (9), `scripts/preview` (6), `hiring` (5) e `media_library` (5). Não há `pytest-cov` configurado, então o projeto não publica percentual de cobertura.
+## Documentation
 
-O CI roda lint, `collectstatic` e testes em pushes/PRs para `main` e `master`. O deploy de produção é manual, aprovado via environment `production`, e move a tag `production-approved`.
+The documentation is written in Portuguese, the language of the client's team.
 
----
+| For | Start here |
+|---|---|
+| Non-technical staff | [docs/user/index.md](docs/user/index.md) |
+| Developers | [docs/technical/README.md](docs/technical/README.md) · [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Deploy and operations | [go-live checklist](docs/technical/go-live-checklist.md) · [DEPLOY.md](docs/technical/DEPLOY.md) · [secure-deploy.md](docs/technical/secure-deploy.md) |
+| Security | [SEGURANCA.md](docs/technical/SEGURANCA.md) · [security audit](docs/security-audit/) · [SECURITY.md](.github/SECURITY.md) |
+| AI coding agents | [docs/ai/README.md](docs/ai/README.md) |
+| History | [CHANGELOG.md](CHANGELOG.md) · [maintenance history](docs/MAINTENANCE_HISTORY.md) |
 
-## Deploy
+## How it's built
 
-O caminho canônico de produção é `/opt/kelly_sys`, com Docker Compose project `kellysys`.
+Development uses AI coding agents (Claude Code and Codex) as pair programmers. The rules they follow are versioned in [`docs/ai/`](docs/ai/README.md), and every change still lands through a pull request that has to pass the required checks; what ships is the maintainer's call.
 
-Esse caminho e esse nome de project são anteriores à renomeação do repositório e foram mantidos de propósito: alterá-los exigiria recriar volumes, containers e o checkout do servidor. A divergência em relação a `news_portal` é intencional, não resíduo.
+## Roadmap
 
-Leia nesta ordem:
+- Run the test suite against PostgreSQL in CI, matching production ([#66](https://github.com/Sitr3n01/news_portal/issues/66)).
+- Migrate to Wagtail 8 and re-sync the Unfold sidebar override so both can leave their pins ([#67](https://github.com/Sitr3n01/news_portal/issues/67)).
+- Move the course catalog to Wagtail snippets if the school starts editing it often ([#68](https://github.com/Sitr3n01/news_portal/issues/68)).
 
-1. [docs/technical/go-live-checklist.md](docs/technical/go-live-checklist.md)
-2. [docs/technical/DEPLOY.md](docs/technical/DEPLOY.md)
-3. [docs/technical/secure-deploy.md](docs/technical/secure-deploy.md)
-4. [docs/technical/cloudflare-bots.md](docs/technical/cloudflare-bots.md)
+## Project history
 
----
+The repository was renamed from `kelly_sys` to `news_portal`; old links redirect. The production path (`/opt/kelly_sys`) and the Compose project name (`kellysys`) keep the old name on purpose, since renaming them would mean recreating volumes and containers. Releases and notes: [CHANGELOG.md](CHANGELOG.md).
 
-## Documentação
+## License
 
-| Público | Comece por |
-|---------|------------|
-| Pessoas não técnicas | [docs/user/index.md](docs/user/index.md) |
-| Desenvolvedores | [docs/technical/README.md](docs/technical/README.md) |
-| Operação/deploy | [docs/technical/go-live-checklist.md](docs/technical/go-live-checklist.md) |
-| Segurança | [docs/technical/SEGURANCA.md](docs/technical/SEGURANCA.md) |
-| Agentes de IA | [docs/ai/README.md](docs/ai/README.md) |
-| Histórico de manutenção | [docs/MAINTENANCE_HISTORY.md](docs/MAINTENANCE_HISTORY.md) |
+The code is released under the [MIT License](LICENSE). The Komuniki and Blog da Kelly names, logos, photos and texts belong to their owners and are not covered by it.
 
-Mapa completo: [docs/README.md](docs/README.md).
-
----
-
-> **Nota histórica:** este repositório foi renomeado de `kelly_sys` para `news_portal`. Links antigos continuam funcionando por redirect do GitHub. O caminho de deploy e o Compose project preservam a nomenclatura anterior, como explicado em [Deploy](#deploy).
-
----
-
-## Licença
-
-Distribuído sob licença MIT. Veja [LICENSE](LICENSE) para detalhes.
+Built and maintained by José Gilberto ([@Sitr3n01](https://github.com/Sitr3n01)).

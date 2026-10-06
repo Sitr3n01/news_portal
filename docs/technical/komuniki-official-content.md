@@ -25,7 +25,7 @@ A ausência pública da seção social orienta a apresentação local; ela não 
 O [manifesto](../../scripts/preview/komuniki-public-content.json) versiona os valores, a origem e a data de consulta. O [aplicador](../../scripts/preview/apply_public_content.py) usa uma lista fixa de campos, confere o Site e os valores anteriores esperados e aceita somente `.preview/local.sqlite3` na worktree experimental. Conteúdo editado manualmente que divirja do manifesto interrompe a operação antes das gravações.
 
 ```powershell
-Set-Location 'C:\Users\Sitr3n\Documents\Github\news_portal-komuniki-design'
+Set-Location ..\news_portal-komuniki-design
 
 # Simular; abre o banco em modo somente leitura e não cria arquivos.
 & '..\news_portal\.venv\Scripts\python.exe' -B scripts/preview/apply_public_content.py
@@ -68,7 +68,7 @@ O carimbo do diretório usa UTC (13/09); a consulta e a aplicação ocorreram em
 Para voltar ao conteúdo anterior, mantendo uma cópia dos dados que existirem no momento da restauração:
 
 ```powershell
-Set-Location 'C:\Users\Sitr3n\Documents\Github\news_portal-komuniki-design'
+Set-Location ..\news_portal-komuniki-design
 .\scripts\preview\preview.ps1 -Action stop
 $restoreSource = (Resolve-Path '.preview\backups\before-official-content-20260913T012739001637Z\local.sqlite3').Path
 $restoreTarget = (Resolve-Path '.preview\local.sqlite3').Path

@@ -12,13 +12,17 @@ Crie um environment chamado `production`:
 - Required reviewers: habilitado.
 - Deployment branches: apenas `master`.
 
-Proteja a branch `master`:
+Proteja a branch `master` (configuracao atual):
 
-- Require status checks before merging.
-- Require review from Code Owners.
-- Require pull request before merging.
-- Restrinja alteracoes em `.github/workflows/**`, `scripts/deploy/**`,
-  `docker/**` e `config/settings/**` a revisao humana.
+- Require status checks before merging: o check `test` do workflow
+  Django CI/CD, com a branch em dia com o `master` (strict).
+- Do not allow bypassing: a regra vale tambem para administradores.
+- Revisao obrigatoria e "Require review from Code Owners" ficam desligadas
+  enquanto o projeto tiver um mantenedor so, porque o GitHub nao deixa
+  aprovar o proprio PR. O `.github/CODEOWNERS` ja marca os caminhos
+  sensiveis (`.github/workflows/**`, `scripts/deploy/**`, `docker/**` e
+  `config/settings/**`) e passa a exigir revisao assim que as duas opcoes
+  forem ligadas, quando houver um segundo revisor.
 
 Nao use `pull_request_target` para deploy.
 

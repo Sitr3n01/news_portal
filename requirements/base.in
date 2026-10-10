@@ -8,7 +8,7 @@
 # --python-version 3.12 é a versão da imagem de produção (docker/Dockerfile).
 
 # Série 5.2 LTS (suporte até abril de 2028). A 6.x fica para uma migração planejada.
-Django>=5.2,<6.0
+Django>=5.2.18,<6.0
 psycopg[binary]>=3.1
 # Pinado: templates/admin/nav_sidebar.html copia o markup interno do Unfold
 # (drawer + backdrop mobile). A partir de 0.88 o Unfold reescreveu a sidebar

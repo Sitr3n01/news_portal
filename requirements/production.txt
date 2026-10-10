@@ -11,15 +11,15 @@ asgiref==3.12.1
     #   django-htmx
 beautifulsoup4==4.15.0
     # via wagtail
-bleach==6.4.0
-    # via -r requirements/base.in
+bleach[css]==6.4.0
+    # via -r base.in
 certifi==2026.7.22
     # via
     #   httpcore
     #   httpx
     #   requests
     #   sentry-sdk
-cffi==2.1.1 ; platform_python_implementation != 'PyPy'
+cffi==2.1.1
     # via cryptography
 charset-normalizer==3.5.2
     # via requests
@@ -27,9 +27,9 @@ cryptography==50.0.2
     # via google-auth
 defusedxml==0.7.1
     # via willow
-django==5.2.17
+django==5.2.18
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   django-appconf
     #   django-axes
     #   django-csp
@@ -50,22 +50,22 @@ django==5.2.17
 django-appconf==1.2.0
     # via django-imagekit
 django-axes==8.3.1
-    # via -r requirements/base.in
+    # via -r base.in
 django-csp==4.0
-    # via -r requirements/base.in
+    # via -r base.in
 django-environ==0.14.0
-    # via -r requirements/base.in
+    # via -r base.in
 django-extensions==4.1
-    # via -r requirements/base.in
+    # via -r base.in
 django-filter==26.2
     # via wagtail
 django-htmx==1.29.0
-    # via -r requirements/base.in
+    # via -r base.in
 django-imagekit==6.1.1
-    # via -r requirements/base.in
+    # via -r base.in
 django-modelcluster==6.5
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   wagtail
 django-permissionedforms==0.1
     # via wagtail
@@ -73,7 +73,7 @@ django-stubs-ext==6.1.2
     # via django-tasks
 django-taggit==6.1.0
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   wagtail
 django-tasks==0.12.0
     # via
@@ -82,7 +82,7 @@ django-tasks==0.12.0
 django-treebeard==5.3.1
     # via wagtail
 django-unfold==0.87.0
-    # via -r requirements/base.in
+    # via -r base.in
 djangorestframework==3.18.1
     # via wagtail
 draftjs-exporter==5.2.0
@@ -92,15 +92,15 @@ et-xmlfile==2.0.0
 filetype==1.2.0
     # via willow
 google-auth==2.60.0
-    # via -r requirements/base.in
+    # via -r base.in
 gunicorn==26.2.0
-    # via -r requirements/production.in
+    # via -r production.in
 h11==0.16.0
     # via httpcore
 httpcore==1.0.9
     # via httpx
 httpx==0.28.1
-    # via -r requirements/base.in
+    # via -r base.in
 idna==3.20
     # via
     #   anyio
@@ -118,26 +118,26 @@ pilkit==3.0
     # via django-imagekit
 pillow==12.3.0
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   pilkit
     #   pillow-heif
     #   wagtail
 pillow-heif==1.8.0
     # via willow
-psycopg==3.3.6
-    # via -r requirements/base.in
-psycopg-binary==3.3.6 ; implementation_name != 'pypy'
+psycopg[binary]==3.3.6
+    # via -r base.in
+psycopg-binary==3.3.6
     # via psycopg
 pyasn1==0.6.4
     # via pyasn1-modules
 pyasn1-modules==0.4.2
     # via google-auth
-pycparser==3.0 ; implementation_name != 'PyPy' and platform_python_implementation != 'PyPy'
+pycparser==3.0
     # via cffi
 requests==2.34.2
     # via wagtail
 sentry-sdk==2.71.0
-    # via -r requirements/production.in
+    # via -r production.in
 soupsieve==2.10
     # via beautifulsoup4
 sqlparse==0.6.0
@@ -152,22 +152,19 @@ typing-extensions==4.16.0
     #   beautifulsoup4
     #   django-stubs-ext
     #   django-tasks
-    #   psycopg
-tzdata==2026.5 ; sys_platform == 'win32'
-    # via
-    #   django
-    #   psycopg
 urllib3==2.8.0
     # via
     #   requests
     #   sentry-sdk
 wagtail==7.4.3
-    # via -r requirements/base.in
+    # via -r base.in
 webencodings==0.6.1
     # via
     #   bleach
     #   tinycss2
 whitenoise==6.12.0
-    # via -r requirements/base.in
-willow==1.12.0
-    # via wagtail
+    # via -r base.in
+willow[heif]==1.12.0
+    # via
+    #   wagtail
+    #   willow

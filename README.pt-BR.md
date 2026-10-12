@@ -50,8 +50,8 @@ A [Komuniki](https://komuniki.com.br) é uma escola de comunicação, artes e li
 - O envio da newsletter entra numa fila ao publicar e roda por comando ou ação do admin, nunca dentro do signal de publicação.
 - Manuais em linguagem simples para quem não é técnico, em [`docs/user/`](docs/user/index.md).
 
-**Segurança auditada**
-- Uma auditoria em cinco categorias achou 7 problemas (3 altos, 3 médios, 1 baixo): escalada de privilégio dentro do admin, IDOR em ações do leitor, XSS armazenado por upload, brechas de CSP e placeholders de segredo no deploy. Todos foram corrigidos em quatro sprints, cada um com teste de regressão. Relatório: [`docs/security-audit/`](docs/security-audit/relatorio-auditoria-seguranca.pdf).
+**Segurança e controle de acesso**
+- Uma revisão interna de segurança em cinco categorias identificou 7 problemas (3 altos, 3 médios, 1 baixo): escalada de privilégio dentro do admin, IDOR em ações do leitor, XSS armazenado por upload, brechas de CSP e placeholders de segredo no deploy. Todos foram corrigidos em quatro sprints, cada um com teste de regressão. Relatório: [`docs/security-audit/`](docs/security-audit/relatorio-auditoria-seguranca.pdf).
 - CSP com nonce em toda página pública. O Nginx soma uma política de base para `/admin/` e `/cms/`, e o navegador aplica a interseção das duas.
 - Uploads passam por lista de extensões e checagem de MIME, nada executável sai de `/media/`, e currículos só são baixados por uma view autenticada com `X-Accel-Redirect`.
 - Login unificado com Google (fluxo OAuth próprio, ID token validado com `google-auth`), verificação de e-mail, troca de senha por código, bloqueio por tentativas com django-axes e Cloudflare Turnstile nos formulários públicos.
@@ -191,7 +191,7 @@ pytest --cov
 | Quem não é técnico | [docs/user/index.md](docs/user/index.md) |
 | Desenvolvimento | [docs/technical/README.md](docs/technical/README.md) · [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Deploy e operação | [checklist de go-live](docs/technical/go-live-checklist.md) · [DEPLOY.md](docs/technical/DEPLOY.md) · [secure-deploy.md](docs/technical/secure-deploy.md) |
-| Segurança | [SEGURANCA.md](docs/technical/SEGURANCA.md) · [auditoria de segurança](docs/security-audit/) · [SECURITY.md](.github/SECURITY.md) |
+| Segurança | [SEGURANCA.md](docs/technical/SEGURANCA.md) · [revisão interna de segurança](docs/security-audit/) · [SECURITY.md](.github/SECURITY.md) |
 | Agentes de IA | [docs/ai/README.md](docs/ai/README.md) |
 | Histórico | [CHANGELOG.md](CHANGELOG.md) · [histórico de manutenção](docs/MAINTENANCE_HISTORY.md) |
 

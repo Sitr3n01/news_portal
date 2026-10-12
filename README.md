@@ -50,8 +50,8 @@ A production system for a real client, built and operated end to end: data model
 - Newsletter sends are queued on publish and run from a command or an admin action, never inside the publish signal.
 - Plain-language manuals for non-technical staff in [`docs/user/`](docs/user/index.md).
 
-**Security, audited**
-- A five-category audit found 7 issues (3 high, 3 medium, 1 low): privilege escalation inside the admin, IDOR on reader actions, stored XSS through uploads, CSP gaps and deploy secret placeholders. All were fixed in four sprints, each with regression tests. Report: [`docs/security-audit/`](docs/security-audit/relatorio-auditoria-seguranca.pdf).
+**Security and access control**
+- An internal security review across five categories identified 7 issues (3 high, 3 medium, 1 low): privilege escalation inside the admin, IDOR on reader actions, stored XSS through uploads, CSP gaps and deploy secret placeholders. All were fixed in four sprints, each with regression tests. Report: [`docs/security-audit/`](docs/security-audit/relatorio-auditoria-seguranca.pdf).
 - Nonce-based CSP on every public page. Nginx adds a baseline policy for `/admin/` and `/cms/`, and browsers enforce the intersection of the two.
 - Uploads are checked by extension allowlist and MIME type, nothing executable is served from `/media/`, and résumés are only reachable through an authenticated `X-Accel-Redirect` view.
 - Unified login with Google (own OAuth flow, ID token verified with `google-auth`), e-mail verification, code-based password reset, lockout with django-axes, and Cloudflare Turnstile on public forms.
@@ -193,7 +193,7 @@ The documentation is written in Portuguese, the language of the client's team.
 | Non-technical staff | [docs/user/index.md](docs/user/index.md) |
 | Developers | [docs/technical/README.md](docs/technical/README.md) · [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Deploy and operations | [go-live checklist](docs/technical/go-live-checklist.md) · [DEPLOY.md](docs/technical/DEPLOY.md) · [secure-deploy.md](docs/technical/secure-deploy.md) |
-| Security | [SEGURANCA.md](docs/technical/SEGURANCA.md) · [security audit](docs/security-audit/) · [SECURITY.md](.github/SECURITY.md) |
+| Security | [SEGURANCA.md](docs/technical/SEGURANCA.md) · [internal security review](docs/security-audit/) · [SECURITY.md](.github/SECURITY.md) |
 | AI coding agents | [docs/ai/README.md](docs/ai/README.md) |
 | History | [CHANGELOG.md](CHANGELOG.md) · [maintenance history](docs/MAINTENANCE_HISTORY.md) |
 

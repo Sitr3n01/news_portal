@@ -8,7 +8,7 @@
 # --python-version 3.12 é a versão da imagem de produção (docker/Dockerfile).
 
 # Série 5.2 LTS (suporte até abril de 2028). A 6.x fica para uma migração planejada.
-Django>=5.2,<6.0
+Django>=5.2.18,<6.0
 psycopg[binary]>=3.1
 # Pinado: templates/admin/nav_sidebar.html copia o markup interno do Unfold
 # (drawer + backdrop mobile). A partir de 0.88 o Unfold reescreveu a sidebar
@@ -29,7 +29,7 @@ httpx>=0.28.1
 # login com Google — apps/accounts/oauth_google.py. Só isso: o fluxo OAuth em
 # si é próprio, com httpx, para não trazer os models/views/templates de login
 # de uma biblioteca de social login e colidir com o login unificado.
-google-auth>=2.28
+google-auth>=2.62.0
 # Piso em 7.4.2 (e não 7.4): as migrations de apps/news e apps/cms_media dependem
 # de `wagtailcore.0097_baselogentry_uuid_action_timestamp_indexes`, o último nó do
 # grafo nesta série. Uma 7.4.x anterior sem esse nó faz o `migrate` morrer antes da

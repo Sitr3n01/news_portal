@@ -3,7 +3,7 @@
 -r base.in
 django-debug-toolbar>=4.3
 django-browser-reload>=1.21.0
-ruff>=0.16.0
+ruff>=0.17.0
 pytest-django>=4.8
 # Cobertura medida no CI (configuração em pyproject.toml, [tool.coverage]).
 pytest-cov>=6.0
